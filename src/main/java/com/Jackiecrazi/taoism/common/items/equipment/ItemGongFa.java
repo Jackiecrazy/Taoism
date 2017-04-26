@@ -18,7 +18,7 @@ import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.EnumEquipmentType;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.IElemental;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ITaoistEquipment;
-import com.Jackiecrazi.taoism.common.entity.ModEntities;
+import com.Jackiecrazi.taoism.common.entity.TaoEntities;
 
 public class ItemGongFa extends Item implements IElemental,ITaoistEquipment {
 	public static final UUID moduuid=UUID.fromString("f94b0bc7-fc44-4d11-8bd8-7302a1547e41");
@@ -62,12 +62,12 @@ public class ItemGongFa extends Item implements IElemental,ITaoistEquipment {
 	
 	@Override
 	public void setAffinity(ItemStack is, int element, int affinity) {
-		getTag(is).setInteger(ModEntities.ALLRES[element].getAttributeUnlocalizedName(), affinity);
+		getTag(is).setInteger(TaoEntities.ALLRES[element].getAttributeUnlocalizedName(), affinity);
 	}
 
 	@Override
 	public int getAffinity(ItemStack is, int element) {
-		return getTag(is).getInteger(ModEntities.ALLRES[element].getAttributeUnlocalizedName());
+		return getTag(is).getInteger(TaoEntities.ALLRES[element].getAttributeUnlocalizedName());
 	}
 
 	@Override
@@ -83,14 +83,14 @@ public class ItemGongFa extends Item implements IElemental,ITaoistEquipment {
 	@Override
 	public void onEquipped(ItemStack is, EntityPlayer ep) {
 		ep.getEntityAttribute(SharedMonsterAttributes.maxHealth).removeAllModifiers();
-		for(IAttribute a:ModEntities.ALLRES){
+		for(IAttribute a:TaoEntities.ALLRES){
 			if(ep.getEntityAttribute(a).getModifier(moduuid)==null)
 			ep.getEntityAttribute(a).applyModifier(modify(ep,is,a));
 		}
-		if(ep.getEntityAttribute(ModEntities.LING_MAX).getModifier(moduuid)==null)
-		ep.getEntityAttribute(ModEntities.LING_MAX).applyModifier(modify(ep,is,ModEntities.LING_MAX));
-		if(ep.getEntityAttribute(ModEntities.LING_SPEED).getModifier(moduuid)==null)
-		ep.getEntityAttribute(ModEntities.LING_SPEED).applyModifier(modify(ep,is,ModEntities.LING_SPEED));
+		if(ep.getEntityAttribute(TaoEntities.LING_MAX).getModifier(moduuid)==null)
+		ep.getEntityAttribute(TaoEntities.LING_MAX).applyModifier(modify(ep,is,TaoEntities.LING_MAX));
+		if(ep.getEntityAttribute(TaoEntities.LING_SPEED).getModifier(moduuid)==null)
+		ep.getEntityAttribute(TaoEntities.LING_SPEED).applyModifier(modify(ep,is,TaoEntities.LING_SPEED));
 		if(ep.getEntityAttribute(SharedMonsterAttributes.maxHealth).getModifier(moduuid)==null)
 		ep.getEntityAttribute(SharedMonsterAttributes.maxHealth).applyModifier(modify(ep,is,SharedMonsterAttributes.maxHealth));
 	}
@@ -118,11 +118,11 @@ public class ItemGongFa extends Item implements IElemental,ITaoistEquipment {
 
 	@Override
 	public void onUnequipped(ItemStack is, EntityPlayer ep) {
-		for(IAttribute a:ModEntities.ALLRES){
+		for(IAttribute a:TaoEntities.ALLRES){
 			ep.getEntityAttribute(a).removeModifier(ep.getEntityAttribute(a).getModifier(moduuid));
 		}
-		ep.getEntityAttribute(ModEntities.LING_MAX).removeModifier(ep.getEntityAttribute(ModEntities.LING_MAX).getModifier(moduuid));
-		ep.getEntityAttribute(ModEntities.LING_SPEED).removeModifier(ep.getEntityAttribute(ModEntities.LING_SPEED).getModifier(moduuid));
+		ep.getEntityAttribute(TaoEntities.LING_MAX).removeModifier(ep.getEntityAttribute(TaoEntities.LING_MAX).getModifier(moduuid));
+		ep.getEntityAttribute(TaoEntities.LING_SPEED).removeModifier(ep.getEntityAttribute(TaoEntities.LING_SPEED).getModifier(moduuid));
 		ep.getEntityAttribute(SharedMonsterAttributes.maxHealth).removeModifier(ep.getEntityAttribute(SharedMonsterAttributes.maxHealth).getModifier(moduuid));
 	}
 
@@ -149,10 +149,10 @@ public class ItemGongFa extends Item implements IElemental,ITaoistEquipment {
 	
 	public void onCreated(ItemStack is, World w, EntityPlayer p) {
 		int max=100;
-		for(IAttribute a:ModEntities.ALLRES)
+		for(IAttribute a:TaoEntities.ALLRES)
 		getTag(is).setDouble(a.getAttributeUnlocalizedName(), w.rand.nextInt(max));
-		getTag(is).setDouble(ModEntities.LING_MAX.getAttributeUnlocalizedName(), w.rand.nextInt(max));
-		getTag(is).setDouble(ModEntities.LING_SPEED.getAttributeUnlocalizedName(), w.rand.nextInt(max));
+		getTag(is).setDouble(TaoEntities.LING_MAX.getAttributeUnlocalizedName(), w.rand.nextInt(max));
+		getTag(is).setDouble(TaoEntities.LING_SPEED.getAttributeUnlocalizedName(), w.rand.nextInt(max));
 		getTag(is).setDouble(SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName(), w.rand.nextInt(max));
 		
 	}

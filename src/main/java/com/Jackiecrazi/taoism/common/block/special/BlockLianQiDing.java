@@ -16,10 +16,10 @@ import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.client.gui.TaoisticGuiHandler;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
 import com.Jackiecrazi.taoism.common.block.tile.TileDing;
 import com.Jackiecrazi.taoism.common.block.tile.TileDummy;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -121,11 +121,11 @@ public class BlockLianQiDing extends BlockContainer {
 	@SideOnly(Side.CLIENT)
 	public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
 	{
-		return ModItems.Ding;
+		return TaoItems.Ding;
 	}
 	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player)
 	{
-		return new ItemStack(ModItems.Ding);
+		return new ItemStack(TaoItems.Ding);
 	}
 
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack is) {
@@ -142,7 +142,7 @@ public class BlockLianQiDing extends BlockContainer {
 		case 3:xx++;zz--;break;
 		}
 		if(world.getBlock(xx, yy, zz).isReplaceable(world, xx, yy, zz)&&world.getBlock(xx, yy, zz).isReplaceable(world, xx, yy, zz)){
-			world.setBlock(xx, yy, zz, ModBlocks.Dummy);
+			world.setBlock(xx, yy, zz, TaoBlocks.Dummy);
 			world.setTileEntity(xx, yy, zz, new TileDummy().setX(x).setY(y).setZ(z));
 			((TileDummy)world.getTileEntity(xx, yy, zz)).setIsSlave(true);
 			if(!create)is.stackSize--;
@@ -152,7 +152,7 @@ public class BlockLianQiDing extends BlockContainer {
 			if (entity instanceof EntityPlayer){
 				EntityPlayer player = (EntityPlayer)entity;
 				if(!create)
-					player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.LianQiDing));
+					player.inventory.addItemStackToInventory(new ItemStack(TaoBlocks.LianQiDing));
 			}
 			return;
 		}

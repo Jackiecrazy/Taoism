@@ -1,28 +1,25 @@
 package com.Jackiecrazi.taoism.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.TaoisticPotions;
-import com.Jackiecrazi.taoism.WayofConfig;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ICustomRange;
 import com.Jackiecrazi.taoism.common.taoistichandlers.PlayerResourceStalker;
 import com.Jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.Jackiecrazi.taoism.networking.PacketOpenTPInv;
-
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
@@ -50,20 +47,20 @@ public class ClientEventHandler {
 					player.inventory.currentItem);
 		}*///Well, the mouse is not part of the keyboard...
 		if(Keyboard.isKeyDown(mc.gameSettings.keyBindJump.getKeyCode()));//detected pressing the jump key in air. You can use this to break concentration or double-jump
-		if(Keyboard.isKeyDown(mc.gameSettings.keyBindInventory.getKeyCode())&&mc.thePlayer.isSneaking()){
-			Taoism.net.sendToServer(new PacketOpenTPInv(mc.thePlayer,mc.currentScreen==null));
+		if(Keyboard.isKeyDown(mc.gameSettings.keyBindInventory.getKeyCode())&&mc.player.isSneaking()){
+			Taoism.net.sendToServer(new PacketOpenTPInv(mc.player,mc.currentScreen==null));
 		}
 	}
 	
 	@SubscribeEvent
 	public void clickAButton(MouseEvent e) {
-		if (e.buttonstate && e.button == 0) // Note: without the
+		if (e.isButtonstate() && e.getButton() == 0) // Note: without the
 											// swingprogressint will
 											// automatically attack. Potential
 											// feature?
 		{
 			
-			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+			EntityPlayer player = Minecraft.getMinecraft().player;
 			if (player != null) {
 				//System.out.println("I broke your concentration");
 				if(PlayerResourceStalker.get(player).getIsMeditating()){
@@ -71,11 +68,11 @@ public class ClientEventHandler {
 					//System.out.println("I broke your concentration");
 					return;
 				}
-				if (player.attackTime != 0&&WayofConfig.CDEnabled){
+				/*if (player.attackTime != 0&&WayofConfig.CDEnabled){
 					e.setCanceled(true);
 					return;
-				}
-				ItemStack itemstack = player.getHeldItem();
+				}*/
+				ItemStack itemstack = player.getHeldItemMainhand();
 				ICustomRange rangedItem = null;
 				if (itemstack != null) {
 					if (itemstack.getItem() instanceof ICustomRange) {
@@ -84,13 +81,12 @@ public class ClientEventHandler {
 
 					if (rangedItem != null) {
 						float reach = rangedItem.getRange(player, itemstack);
-						MovingObjectPosition mov = ExtendThyReachHelper
+						RayTraceResult mov = ExtendThyReachHelper
 								.getMouseOver(0, reach);
 
 						if (mov != null && mov.entityHit != null
 								&& mov.entityHit != player
-								&& mov.entityHit.hurtResistantTime == 0
-								&& (player.attackTime == 0||!WayofConfig.CDEnabled)) {
+								&& mov.entityHit.hurtResistantTime == 0) {
 							Taoism.net.sendToServer(new PacketExtendThyReach(
 									mov.entityHit.getEntityId(),true));
 						}
@@ -98,10 +94,10 @@ public class ClientEventHandler {
 				}
 			}
 		}
-		if(e.buttonstate&&e.button==1){
-			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+		if(e.isButtonstate()&&e.getButton()==1){
+			EntityPlayer player = Minecraft.getMinecraft().player;
 			if (player != null) {
-				if(player.isSneaking()&&player.onGround&&!PlayerResourceStalker.get(player).getIsMeditating()&&player.getHeldItem()==null){
+				if(player.isSneaking()&&player.onGround&&!PlayerResourceStalker.get(player).getIsMeditating()&&player.getHeldItem(player.swingingHand)==null){
 					PlayerResourceStalker.get(player).setIsMeditating(true);
 					//System.out.println("start meditate");
 				}
@@ -109,14 +105,13 @@ public class ClientEventHandler {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	@SubscribeEvent
-	public void renderPlayerShenanigansStart(RenderPlayerEvent.Specials.Pre e) {
-		RenderPlayer rp = e.renderer;
+	public void renderPlayerShenanigansStart(RenderPlayerEvent.Pre e) {
+		//RenderPlayer rp = e.getRenderer();
 		//RenderHalper.renderColoredSphere((int)(Math.sin(NeedyLittleThings.rad(e.entityPlayer.ticksExisted))+1)*125,(int) e.entityPlayer.cameraYaw%255, (int) e.entityPlayer.cameraPitch%255, 0.4f, 0, 0, 0, 3f);
-		if(e.entityPlayer.isPotionActive(TaoisticPotions.Hide)){
+		if(e.getEntityPlayer().isPotionActive(TaoisticPotions.Hide)){
 			//
-			int amp=e.entityPlayer.getActivePotionEffect(TaoisticPotions.Hide).getAmplifier();
+			int amp=e.getEntityPlayer().getActivePotionEffect(TaoisticPotions.Hide).getAmplifier();
 			//System.out.println(amp);
 			if(amp<-3)e.setCanceled(true);
 		}
@@ -136,11 +131,11 @@ public class ClientEventHandler {
 		//do a full body rotate when holding polearms
 	}
 	@SubscribeEvent
-	public void renderPlayerShenanigansEnd(RenderPlayerEvent.Specials.Post e) {
-		RenderPlayer rp=e.renderer;
-			boolean frlse = false;
+	public void renderPlayerShenanigansEnd(RenderPlayerEvent.Post e) {
+		//RenderPlayer rp=e.getRenderer();
+			//boolean frlse = false;
 
-			rp.modelArmor.bipedBody.isHidden=frlse;
+			/*rp.modelArmor.bipedBody.isHidden=frlse;
 			rp.modelArmorChestplate.bipedBody.isHidden=frlse;
 			rp.modelArmorChestplate.bipedHeadwear.isHidden=frlse;
 			rp.modelArmorChestplate.bipedRightLeg.isHidden=frlse;
@@ -152,7 +147,8 @@ public class ClientEventHandler {
 			rp.modelArmor.bipedHeadwear.isHidden=frlse;
 			rp.modelArmor.bipedHead.isHidden=frlse;
 			rp.modelArmor.bipedEars.isHidden=frlse;
-			rp.modelArmorChestplate.bipedHead.isHidden=frlse;
+			rp.modelArmorChestplate.bipedHead.isHidden=frlse;*/
+			
 	}
 	/*@SubscribeEvent
 	  public void renderOverlay(RenderGameOverlayEvent.Post event)

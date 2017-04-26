@@ -1,17 +1,13 @@
 package com.Jackiecrazi.taoism.networking;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.common.taoistichandlers.PlayerResourceStalker;
-import com.Jackiecrazi.taoism.common.taoistichandlers.tickhandlers.IApologizeForThisHandler;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketSetPlayerMeditating implements IMessage {
 	private boolean toggle;
@@ -42,7 +38,7 @@ public class PacketSetPlayerMeditating implements IMessage {
 			final EntityPlayer thePlayer = (EntityPlayer) Taoism.proxy
 					.getPlayerEntityFromContext(ctx);
 
-			EntityPlayer theEntity = (EntityPlayer) thePlayer.worldObj.getEntityByID(message.PlayerID);
+			EntityPlayer theEntity = (EntityPlayer) thePlayer.world.getEntityByID(message.PlayerID);
 			if(theEntity!=null)
 			PlayerResourceStalker.get(theEntity).setIsMeditating(message.toggle);
 			//System.out.println(theEntity.toString()+" is now meditating is "+message.toggle+" on the "+ctx.side+" side");

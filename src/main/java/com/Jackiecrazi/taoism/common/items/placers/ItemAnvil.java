@@ -7,7 +7,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.Taoism;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
 import com.Jackiecrazi.taoism.common.block.special.BlockAnvil;
 
 public class ItemAnvil extends Item {
@@ -37,7 +37,7 @@ public class ItemAnvil extends Item {
         else
         {
             ++y;
-            BlockAnvil blockbed = (BlockAnvil)ModBlocks.Anvil;
+            BlockAnvil blockbed = (BlockAnvil)TaoBlocks.Anvil;
             int i1 = MathHelper.floor_double((double)(p.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
             byte b0 = 0;
             byte b1 = 0;

@@ -17,7 +17,7 @@ import com.Jackiecrazi.taoism.api.allTheInterfaces.IModular;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.IModularWeapon;
 import com.Jackiecrazi.taoism.common.entity.EntityLevitatingItem;
 import com.Jackiecrazi.taoism.common.items.ItemWeaponPart;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.items.resource.ItemResource;
 import com.Jackiecrazi.taoism.common.items.weapons.GenericTaoistWeapon;
 
@@ -120,7 +120,7 @@ public class TileAnvil extends TaoisticInvTE {
 
 	@Override
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
-		return stack.getItem()==null?false:(stack.getItem() instanceof IModular||stack.getItem() instanceof ILianQiMaterial||stack.getItem()==ModItems.QiPu);
+		return stack.getItem()==null?false:(stack.getItem() instanceof IModular||stack.getItem() instanceof ILianQiMaterial||stack.getItem()==TaoItems.QiPu);
 	}
 
 	/*public boolean isSmithingTool() {
@@ -274,7 +274,7 @@ public class TileAnvil extends TaoisticInvTE {
 
 	}
 	public void begin(){
-		ItemStack is=new ItemStack(ModItems.ResourceMetal,1,9000);
+		ItemStack is=new ItemStack(TaoItems.ResourceMetal,1,9000);
 
 		((GenericTaoistWeapon)inv[0].getItem()).setPart(((GenericTaoistWeapon)inv[0].getItem()).getParts().get(index), inv[0], is);
 	}

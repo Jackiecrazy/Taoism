@@ -3,16 +3,15 @@ package com.Jackiecrazi.taoism.networking;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.lianDan.LianDanHandler;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.lianQi.LianQiHandler;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.qiLi.XiuWeiHandler;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.wuGong.WuGongHandler;
-
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketSetSkillStuff implements IMessage {
 	private String skill;
@@ -41,7 +40,7 @@ public class PacketSetSkillStuff implements IMessage {
 
 		@Override
 		public IMessage onMessage(PacketSetSkillStuff message, MessageContext ctx) {
-			EntityPlayer p=(ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : ctx.getServerHandler().playerEntity);
+			EntityPlayer p=(ctx.side.isClient() ? Minecraft.getMinecraft().player : ctx.getServerHandler().playerEntity);
 			String s=message.skill;
 			if(s.equals("QiLiSkill")){
 				XiuWeiHandler.getThis(p).setXP(message.XP);

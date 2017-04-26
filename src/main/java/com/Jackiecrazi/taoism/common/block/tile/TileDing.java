@@ -7,7 +7,7 @@ import net.minecraft.util.AxisAlignedBB;
 
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ILianQiMaterial;
 import com.Jackiecrazi.taoism.common.entity.EntityLevitatingItem;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -84,7 +84,7 @@ public class TileDing extends TaoisticInvTE {
 		if(!isStillIntact()){
 			//ArrayList<ItemStack> drop=worldObj.getBlock(xCoord, yCoord, zCoord).getDrops(worldObj, xCoord, yCoord, zCoord, blockMetadata, 0);
 			//for(ItemStack stack:drop)
-			if(!worldObj.isRemote)worldObj.spawnEntityInWorld(new EntityItem(worldObj,xCoord,yCoord,zCoord,new ItemStack(ModItems.Ding)));
+			if(!worldObj.isRemote)worldObj.spawnEntityInWorld(new EntityItem(worldObj,xCoord,yCoord,zCoord,new ItemStack(TaoItems.Ding)));
 			worldObj.setBlockToAir(xCoord, yCoord, zCoord);
 			worldObj.removeTileEntity(xCoord, yCoord, zCoord);
 		}

@@ -15,6 +15,7 @@ public class EntityAIRangedAttack extends EntityAIBase {
 	//stamina per attack, recovery rate.
 	private int fireRate,fireCD,staminaMax,staminaPerAtk,staminaRecovery,currentStamina;
 	private double range,longRange,shortRange,speed;
+	private float debuff;
 	private boolean autoAim, enabled=true, rapidFire,rememberTarget=true,mountedAttacks;
 	private final EntityTaoisticCreature etc;
 	private EntityLivingBase uke;
@@ -31,6 +32,10 @@ public class EntityAIRangedAttack extends EntityAIBase {
 	//======================
 	//set stuff
 	//======================
+	public EntityAIRangedAttack setDamDeb(float ne){
+		debuff=ne;
+		return this;
+	}
 	public EntityAIRangedAttack setFireRate(int ne){
 		fireRate=ne;
 		return this;
@@ -112,6 +117,7 @@ public class EntityAIRangedAttack extends EntityAIBase {
 			return false;
 		if(!possibleAttackTarget.isEntityAlive())
 			return false;
+		if(possibleAttackTarget.getDistanceToEntity(etc)<shortRange)return false;
 		uke = possibleAttackTarget;
 		//System.out.println("executing");
 		return true;
@@ -178,7 +184,7 @@ public class EntityAIRangedAttack extends EntityAIBase {
 				f1 = 1.0F;
 			}
 
-			this.etc.range(uke, f1);
+			this.etc.range(uke, f1/debuff);
 			//System.out.println("ranged");
 			this.fireCD = MathHelper.floor_float(f * (float)(this.fireRate));
 		}

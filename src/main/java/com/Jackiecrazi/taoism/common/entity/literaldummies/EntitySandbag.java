@@ -17,8 +17,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.api.allTheInterfaces.IBlunt;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.wuGong.WuGongHandler;
 
 public class EntitySandbag extends Entity {
@@ -101,7 +101,7 @@ public class EntitySandbag extends Entity {
 			if(uncool)
 				dropItem(Items.leather,3);
 			else
-			dropItem(ModItems.sandbag, 1);
+			dropItem(TaoItems.sandbag, 1);
 			if (content != null)
 				dropItem(content.getItem(), content.stackSize);
 		}
@@ -137,7 +137,7 @@ public class EntitySandbag extends Entity {
 			Item sand = p.getHeldItem().getItem();
 			if (sand instanceof ItemBlock) {
 				Block sandy = Block.getBlockFromItem(sand);
-				if (sandy == ModBlocks.PoisonSand || sandy == Blocks.sand
+				if (sandy == TaoBlocks.PoisonSand || sandy == Blocks.sand
 						|| sandy == Blocks.soul_sand) {
 					content = p.getHeldItem();
 					p.inventory.setInventorySlotContents(

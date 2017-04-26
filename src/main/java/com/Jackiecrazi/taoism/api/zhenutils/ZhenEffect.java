@@ -43,8 +43,7 @@ public class ZhenEffect {
 			break;
 		}
 		if (entity) {
-			Entity[] target=zes.performEffectEntity(w, new TaoistPosition(source.xCoord, source.yCoord,
-					source.zCoord, source.getWorldObj()), source.getEffectStart().getX(),
+			Entity[] target=zes.performEffectEntity(w, new TaoistPosition(source.getPos(),source.getWorld()), source.getEffectStart().getX(),
 					source.getEffectStart().getY(), source.getEffectStart().getZ(), source
 							.getEffectEnd().getX(), source.getEffectEnd().getY(),
 					source.getEffectEnd().getZ());
@@ -53,13 +52,12 @@ public class ZhenEffect {
 			zeo.performEffect(source, target, zem);
 			
 		} else {
-			TaoistPosition[] target=zes.performEffectBlock(w, new TaoistPosition(source.xCoord, source.yCoord,
-					source.zCoord, source.getWorldObj()), source.getEffectStart().getX(),
+			TaoistPosition[] target=zes.performEffectBlock(w, new TaoistPosition(source.getPos(),source.getWorld()), source.getEffectStart().getX(),
 					source.getEffectStart().getY(), source.getEffectStart().getZ(), source
 							.getEffectEnd().getX(), source.getEffectEnd().getY(),
 					source.getEffectEnd().getZ());
 			for(int ent=0;ent<target.length;ent++)
-			if(!zef.passesFilter(source.getWorldObj(), target[ent]))target[ent]=null;
+			if(!zef.passesFilter(source.getWorld(), target[ent]))target[ent]=null;
 			zeo.performEffect(source, target, zem);
 		}
 	}

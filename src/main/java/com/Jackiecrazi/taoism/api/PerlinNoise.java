@@ -95,7 +95,7 @@ public class PerlinNoise
 
 		for(int i = 0; i < width; i++) {
 			for(int j = 0; j < height; j++) {
-				noiseArray[i][j] = noiseGenerator.func_151601_a(x + i, y + j);
+				noiseArray[i][j] = noiseGenerator.getValue(x + i, y + j);
 			}
 		}
 

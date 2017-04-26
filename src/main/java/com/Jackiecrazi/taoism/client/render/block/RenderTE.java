@@ -33,7 +33,7 @@ public class RenderTE implements IItemRenderer {
 		{
 		GL11.glTranslatef(-0.5F, 0.0F, -0.5F);
 		}
-		GL11.glScalef(1.5F, 1.5F, 1.5F);
+		GL11.glScalef(0.6F, 0.6f, 0.6F);
 		 
 		tesr.renderTileEntityAt(this.te, 0.0D, 0.0D, 0.0D, 0.0F);
 		GL11.glPopMatrix();

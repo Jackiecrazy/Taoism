@@ -3,9 +3,13 @@ package com.Jackiecrazi.taoism;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import org.apache.logging.log4j.LogManager;
 import org.lwjgl.opengl.GL11;
@@ -14,13 +18,7 @@ import org.lwjgl.util.glu.Sphere;
 
 import com.Jackiecrazi.taoism.client.ClientEventHandler;
 import com.Jackiecrazi.taoism.client.render.CompiledSkillRenders;
-import com.Jackiecrazi.taoism.client.render.ModRenders;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import com.Jackiecrazi.taoism.client.render.TaoRenders;
 
 	public class ClientProxy extends CommonProxy {
 		public static IIcon metal, wood, water, fire, earth, wind, thunder, yin, yang, sha;
@@ -34,7 +32,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 	    @Override
 	    public void preInit(FMLPreInitializationEvent e) {
 	        super.preInit(e);
-	        FMLCommonHandler.instance().bus().register(new ClientEventHandler());
 			MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 	    }
 
@@ -52,8 +49,8 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 	    @Override
 	    public void initRenders(){
 	    	CompiledSkillRenders.initLender();
-	    	ModRenders.drawEntity();
-	    	ModRenders.drawItem();
+	    	TaoRenders.drawEntity();
+	    	TaoRenders.drawItem();
 	    	saveSphereRender();
 	    	LogManager.getLogger("Taoism").debug("Successfully registered renders");
 	    }
@@ -68,7 +65,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 	    
 	    public EntityPlayer getPlayerEntityFromContext(MessageContext ctx) 
 	    {
-	    	return (ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : super.getPlayerEntityFromContext(ctx));
+	    	return (ctx.side.isClient() ? Minecraft.getMinecraft().player : super.getPlayerEntityFromContext(ctx));
 	    }
 	    private static void saveSphereRender(){
 	    	Sphere ball=new Sphere();

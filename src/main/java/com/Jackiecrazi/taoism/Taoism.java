@@ -2,23 +2,22 @@ package com.Jackiecrazi.taoism;
 
 
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 import org.apache.logging.log4j.LogManager;
 
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.taoistichandlers.BusRegister;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.Skill;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 
 @Mod(modid = Taoism.MODID, version = Taoism.MODVER, name = "taoism")
@@ -39,20 +38,20 @@ public class Taoism
     public static Taoism inst;
     public static CreativeTabs TabTaoistWeapon = new CreativeTabs("TaoistWeapon"){
     @Override
-    public Item getTabIconItem() {
-    	return ModItems.SwordIron;
+    public ItemStack getTabIconItem() {
+    	return new ItemStack(TaoItems.SwordIron);
     	}
     };
     public static CreativeTabs TabTaoistMaterials = new CreativeTabs("TaoistMats"){
         @Override
-        public Item getTabIconItem() {
-        	return (ModItems.ResourceMetal);
+        public ItemStack getTabIconItem() {
+        	return new ItemStack(TaoItems.ResourceMetal);
         	}
         };
         public static CreativeTabs TabTaoistAccessories = new CreativeTabs("TaoistAccs"){
             @Override
-            public Item getTabIconItem() {
-            	return ModItems.GongFa;
+            public ItemStack getTabIconItem() {
+            	return new ItemStack(TaoItems.GongFa);
             	}
             };
     @EventHandler

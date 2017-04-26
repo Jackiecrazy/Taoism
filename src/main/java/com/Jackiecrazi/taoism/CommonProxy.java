@@ -1,22 +1,22 @@
 package com.Jackiecrazi.taoism;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumRarity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.WeightedRandomChestContent;
-import net.minecraftforge.common.ChestGenHooks;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 
 import com.Jackiecrazi.taoism.api.PerlinNoise;
 import com.Jackiecrazi.taoism.api.StaticRefs;
 import com.Jackiecrazi.taoism.client.gui.TaoisticGuiHandler;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
-import com.Jackiecrazi.taoism.common.block.tile.ModTEs;
-import com.Jackiecrazi.taoism.common.crafting.ModCrafting;
-import com.Jackiecrazi.taoism.common.entity.ModEntities;
-import com.Jackiecrazi.taoism.common.items.ItemSkillScroll;
-import com.Jackiecrazi.taoism.common.items.ModItems;
-import com.Jackiecrazi.taoism.common.items.weapons.GenericTaoistWeapon;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
+import com.Jackiecrazi.taoism.common.block.tile.TaoTEs;
+import com.Jackiecrazi.taoism.common.crafting.TaoCrafting;
+import com.Jackiecrazi.taoism.common.entity.TaoEntities;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.world.gen.WorldGeneratorLingMai;
 import com.Jackiecrazi.taoism.networking.PacketAnimUpdate;
 import com.Jackiecrazi.taoism.networking.PacketAnimUpdate.UpdateAnimationHandler;
@@ -37,22 +37,14 @@ import com.Jackiecrazi.taoism.networking.PacketSetUnlockSkill.SetSkillHandler;
 import com.Jackiecrazi.taoism.networking.PacketUpdateAttackTimer;
 import com.Jackiecrazi.taoism.networking.PacketUpdateAttackTimer.UpdateAttackTimeHandler;
 
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-
 public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent e) {
     	NetworkRegistry.INSTANCE.registerGuiHandler(Taoism.inst, new TaoisticGuiHandler());
-    	ModItems.init();
-    	ModBlocks.init();
-    	ModTEs.init();
-    	ModEntities.init();
+    	TaoItems.init();
+    	TaoBlocks.init();
+    	TaoTEs.init();
+    	TaoEntities.init();
     	TaoisticPotions.brew();
     	PerlinNoise.init();
     	int dis=0;
@@ -68,11 +60,11 @@ public class CommonProxy {
     	
     }
     public void postpreInit(FMLPreInitializationEvent e){
-    	ModItems.postInit();
+    	TaoItems.postInit();
     }
 
     public void init(FMLInitializationEvent e) {
-    	ModCrafting.initCrafting();
+    	TaoCrafting.initCrafting();
     	
     }
 
@@ -80,7 +72,6 @@ public class CommonProxy {
     	GameRegistry.registerWorldGenerator(new WorldGeneratorLingMai(), 5);
     	StaticRefs.populateLists();
     	initRenders();
-    	gottaLootThemAll();
     }
     
     public void initRenders(){
@@ -90,27 +81,4 @@ public class CommonProxy {
     {
         return ctx.getServerHandler().playerEntity;
     }
-    private void gottaLootThemAll(){
-    	ItemStack phatloot=new ItemStack(ModItems.Scroll);
-    	for(int x=0;x<ItemSkillScroll.types.size();x++){
-    		phatloot.setTagCompound(new NBTTagCompound());
-    		phatloot.getTagCompound().setString("name", ItemSkillScroll.types.get(x));
-    		boolean rare=phatloot.getRarity()==EnumRarity.common;
-    		int rarity=ItemSkillScroll.rarity(phatloot);
-    		addLoot(new WeightedRandomChestContent(phatloot, 1, 1, (int)(rarity==0?50:rarity==1?30:rarity==2?7:1)),rare);//item, min, max, weight
-    	}
-    	for(int x=0;x<GenericTaoistWeapon.ListOfLoot.size();x++){
-    		phatloot=new ItemStack(GenericTaoistWeapon.ListOfLoot.get(x));
-    		addLoot(new WeightedRandomChestContent(phatloot, 1, 1, 50),true);//item, min, max, weight
-    	}
-    }
-    private void addLoot(WeightedRandomChestContent loot, boolean bonus) {
-		ChestGenHooks.getInfo(ChestGenHooks.MINESHAFT_CORRIDOR).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(loot);
-		ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(loot);
-		if(bonus)ChestGenHooks.getInfo(ChestGenHooks.BONUS_CHEST).addItem(loot);;
-	}
 }

@@ -23,13 +23,14 @@ public class ButtonTexture extends GuiButton {
 	@Override
     public void drawButton(Minecraft par1Minecraft, int par2, int par3)
     {
+		super.drawButton(par1Minecraft, par2, par3);
         if (this.visible)
         {
-            final FontRenderer var4 = par1Minecraft.fontRenderer;
+            final FontRenderer var4 = par1Minecraft.fontRendererObj;
             GL11.glPushMatrix();
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.field_146123_n = par2 >= this.xPosition && par3 >= this.yPosition && par2 < this.xPosition + this.width && par3 < this.yPosition + this.height;
-            this.getHoverState(this.field_146123_n);
+            this.hovered = par2 >= this.xPosition && par3 >= this.yPosition && par2 < this.xPosition + this.width && par3 < this.yPosition + this.height;
+            this.getHoverState(this.hovered);
             double scale =0.05d;
             GL11.glScaled(scale, scale, scale);
             par1Minecraft.renderEngine.bindTexture(this.texture);
@@ -41,7 +42,7 @@ public class ButtonTexture extends GuiButton {
             {
                 var6 = -6250336;
             }
-            else if (this.field_146123_n)
+            else if (this.hovered)
             {
                 var6 = 16777120;
             }

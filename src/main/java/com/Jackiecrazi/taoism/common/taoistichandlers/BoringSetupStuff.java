@@ -6,7 +6,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.EntityEvent;
 
 import com.Jackiecrazi.taoism.Taoism;
-import com.Jackiecrazi.taoism.common.entity.ModEntities;
+import com.Jackiecrazi.taoism.common.entity.TaoEntities;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.Skill;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.lianDan.LianDanHandler;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.lianQi.LianQiHandler;
@@ -56,18 +56,16 @@ public class BoringSetupStuff {
 			}
 			else if(e.entity.getExtendedProperties("taoisttrainingstalk")==null)e.entity.registerExtendedProperties("taoisttrainingstalk", new TrainingStalker());
 			EntityLivingBase elb=(EntityLivingBase) e.entity;
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_EARTH);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_FIRE);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_METAL);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_SHA);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_THUNDER);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_WATER);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_WIND);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_WOOD);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_YANG);
-			elb.getAttributeMap().registerAttribute(ModEntities.RESISTANCE_YIN);
-			elb.getAttributeMap().registerAttribute(ModEntities.LING_SPEED);
-			elb.getAttributeMap().registerAttribute(ModEntities.LING_MAX);
+			elb.getAttributeMap().registerAttribute(TaoEntities.RESISTANCE_EARTH);
+			elb.getAttributeMap().registerAttribute(TaoEntities.RESISTANCE_FIRE);
+			elb.getAttributeMap().registerAttribute(TaoEntities.RESISTANCE_METAL);
+			
+			elb.getAttributeMap().registerAttribute(TaoEntities.RESISTANCE_WATER);
+			
+			elb.getAttributeMap().registerAttribute(TaoEntities.RESISTANCE_WOOD);
+			
+			elb.getAttributeMap().registerAttribute(TaoEntities.LING_SPEED);
+			elb.getAttributeMap().registerAttribute(TaoEntities.LING_MAX);
 			
 		}
 	}

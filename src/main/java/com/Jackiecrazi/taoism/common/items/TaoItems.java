@@ -11,7 +11,7 @@ import com.Jackiecrazi.taoism.CommonProxy;
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.WayofConfig;
 import com.Jackiecrazi.taoism.api.StaticRefs;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
 import com.Jackiecrazi.taoism.common.items.armor.ClothingWushu;
 import com.Jackiecrazi.taoism.common.items.dummies.ItemMuRenZhuang;
 import com.Jackiecrazi.taoism.common.items.dummies.ItemSandbag;
@@ -24,7 +24,7 @@ import com.Jackiecrazi.taoism.common.items.weapons.SilverNeedle;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 
-public class ModItems {
+public class TaoItems {
 	public static Item.ToolMaterial tawood = EnumHelper.addToolMaterial(
 			"TAWOOD", 0, 89, 2.0F, -0.5F, 30);
 	public static Item.ToolMaterial tairon = EnumHelper.addToolMaterial(
@@ -156,7 +156,7 @@ public class ModItems {
 		
 		Talisman = new Fuuuu();
 		//GameRegistry.registerItem(Fu, "WrittenFu"); TODO reenable when it happens
-		Ding=new ItemReed(ModBlocks.LianQiDing).setTextureName("taoism:qilu").setCreativeTab(Taoism.TabTaoistMaterials).setUnlocalizedName("lianqilu").setMaxStackSize(1);
+		Ding=new ItemReed(TaoBlocks.LianQiDing).setTextureName("taoism:qilu").setCreativeTab(Taoism.TabTaoistMaterials).setUnlocalizedName("lianqilu").setMaxStackSize(1);
 		ri(Ding,"TaoisticDingItem");
 		QiPu=new ItemQiPu();
 		ri(QiPu,"qipu");

@@ -7,7 +7,7 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -50,7 +50,7 @@ public class ClothingWushu extends GenericTaoistArmor {//TODO implement ISpecial
 	}
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type)
 	  {
-	      return stack.getItem()==ModItems.wushuPants?"taoism:textures/models/armor/wushushoe.png": "taoism:textures/models/armor/wushubody.png";
+	      return stack.getItem()==TaoItems.wushuPants?"taoism:textures/models/armor/wushushoe.png": "taoism:textures/models/armor/wushubody.png";
 	  }
 	
 }

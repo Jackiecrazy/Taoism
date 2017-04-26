@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.api.TaoistPosition;
@@ -146,7 +147,7 @@ public class ZhenEffectFilter {
 	public boolean passesFilter(World w, TaoistPosition tp){
 		boolean ret=true;
 		if(blockFilter!=null){
-			Block b=w.getBlock(tp.getX(), tp.getY(), tp.getZ());
+			Block b=w.getBlockState(new BlockPos(tp.getX(), tp.getY(), tp.getZ())).getBlock();
 			if(blacklist){
 				if(b==blockFilter)ret=false;
 			}

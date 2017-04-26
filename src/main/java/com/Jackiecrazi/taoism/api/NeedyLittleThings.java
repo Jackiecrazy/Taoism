@@ -14,13 +14,13 @@ import net.minecraft.potion.Potion;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.items.armor.ClothingWushu;
-import com.sun.javafx.geom.Vec3d;
 
 public class NeedyLittleThings {
 	
@@ -40,24 +40,24 @@ public class NeedyLittleThings {
 		return new Vec3d(vx,vy,vz);
 	}
 	public static void attackWithDebuff(Entity targetEntity, EntityPlayer player,float debuff)
-	  {
+	  {}/*
 		if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, targetEntity)))
 	    {
 			 //System.out.println("nein");
 	      return;
 	      
 	    }
-	    if (targetEntity.canAttackWithItem())
+	    if (targetEntity.canBeAttackedWithItem())
 	    {
 	      if (!targetEntity.hitByEntity(player))
 	      {
-	        float f = (float)player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+	        float f = (float)player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
 	        int i = 0;
 	        float f1 = 0.0F;
 
 	        if ((targetEntity instanceof EntityLivingBase))
 	        {
-	          f1 = EnchantmentHelper.getEnchantmentModifierLiving(player, (EntityLivingBase)targetEntity);
+	          f1 = EnchantmentHelper.getEnchantmentLevel(player, (EntityLivingBase)targetEntity);
 	          i += EnchantmentHelper.getKnockbackModifier(player, (EntityLivingBase)targetEntity);
 	        }
 
@@ -162,9 +162,9 @@ public class NeedyLittleThings {
 	        }
 	      }
 	    }
-	  }
+	  }*/
 	public static boolean isUltimating(EntityPlayer player){
-		return player.worldObj.getTotalWorldTime()-player.getEntityData().getLong("HissatsuTimeStart")<player.getEntityData().getInteger("HissatsuDuration");
+		return player.world.getTotalWorldTime()-player.getEntityData().getLong("HissatsuTimeStart")<player.getEntityData().getInteger("HissatsuDuration");
 	}
 	public static void writeToTaoisticNBT(NBTTagCompound compound,String tag, Object data){
 		NBTTagCompound master=compound.getTag("Taoism")==null?new NBTTagCompound():(NBTTagCompound)compound.getTag("Taoism");
@@ -202,7 +202,7 @@ public class NeedyLittleThings {
 		if(p.inventory.armorItemInSlot(3)!=null)boot=p.inventory.armorItemInSlot(3).getItem();
 		if(helm!=null&&chest!=null&&leg!=null&&boot!=null){
 			if(reference instanceof ClothingWushu){
-				ret= helm==ModItems.wushuRibbon&&chest==ModItems.wushuShirt&&leg==ModItems.wushuPants&&boot==ModItems.wushuShoes;
+				ret= helm==TaoItems.wushuRibbon&&chest==TaoItems.wushuShirt&&leg==TaoItems.wushuPants&&boot==TaoItems.wushuShoes;
 			}
 		}
 		return ret;
@@ -210,5 +210,24 @@ public class NeedyLittleThings {
 	public static int avg(int orig, int[] additions){
 		for(int a:additions)orig+=a;
 		return (int)(orig/additions.length);
+	}
+	public static TaoistPosition[] bresenham(double x1,double y1,double z1,double x2, double y2, double z2){
+		
+		double p_x=x1; double p_y=y1; double p_z=z1;
+		double d_x=x2-x1; double d_y=y2-y1; double d_z=z2-z1;
+		int N=(int)Math.ceil(Math.max(Math.abs(d_x),Math.max(Math.abs(d_y),Math.abs(d_z))));
+		double s_x=d_x/N; double s_y=d_y/N; double s_z=d_z/N;
+		//System.out.println(N);
+		TaoistPosition[] out=new TaoistPosition[N];
+		if(out.length==0){
+			System.out.println("nay!");
+			return out;
+		}
+		out[0]=new TaoistPosition((int)p_x,(int)p_y,(int)p_z);
+		for (int ii=1;ii<N;ii++){
+			p_x+=s_x; p_y+=s_y; p_z+=s_z;
+			out[ii]=new TaoistPosition((int)p_x,(int)p_y,(int)p_z);
+		}
+		return out;
 	}
 }

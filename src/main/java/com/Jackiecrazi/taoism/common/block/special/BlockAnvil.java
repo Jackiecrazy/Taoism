@@ -13,10 +13,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.Taoism;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
 import com.Jackiecrazi.taoism.common.block.tile.TileAnvil;
 import com.Jackiecrazi.taoism.common.block.tile.TileDummy;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.items.weapons.GenericTaoistWeapon;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.lianQi.LianQiHandler;
 
@@ -43,7 +43,7 @@ public class BlockAnvil extends BlockContainer {
             case 3:xx++;break;
             }
             if(world.getBlock(xx, yy, zz).isReplaceable(world, xx, yy, zz)){
-				world.setBlock(xx, yy, zz, ModBlocks.Dummy,l,3);
+				world.setBlock(xx, yy, zz, TaoBlocks.Dummy,l,3);
 				world.setTileEntity(xx, yy, zz, new TileDummy().setX(x).setY(y).setZ(z));
 				((TileDummy)world.getTileEntity(xx, yy, zz)).setIsSlave(true);
 				if(!create)is.stackSize--;
@@ -53,7 +53,7 @@ public class BlockAnvil extends BlockContainer {
     			if (entity instanceof EntityPlayer){
     				EntityPlayer player = (EntityPlayer)entity;
     				if(!create)
-    				player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.Anvil));
+    				player.inventory.addItemStackToInventory(new ItemStack(TaoBlocks.Anvil));
     			}
     			return;
             }
@@ -67,10 +67,10 @@ public class BlockAnvil extends BlockContainer {
 		System.out.println("wootz");
 		TileAnvil te=(TileAnvil) w.getTileEntity(x, y, z);
 		if(p.getHeldItem()!=null){
-			if(p.getHeldItem().getItem()==ModItems.Ding){
+			if(p.getHeldItem().getItem()==TaoItems.Ding){
 				if(te.isValidCombination())te.dropContent();
 			}
-			if(p.getHeldItem().getItem()==ModItems.hammer&&w.rand.nextInt(1000)<=LianQiHandler.getThis(p).getLevel()){//get a REAL hammer
+			if(p.getHeldItem().getItem()==TaoItems.hammer&&w.rand.nextInt(1000)<=LianQiHandler.getThis(p).getLevel()){//get a REAL hammer
 				te.requestFeeding();
 				LianQiHandler.getThis(p).addXP(w.rand.nextFloat());
 			}
@@ -82,7 +82,7 @@ public class BlockAnvil extends BlockContainer {
 		TileAnvil te=(TileAnvil) w.getTileEntity(x, y, z);
 		ItemStack heldItem = p.getHeldItem();
 		if(heldItem!=null&&te.isItemValidForSlot(0, heldItem)){//&&!te.isSmithingTool()&&!te.isSmithingPart()
-			if(heldItem.getItem()==ModItems.QiPu){
+			if(heldItem.getItem()==TaoItems.QiPu){
 				te.dropContent();
 				if(te.getStackInSlot(0)!=null)return false;
 				ItemStack i=heldItem;
@@ -90,7 +90,7 @@ public class BlockAnvil extends BlockContainer {
 				ItemStack put=new ItemStack(cont);
 				for(String n:cont.getParts()){
 					
-					cont.setPart(n, put, new ItemStack(ModItems.ResourceMetal,1,8000));
+					cont.setPart(n, put, new ItemStack(TaoItems.ResourceMetal,1,8000));
 					
 				}
 				te.setAnvilContent(put);
@@ -116,7 +116,7 @@ public class BlockAnvil extends BlockContainer {
 		else{
 			ItemStack eaten=heldItem;
 			if(eaten!=null){
-				if(p.getHeldItem().getItem()==ModItems.hammer&&w.rand.nextInt(10)<=p.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue()){//higher prob?
+				if(p.getHeldItem().getItem()==TaoItems.hammer&&w.rand.nextInt(10)<=p.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue()){//higher prob?
 					te.requestFeeding();
 					LianQiHandler.getThis(p).addXP(w.rand.nextFloat());
 					

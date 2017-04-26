@@ -6,13 +6,12 @@ import java.util.List;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 
 import com.Jackiecrazi.taoism.common.entity.base.EntityTaoisticCreature;
 
 public class EntityAITargetAMob extends EntityAITargetNew {
 
-	private final Class targetClass;
+	private final Class<Entity> targetClass;
     private final int targetChance;
     /** Instance of EntityAINearestAttackableTargetSorter. */
     private final Sorter theNearestAttackableTargetSorter;
@@ -22,8 +21,7 @@ public class EntityAITargetAMob extends EntityAITargetNew {
      */
     private final IEntitySelector targetEntitySelector;
     private EntityLivingBase targetEntity;
-    private static final String __OBFID = "CL_00001620";
-
+    
     public EntityAITargetAMob(EntityTaoisticCreature p_i1663_1_, Class p_i1663_2_, int p_i1663_3_, boolean p_i1663_4_)
     {
         this(p_i1663_1_, p_i1663_2_, p_i1663_3_, p_i1663_4_, false);
@@ -72,17 +70,19 @@ public class EntityAITargetAMob extends EntityAITargetNew {
         }
         else
         {
-        	//System.out.println("success");
+        	//System.out.println(this.taskOwner.boundingBox);
             double d0 = this.getTargetDistance();
             List list = this.taskOwner.worldObj.selectEntitiesWithinAABB(this.targetClass, this.taskOwner.boundingBox.expand(d0, 4.0D, d0), this.targetEntitySelector);
             Collections.sort(list, this.theNearestAttackableTargetSorter);
 
             if (list.isEmpty())
             {
+            	//System.out.println("empty");
                 return false;
             }
             else
             {
+            	//System.out.println("unempty");
                 this.targetEntity = (EntityLivingBase)list.get(0);
                 return true;
             }
@@ -94,6 +94,7 @@ public class EntityAITargetAMob extends EntityAITargetNew {
      */
     public void startExecuting()
     {
+    	//System.out.println("carnage");
         this.taskOwner.setAttackTarget(this.targetEntity);
         super.startExecuting();
     }

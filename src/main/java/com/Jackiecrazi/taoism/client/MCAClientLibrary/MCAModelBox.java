@@ -1,12 +1,12 @@
 package com.Jackiecrazi.taoism.client.MCAClientLibrary;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /** Coords values are set following a right-handed system with no transformations(ie. a default one, with +Z which goes out of the screen). */
 public class MCAModelBox extends ModelBox {

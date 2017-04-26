@@ -4,12 +4,12 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ExtendThyReachHelper {
@@ -22,29 +22,29 @@ public class ExtendThyReachHelper {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-		public static MovingObjectPosition getMouseOver(float frame, float dist)
+		public static RayTraceResult getMouseOver(float frame, float dist)
 		{
-			MovingObjectPosition mop = null;
-			if (mc.renderViewEntity != null)
+			RayTraceResult mop = null;
+			final Entity renderViewEntity = mc.getRenderViewEntity();
+			if (renderViewEntity != null)
 			{
-				if (mc.theWorld != null)
+				if (mc.world != null)
 				{
 					double var2 = dist;
-					mop = mc.renderViewEntity.rayTrace(var2, frame);
+					mop = mc.getRenderViewEntity().rayTrace(var2, frame);
 					double calcdist = var2;
-					Vec3 pos = mc.renderViewEntity.getPosition(frame);
+					Vec3d pos = mc.getRenderViewEntity().getPositionVector();
 					var2 = calcdist;
 					if (mop != null)
 					{
 						calcdist = mop.hitVec.distanceTo(pos);
 					}
 					
-					Vec3 lookvec = mc.renderViewEntity.getLook(frame);
-					Vec3 var8 = pos.addVector(lookvec.xCoord * var2, lookvec.yCoord * var2, lookvec.zCoord * var2);
+					Vec3d lookvec = mc.getRenderViewEntity().getLook(frame);
+					Vec3d var8 = pos.addVector(lookvec.xCoord * var2, lookvec.yCoord * var2, lookvec.zCoord * var2);
 					Entity pointedEntity = null;
 					float var9 = 1.0F;
-					List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(mc.renderViewEntity, mc.renderViewEntity.boundingBox.addCoord(lookvec.xCoord * var2, lookvec.yCoord * var2, lookvec.zCoord * var2).expand(var9, var9, var9));
+					List<Entity> list = mc.world.getEntitiesWithinAABBExcludingEntity(renderViewEntity, renderViewEntity.getCollisionBoundingBox().addCoord(lookvec.xCoord * var2, lookvec.yCoord * var2, lookvec.zCoord * var2).expand(var9, var9, var9));
 					double d = calcdist;
 					
 					for (Entity entity : list)
@@ -52,8 +52,8 @@ public class ExtendThyReachHelper {
 						if (entity.canBeCollidedWith())
 						{
 							float bordersize = entity.getCollisionBorderSize();
-							AxisAlignedBB aabb = entity.boundingBox.expand(bordersize, bordersize, bordersize);
-							MovingObjectPosition mop0 = aabb.calculateIntercept(pos, var8);
+							AxisAlignedBB aabb = entity.getCollisionBoundingBox().expand(bordersize, bordersize, bordersize);
+							RayTraceResult mop0 = aabb.calculateIntercept(pos, var8);
 							
 							if (aabb.isVecInside(pos))
 							{
@@ -77,7 +77,7 @@ public class ExtendThyReachHelper {
 					
 					if (pointedEntity != null && (d < calcdist || mop == null))
 					{
-						mop = new MovingObjectPosition(pointedEntity);
+						mop = new RayTraceResult(pointedEntity);
 					}
 				}
 			}

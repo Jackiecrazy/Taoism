@@ -2,7 +2,7 @@ package com.Jackiecrazi.taoism;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -18,16 +18,14 @@ public class TaoisticPotions extends Potion {
 	public static Potion Hide;
 	final int tickrate;
 	final int halvetick;
-	public final int identity;
 	private ItemStack stackIcon;
 
-	public TaoisticPotions(int id, boolean isBad, int colour, int tick,
+	public TaoisticPotions(boolean isBad, int colour, int tick,
 			int halvetick, Item icon,String name) {
-		super(id, isBad, colour);
+		super(isBad, colour);
 		this.tickrate = tick;
 		this.halvetick = tick;
 		this.setIcon(new ItemStack(icon));
-		this.identity = id;
 		this.setPotionName(name);
 	}
 
@@ -39,32 +37,31 @@ public class TaoisticPotions extends Potion {
 			Minecraft mc) {
 		x += 6;
 		y += 7;
-		RenderItem itemRender = new RenderItem();
+		RenderItem itemRender = Minecraft.getMinecraft().getRenderItem();
 		if (stackIcon == null)
-			stackIcon = new ItemStack(Items.potato);
+			stackIcon = new ItemStack(Items.POTATO);
 		RenderHelper.enableGUIStandardItemLighting();
-		itemRender.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine,
-				stackIcon, x, y);
+		itemRender.renderItemIntoGUI(stackIcon, x, y);
 		RenderHelper.enableStandardItemLighting();
 	}
 
 	@Override
 	public boolean isReady(int duration, int amplifier) {
 		boolean ret = false;
-		if (this.id == WayofConfig.HidePotID&&amplifier<-1)
+		if (this.equals(Hide)&&amplifier<-1)
 			ret = true;
 		return ret;
 	}
 
 	@Override
 	public void performEffect(EntityLivingBase l, int potency) {
-		if (this.id == WayofConfig.HidePotID)
+		if (this.equals(Hide))
 			l.setInvisible(true);
 	}
 
 	public static void brew() {
-		Hide = new TaoisticPotions(WayofConfig.HidePotID, false, 0xFFFFFF, 20,
-				20, Items.string,"taoisticpotions.hide");
+		Hide = new TaoisticPotions(false, 0xFFFFFF, 20,
+				20, Items.STRING,"taoisticpotions.hide");
 
 	}
 }

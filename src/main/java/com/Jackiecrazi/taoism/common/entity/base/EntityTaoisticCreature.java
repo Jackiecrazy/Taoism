@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.EnumDifficulty;
@@ -61,9 +62,7 @@ public class EntityTaoisticCreature extends EntityLiving {
 		populate();
 	}
 	public EntityTaoisticCreature(World w,Material... liquid) {
-		super(w);
-		ems=new ExtraMobStuff(this);
-		dpf=new DecentPathFinder(this);
+		this(w);
 	}
 	/**
 	 * preferred liquids go here
@@ -129,7 +128,6 @@ public class EntityTaoisticCreature extends EntityLiving {
     		}
     	}
     	if(this.canFly() || freeSwimming || (noClipping&&this.noClip)){
-    		System.out.println("trigger");
     		return true;
     		
     	}
@@ -277,4 +275,18 @@ public class EntityTaoisticCreature extends EntityLiving {
     {
 		super.setPositionAndRotation2(x, y, z, yaw, pitch, increment);
     }
+	@Override
+	public AxisAlignedBB getCollisionBox(Entity p) {
+		return p.getBoundingBox();
+		// return AxisAlignedBB.getBoundingBox(-1, -0.5, -1, 1, 3, 1);
+	}
+
+	public AxisAlignedBB getBoundingBox() {
+		return this.boundingBox;
+	}
+
+	@Override
+	public boolean canBeCollidedWith() {
+		return true;
+	}
 }

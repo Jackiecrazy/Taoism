@@ -12,7 +12,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import com.Jackiecrazi.taoism.Taoism;
-import com.Jackiecrazi.taoism.common.block.ModBlocks;
+import com.Jackiecrazi.taoism.common.block.TaoBlocks;
 import com.Jackiecrazi.taoism.common.block.tile.TileBellows;
 import com.Jackiecrazi.taoism.common.block.tile.TileDummy;
 
@@ -76,15 +76,15 @@ public class BlockBellows extends BlockContainer {
             case 3:xx++;break;
             }
             if(world.getBlock(xx, yy, zz).isReplaceable(world, xx, yy, zz)&&world.getBlock(xx, yy+1, zz).isReplaceable(world, xx, yy+1, zz)&&world.getBlock(xx, y+1, zz).isReplaceable(world, xx, y+1, zz)){
-				world.setBlock(xx, yy, zz, ModBlocks.Dummy);
+				world.setBlock(xx, yy, zz, TaoBlocks.Dummy);
 				world.setTileEntity(xx, yy, zz, new TileDummy().setX(x).setY(y).setZ(z));
 				((TileDummy)world.getTileEntity(xx, yy, zz)).setIsSlave(true);
 				yy++;
-				world.setBlock(xx, yy, zz, ModBlocks.Dummy);
+				world.setBlock(xx, yy, zz, TaoBlocks.Dummy);
 				world.setTileEntity(xx, yy, zz, new TileDummy().setX(x).setY(y).setZ(z));
 				((TileDummy)world.getTileEntity(xx, yy, zz)).setIsSlave(true);
 				
-				world.setBlock(x, y+1, z, ModBlocks.Dummy);
+				world.setBlock(x, y+1, z, TaoBlocks.Dummy);
 				world.setTileEntity(x, y+1, z, new TileDummy().setX(x).setY(y).setZ(z));
 				((TileDummy)world.getTileEntity(x, y+1, z)).setIsSlave(true);
 				if(!create)is.stackSize--;
@@ -94,7 +94,7 @@ public class BlockBellows extends BlockContainer {
     			if (entity instanceof EntityPlayer){
     				EntityPlayer player = (EntityPlayer)entity;
     				if(!create)
-    				player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.Bellows));
+    				player.inventory.addItemStackToInventory(new ItemStack(TaoBlocks.Bellows));
     			}
     			return;
             }

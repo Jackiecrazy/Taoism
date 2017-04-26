@@ -12,9 +12,9 @@ import com.Jackiecrazi.taoism.common.block.special.DummyBlock;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 
-public class ModBlocks {
+public class TaoBlocks {
     public static Block Altar, Shrine,LianQiDing,Anvil,Bellows;
-    public static Block Arboreal,PoisonSand,Dummy;
+    public static Block Arboreal,PoisonSand,Dummy,LingOre;
     public static Block Sapling;
     static{
 		Altar = new BlockAltar();
@@ -26,6 +26,7 @@ public class ModBlocks {
 		Dummy=new DummyBlock(Material.rock);
 		Anvil=new BlockAnvil(Material.anvil);
 		Bellows=new BlockBellows();
+		LingOre=new TaoisticOreBlock("lingore","taoism:orelingshi");
     }
 	public static void init()
     {
@@ -40,6 +41,7 @@ public class ModBlocks {
 		GameRegistry.registerBlock(Dummy, "TaoisticDummy");
 		GameRegistry.registerBlock(Anvil, "TaoisticAnvil");
 		GameRegistry.registerBlock(Bellows, "TaoisticBellows");
+		GameRegistry.registerBlock(LingOre, "taolingore");
     }
 	
 }

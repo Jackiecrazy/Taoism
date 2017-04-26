@@ -6,24 +6,23 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.UsernameCache;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class PlayerHelper {
 
 	public static boolean decrease(int i, EntityPlayer player) {
 		boolean didit = false;
 		if(player.capabilities.isCreativeMode)return true;
-		if (player.getHeldItem() != null) {
-			ItemStack playerItem = player.getHeldItem();
-			int jack = playerItem.stackSize;
+		if (player.getHeldItemMainhand() != null) {
+			ItemStack playerItem = player.getHeldItemMainhand();
+			int jack = playerItem.getCount();
 			if (jack > i) {
-				playerItem.stackSize -= i;
+				playerItem.setCount(playerItem.getCount()-i);
 				didit = true;
 			} else if (jack == i) {
-				player.setCurrentItemOrArmor(0, null);
+				player.setHeldItem(player.getActiveHand(), null);
 				didit = true;
 			}
 			
@@ -41,9 +40,9 @@ public class PlayerHelper {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
             return null;
 
-        List<EntityPlayerMP> allPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+        List<EntityPlayerMP> allPlayers = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers();
         for (EntityPlayerMP player : allPlayers) {
-            if (player.getDisplayName()==username) {
+            if (player.getDisplayNameString()==username) {
                 return player;
             }
         }

@@ -4,11 +4,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 
 public class DamageConcussion extends EntityDamageSourceIndirect{
@@ -19,22 +18,22 @@ public class DamageConcussion extends EntityDamageSourceIndirect{
 		this.setDamageBypassesArmor();
 	}
 	@Override
-	public IChatComponent func_151519_b(EntityLivingBase target)
+	public ITextComponent getDeathMessage(EntityLivingBase target)
     {
 		String howtodie = "death.attack." + this.damageType;
 		ItemStack stack=null;
-	    IChatComponent source = getEntity() == null ? getSourceOfDamage().func_145748_c_() : this.getEntity().func_145748_c_();
+	    ITextComponent source = getEntity() == null ? getSourceOfDamage().getDisplayName() : this.getEntity().getDisplayName();
 	    if(getEntity() != null && getEntity() instanceof EntityLivingBase){
-	    stack =  ((EntityLivingBase)getEntity()).getHeldItem();
+	    stack =  ((EntityLivingBase)getEntity()).getHeldItemMainhand();
 	    }
 	    else if(getSourceOfDamage() instanceof EntityLivingBase){
-	    	stack=((EntityLivingBase)getSourceOfDamage()).getHeldItem();
+	    	stack=((EntityLivingBase)getSourceOfDamage()).getHeldItemMainhand();
 	    }
 	    String deathname = howtodie + ".item";
 
-	    return stack != null && stack.hasDisplayName() && StatCollector.canTranslate(deathname) ? 
-	            new ChatComponentTranslation(deathname, target.func_145748_c_(), source, stack.getDisplayName()) :
-	            new ChatComponentTranslation(howtodie, target.func_145748_c_(), source);
+	    return stack != null && stack.hasDisplayName()? 
+	            new TextComponentTranslation(deathname, target.getDisplayName(), source, stack.getDisplayName()) :
+	            new TextComponentTranslation(howtodie, target.getDisplayName(), source);
 		
     }
 	public static DamageSource causeBrainDamageIndirectly(Entity source, Entity transmitter) {

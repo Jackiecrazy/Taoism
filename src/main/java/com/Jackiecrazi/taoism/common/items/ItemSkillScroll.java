@@ -54,7 +54,7 @@ public class ItemSkillScroll extends Item {
 	public void getSubItems(Item item, CreativeTabs xCreativeTabs, List list) {
 		ItemStack scroll;
 		for (int x = 0; x < types.size(); x++) {
-			scroll=new ItemStack(ModItems.Scroll);
+			scroll=new ItemStack(TaoItems.Scroll);
 			scroll.setTagCompound(new NBTTagCompound());
 			scroll.stackTagCompound.setString(name, types.get(x));
 			list.add(scroll);

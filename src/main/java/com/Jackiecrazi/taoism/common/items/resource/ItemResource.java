@@ -11,7 +11,7 @@ import net.minecraft.util.IIcon;
 
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ILianQiMaterial;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -99,7 +99,7 @@ public class ItemResource extends Item implements ILianQiMaterial {
 
 	@Override
 	public boolean isMat(ItemStack i) {
-		return (i.getItem()==ModItems.ResourceMetal?(i.getItemDamage()!=8000&&i.getItemDamage()!=9000):true);
+		return (i.getItem()==TaoItems.ResourceMetal?(i.getItemDamage()!=8000&&i.getItemDamage()!=9000):true);
 	}
 	public boolean isWood(int meta){
 		int ref=Math.floorDiv(meta, 1000)%types.length;

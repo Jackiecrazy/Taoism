@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import com.Jackiecrazi.taoism.client.models.entity.mobs.animation.lili.AnimationHandlerLili;
 import com.Jackiecrazi.taoism.common.MCACommonLibrary.IMCAnimatedEntity;
 import com.Jackiecrazi.taoism.common.MCACommonLibrary.animation.AnimationHandler;
-import com.Jackiecrazi.taoism.common.entity.ModEntities;
+import com.Jackiecrazi.taoism.common.entity.TaoEntities;
 import com.Jackiecrazi.taoism.common.entity.ai.EntityAINinja;
 import com.Jackiecrazi.taoism.common.entity.ai.EntityAIRangedAttack;
 import com.Jackiecrazi.taoism.common.entity.ai.aerialai.EntityAIFlyingWander;
@@ -78,6 +78,6 @@ public class EntityLiLi extends EntityTaoisticCreature implements IMCAnimatedEnt
 	    // elemental resistance
 	   getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage);
 	   getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
-	   getEntityAttribute(ModEntities.RESISTANCE_EARTH).setBaseValue(30);
+	   getEntityAttribute(TaoEntities.RESISTANCE_EARTH).setBaseValue(30);
 	}
 }

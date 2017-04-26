@@ -45,7 +45,7 @@ public class EntityAISayo extends EntityAITargetNew {
 
             while (iterator.hasNext())
             {
-                EntityCreature entitycreature = (EntityCreature)iterator.next();
+                EntityTaoisticCreature entitycreature = (EntityTaoisticCreature)iterator.next();
 
                 if (entitycreature.getAttackTarget() == null && !entitycreature.isOnSameTeam(this.taskOwner.getAITarget()))
                 {

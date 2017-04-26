@@ -52,7 +52,7 @@ public class EntityAIFlyingWander extends EntityAIBase
             }
             else
             {
-            	//System.out.println(vec3.toString());
+            	System.out.println("execute wander script");
                 this.xPosition = vec3.xCoord;
                 this.yPosition = vec3.yCoord;
                 this.zPosition = vec3.zCoord;

@@ -75,6 +75,7 @@ public abstract class TaoisticInvTE extends TileEntity implements IInventory, IT
         }
 
         tag.setTag("Inventory", invList);
+        if(ownerID!=null)
         tag.setString("owner", ownerID.toString());
     }
 
@@ -92,6 +93,7 @@ public abstract class TaoisticInvTE extends TileEntity implements IInventory, IT
             if (slot >= 0 && slot < inv.length)
                 inv[slot] = ItemStack.loadItemStackFromNBT(stackTag);
         }
+        if(tag.hasKey("owner"))
         ownerID=UUID.fromString(tag.getString("owner"));
         ownerEntity=new WeakReference<EntityPlayer>(getOwnerEntity());
     }

@@ -1,11 +1,8 @@
 package com.Jackiecrazi.taoism.common.taoistichandlers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -13,18 +10,13 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -36,28 +28,26 @@ import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.entity.player.PlayerEvent.HarvestCheck;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import com.Jackiecrazi.taoism.Taoism;
+import com.Jackiecrazi.taoism.TaoisticPotions;
 import com.Jackiecrazi.taoism.WayofConfig;
 import com.Jackiecrazi.taoism.api.NeedyLittleThings;
 import com.Jackiecrazi.taoism.api.allTheDamageTypes.DamageElemental;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ICustomRange;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ISwingSpeed;
-import com.Jackiecrazi.taoism.common.entity.ModEntities;
+import com.Jackiecrazi.taoism.common.entity.TaoEntities;
 import com.Jackiecrazi.taoism.common.entity.literaldummies.EntityDroppedWeapon;
 import com.Jackiecrazi.taoism.common.entity.literaldummies.EntityMuRenZhuang;
 import com.Jackiecrazi.taoism.common.entity.literaldummies.EntitySandbag;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.items.weapons.GenericTaoistWeapon;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.Skill;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.qiLi.XiuWeiHandler;
 import com.Jackiecrazi.taoism.common.taoistichandlers.skillHandlers.wuGong.WuGongHandler;
-import com.Jackiecrazi.taoism.networking.PacketUpdateAttackTimer;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class TaoisticEventHandler {
 	int lcd;
@@ -72,41 +62,39 @@ public class TaoisticEventHandler {
 	public void sadism(AttackEntityEvent e) {// attack with more damage and
 		// fire/magic/etc
 		//e.entity.worldObj.addWeatherEffect(new EntityLightningBolt(e.entity.worldObj,e.entity.posX,e.entity.posY,e.entity.posZ));
-		EntityPlayer player = (EntityPlayer) e.entityPlayer;
-		Entity uke = e.target;
+		EntityPlayer player = (EntityPlayer) e.getEntityPlayer();
+		Entity uke = e.getTarget();
 		// if(uke.hurtResistantTime!=0)System.out.println("hi");
 		float rawWGlvl = (WuGongHandler.getThis(player).getLevel());
 		float rawQLlvl = (XiuWeiHandler.getThis(player).getLevel());
 		float processedWGlvl = (WuGongHandler.getThis(player).getLevel() / 100) + 0.01F;
 		float processedQLlvl = (XiuWeiHandler.getThis(player).getLevel() / 100) + 0.01F;
-		float WGxp = e.entity.worldObj.rand.nextFloat() * (processedWGlvl);
-		if (NeedyLittleThings.isWearingFullSet(player, ModItems.wushuRibbon)) {
+		float WGxp = uke.world.rand.nextFloat() * (processedWGlvl);
+		if (NeedyLittleThings.isWearingFullSet(player, TaoItems.wushuRibbon)) {
 			WGxp *= 2;
 			processedWGlvl *= 2;
 		}
-		float QLxp = e.entity.worldObj.rand.nextFloat() * (processedQLlvl);
-		if ((player.getHeldItem() != null)) {
-			if ((player.attackTime == 0)
-					|| (player.getHeldItem().getItem() instanceof ISwingSpeed && ((ISwingSpeed) player
-							.getHeldItem().getItem()).swingSpd() == player.attackTime)
-							|| player.getHeldItem() == null || !WayofConfig.CDEnabled) {
+		float QLxp = uke.world.rand.nextFloat() * (processedQLlvl);
+		if ((player.getHeldItemMainhand() != null)) {
+			if (player.getHeldItemMainhand().getItem() instanceof ISwingSpeed
+							|| player.getHeldItemMainhand() == null || !WayofConfig.CDEnabled) {
 
-				if (!player.worldObj.isRemote) {
+				if (!player.world.isRemote) {
 					WuGongHandler.getThis(player).addXP(WGxp);
 					// player.addExhaustion(1 / rawWGlvl);
 					// System.out.println(1/rawWGlvl);
-					if (player.getHeldItem() != null) {
-						ItemStack held = player.getHeldItem();
+					if (player.getHeldItemMainhand() != null) {/*
+						ItemStack held = player.getHeldItemMainhand();
 						Item i = held.getItem();
 						if (i instanceof ISwingSpeed) {
 							player.attackTime = ((ISwingSpeed) i).swingSpd();
-							if (!player.worldObj.isRemote)
+							if (!player.world.isRemote)
 								Taoism.net.sendTo(new PacketUpdateAttackTimer(
 										((ISwingSpeed) i).swingSpd()),
 										(EntityPlayerMP) player);
 
 						}
-					}
+					*/}
 
 					if (uke instanceof EntitySandbag) {
 						EntitySandbag sand = (EntitySandbag) uke;
@@ -116,13 +104,13 @@ public class TaoisticEventHandler {
 									.getItem());
 							WuGongHandler
 							.getThis(player)
-							.addXP(sandType == Blocks.soul_sand ? (float) (sa.stackSize
+							.addXP(sandType == Blocks.SOUL_SAND ? (float) (sa.getCount()
 									/ processedWGlvl * 0.0002)
-									: sandType == Blocks.sand ? (float) (sa.stackSize
+									: sandType == Blocks.SAND ? (float) (sa.getCount()
 											/ processedWGlvl * 0.0001)
 											: 0.0001F);
 							// System.out.println();
-							player.addExhaustion((1 / 64) * sa.stackSize);
+							player.addExhaustion((1 / 64) * sa.getCount());
 						}
 					}
 				}
@@ -134,7 +122,7 @@ public class TaoisticEventHandler {
 
 			float exp = QLxp;
 			// System.out.println("added xp of value "+exp+" consuming "+rawQLlvl+" qi");
-			if (player.getHeldItem() == null
+			if (player.getHeldItemMainhand() == null
 					&& PlayerResourceStalker.get(player).subtractValues(
 							WayofConfig.QiDWID, rawQLlvl))
 				XiuWeiHandler.getThis(player).addXP(exp);
@@ -150,11 +138,11 @@ public class TaoisticEventHandler {
 	@SubscribeEvent
 	public void masochism(LivingHurtEvent e) {
 		// modify dealt damage here
-		if (e.source.getEntity() != null) {
+		if (e.getSource().getEntity() != null) {
 
-			Entity sadist = e.source.getEntity();
+			Entity sadist = e.getSource().getEntity();
 
-			EntityLivingBase masochist = (EntityLivingBase) e.entityLiving;
+			EntityLivingBase masochist = (EntityLivingBase) e.getEntityLiving();
 			double sadistX = sadist.posX;
 			double sadistY = sadist.posY;
 			double sadistZ = sadist.posZ;
@@ -165,11 +153,11 @@ public class TaoisticEventHandler {
 				EntityPlayer player = (EntityPlayer) sadist;
 				int WGS = WuGongHandler.getThis(player).getLevel();
 
-				if (player.getCurrentEquippedItem() != null) {
-					String shakespeare = player.getCurrentEquippedItem()
+				if (player.getHeldItemMainhand() != null) {
+					String shakespeare = player.getHeldItemMainhand()
 							.getItem().getUnlocalizedName();
 
-					if (player.getCurrentEquippedItem().getItem() instanceof GenericTaoistWeapon) {
+					if (player.getHeldItemMainhand().getItem() instanceof GenericTaoistWeapon) {
 						// random crit. It's a bad idea.
 						/*
 						 * float shamate = Skills.readit(player, shakespeare);
@@ -183,191 +171,186 @@ public class TaoisticEventHandler {
 						 * Math.random(), masochistZ + Math.random(), 0,
 						 * Math.random(), 0); } e.ammount *= 2; }
 						 */
-						// set swing speed
-						if (player.getCurrentEquippedItem().getItem() instanceof ISwingSpeed)
-							player.attackTime = ((ISwingSpeed) player
-									.getCurrentEquippedItem().getItem())
-									.swingSpd();
 						// sword's lightning buff
-						if (player.getCurrentEquippedItem().getItem() instanceof ICustomRange) {
+						if (player.getHeldItemMainhand().getItem() instanceof ICustomRange) {
 							// something goes here? I FORGOT! The below is a
 							// placeholder that gives extra damage when
 							// assassinating
-							if (player.isInvisible()&&((ICustomRange)player.getCurrentEquippedItem().getItem()).getRange(player, player.getCurrentEquippedItem())<4)
-								e.ammount *= 1.5;
+							if (player.isInvisible()&&((ICustomRange)player.getHeldItemMainhand().getItem()).getRange(player, player.getHeldItemMainhand())<4)
+								e.setAmount(e.getAmount()*1.5f);
 						}
 					}
 					
 				} else {
 					// KENSHIRO!
-					e.ammount *= Math.max(WGS / 20, 1);
-					e.entity.hurtResistantTime = MathHelper.floor_double(Math
+					e.setAmount(e.getAmount()*Math.max(WGS/20, 1));
+					e.getEntity().hurtResistantTime = MathHelper.floor(Math
 							.min(20, (20 / (WGS / 10 + 0.1))));
 				}
 				// basic fighting adds some buff, esp. for bare hands
 				float buff = ((float) XiuWeiHandler.getThis(player)
 						.getSkillAwesomeness(Skill.BFNAME) / 25F);
-				buff *= player.getHeldItem() == null ? 1.5 : 1;
-				e.ammount *= Math.max(buff, 1f);
+				buff *= player.getHeldItemMainhand() == null ? 1.5 : 1;
+				e.setAmount(e.getAmount()*buff);
 			}
 
 		}
 
-		if(e.source.damageType.contains("taoistelement")){
-			EntityLivingBase elb=e.entityLiving;
+		if(e.getSource().damageType.contains("taoistelement")){
+			EntityLivingBase elb=e.getEntityLiving();
 			IAttributeInstance damnerf;
 			//heals based on element
-			if(!(e.entityLiving instanceof EntityPlayer)){
-				switch(DamageElemental.TaoistElement.valueOf(e.source.damageType.substring(e.source.damageType.lastIndexOf(".")+1).toUpperCase())){
+			if(!(e.getEntityLiving() instanceof EntityPlayer)){
+				switch(DamageElemental.TaoistElement.valueOf(e.getSource().damageType.substring(e.getSource().damageType.lastIndexOf(".")+1).toUpperCase())){
 				case METAL://metal makes water
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WATER);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WATER);
 					break;
 				case WOOD://wood creates fire
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_FIRE);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_FIRE);
 					break;
 				case WATER://water nourishes wood
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WOOD);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WOOD);
 					break;
 				case FIRE://fire burns to earth
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_EARTH);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_EARTH);
 					break;
 				case EARTH://earth compresses to metal
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_METAL);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_METAL);
 					break;
-				case WIND://wind hastens thunder
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_THUNDER);
+				/*case WIND://wind hastens thunder
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_THUNDER);
 					break;
 				case THUNDER://thunder helps yang
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YANG);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YANG);
 					break;
 				case YIN://yin accumulates sha
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_SHA);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_SHA);
 					break;
 				case YANG://yang grows yin
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YIN);
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YIN);
 					break;
 				case SHA://sha creates wind
-					damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WIND);
-					break;
+					damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WIND);
+					break;*/
 				default:
-					damnerf=elb.getEntityAttribute(SharedMonsterAttributes.knockbackResistance);
+					damnerf=elb.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
 					break;
 				}
-				e.entityLiving.heal((float) (2*e.ammount*damnerf.getAttributeValue()/100));
+				e.getEntityLiving().heal((float) (2*e.getAmount()*damnerf.getAttributeValue()/100));
 				e.setCanceled(true);
 				return;
 			}
 
 			//decrease damage based on feeding element
-			switch(DamageElemental.TaoistElement.valueOf(e.source.damageType.substring(e.source.damageType.lastIndexOf(".")+1).toUpperCase())){
+			switch(DamageElemental.TaoistElement.valueOf(e.getSource().damageType.substring(e.getSource().damageType.lastIndexOf(".")+1).toUpperCase())){
 			case METAL://metal
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_METAL);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_METAL);
 				break;
 			case WOOD://wood
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WOOD);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WOOD);
 				break;
 			case WATER://water
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WATER);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WATER);
 				break;
 			case FIRE://fire
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_FIRE);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_FIRE);
 				break;
 			case EARTH://earth
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_EARTH);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_EARTH);
 				break;
-			case WIND://wind
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WIND);
+			/*case WIND://wind
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WIND);
 				break;
 			case THUNDER://thunder
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_THUNDER);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_THUNDER);
 				break;
 			case YIN://yin
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YIN);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YIN);
 				break;
 			case YANG://yang
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YANG);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YANG);
 				break;
 			case SHA://sha
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_SHA);
-				break;
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_SHA);
+				break;*/
 			default:
-				damnerf=elb.getEntityAttribute(SharedMonsterAttributes.knockbackResistance);
+				damnerf=elb.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
 				break;
 			}
 			if(elb instanceof EntityPlayer){
-				e.ammount*=(100-damnerf.getAttributeValue());//percentage?
-				e.ammount/=100;
+				e.setAmount((float) (e.getAmount()*(100-damnerf.getAttributeValue())/100));//percentage?
+				//e.ammount/=100;
 			}
 			else{
-				elb.heal((float) (e.ammount*(100-damnerf.getAttributeValue())/100));
+				elb.heal((float) (e.getAmount()*(100-damnerf.getAttributeValue())/100));
 			}
 
 
 			//increase damage
-			switch(DamageElemental.TaoistElement.valueOf(e.source.damageType.substring(e.source.damageType.lastIndexOf(".")+1).toUpperCase())){
+			switch(DamageElemental.TaoistElement.valueOf(e.getSource().damageType.substring(e.getSource().damageType.lastIndexOf(".")+1).toUpperCase())){
 			case METAL://metal falls trees
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WOOD);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WOOD);
 				break;
 			case WOOD://wood splits earth
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_EARTH);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_EARTH);
 				break;
 			case WATER://water extinguishes fire
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_FIRE);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_FIRE);
 				break;
 			case FIRE://fire melts metal
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_METAL);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_METAL);
 				break;
 			case EARTH://earth absorbs water
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WATER);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WATER);
 				break;
-			case WIND://wind dissipates yang
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YANG);
+			/*case WIND://wind dissipates yang
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YANG);
 				break;
 			case THUNDER://thunder dissipates yin
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_YIN);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_YIN);
 				break;
 			case YIN://yin stops wind
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_WIND);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_WIND);
 				break;
 			case YANG://yang oppresses sha
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_SHA);
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_SHA);
 				break;
 			case SHA://sha presses thunder
-				damnerf=elb.getEntityAttribute(ModEntities.RESISTANCE_THUNDER);
-				break;
+				damnerf=elb.getEntityAttribute(TaoEntities.RESISTANCE_THUNDER);
+				break;*/
 			default:
-				damnerf=elb.getEntityAttribute(SharedMonsterAttributes.knockbackResistance);
+				damnerf=elb.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
 				break;
 			}
-			e.ammount*=(1+(damnerf.getAttributeValue()/100));
+			e.setAmount((float) (e.getAmount()*(1+(damnerf.getAttributeValue()/100))));
 		}
 
 	}
 
 	@SubscribeEvent
 	public void evade(LivingAttackEvent e) {
-		if (e.source.getEntity() != null) {
+		if (e.getSource().getEntity() != null) {
 
-			Entity sadist = e.source.getEntity();
+			Entity sadist = e.getSource().getEntity();
 
-			EntityLivingBase masochist = (EntityLivingBase) e.entityLiving;
+			EntityLivingBase masochist = (EntityLivingBase) e.getEntityLiving();
 			double sadistX = sadist.posX;
 			double sadistY = sadist.posY;
 			double sadistZ = sadist.posZ;
 			double masochistX = sadist.posX;
 			double masochistY = sadist.posY;
 			double masochistZ = sadist.posZ;
-			if (e.entityLiving instanceof EntityPlayer) {
+			if (masochist instanceof EntityPlayer) {
 				EntityPlayer player = (EntityPlayer) masochist;
 				int WGS = WuGongHandler.getThis(player).getLevel();
 				int QLS = XiuWeiHandler.getThis(player).getLevel();
-				Random r = player.worldObj.rand;
+				Random r = player.world.rand;
 				if (QLS > 20
 						&& r.nextInt(200) < QLS
 						&& PlayerResourceStalker.get(player).subtractValues(
 								WayofConfig.QiDWID, 40f)
-								&& (e.source.isProjectile()
-										|| e.source.getDamageType() == "mob" || e.source
+								&& (e.getSource().isProjectile()
+										|| e.getSource().getDamageType() == "mob" || e.getSource()
 										.getDamageType() == "player")) {
 					// System.out.println("trigger");
 					/*
@@ -409,14 +392,14 @@ public class TaoisticEventHandler {
 			}
 		}
 		// modify received damage here
-		if (e.entityLiving != null) {
-			EntityLivingBase masochist = e.entityLiving;
+		if (e.getEntityLiving() != null) {
+			EntityLivingBase masochist = e.getEntityLiving();
 			if (masochist instanceof EntityPlayer) {
 				EntityPlayer player = (EntityPlayer) masochist;
 				int WGS = WuGongHandler.getThis(player).getLevel();
 				// prevents falling to death
-				if (e.source == DamageSource.fall) {
-					float sky = e.ammount;
+				if (e.getSource() == DamageSource.FALL) {
+					float sky = e.getAmount();
 					// 255 damage is negated at lvl 150
 					if (sky - Math.min(1.8 * WGS, sky) <= 0) {
 						e.setCanceled(true);
@@ -425,17 +408,17 @@ public class TaoisticEventHandler {
 				}
 			}
 		}
-		if (e.ammount == 0)
+		if (e.getAmount() <= 0)
 			e.setCanceled(true);
 	}
 
 	@SubscribeEvent
 	public void onElectricHit(EntityStruckByLightningEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entity;
-			if (player.getCurrentEquippedItem() != null
-					&& player.getCurrentEquippedItem().getItem() == ModItems.SwordCherry) {
-				ItemStack itemstack = player.getCurrentEquippedItem();
+		if (event.getEntity() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getEntity();
+			if (player.getHeldItemMainhand() != null
+					&& player.getHeldItemMainhand().getItem() == TaoItems.SwordCherry) {
+				ItemStack itemstack = player.getHeldItemMainhand();
 				if (itemstack.hasTagCompound()) {
 					int nb = itemstack.getTagCompound().getInteger("hitcount");
 					if (nb < 9 && lcd == 0) {
@@ -446,12 +429,12 @@ public class TaoisticEventHandler {
 						itemstack.getTagCompound().setInteger("hitcount",
 								nb + 1);
 						lcd = 18000;
-					} else if (lcd == 0) {
-						player.destroyCurrentEquippedItem();
+					} else if (lcd == 0) {/*
+						
 						ChatComponentText component = new ChatComponentText(
 								"dude, you destroyed it!");
 						player.addChatComponentMessage(component);
-					}
+					*/}
 				} else {
 					itemstack.setTagCompound(new NBTTagCompound());
 					itemstack.getTagCompound().setInteger("hitcount", 1);
@@ -492,7 +475,7 @@ public class TaoisticEventHandler {
 	 */
 	@SubscribeEvent
 	public void whee(LivingJumpEvent e) {
-		EntityLivingBase l = e.entityLiving;
+		EntityLivingBase l = e.getEntityLiving();
 		// System.out.println("hi");
 		if (l instanceof EntityPlayer) {
 
@@ -513,8 +496,7 @@ public class TaoisticEventHandler {
 				;
 			buff += Math.min(QLLvl / 2000, 0.275f);
 			// System.out.println(buff);
-			buff /= Math.max(p.inventory.getTotalArmorValue(), 1F);
-			if (NeedyLittleThings.isWearingFullSet(p, ModItems.wushuPants))
+			if (NeedyLittleThings.isWearingFullSet(p, TaoItems.wushuPants))
 				buff *= 2;
 
 			p.motionY += buff;
@@ -526,24 +508,24 @@ public class TaoisticEventHandler {
 
 	@SubscribeEvent
 	public void ignoreStuff(LivingSetAttackTargetEvent e) {
-		if (e.target != null&&e.entity instanceof EntityLiving)
-			if (e.target.isPotionActive(WayofConfig.HidePotID)
-					&& e.entityLiving.func_94060_bK() != e.target) {
+		if (e.getTarget() != null&&e.getEntity() instanceof EntityLiving)
+			if (e.getTarget().isPotionActive(TaoisticPotions.Hide)
+					&& e.getEntityLiving().getAttackingEntity() != e.getTarget()) {
 
-				((EntityLiving) e.entity).setAttackTarget(null);
+				((EntityLiving) e.getEntity()).setAttackTarget(null);
 			}
 	}
 
 	@SubscribeEvent
 	public void rasengan(BreakSpeed e) {
-		e.newSpeed = Math.max(e.originalSpeed,
-				WuGongHandler.getThis(e.entityPlayer).getLevel() / 10);
+		e.setNewSpeed(Math.max(e.getOriginalSpeed(),
+				WuGongHandler.getThis(e.getEntityPlayer()).getLevel() / 10));
 	}
 
 	@SubscribeEvent
-	public void rasenganEnd(BreakEvent e) {
-		if (e.getPlayer().getHeldItem() == null
-				&& e.block.getMaterial() == Material.rock) {
+	public void rasenganEnd(BreakEvent e) {/*
+		if (e.getPlayer().getHeldItemMainhand() == null
+				&& e..getMaterial() == Material.rock) {
 			int lvl = WuGongHandler.getThis(e.getPlayer()).getLevel();
 			int buff = PlayerResourceStalker.get(e.getPlayer()).subtractValues(
 					WayofConfig.QiDWID,
@@ -562,10 +544,10 @@ public class TaoisticEventHandler {
 			}
 			// Area break goes here
 		}
-	}
+	*/}
 
 	@SubscribeEvent
-	public void breakSuccess(HarvestCheck e) {
+	public void breakSuccess(HarvestCheck e) {/*
 		EntityPlayer player = e.entityPlayer;
 		int WGS = WuGongHandler.getThis(player).getLevel();
 		Vec3 playerPos = Vec3.createVectorHelper(player.posX, player.posY,
@@ -580,10 +562,10 @@ public class TaoisticEventHandler {
 						mop.blockX, mop.blockY, mop.blockZ)) < (WGS / 16))e.success=true;
 			}
 		}
-	}
+	*/}
 
 	@SubscribeEvent
-	public void drops(HarvestDropsEvent e) {
+	public void drops(HarvestDropsEvent e) {/*
 		if (e.harvester != null) {
 			EntityPlayer player = e.harvester;
 			int lvl = WuGongHandler.getThis(player).getLevel();
@@ -600,22 +582,27 @@ public class TaoisticEventHandler {
 
 			}
 		}
-	}
+	*/}
 	
 	@SubscribeEvent
 	public void replaceDrop(EntityJoinWorldEvent e){
-		if(e.entity instanceof EntityItem){
-			if(((EntityItem)e.entity).getEntityItem()!=null
-					&&((EntityItem)e.entity).getEntityItem().getItem() instanceof GenericTaoistWeapon
-					&&!(e.entity instanceof EntityDroppedWeapon)){
-				EntityDroppedWeapon replace=new EntityDroppedWeapon(e.world,e.entity.posX,e.entity.posY,e.entity.posZ,((EntityItem)e.entity).getEntityItem(),e.world.rand.nextFloat()*90,e.world.rand.nextFloat()*90,e.world.rand.nextFloat()*90);
-				e.entity.setDead();
-				if(!e.world.isRemote){
+		if(e.getEntity() instanceof EntityItem){
+			if(((EntityItem)e.getEntity()).getEntityItem()!=null
+					&&((EntityItem)e.getEntity()).getEntityItem().getItem() instanceof GenericTaoistWeapon
+					&&!(e.getEntity() instanceof EntityDroppedWeapon)){
+				EntityDroppedWeapon replace=new EntityDroppedWeapon(e.getWorld(),e.getEntity().posX,e.getEntity().posY,e.getEntity().posZ,((EntityItem)e.getEntity()).getEntityItem(),e.getWorld().rand.nextFloat()*90,e.getWorld().rand.nextFloat()*90,e.getWorld().rand.nextFloat()*90);
+				e.getEntity().setDead();
+				if(!e.getWorld().isRemote){
 					//System.out.println("replacing");
-				e.world.spawnEntityInWorld(replace);
+				e.getWorld().spawnEntity(replace);
 				}
 				e.setCanceled(true);
 			}
 		}
+	}
+	
+	@SubscribeEvent
+	public void addLewt(LootTableLoadEvent e){
+		//if(e.getName()==loottablelist);
 	}
 }

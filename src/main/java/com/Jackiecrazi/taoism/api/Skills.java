@@ -17,7 +17,7 @@ public class Skills {
 	}
 
 	public static void writeit(EntityPlayer p, int f) {
-		String ekkamai = p.getHeldItem().getUnlocalizedName();
+		String ekkamai = p.getHeldItemMainhand().getUnlocalizedName();
 		int khrungthep = p.getEntityData().getInteger(ekkamai);
 		if (khrungthep < 1000) {
 			p.getEntityData().setInteger(ekkamai, khrungthep + f);
@@ -25,7 +25,7 @@ public class Skills {
 	}
 
 	public static int readit(EntityPlayer p, String ekkamai) {
-		ekkamai = p.getHeldItem().getUnlocalizedName();
+		ekkamai = p.getHeldItemMainhand().getUnlocalizedName();
 		int khrungthep = p.getEntityData().getInteger(ekkamai);
 		return khrungthep;
 	}

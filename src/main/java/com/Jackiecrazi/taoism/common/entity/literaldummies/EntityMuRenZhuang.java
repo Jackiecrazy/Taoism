@@ -9,7 +9,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 
 public class EntityMuRenZhuang extends Entity {
 	public int rotation;//0 south 1 east 2 north 3 west
@@ -62,7 +62,7 @@ public class EntityMuRenZhuang extends Entity {
 				dropItem(Items.stick, 5);
 				dropItem(Items.string, 2);
 			} else
-				dropItem(ModItems.muRenZhuang, 1);
+				dropItem(TaoItems.muRenZhuang, 1);
 
 		}
 		this.setDead();

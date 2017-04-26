@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import com.Jackiecrazi.taoism.api.allTheDamageTypes.DamageElemental;
 
 public class EntityElementalProjectile extends EntityThrowable {
-	//metal, wood, water, fire, earth, wind, thunder, yin, yang, sha
+	//metal, wood, water, fire, earth, ling, sha
 	//they will heal their respective elements and whatever they feed, and hurt more of what they don't.
 	private int element;
 	private double damage;

@@ -1,19 +1,19 @@
 package com.Jackiecrazi.taoism.networking;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.Arrays;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.Jackiecrazi.taoism.Taoism;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.EnumEquipmentType;
 import com.Jackiecrazi.taoism.common.taoistichandlers.PlayerEquipmentStalker;
-
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketSetInvContent implements IMessage {
 	private ItemStack is;

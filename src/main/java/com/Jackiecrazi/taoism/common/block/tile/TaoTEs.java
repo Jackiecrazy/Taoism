@@ -2,7 +2,7 @@ package com.Jackiecrazi.taoism.common.block.tile;
 import net.minecraft.block.Block;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-public final class ModTEs {
+public final class TaoTEs {
 	public static Block Altar;
     public static void init() {
         GameRegistry.registerTileEntity(TileAltar.class, "altar");

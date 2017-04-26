@@ -38,7 +38,7 @@ import com.Jackiecrazi.taoism.api.allTheInterfaces.IModularWeapon;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ISwingSpeed;
 import com.Jackiecrazi.taoism.api.allTheInterfaces.ISwingState;
 import com.Jackiecrazi.taoism.common.items.ItemWeaponPart;
-import com.Jackiecrazi.taoism.common.items.ModItems;
+import com.Jackiecrazi.taoism.common.items.TaoItems;
 import com.Jackiecrazi.taoism.common.items.resource.ItemResource;
 import com.Jackiecrazi.taoism.common.taoistichandlers.AnimationStalker;
 import com.Jackiecrazi.taoism.common.taoistichandlers.PlayerResourceStalker;
@@ -85,7 +85,7 @@ ISwingState, ISwingSpeed, ICustomRange, IElemental, IModularWeapon {// IUltimate
 		//String nam = getRealName(this.getUnlocalizedName());
 		if (!ListOfWeapons.contains(this))
 			ListOfWeapons.add(this);
-		if (tmat == ModItems.tawood)
+		if (tmat == TaoItems.tawood)
 			ListOfLoot.add(this);
 		setPointyBit(StaticRefs.DEFOFF);//edge
 		setParts(StaticRefs.DEFOFF,StaticRefs.GUARD,StaticRefs.HANDLE,StaticRefs.FANCY);//partnames
@@ -108,7 +108,7 @@ ISwingState, ISwingSpeed, ICustomRange, IElemental, IModularWeapon {// IUltimate
 		//String nam = getRealName(this.getUnlocalizedName());
 		if (!ListOfWeapons.contains(this))
 			ListOfWeapons.add(this);
-		if (tmat == ModItems.tawood)
+		if (tmat == TaoItems.tawood)
 			ListOfLoot.add(this);
 		setPointyBit(StaticRefs.DEFOFF);//edge
 		setParts(StaticRefs.DEFOFF,StaticRefs.HANDLE,StaticRefs.FANCY);//partnames
