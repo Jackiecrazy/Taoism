@@ -1,4 +1,4 @@
-package com.Jackiecrazi.taoism.api.zhenutils;
+package com.jackiecrazi.taoism.api.zhenutils;
 
 import java.util.HashMap;
 
@@ -6,7 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 
-import com.Jackiecrazi.taoism.api.TaoistPosition;
+import com.jackiecrazi.taoism.api.TaoistPosition;
 /**
  * Does something to the list of entities passed by the filter
  * @author Jackiecrazy

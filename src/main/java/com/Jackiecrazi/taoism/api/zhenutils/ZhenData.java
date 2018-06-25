@@ -1,4 +1,4 @@
-package com.Jackiecrazi.taoism.api.zhenutils;
+package com.jackiecrazi.taoism.api.zhenutils;
 
 public class ZhenData {
 private boolean shouldActivate;

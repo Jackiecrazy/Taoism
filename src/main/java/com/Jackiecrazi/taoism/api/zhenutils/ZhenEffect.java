@@ -1,10 +1,10 @@
-package com.Jackiecrazi.taoism.api.zhenutils;
+package com.jackiecrazi.taoism.api.zhenutils;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-import com.Jackiecrazi.taoism.api.TaoistPosition;
-import com.Jackiecrazi.taoism.common.block.tile.TileZhenJiao;
+import com.jackiecrazi.taoism.api.TaoistPosition;
+import com.jackiecrazi.taoism.common.tile.TileZhenJiao;
 
 public class ZhenEffect {
 	private ZhenEffectShape zes;
@@ -12,19 +12,18 @@ public class ZhenEffect {
 	private ZhenEffectOperation zeo;
 	private ZhenEffectModifier zem;
 	private int cost;
-	public ZhenEffect(ZhenEffectShape s, ZhenEffectFilter f,
-			ZhenEffectOperation o, ZhenEffectModifier m) {
+
+	public ZhenEffect(ZhenEffectShape s, ZhenEffectFilter f, ZhenEffectOperation o, ZhenEffectModifier m) {
 		zes = s;
 		zef = f;
 		zeo = o;
 		zem = m;
-		if(o.getPrice()>0)
-		cost=(s.getPrice()+f.getPrice())*(o.getPrice()+m.getPrice());
-		else
-		cost=(o.getPrice()*m.getPrice())/(s.getPrice()+f.getPrice());
+		if (o.getPrice() > 0) cost = (s.getPrice() + f.getPrice()) * (o.getPrice() + m.getPrice());
+		else cost = (o.getPrice() * m.getPrice()) / (s.getPrice() + f.getPrice());
 	}
-	public boolean passesNullCheck(){
-		return zes!=null&&zef!=null&&zeo!=null&&zem!=null;
+
+	public boolean passesNullCheck() {
+		return zes != null && zef != null && zeo != null && zem != null;
 	}
 
 	public void performEffect(World w, TileZhenJiao source) {
@@ -43,23 +42,20 @@ public class ZhenEffect {
 			break;
 		}
 		if (entity) {
-			Entity[] target=zes.performEffectEntity(w, new TaoistPosition(source.getPos(),source.getWorld()), source.getEffectStart().getX(),
-					source.getEffectStart().getY(), source.getEffectStart().getZ(), source
-							.getEffectEnd().getX(), source.getEffectEnd().getY(),
-					source.getEffectEnd().getZ());
-			for(int ent=0;ent<target.length;ent++)
-			if(!zef.passesFilter(target[ent]))target[ent]=null;
+			Entity[] target = zes.performEffectEntity(w, new TaoistPosition(source.getPos()), source.getEffectStart().getX(), source.getEffectStart().getY(), source.getEffectStart().getZ(), source.getEffectEnd().getX(), source.getEffectEnd().getY(), source.getEffectEnd().getZ());
+			for (int ent = 0; ent < target.length; ent++)
+				if (!zef.passesFilter(target[ent])) target[ent] = null;
 			zeo.performEffect(source, target, zem);
-			
+
 		} else {
-			TaoistPosition[] target=zes.performEffectBlock(w, new TaoistPosition(source.getPos(),source.getWorld()), source.getEffectStart().getX(),
-					source.getEffectStart().getY(), source.getEffectStart().getZ(), source
-							.getEffectEnd().getX(), source.getEffectEnd().getY(),
-					source.getEffectEnd().getZ());
-			for(int ent=0;ent<target.length;ent++)
-			if(!zef.passesFilter(source.getWorld(), target[ent]))target[ent]=null;
+			TaoistPosition[] target = zes.performEffectBlock(w, new TaoistPosition(source.getPos()), source.getEffectStart().getX(), source.getEffectStart().getY(), source.getEffectStart().getZ(), source.getEffectEnd().getX(), source.getEffectEnd().getY(), source.getEffectEnd().getZ());
+			for (int ent = 0; ent < target.length; ent++)
+				if (!zef.passesFilter(source.getWorld(), target[ent])) target[ent] = null;
 			zeo.performEffect(source, target, zem);
 		}
 	}
-	public int getCost(){return cost;}
+
+	public int getCost() {
+		return cost;
+	}
 }

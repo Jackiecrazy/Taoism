@@ -1,4 +1,4 @@
-package com.Jackiecrazi.taoism.api;
+package com.jackiecrazi.taoism.api;
 
 import java.util.HashMap;
 

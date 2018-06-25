@@ -1,4 +1,4 @@
-package com.Jackiecrazi.taoism.api.zhenutils;
+package com.jackiecrazi.taoism.api.zhenutils;
 
 import java.util.HashMap;
 
@@ -6,7 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-import com.Jackiecrazi.taoism.api.TaoistPosition;
+import com.jackiecrazi.taoism.api.TaoistPosition;
 
 /**
  * Determines the shape of the zhen, with zhenqi as corners. Available shapes

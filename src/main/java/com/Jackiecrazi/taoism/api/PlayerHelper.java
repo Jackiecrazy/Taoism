@@ -1,34 +1,13 @@
-package com.Jackiecrazi.taoism.api;
+package com.jackiecrazi.taoism.api;
 
-import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class PlayerHelper {
-
-	public static boolean decrease(int i, EntityPlayer player) {
-		boolean didit = false;
-		if(player.capabilities.isCreativeMode)return true;
-		if (player.getHeldItemMainhand() != null) {
-			ItemStack playerItem = player.getHeldItemMainhand();
-			int jack = playerItem.getCount();
-			if (jack > i) {
-				playerItem.setCount(playerItem.getCount()-i);
-				didit = true;
-			} else if (jack == i) {
-				player.setHeldItem(player.getActiveHand(), null);
-				didit = true;
-			}
-			
-		}
-		return didit;
-	}
 
 	public static String getUsernameFromPlayer(EntityPlayer player)
     {
@@ -40,13 +19,8 @@ public class PlayerHelper {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
             return null;
 
-        List<EntityPlayerMP> allPlayers = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers();
-        for (EntityPlayerMP player : allPlayers) {
-            if (player.getDisplayNameString()==username) {
-                return player;
-            }
-        }
-        return null;
+       return FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUsername(username);
+       
     }
 
     public static EntityPlayer getPlayerFromUUID(String uuid)

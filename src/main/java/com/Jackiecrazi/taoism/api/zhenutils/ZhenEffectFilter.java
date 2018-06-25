@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.Jackiecrazi.taoism.api.zhenutils;
+package com.jackiecrazi.taoism.api.zhenutils;
 
 import java.util.HashMap;
 
@@ -10,10 +10,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import com.Jackiecrazi.taoism.api.TaoistPosition;
+import com.jackiecrazi.taoism.api.TaoistPosition;
 
 /**
  * Filters the list of blocks or entities for specific ones. Essentially a
@@ -147,7 +146,7 @@ public class ZhenEffectFilter {
 	public boolean passesFilter(World w, TaoistPosition tp){
 		boolean ret=true;
 		if(blockFilter!=null){
-			Block b=w.getBlockState(new BlockPos(tp.getX(), tp.getY(), tp.getZ())).getBlock();
+			Block b=w.getBlockState(tp.toBlockPos()).getBlock();
 			if(blacklist){
 				if(b==blockFilter)ret=false;
 			}

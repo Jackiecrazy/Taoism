@@ -1,4 +1,4 @@
-package com.Jackiecrazi.taoism.api.allTheInterfaces;
+package com.jackiecrazi.taoism.api.alltheinterfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
