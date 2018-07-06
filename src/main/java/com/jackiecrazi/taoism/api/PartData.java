@@ -1,9 +1,11 @@
 package com.jackiecrazi.taoism.api;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+
+import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.config.MaterialsConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
-
-import net.minecraft.nbt.NBTTagCompound;
 
 public class PartData {
 	private String oredict, part;
@@ -48,7 +50,7 @@ public class PartData {
 		return part+" number "+damage+" made of "+oredict;
 	}
 	
-	public int getDam(){
+	public int getOrdinal(){
 		return damage;
 	}
 	
@@ -70,5 +72,16 @@ public class PartData {
 		}catch(Exception e){
 			return false;
 		}
+	}
+	/**
+	 * creates a dummy representation of this partdata
+	 */
+	public ItemStack toStack(){
+		ItemStack ret= new ItemStack(TaoItems.dummy);
+		ret.setTagCompound(new NBTTagCompound());
+		ret.getTagCompound().setString("dict", oredict);
+		ret.getTagCompound().setString("part", part);
+		ret.getTagCompound().setInteger("dam", damage);
+		return ret;
 	}
 }

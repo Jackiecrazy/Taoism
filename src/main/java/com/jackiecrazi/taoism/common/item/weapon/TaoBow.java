@@ -84,7 +84,7 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		//TODO list stats like draw strength and durability
 		for (PartData a : getParts(stack).values()) {//so this is now an empty list eh
-			if (a != null && a.getMat() != null) tooltip.add(a.getMat() + " " + TaoConfigs.bowc.lookup(a.getPart(), a.getDam()).getName());
+			if (a != null && a.getMat() != null) tooltip.add(a.getMat() + " " + TaoConfigs.bowc.lookup(a.getPart(), a.getOrdinal()).getName());
 			/*else {
 				System.out.println(a.getDam());
 			}*/
@@ -216,7 +216,7 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 	public boolean isValidAddition(ItemStack is, String s, PartData pd) {
 
 		ArrayList<String> perks = new ArrayList<String>();
-		WeaponStatWrapper wsw = TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam());
+		WeaponStatWrapper wsw = TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal());
 		if (wsw == null) {
 			//System.out.println("proceeding");
 			return false;//can throw null
@@ -224,8 +224,8 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		//System.out.println(wsw.getName());
 		for (PartData p : getParts(is).values())
 			if (p != null) {
-				if (TaoConfigs.bowc.lookup(p.getPart(), p.getDam()) != null) {
-					WeaponStatWrapper w = TaoConfigs.bowc.lookup(p.getPart(), p.getDam());
+				if (TaoConfigs.bowc.lookup(p.getPart(), p.getOrdinal()) != null) {
+					WeaponStatWrapper w = TaoConfigs.bowc.lookup(p.getPart(), p.getOrdinal());
 					for (WeaponPerk wp : w.getPerks())
 						if (wp != null) perks.add(wp.name);
 				}
@@ -309,13 +309,13 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		for (String s : getPartNames(is)) {
 			if (getPart(is, s) != null) {
 				PartData pd = getPart(is, s);
-				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-					System.out.println(TaoConfigs.bowc.lookup(pd.getPart(),pd.getDam()));
+				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
+					System.out.println(TaoConfigs.bowc.lookup(pd.getPart(),pd.getOrdinal()));
 					//System.out.println(MaterialsConfig.findMat(pd.getMat()));
 
 					continue;
 				}
-				ret += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.arrowSpeed;
+				ret += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.arrowSpeed;
 				numofparts++;
 			} else System.out.println("null part");
 		}
@@ -330,24 +330,24 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		for (String s : getPartNames(is)) {
 			if (getPart(is, s) != null) {
 				PartData pd = getPart(is, s);
-				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
+				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
 					//System.out.println(TaoConfigs.bowc.lookup(pd.getDam()));
 					//System.out.println(MaterialsConfig.findMat(pd.getMat()));
 
 					continue;
 				}
-				ret[0] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
-				ret[1] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
+				ret[0] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
+				ret[1] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
 				//dur
-				ret[2] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
+				ret[2] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
 				//ran
-				ret[3] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getRange();
+				ret[3] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getRange();
 				//kin moku sui hi do
-				ret[4] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
-				ret[5] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
-				ret[6] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
-				ret[7] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
-				ret[8] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
+				ret[4] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
+				ret[5] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
+				ret[6] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
+				ret[7] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
+				ret[8] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
 				//(part damage modifier * material damage)/((1/(part attack time modifier*material attack time)))
 				numofparts++;
 			} else System.out.println(s + " is a null part");
@@ -364,24 +364,24 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		for (String s : getPartNames(is)) {
 			if (getPart(is, s) != null) {
 				PartData pd = getPart(is, s);
-				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-					System.out.println(TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()));
+				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
+					System.out.println(TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()));
 					System.out.println(MaterialsConfig.findMat(pd.getMat()));
 
 					continue;
 				}
-				ret[0] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
-				ret[1] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
+				ret[0] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
+				ret[1] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
 				//dur
-				ret[2] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
+				ret[2] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
 				//ran
-				ret[3] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getRange();
+				ret[3] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getRange();
 				//kin moku sui hi do
-				ret[4] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
-				ret[5] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
-				ret[6] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
-				ret[7] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
-				ret[8] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
+				ret[4] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
+				ret[5] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
+				ret[6] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
+				ret[7] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
+				ret[8] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
 				//(part damage modifier * material damage)/((1/(part attack time modifier*material attack time)))
 				numofparts++;
 			} else System.out.println("null part");
@@ -465,12 +465,12 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		String s = StaticRefs.STAVE;
 		if (getPart(is, s) != null) {
 			PartData pd = getPart(is, s);
-			if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
+			if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
 				System.out.println("null stave like seriously this shouldn't even exist");
 			}
 			//System.out.println(TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()));
 			//System.out.println(MaterialsConfig.findMat(pd.getMat()));//null!
-			ret = TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.drawSpeed;
+			ret = TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.drawSpeed;
 			//System.out.println(s + "   "+TaoConfigs.bowc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).mass);
 		} else System.out.println("null part like seriously this shouldn't even exist");
 		//System.out.println(""+ret);

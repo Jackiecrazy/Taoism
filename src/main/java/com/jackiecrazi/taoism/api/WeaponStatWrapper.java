@@ -13,15 +13,15 @@ public class WeaponStatWrapper {
 	//pommel is a nice place to put on butt spike, chains, round pommel, crescent edge (for long only)
 	//TODO add some purely cosmetic variations on each part for the fashion souls look. They would be the exact same stat-wise
 	//hierarchy: first two bits to store where it goes on, the rest to denote it
-	private int cost, dtype;
-	private String name;
+	private int cost, dtype, ordinal;
+	private String name, classification;
 	private WeaponPerk[] behaviour;
 	private String[] whitelist=new String[0],blacklist=new String[0];
 	private float range, speed, damage, durabilityMultiplier,
 			elementalMultiplier = 1f;
 	private MaterialType type;
 
-	public WeaponStatWrapper(MaterialType type, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
+	public WeaponStatWrapper(String classify, int order,MaterialType type, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
 		this.name = nam;
 		this.cost = cost;
 		this.range = range;
@@ -32,6 +32,8 @@ public class WeaponStatWrapper {
 		this.type=type;
 		elementalMultiplier = elem;
 		behaviour = wb;
+		classification=classify;
+		ordinal=order;
 	}
 
 	public String[] getWhitelist() {
@@ -161,5 +163,12 @@ public class WeaponStatWrapper {
 		System.out.println(this.name+" is "+this.type);
 		return this.type==msw.type;
 	}
+
+	public String getClassification() {
+		return classification;
+	}
 	
+	public int getOrdinal() {
+		return ordinal;
+	}
 }

@@ -88,6 +88,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		this.setUnlocalizedName("weapon");
 		this.setRegistryName("taoweapon");
 		this.setCreativeTab(Taoism.tabWea);
+		this.setFull3D();
 		this.addPropertyOverride(new ResourceLocation("pull"), new IItemPropertyGetter() {
 
 			@Override
@@ -109,7 +110,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		for (PartData a : getParts(stack).values()) {
 			try {
-				if (a != null && a.getMat() != null) tooltip.add(a.getMat() + " " + TaoConfigs.weapc.lookup(a.getPart(), a.getDam()).getName());
+				if (a != null && a.getMat() != null) tooltip.add(a.getMat() + " " + TaoConfigs.weapc.lookup(a.getPart(), a.getOrdinal()).getName());
 			} catch (Exception e) {
 
 			}
@@ -150,7 +151,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 
 	@Override
 	public float getHorizontalRange(EntityPlayer p, ItemStack is) {
-		return TaoConfigs.weapc.lookup(StaticRefs.GUARD, getParts(is).get(StaticRefs.GUARD).getDam()).getRange();
+		return TaoConfigs.weapc.lookup(StaticRefs.GUARD, getParts(is).get(StaticRefs.GUARD).getOrdinal()).getRange();
 	}
 
 	public int getItemEnchantability(ItemStack is)
@@ -174,9 +175,6 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return new ArrayList<String>(Arrays.asList(StaticRefs.weaponparts));
 	}
 
-	/**
-	 * a version that'll always return *something* can be found at getPart()
-	 */
 	@Nullable
 	@Override
 	public HashMap<String, PartData> getParts(ItemStack is) {
@@ -192,7 +190,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public float getReach(EntityPlayer p, ItemStack is) {
 		float reach=-4F;
 		for(PartData pd:getParts(is).values()){
-			reach+=TaoConfigs.weapc.lookup(pd.getPart(), pd.getDam()).getRange();
+			reach+=TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal()).getRange();
 		}
 		return reach;
 	}
@@ -219,7 +217,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public boolean isValidAddition(ItemStack is, String s, PartData pd) {
 		//check if the pd actually works
 		ArrayList<String> perks = new ArrayList<String>();
-		WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getDam());
+		WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
 		if (wsw == null) {
 			//System.out.println("proceeding");
 			return false;//can throw null
@@ -231,8 +229,8 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 			if (p != null) {
 				//System.out.println(p.toString());
 				if (p.isValid()) {
-					if (TaoConfigs.weapc.lookup(p.getPart(), p.getDam()) != null) {
-						WeaponStatWrapper w = TaoConfigs.weapc.lookup(p.getPart(), p.getDam());
+					if (TaoConfigs.weapc.lookup(p.getPart(), p.getOrdinal()) != null) {
+						WeaponStatWrapper w = TaoConfigs.weapc.lookup(p.getPart(), p.getOrdinal());
 						for (WeaponPerk wp : w.getPerks())
 							if (wp != null) perks.add(wp.name);
 					}
@@ -347,9 +345,9 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		int numofparts = 0;
 		for (PartData pd : getParts(is).values()) {
 
-			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getDam());
+			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
 			if (wsw == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-				System.out.println(TaoConfigs.weapc.lookup(pd.getPart(),pd.getDam()));
+				System.out.println(TaoConfigs.weapc.lookup(pd.getPart(),pd.getOrdinal()));
 				System.out.println(MaterialsConfig.findMat(pd.getMat()));
 
 				continue;

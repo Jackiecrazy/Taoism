@@ -1,7 +1,11 @@
 package com.jackiecrazi.taoism.client;
 
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -34,17 +38,36 @@ public class ClientEvents {
 
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
-			
-			ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/"+ a.getName().toLowerCase().replace(" ", "")));
-		}
 
+			ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
+			ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
+		}
+		//ModelLoader.setCustomModelResourceLocation(TaoItems.dummy, 0, new ModelResourceLocation(Taoism.MODID + ":parts/part", "inventory"));
+		//vvvv not being called???
+		//System.out.println("eyy");
+		ModelLoader.setCustomMeshDefinition(TaoItems.dummy, new ItemMeshDefinition() {
+
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				if(!stack.hasTagCompound())return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
+				NBTTagCompound ntc = stack.getTagCompound();
+				//System.out.println(Taoism.MODID + ":parts/" +TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
+				return new ModelResourceLocation(Taoism.MODID + ":parts/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""),"inventory");
+				
+			}
+
+		});
 	}
 
 	@SubscribeEvent
-	public static void modelDaWeaponz(ModelBakeEvent e) {
+	public static void modelTheWeapons(ModelBakeEvent event) {
 		//renderitem has an interesting method
-
-		e.getModelRegistry().putObject(new ModelResourceLocation(Taoism.MODID + ":taoweapon", "inventory"), new ModelWeapon());
+		ModelResourceLocation mrl=new ModelResourceLocation(Taoism.MODID + ":taoweapon", "inventory");
+		Object object =  event.getModelRegistry().getObject(mrl);
+	    if (object instanceof IBakedModel) {
+	      IBakedModel existingModel = (IBakedModel)object;
+	      event.getModelRegistry().putObject(mrl, new ModelWeapon(existingModel));
+	    }
 		Taoism.logger.debug("registered the weapon models");
 	}
 }

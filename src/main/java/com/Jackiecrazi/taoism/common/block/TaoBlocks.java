@@ -15,12 +15,12 @@ public class TaoBlocks {
 	public static ItemBlock workstationI=(ItemBlock) new ItemBlock(workstation).setRegistryName(workstation.getRegistryName());
 	@SubscribeEvent
 	public static void init(RegistryEvent.Register<Block> event){
-		event.getRegistry().register(workstation);
-		GameRegistry.registerTileEntity(TileWorkstation.class, "taoworkstation");
+		//event.getRegistry().register(workstation);
+		//GameRegistry.registerTileEntity(TileWorkstation.class, "taoworkstation");
 	}
 	@SubscribeEvent
 	public static void initI(RegistryEvent.Register<Item> event){
-		event.getRegistry().register(workstationI);
+		//event.getRegistry().register(workstationI);
 		
 	}
 	

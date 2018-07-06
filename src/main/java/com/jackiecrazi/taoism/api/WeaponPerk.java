@@ -69,6 +69,8 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk CLEAVE = new WeaponPerk("cleave") {
 		//damage armor?
 	};
+	public static final WeaponPerk HORIZONTAL = new WeaponPerk("horizontal") {
+	};
 	public static final WeaponPerk SHORT = new WeaponPerk("short") {
 	};
 	public static final WeaponPerk MEDIUM = new WeaponPerk("medium") {
