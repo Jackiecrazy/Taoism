@@ -6,4 +6,5 @@ import net.minecraft.item.ItemStack;
 public interface ICustomRange {
 public float getReach(EntityPlayer p, ItemStack is);
 public float getHorizontalRange(EntityPlayer p, ItemStack is);
+
 }

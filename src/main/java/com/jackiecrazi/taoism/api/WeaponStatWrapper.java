@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.api;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 
 public class WeaponStatWrapper {
 	//head goes on the tip of the stick 
@@ -15,13 +16,17 @@ public class WeaponStatWrapper {
 	//hierarchy: first two bits to store where it goes on, the rest to denote it
 	private int cost, dtype, ordinal;
 	private String name, classification;
-	private WeaponPerk[] behaviour;
-	private String[] whitelist=new String[0],blacklist=new String[0];
+	private WeaponPerk[] behaviour = new WeaponPerk[0];
+	/**
+	 * usually used to determine what handles accept it. OR-gated.
+	 */
+	private String[] whitelist = new String[0];
+	private String[] blacklist = new String[0];
 	private float range, speed, damage, durabilityMultiplier,
 			elementalMultiplier = 1f;
 	private MaterialType type;
 
-	public WeaponStatWrapper(String classify, int order,MaterialType type, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
+	public WeaponStatWrapper(String classify, int order, MaterialType type, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
 		this.name = nam;
 		this.cost = cost;
 		this.range = range;
@@ -29,13 +34,18 @@ public class WeaponStatWrapper {
 		this.damage = damage;
 		this.durabilityMultiplier = durmultiplier;
 		this.dtype = damageType;
-		this.type=type;
+		this.type = type;
 		elementalMultiplier = elem;
 		behaviour = wb;
-		classification=classify;
-		ordinal=order;
+		classification = classify;
+		ordinal = order;
 	}
 
+	/**
+	 * OR not AND
+	 * 
+	 * @return
+	 */
 	public String[] getWhitelist() {
 		return whitelist;
 	}
@@ -44,36 +54,29 @@ public class WeaponStatWrapper {
 		this.whitelist = whitelist;
 		return this;
 	}
-
+	
 	public String[] getBlacklist() {
 		return blacklist;
 	}
 
 	public WeaponStatWrapper setBlacklist(String... blacklist) {
-		if (blacklist.length == 1 && blacklist[0].equals(" ")){
-			return this;
-		}
 		this.blacklist = blacklist;
 		return this;
 	}
-	
+
 	public WeaponStatWrapper setBehaviour(WeaponPerk... b) {
-		if (b.length == 1 && b[0].equals(" ")){
-			return this;
-		}
-		behaviour=b;
+		if (b.length == 1 && b[0].equals(" ")) { return this; }
+		behaviour = b;
 		return this;
 	}
-	
+
 	public WeaponStatWrapper setBehaviour(String... b) {
-		if (b.length == 1 && b[0].equals(" ")){
-			return this;
+		if (b.length == 1 && b[0].equals(" ")) { return this; }
+		WeaponPerk[] wp = new WeaponPerk[b.length];
+		for (int a = 0; a < b.length; a++) {
+			wp[a] = WeaponPerk.lookUp(b[a]);
 		}
-		WeaponPerk[] wp=new WeaponPerk[b.length];
-		for(int a=0;a<b.length;a++){
-			wp[a]=WeaponPerk.lookUp(b[a]);
-		}
-		behaviour=wp;
+		behaviour = wp;
 		return this;
 	}
 
@@ -157,17 +160,51 @@ public class WeaponStatWrapper {
 	public MaterialType matType() {
 		return type;
 	}
-	
-	public boolean accepts(MaterialStatWrapper msw){
-		System.out.println(msw.name+" is "+msw.type);
-		System.out.println(this.name+" is "+this.type);
-		return this.type==msw.type;
+
+	public boolean accepts(MaterialStatWrapper msw) {
+		System.out.println(msw.name + " is " + msw.type);
+		System.out.println(this.name + " is " + this.type);
+		return this.type == msw.type;
+	}
+
+	/*private HandlePerk getHP() {
+		for (WeaponPerk wp : getPerks()) {
+			if (wp instanceof HandlePerk) return (HandlePerk) wp;
+		}
+		return null;
+	}*/
+
+	public boolean acceptsHandle(HandlePerk wp) {
+		if (this.isHandle()) return true;//getHP().equals(wp);
+		for (String s : getWhitelist()) {
+			if (wp.name.equals(s)) return true;
+		}
+		return false;
+	}
+
+	public boolean acceptsHandle(WeaponStatWrapper wsw) {
+		if (this.isHandle()) return true;
+		for (WeaponPerk wp : wsw.behaviour) {
+			if (wp instanceof HandlePerk){
+				System.out.println("aaaaa");
+				return acceptsHandle((HandlePerk) wp);
+			}
+		}
+		return false;
+	}
+
+	public boolean isHandle() {
+		for (WeaponPerk wp : getPerks()) {
+
+			if (wp != null && WeaponPerk.REGISTEREDHANDLES.containsKey(wp.name)) return true;
+		}
+		return false;
 	}
 
 	public String getClassification() {
 		return classification;
 	}
-	
+
 	public int getOrdinal() {
 		return ordinal;
 	}

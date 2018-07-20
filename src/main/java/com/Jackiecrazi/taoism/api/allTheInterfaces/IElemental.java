@@ -4,9 +4,13 @@
 package com.jackiecrazi.taoism.api.alltheinterfaces;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextFormatting;
 
 public interface IElemental {
 	public static final int NUMOFELEM=5;
+	public static final String[] ELEMS={"metal","wood","water","fire","earth"};
+	public static final TextFormatting[] ELEMC={TextFormatting.WHITE,TextFormatting.GREEN,TextFormatting.BLUE,TextFormatting.RED,TextFormatting.YELLOW};
+	
 	/**
 	 * @return a list of elemental affinities, in the order metal, wood, water, fire, earth
 	 */

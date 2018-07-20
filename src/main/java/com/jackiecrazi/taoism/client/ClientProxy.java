@@ -2,12 +2,14 @@ package com.jackiecrazi.taoism.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartData;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.item.TaoItems;
@@ -29,8 +31,7 @@ public class ClientProxy extends CommonProxy {
 
 	}
 
-	@SubscribeEvent
-	public void init(ColorHandlerEvent event) {
+	public void init(FMLInitializationEvent event) {
 		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new IItemColor() {
 
 			@Override
@@ -39,7 +40,10 @@ public class ClientProxy extends CommonProxy {
 				TaoWeapon tw = (TaoWeapon) stack.getItem();
 				PartData p=tw.getPart(stack, TaoConfigs.weapc.lookupType(tintIndex));
 				if (p != null&&MaterialsConfig.findMat(p.getMat())!=null) return MaterialsConfig.findMat(p.getMat()).msw.color.getRGB();
-				else return -1;
+				else{
+					//System.out.println("lel");
+					return -1;
+				}
 			}
 
 		}, TaoItems.weap);
@@ -55,7 +59,11 @@ public class ClientProxy extends CommonProxy {
 			}
 
 		}, TaoItems.dummy);
-		
+		Taoism.logger.debug("gave color to the masses");
 	}
-
+	public EntityPlayerMP getPlayerEntityFromContext(MessageContext ctx) 
+    {
+    	return (EntityPlayerMP) (ctx.side.isClient() ? Minecraft.getMinecraft().player : super.getPlayerEntityFromContext(ctx));
+    }
+	
 }

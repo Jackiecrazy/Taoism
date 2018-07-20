@@ -68,7 +68,8 @@ public class PartData {
 	 */
 	public boolean isValid(){
 		try{
-			return TaoConfigs.weapc.lookup(part, damage).matType()==MaterialsConfig.findMat(oredict).msw.type;
+			return TaoConfigs.weapc.reverseLookupType(part)!=-1&&
+					TaoConfigs.weapc.lookup(part, damage).matType()==MaterialsConfig.findMat(oredict).msw.type;
 		}catch(Exception e){
 			return false;
 		}
@@ -83,5 +84,13 @@ public class PartData {
 		ret.getTagCompound().setString("part", part);
 		ret.getTagCompound().setInteger("dam", damage);
 		return ret;
+	}
+	
+	public WeaponStatWrapper getWeaponSW(){
+		return TaoConfigs.weapc.lookup(this);
+	}
+	
+	public MaterialStatWrapper getMatSW(){
+		return MaterialsConfig.findMat(getMat()).msw;
 	}
 }

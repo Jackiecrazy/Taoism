@@ -2,20 +2,28 @@ package com.jackiecrazi.taoism.api;
 
 import java.util.HashMap;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.MathHelper;
 
-import com.jackiecrazi.taoism.TaoPotions;
+import com.jackiecrazi.taoism.potions.TaoPotions;
 
 public abstract class WeaponPerk {
 	public static final HashMap<String, WeaponPerk> REGISTERED = new HashMap<String, WeaponPerk>();
+	public static final HashMap<String, HandlePerk> REGISTEREDHANDLES = new HashMap<String, HandlePerk>();
+	
+	@Nullable
+	public static WeaponPerk get(String s){
+		return REGISTERED.get(s);
+	}
 	public static final WeaponPerk BLEED = new WeaponPerk("bleed") {
 
 		@Override
-		public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 			if (uke.getActivePotionEffect(TaoPotions.Bleed) == null) uke.addPotionEffect(new PotionEffect(TaoPotions.Bleed, 80, 0));
 			else uke.addPotionEffect(new PotionEffect(TaoPotions.Bleed, uke.getActivePotionEffect(TaoPotions.Bleed).getDuration(), uke.getActivePotionEffect(TaoPotions.Bleed).getAmplifier() + 1));
 		}
@@ -24,7 +32,7 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk DAZE = new WeaponPerk("daze") {
 
 		@Override
-		public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 			uke.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 10, 0));
 		}
 
@@ -32,7 +40,7 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk HOOK = new WeaponPerk("hook") {
 
 		@Override
-		public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 			uke.knockBack(seme, 1F, (double) -MathHelper.sin(seme.rotationYaw * 0.017453292F), (double) (MathHelper.cos(seme.rotationYaw * 0.017453292F)));
 		}
 
@@ -40,7 +48,7 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk PARRY = new WeaponPerk("parry") {
 
 		@Override
-		public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 			//what do?
 		}
 
@@ -57,25 +65,21 @@ public abstract class WeaponPerk {
 	};
 	public static final WeaponPerk CONTROL = new WeaponPerk("control") {
 	};
-	public static final WeaponPerk CHAIN = new WeaponPerk("chain") {
-		@Override
-		public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
-			//invoke your own capability
-		}
-	};
 	public static final WeaponPerk FEAR = new WeaponPerk("fear") {
 		//????
 	};
 	public static final WeaponPerk CLEAVE = new WeaponPerk("cleave") {
 		//damage armor?
 	};
-	public static final WeaponPerk HORIZONTAL = new WeaponPerk("horizontal") {
+	public static final HandlePerk CHAIN = new HandlePerk("chain") {
 	};
-	public static final WeaponPerk SHORT = new WeaponPerk("short") {
+	public static final HandlePerk HORIZONTAL = new HandlePerk("horizontal") {
 	};
-	public static final WeaponPerk MEDIUM = new WeaponPerk("medium") {
+	public static final HandlePerk SHORT = new HandlePerk("short") {
 	};
-	public static final WeaponPerk LONG = new WeaponPerk("long") {
+	public static final HandlePerk MEDIUM = new HandlePerk("medium") {
+	};
+	public static final HandlePerk LONG = new HandlePerk("long") {
 	};
 	public final String name;
 	public static WeaponPerk lookUp(String s){
@@ -87,7 +91,15 @@ public abstract class WeaponPerk {
 		this.name=name;
 	}
 
-	public void onSwing(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+	public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 
+	}
+	public static abstract class HandlePerk extends WeaponPerk{
+
+		public HandlePerk(String name) {
+			super(name);
+			REGISTEREDHANDLES.put(name, this);
+		}
+		
 	}
 }

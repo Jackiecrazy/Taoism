@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -37,103 +38,107 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.oredict.OreDictionary;
 
+import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
+
 public class NeedyLittleThings {
 	public final static UUID MODIFIER_UUID = UUID.fromString("294093da-54f0-4c1b-9dbb-13b77534a84c");
 
 
-	public static void attackWithDebuff(Entity targetEntity, EntityPlayer player, float debuff) {
-
+	public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player) {
         if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
         if (targetEntity.canBeAttackedWithItem())
         {
             if (!targetEntity.hitByEntity(player))
             {
-                float f = (float)player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-                float f1;
+            	ItemStack is=player.getHeldItemMainhand();
+            	ICustomRange tw=is.getItem() instanceof ICustomRange?(ICustomRange)is.getItem():null;
+            	
+                float attack = (float)player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+                float extraAttack;
 
                 if (targetEntity instanceof EntityLivingBase)
                 {
-                    f1 = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), ((EntityLivingBase)targetEntity).getCreatureAttribute());
+                    extraAttack = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), ((EntityLivingBase)targetEntity).getCreatureAttribute());
                 }
                 else
                 {
-                    f1 = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
+                    extraAttack = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
                 }
 
-                float f2 = player.getCooledAttackStrength(0.5F);
-                f = f * (0.2F + f2 * f2 * 0.8F);
-                f1 = f1 * f2;
+                float spamDebuff = player.getCooledAttackStrength(0.5F);
+                attack = attack * (0.2F + spamDebuff * spamDebuff * 0.8F);
+                extraAttack = extraAttack * spamDebuff;
                 player.resetCooldown();
 
-                if (f > 0.0F || f1 > 0.0F)
+                if (attack > 0.0F || extraAttack > 0.0F)
                 {
-                    boolean flag = f2 > 0.9F;
-                    boolean flag1 = false;
-                    int i = 0;
-                    i = i + EnchantmentHelper.getKnockbackModifier(player);
+                    boolean charged = spamDebuff > 0.9F;
+                    boolean sprinting = false;
+                    int knockback = 0;
+                    knockback = knockback + EnchantmentHelper.getKnockbackModifier(player);
 
-                    if (player.isSprinting() && flag)
+                    if (player.isSprinting() && charged)
                     {
                         player.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, player.getSoundCategory(), 1.0F, 1.0F);
-                        ++i;
-                        flag1 = true;
+                        ++knockback;
+                        sprinting = true;
                     }
 
-                    boolean flag2 = flag && player.fallDistance > 0.0F && !player.onGround && !player.isOnLadder() && !player.isInWater() && !player.isPotionActive(MobEffects.BLINDNESS) && !player.isRiding() && targetEntity instanceof EntityLivingBase;
-                    flag2 = flag2 && !player.isSprinting();
+                    boolean crit = charged && player.fallDistance > 0.0F && !player.onGround && !player.isOnLadder() && !player.isInWater() && !player.isPotionActive(MobEffects.BLINDNESS) && !player.isRiding() && targetEntity instanceof EntityLivingBase;
+                    crit = crit && !player.isSprinting();
 
-                    net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks.getCriticalHit(player, targetEntity, flag2, flag2 ? 1.5F : 1.0F);
-                    flag2 = hitResult != null;
-                    if (flag2)
+                    net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks.getCriticalHit(player, targetEntity, crit, crit ? 1.5F : 1.0F);
+                    crit = hitResult != null;
+                    if (crit)
                     {
-                        f *= hitResult.getDamageModifier();
+                        attack *= hitResult.getDamageModifier();
                     }
 
-                    f = f + f1;
-                    boolean flag3 = false;
-                    double d0 = (double)(player.distanceWalkedModified - player.prevDistanceWalkedModified);
+                    attack = attack + extraAttack;
+                    boolean shouldSweep = false;
+                    double dist = (double)(player.distanceWalkedModified - player.prevDistanceWalkedModified);
 
-                    if (flag && !flag2 && !flag1 && player.onGround && d0 < (double)player.getAIMoveSpeed())
+                    if (charged && !crit && !sprinting && player.onGround && dist < (double)player.getAIMoveSpeed())
                     {
                         ItemStack itemstack = player.getHeldItem(EnumHand.MAIN_HAND);
 
                         if (itemstack.getItem() instanceof ItemSword)
                         {
-                            flag3 = true;
+                            shouldSweep = true;
                         }
                     }
 
-                    float f4 = 0.0F;
-                    boolean flag4 = false;
-                    int j = EnchantmentHelper.getFireAspectModifier(player);
+                    float health = 0.0F;
+                    boolean burnt = false;
+                    int fireenchantlvl = EnchantmentHelper.getFireAspectModifier(player);
 
                     if (targetEntity instanceof EntityLivingBase)
                     {
-                        f4 = ((EntityLivingBase)targetEntity).getHealth();
+                        health = ((EntityLivingBase)targetEntity).getHealth();
 
-                        if (j > 0 && !targetEntity.isBurning())
+                        if (fireenchantlvl > 0 && !targetEntity.isBurning())
                         {
-                            flag4 = true;
+                            burnt = true;
                             targetEntity.setFire(1);
                         }
                     }
 
-                    double d1 = targetEntity.motionX;
-                    double d2 = targetEntity.motionY;
-                    double d3 = targetEntity.motionZ;
-                    boolean flag5 = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(player), f);
+                    double motionx = targetEntity.motionX;
+                    double motiony = targetEntity.motionY;
+                    double motionz = targetEntity.motionZ;
+                    boolean canattack = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(player), attack);
 
-                    if (flag5)
+                    if (canattack)
                     {
-                        if (i > 0)
+                        if (knockback > 0)
                         {
                             if (targetEntity instanceof EntityLivingBase)
                             {
-                                ((EntityLivingBase)targetEntity).knockBack(player, (float)i * 0.5F, (double)MathHelper.sin(player.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(player.rotationYaw * 0.017453292F)));
+                                ((EntityLivingBase)targetEntity).knockBack(player, (float)knockback * 0.5F, (double)MathHelper.sin(player.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(player.rotationYaw * 0.017453292F)));
                             }
                             else
                             {
-                                targetEntity.addVelocity((double)(-MathHelper.sin(player.rotationYaw * 0.017453292F) * (float)i * 0.5F), 0.1D, (double)(MathHelper.cos(player.rotationYaw * 0.017453292F) * (float)i * 0.5F));
+                                targetEntity.addVelocity((double)(-MathHelper.sin(player.rotationYaw * 0.017453292F) * (float)knockback * 0.5F), 0.1D, (double)(MathHelper.cos(player.rotationYaw * 0.017453292F) * (float)knockback * 0.5F));
                             }
 
                             player.motionX *= 0.6D;
@@ -141,11 +146,11 @@ public class NeedyLittleThings {
                             player.setSprinting(false);
                         }
 
-                        if (flag3)
+                        if (shouldSweep)
                         {
-                            float f3 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(player) * f;
-
-                            for (EntityLivingBase entitylivingbase : player.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D)))
+                            float f3 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(player) * attack;
+                            double stretch= tw==null?1d:tw.getHorizontalRange(player, is)+1;
+                            for (EntityLivingBase entitylivingbase : player.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(stretch, 0.25D, stretch)))
                             {
                                 if (entitylivingbase != player && entitylivingbase != targetEntity && !player.isOnSameTeam(entitylivingbase) && player.getDistanceSq(entitylivingbase) < 9.0D)
                                 {
@@ -162,20 +167,20 @@ public class NeedyLittleThings {
                         {
                             ((EntityPlayerMP)targetEntity).connection.sendPacket(new SPacketEntityVelocity(targetEntity));
                             targetEntity.velocityChanged = false;
-                            targetEntity.motionX = d1;
-                            targetEntity.motionY = d2;
-                            targetEntity.motionZ = d3;
+                            targetEntity.motionX = motionx;
+                            targetEntity.motionY = motiony;
+                            targetEntity.motionZ = motionz;
                         }
 
-                        if (flag2)
+                        if (crit)
                         {
                             player.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, player.getSoundCategory(), 1.0F, 1.0F);
                             player.onCriticalHit(targetEntity);
                         }
 
-                        if (!flag2 && !flag3)
+                        if (!crit && !shouldSweep)
                         {
-                            if (flag)
+                            if (charged)
                             {
                                 player.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, player.getSoundCategory(), 1.0F, 1.0F);
                             }
@@ -185,7 +190,7 @@ public class NeedyLittleThings {
                             }
                         }
 
-                        if (f1 > 0.0F)
+                        if (extraAttack > 0.0F)
                         {
                             player.onEnchantmentCritical(targetEntity);
                         }
@@ -225,12 +230,12 @@ public class NeedyLittleThings {
 
                         if (targetEntity instanceof EntityLivingBase)
                         {
-                            float f5 = f4 - ((EntityLivingBase)targetEntity).getHealth();
+                            float f5 = health - ((EntityLivingBase)targetEntity).getHealth();
                             player.addStat(StatList.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
-                            if (j > 0)
+                            if (fireenchantlvl > 0)
                             {
-                                targetEntity.setFire(j * 4);
+                                targetEntity.setFire(fireenchantlvl * 4);
                             }
 
                             if (player.world instanceof WorldServer && f5 > 2.0F)
@@ -246,7 +251,7 @@ public class NeedyLittleThings {
                     {
                         player.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
 
-                        if (flag4)
+                        if (burnt)
                         {
                             targetEntity.extinguish();
                         }
@@ -254,8 +259,7 @@ public class NeedyLittleThings {
                 }
             }
         }
-    
-	}
+    }
 	
 	public static int avg(int orig, int[] additions) {
 		for (int a : additions)
@@ -404,7 +408,61 @@ public class NeedyLittleThings {
 		float vy = -MathHelper.sin(rad(rotationPitch));
 		return new Vec3d(vx, vy, vz);
 	}
+	
+	public static EntityLivingBase raytraceEntities(World world, EntityPlayer player, double range) {
+        HitResult result = new HitResult();
+        Vec3d pos = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+        Vec3d segment = player.getLookVec();
+        segment = pos.addVector(segment.x * range, segment.y * range, segment.z * range);
+        result.setBlockHit(world.rayTraceBlocks(pos, segment, false, true, true));
+        double collidePosX, collidePosY, collidePosZ;
+        if (result.blockHit != null) {
+            collidePosX = result.blockHit.hitVec.x;
+            collidePosY = result.blockHit.hitVec.y;
+            collidePosZ = result.blockHit.hitVec.z;
+        }
+        else {
+            Vec3d end = player.getLookVec().scale(range);
+            collidePosX = end.x;
+            collidePosY = end.y;
+            collidePosZ = end.z;
+        }
 
+        List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(Math.min(pos.x, collidePosX), Math.min(pos.y, collidePosY), Math.min(pos.z, collidePosZ), Math.max(pos.x, collidePosX), Math.max(pos.y, collidePosY), Math.max(pos.z, collidePosZ)).grow(1, 1, 1));
+        EntityLivingBase closest = null;
+        for (EntityLivingBase entity : entities) {
+            if (entity == player) {
+                continue;
+            }
+            float pad = entity.getCollisionBorderSize();
+            AxisAlignedBB aabb = entity.getEntityBoundingBox().grow(pad, pad, pad);
+            RayTraceResult hit = aabb.calculateIntercept(pos, segment);
+            if (aabb.contains(pos) || hit != null) {
+                result.addEntityHit(entity);
+                if (closest == null || player.getDistanceSq(closest) > player.getDistanceSq(entity)) closest = entity;
+            }
+        }
+        return closest;
+    }
+	
+	public static class HitResult {
+        private RayTraceResult blockHit;
+
+        private List<EntityLivingBase> entities = new ArrayList<>();
+
+        public RayTraceResult getBlockHit() {
+            return blockHit;
+        }
+
+        public void setBlockHit(RayTraceResult blockHit) {
+            this.blockHit = blockHit;
+        }
+
+        public void addEntityHit(EntityLivingBase entity) {
+            entities.add(entity);
+        }
+    }
+	
 	public static int posmod(int i, int n) {
 		return ((i % n) + n) % n;
 	}

@@ -27,8 +27,8 @@ public class ItemDummy extends Item {
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
 		if(this.isInCreativeTab(tab)){
 			for(WeaponStatWrapper wsw:TaoConfigs.weapc.enabledParts.values()){
-				
-				items.add(new PartData(wsw.getClassification(), MaterialsConfig.findMat("gemDiamond").msw, wsw.getOrdinal()).toStack());
+				for(int aaa=0;aaa<5;aaa++)
+				items.add(new PartData(wsw.getClassification(), MaterialsConfig.getRandomMat(itemRand, wsw.matType()), wsw.getOrdinal()).toStack());
 			}
 		}
 	}

@@ -234,13 +234,13 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 			if (wp != null) perks.add(wp.name);
 		{
 			//System.out.println(perks);
-			for (String bl : wsw.getBlacklist()) {
+			/*for (String bl : wsw.getBlacklist()) {
 				//System.out.println("blacklist is " + bl);
 				if (perks.contains(bl) && !bl.isEmpty()) {
 					System.out.println(bl + " is in the blacklist");
 					return false;
 				}
-			}
+			}*/
 			for (String wl : wsw.getWhitelist()) {
 				//System.out.println("whitelist is " + wl);
 				if (!perks.contains(wl) && !wl.isEmpty() && !wl.replace(" ", "").equals("")) {

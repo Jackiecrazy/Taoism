@@ -18,6 +18,8 @@ public class MaterialStatWrapper {
 	  public final int dominance;
 	  public final int lingAbility;
 	  public final MaterialType type;
+	  private int miningLevel=0;
+	  private float digSpeed=0;
 	  
 	  public MaterialStatWrapper(String name,MaterialType type, float m, float h, float f, float ji, float mu, float sh, float hu, float tu, Color c, int dom, int la, float ds, float as)
 	  {
@@ -36,6 +38,7 @@ public class MaterialStatWrapper {
 	    this.arrowSpeed = as;
 	    this.lingAbility = la;
 	    this.name=name;
+	    this.setDigSpeed(h+(h-6)*2);
 	  }
 	  
 	  public MaterialStatWrapper(String name,MaterialType type, float m, float h, float f, float ji, float mu, float sh, float hu, float tu, Color c, int la, int dom)
@@ -85,4 +88,20 @@ public class MaterialStatWrapper {
 	  public boolean isHard(){
 		  return type==MaterialType.HARD;
 	  }
+
+	public int getMiningLevel() {
+		return miningLevel;
+	}
+
+	public void setMiningLevel(int miningLevel) {
+		this.miningLevel = miningLevel;
+	}
+
+	public float getDigSpeed() {
+		return digSpeed;
+	}
+
+	public void setDigSpeed(float digSpeed) {
+		this.digSpeed = digSpeed;
+	}
 }

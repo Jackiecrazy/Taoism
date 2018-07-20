@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,8 @@ import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
 import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
 import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
+import com.jackiecrazi.taoism.potions.TaoPotions;
 
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
@@ -81,8 +84,11 @@ public class Taoism {
 	public void preinit(FMLPreInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(TaoItems.class);
 		MinecraftForge.EVENT_BUS.register(TaoBlocks.class);
-		
+		MinecraftForge.EVENT_BUS.register(TaoPotions.class);
+		MinecraftForge.EVENT_BUS.register(TaoisticEventHandler.class);
+		//MinecraftForge.EVENT_BUS.register(ClientProxy.class);
 		TaoConfigs.init(event.getModConfigurationDirectory() + "/taoism/");
+		net=NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
 		proxy.preinit(event);
 	}
 

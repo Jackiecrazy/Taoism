@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.client.stupidmodels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -21,6 +22,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.model.TRSRTransformation;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,30 +32,24 @@ import com.jackiecrazi.taoism.api.PartData;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.WeaponPerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
+import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.config.TaoConfigs;
 
 public class ModelWeapon implements IBakedModel {
-	//arrange png files such that:
-	//heads have 32x32 textures and should cross 16, 16 as its rough center, make all "lenticular" (e.g. blades, spears, but not spears or clubs) end on the same pixel for guard purposes
-	//shaft and long shaft adjust such that they touch the head when they are normal size and the heads are scaled down by one half and on the top right
-	//IE make them end at the 48,48 point
-	//plan guards such that they are on the handle at normal size and at the top of the shaft at 1/2 scale
-	//pommels should be in the same location everytime
 
-	//TODO essentially, guards and blades have it so that the top right part of a long weapon looks like a short weapon. Handles and pommels do not scale
-
-	//FIXME shaft/long shaft are too thicc compared to the head/guard due to scaling, put everything except guard on a 0.5 diet
+	//FIXME blade and guard do not load but pommel/handle load fine, though texture is being called for all 4
 	//yes you need to pretty much use the old textures -.-
 	IBakedModel base;
+
 	public ModelWeapon(IBakedModel orig) {
 		//super(ImmutableList.copyOf(new ArrayList<BakedQuad>()), null, ImmutableMap.copyOf(new HashMap<TransformType, TRSRTransformation>()), WeaponOverride.inst);
-		base=orig;
+		base = orig;
 	}
 
 	public static class WeaponOverride extends ItemOverrideList {
 		public static final WeaponOverride inst = new WeaponOverride();
-		private Cache<CacheKey, IBakedModel> othercache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.MINUTES).build();
+		private Cache<CacheKey, IBakedModel> othercache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(10, TimeUnit.SECONDS).build();
 
 		//private HashMap<CacheKey, IBakedModel> cache = new HashMap<CacheKey, IBakedModel>();
 
@@ -138,38 +134,55 @@ public class ModelWeapon implements IBakedModel {
 			weap = is.copy();
 		}
 
+		static Matrix4f thinner = new Matrix4f();
+		static {
+			thinner.setIdentity();
+			thinner.m00 = 1f;//x
+			thinner.m11 = 1f;//y
+			thinner.m22 = 0.5f;//z
+		}
+
 		@Override
 		public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType t) {
-			//TODO fix all this crap
 			PartData pd = TaoItems.weap.getPart(weap, StaticRefs.HANDLE);
-			if (pd == null) return Pair.of(this, null);
+			if (pd == null){
+				return Pair.of(this, null);
+			}
 			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
 			if (wsw == null) return Pair.of(this, null);
 			Matrix4f ret = new Matrix4f();
+			Optional<TRSRTransformation> trsr = UsefulTransformations.transforms.get("held").apply(Optional.of(t));
 			ret.setIdentity();
+			if (trsr.isPresent()) {
+				TRSRTransformation newtrsr = TRSRTransformation.blockCornerToCenter(trsr.get());
+				//TRSRTransformation.mul(null, null, new Vector3f(0.5f,2f,5f), null);
+				ret = newtrsr.getMatrix();
+				ret.mul(thinner);
+			}
+
 			if (t != TransformType.GUI) {
+				//ret = (TRSRTransformation.blockCornerToCenter(UsefulTransformations.get(0, 4, 0.5f, 0, -90, 55, 1f)).getMatrix());
 				//ret.transform(new Vector3f(10f,0f,0f));
 				//ret.rotX((float) (Math.PI / 2));
-				ret.rotY((float) (-Math.PI / 2));
+				//ret.rotY((float) (-Math.PI / 2));
 				//ret.rotZ((float) (-Math.PI / 2));
-				
 
 				for (WeaponPerk wp : wsw.getPerks()) {
 					if (wp.equals(WeaponPerk.SHORT)) {
 						//do nothing, just in case it's horizontal
 					}
 					if (wp.equals(WeaponPerk.MEDIUM)) {
-						ret.mul(1.5f);
-						ret.m33=1f;
+						ret.mul(2f);
+						ret.m33 = 1f;
 						break;
 					}
 					if (wp.equals(WeaponPerk.LONG)) {
-						ret.mul(2f);
-						ret.m33=1f;
+						ret.mul(3f);
+						ret.m33 = 1f;
 						break;
 					}
 					if (wp.equals(WeaponPerk.HORIZONTAL)) {
-						ret.rotY((float) (Math.PI));
+						//ret.rotZ((float) (Math.PI/2));
 						break;
 					}
 				}
@@ -197,18 +210,30 @@ public class ModelWeapon implements IBakedModel {
 					quads.add(new BakedQuad(shuten.getVertexData(), shuten.getTintIndex(), shuten.getFace(), shuten.getSprite(), shuten.shouldApplyDiffuseLighting(), shuten.getFormat()));
 				}
 			}*/
-			
-
+			PartData handleRef = TaoItems.weap.getPart(weap, StaticRefs.HANDLE);
+			if(handleRef==null){
+				System.out.println("null!");
+				return quads;
+			}
 			for (PartData p : TaoItems.weap.getParts(weap).values())
 				if (side != null) {
 					//System.out.println(p);
 					//System.out.println(Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(p.toStack(), null, null));
 					//missingno not turning up with rabbit foot but there is still no texture because it suddenly has no quads...
 					//Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, worldIn, entitylivingbaseIn);
-					IBakedModel quaddy = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(p.toStack(), null, null);
+					ItemStack is = p.toStack();
+					for (WeaponPerk wp : handleRef.getWeaponSW().getPerks()) {
+						if (ClientEvents.veryLazy(wp.name) != 0) is.setItemDamage(ClientEvents.veryLazy(wp.name));
+					}
+					//System.out.println(is.getItemDamage());
+					IBakedModel quaddy = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(is, null, null);
 					//System.out.println(side==null);
 					//quads.addAll(quaddy.getQuads(state, null, rand));
-					quads.addAll(scaleAndTranslateQuads(quaddy.getQuads(state, null, rand), getTranslation(weap, p), getScale(weap, p)));
+					for (BakedQuad bk : quaddy.getQuads(state, null, rand)) {
+						//scaleAndTranslateQuad(   ), getTranslation(weap, p), getScale(weap, p) 
+						quads.add(scaleAndTranslateQuad(new HackyBakedQuad(bk.getVertexData(), TaoConfigs.weapc.reverseLookupType(p.getPart()), bk.getFace(), bk.getSprite(), bk.shouldApplyDiffuseLighting(), bk.getFormat()), getTranslation(weap, p), getScale(weap, p)));
+					}
+					//quads.addAll(scaleAndTranslateQuads(quaddy.getQuads(state, null, rand), getTranslation(weap, p), getScale(weap, p)));
 				}
 			cache = quads;
 			return quads;
@@ -217,68 +242,34 @@ public class ModelWeapon implements IBakedModel {
 	}
 
 	private static Vec3d getTranslation(ItemStack i, PartData p) {
-		switch (p.getPart()) {
-		//these don't need moving
-		case StaticRefs.POMMEL:
-			return new Vec3d(0, 0, 0);
-		case StaticRefs.HANDLE:
-			return new Vec3d(0, 0, 0);
-		default:
-			break;
-		}
-		try {
-			//System.out.println("call");
-			for (WeaponPerk wp : TaoConfigs.weapc.lookup(StaticRefs.HANDLE, TaoItems.weap.getPart(i, StaticRefs.HANDLE).getOrdinal()).getPerks()) {
-				if (wp == WeaponPerk.LONG) {
-					return new Vec3d(1, 1, 0.5);
-				} else if (wp == WeaponPerk.MEDIUM) {
-					return new Vec3d(1, 1, 0.5);
-				} else if (wp == WeaponPerk.SHORT) { return new Vec3d(0, 0, 0); }
-				//FIXME fine tune these values, and vec3i means INTEGER yo
-			}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new Vec3d(0, 0, 0);
-		}
-		return new Vec3d(0, 0, 0);
+		return new Vec3d(0, 0, (1 - getScale(i, p)) / 2);
 	}
 
 	private static float getScale(ItemStack i, PartData p) {
 		switch (p.getPart()) {
 		//these don't need scaling... right?
 		case StaticRefs.POMMEL:
-			return 1;
+			return 1f;
 		case StaticRefs.HANDLE:
-			return 1;
+			return 0.999f;
+		case StaticRefs.GUARD:
+			return 1f;//slight scale up to make it pop
+		case StaticRefs.HEAD:
+			return 1f;
 		default:
 			break;
-		}
-		try {
-			//System.out.println("call");
-			if (p.getPart().equals(StaticRefs.GUARD) || p.getPart().equals(StaticRefs.HEAD)) for (WeaponPerk wp : TaoConfigs.weapc.lookup(StaticRefs.HANDLE, TaoItems.weap.getPart(i, StaticRefs.HANDLE).getOrdinal()).getPerks()) {
-				if (wp == WeaponPerk.LONG) {
-					return 0.5f;
-				} else if (wp == WeaponPerk.MEDIUM) {
-					return 0.5f;
-				} else if (wp == WeaponPerk.SHORT) { return 1f; }
-				//FIXME fine tune these values
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 1;
 		}
 		return 1;
 	}
 
-	private static List<BakedQuad> scaleAndTranslateQuads(List<BakedQuad> q, Vec3d t, float s) {
+	/*private static List<BakedQuad> scaleAndTranslateQuads(List<BakedQuad> q, Vec3d t, float s) {
 		ArrayList<BakedQuad> ret = new ArrayList<BakedQuad>();
 		for (int x = 0; x < q.size(); x++) {
 			ret.add(scaleAndTranslateQuad(q.get(x), t, s));
 		}
 		return ret;
-	}
+	}*/
 
 	private static BakedQuad scaleAndTranslateQuad(BakedQuad q, Vec3d t, float s) {
 		//System.out.println(q.getFace());
@@ -294,8 +285,9 @@ public class ModelWeapon implements IBakedModel {
 		// east: x
 		// south: z
 		// up: y
-
+		//System.out.println(q.getFace());
 		switch (q.getFace()) {
+		//up down west east 
 		case UP:
 			// Quad up is towards north
 			lr = t.x;
@@ -318,7 +310,7 @@ public class ModelWeapon implements IBakedModel {
 			v[23] = transform(v[23], ud, s);
 			break;
 
-		case DOWN:
+		case DOWN: //these were modified
 			// Quad up is towards south
 			lr = t.x;
 			ud = t.z;
@@ -334,10 +326,10 @@ public class ModelWeapon implements IBakedModel {
 			v[15] = transform(v[15], fb, s);
 			v[22] = transform(v[22], fb, s);
 
-			v[2] = transform(v[2], -ud, s);
-			v[9] = transform(v[9], -ud, s);
-			v[16] = transform(v[16], -ud, s);
-			v[23] = transform(v[23], -ud, s);
+			v[2] = transform(v[2], ud, s);
+			v[9] = transform(v[9], ud, s);
+			v[16] = transform(v[16], ud, s);
+			v[23] = transform(v[23], ud, s);
 			break;
 
 		case WEST:

@@ -12,22 +12,24 @@ import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
 import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
 
 public class TaoItems {
-	public static ItemDummy dummy=new ItemDummy();
-	public static TaoWeapon weap=new TaoWeapon();
-	public static ItemBlueprint blueprint=new ItemBlueprint(){
+	public static ItemDummy dummy = new ItemDummy();
+	public static TaoWeapon weap = new TaoWeapon();
+	public static TaoBow bow = new TaoBow();
+	public static ItemBlueprint blueprint = new ItemBlueprint() {
 
 		@Override
 		public SlotLianQi[] getSlots(IInventory in) {
 			return null;
 		}
-		
+
 	};
-	public static TaoBow bow=new TaoBow();
+
 	@SubscribeEvent
-	public static void init(RegistryEvent.Register<Item> event){
+	public static void init(RegistryEvent.Register<Item> event) {
 		event.getRegistry().register(weap);
 		event.getRegistry().register(dummy);
 		event.getRegistry().register(blueprint);
 		event.getRegistry().register(bow);
 	}
+
 }

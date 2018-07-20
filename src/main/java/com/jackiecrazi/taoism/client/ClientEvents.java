@@ -14,6 +14,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.WeaponPerk;
+import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.client.stupidmodels.ModelWeapon;
 import com.jackiecrazi.taoism.common.item.TaoItems;
@@ -21,6 +23,7 @@ import com.jackiecrazi.taoism.config.TaoConfigs;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
+	
 	@SubscribeEvent
 	public static void model(ModelRegistryEvent e) {
 		ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
@@ -38,9 +41,11 @@ public class ClientEvents {
 
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
-
-			ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
-			ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
+			//if(a.isHandle())ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
+			for (HandlePerk hp : WeaponPerk.REGISTEREDHANDLES.values()) {
+				if (a.acceptsHandle(hp)) ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
+			}
+			//ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
 		}
 		//ModelLoader.setCustomModelResourceLocation(TaoItems.dummy, 0, new ModelResourceLocation(Taoism.MODID + ":parts/part", "inventory"));
 		//vvvv not being called???
@@ -49,27 +54,44 @@ public class ClientEvents {
 
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				if(!stack.hasTagCompound())return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
+				if (!stack.hasTagCompound()) return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
 				NBTTagCompound ntc = stack.getTagCompound();
-				//System.out.println(Taoism.MODID + ":parts/" +TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
-				return new ModelResourceLocation(Taoism.MODID + ":parts/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""),"inventory");
+				//System.out.println(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()].toString() + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
+				return new ModelResourceLocation(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()] + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""), "inventory");
 				
 			}
 
 		});
 	}
 
+	public static int veryLazy(String s) {
+		int ret = 0;
+		for (Object st : WeaponPerk.REGISTEREDHANDLES.keySet().toArray()) {
+			if (st.equals(s)) {
+				//System.out.println(ret);
+				return ret;
+			}
+			ret++;
+		}
+		return 0;
+	}
+
 	@SubscribeEvent
 	public static void modelTheWeapons(ModelBakeEvent event) {
 		//renderitem has an interesting method
-		ModelResourceLocation mrl=new ModelResourceLocation(Taoism.MODID + ":taoweapon", "inventory");
-		Object object =  event.getModelRegistry().getObject(mrl);
-	    if (object instanceof IBakedModel) {
-	      IBakedModel existingModel = (IBakedModel)object;
-	      event.getModelRegistry().putObject(mrl, new ModelWeapon(existingModel));
-	    }
+		ModelResourceLocation mrl = new ModelResourceLocation(Taoism.MODID + ":taoweapon", "inventory");
+		Object object = event.getModelRegistry().getObject(mrl);
+		if (object instanceof IBakedModel) {
+			IBakedModel existingModel = (IBakedModel) object;
+			event.getModelRegistry().putObject(mrl, new ModelWeapon(existingModel));
+		}
 		Taoism.logger.debug("registered the weapon models");
 	}
+
+	/*@SubscribeEvent
+	public static void colorize(ColorHandlerEvent event){
+		Taoism.logger.debug("this is being called");
+	}*/
 }
 
 /*
