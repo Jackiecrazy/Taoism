@@ -15,11 +15,12 @@ import com.jackiecrazi.taoism.potions.TaoPotions;
 public abstract class WeaponPerk {
 	public static final HashMap<String, WeaponPerk> REGISTERED = new HashMap<String, WeaponPerk>();
 	public static final HashMap<String, HandlePerk> REGISTEREDHANDLES = new HashMap<String, HandlePerk>();
-	
+
 	@Nullable
-	public static WeaponPerk get(String s){
+	public static WeaponPerk get(String s) {
 		return REGISTERED.get(s);
 	}
+
 	public static final WeaponPerk BLEED = new WeaponPerk("bleed") {
 
 		@Override
@@ -82,24 +83,26 @@ public abstract class WeaponPerk {
 	public static final HandlePerk LONG = new HandlePerk("long") {
 	};
 	public final String name;
-	public static WeaponPerk lookUp(String s){
+
+	public static WeaponPerk lookUp(String s) {
 		return REGISTERED.get(s);
 	}
 
 	public WeaponPerk(String name) {
 		REGISTERED.put(name, this);
-		this.name=name;
+		this.name = name;
 	}
 
 	public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
 
 	}
-	public static abstract class HandlePerk extends WeaponPerk{
+
+	public static abstract class HandlePerk extends WeaponPerk {
 
 		public HandlePerk(String name) {
 			super(name);
 			REGISTEREDHANDLES.put(name, this);
 		}
-		
+
 	}
 }

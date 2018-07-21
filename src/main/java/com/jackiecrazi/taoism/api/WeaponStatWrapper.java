@@ -22,11 +22,12 @@ public class WeaponStatWrapper {
 	 */
 	private String[] whitelist = new String[0];
 	private String[] blacklist = new String[0];
+	private String[] handleList;
 	private float range, speed, damage, durabilityMultiplier,
 			elementalMultiplier = 1f;
 	private MaterialType type;
 
-	public WeaponStatWrapper(String classify, int order, MaterialType type, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
+	public WeaponStatWrapper(String classify, int order, MaterialType type, String[] acceptableHandles, String nam, int cost, int damageType, float range, float speed, float damage, float durmultiplier, float elem, WeaponPerk... wb) {
 		this.name = nam;
 		this.cost = cost;
 		this.range = range;
@@ -39,6 +40,7 @@ public class WeaponStatWrapper {
 		behaviour = wb;
 		classification = classify;
 		ordinal = order;
+		handleList=acceptableHandles;
 	}
 
 	/**
@@ -176,9 +178,11 @@ public class WeaponStatWrapper {
 
 	public boolean acceptsHandle(HandlePerk wp) {
 		if (this.isHandle()) return true;//getHP().equals(wp);
-		for (String s : getWhitelist()) {
-			if (wp.name.equals(s)) return true;
+		for (String s : getHandleList()) {
+			if (wp.name.equals(s))
+				return true;
 		}
+		
 		return false;
 	}
 
@@ -186,7 +190,6 @@ public class WeaponStatWrapper {
 		if (this.isHandle()) return true;
 		for (WeaponPerk wp : wsw.behaviour) {
 			if (wp instanceof HandlePerk){
-				System.out.println("aaaaa");
 				return acceptsHandle((HandlePerk) wp);
 			}
 		}
@@ -207,5 +210,9 @@ public class WeaponStatWrapper {
 
 	public int getOrdinal() {
 		return ordinal;
+	}
+
+	public String[] getHandleList() {
+		return handleList;
 	}
 }

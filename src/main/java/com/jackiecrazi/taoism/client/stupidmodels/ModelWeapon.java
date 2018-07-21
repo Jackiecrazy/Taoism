@@ -38,7 +38,7 @@ import com.jackiecrazi.taoism.config.TaoConfigs;
 
 public class ModelWeapon implements IBakedModel {
 
-	//FIXME blade and guard do not load but pommel/handle load fine, though texture is being called for all 4
+	//FIXME blade and guard have missing models
 	//yes you need to pretty much use the old textures -.-
 	IBakedModel base;
 
@@ -49,7 +49,7 @@ public class ModelWeapon implements IBakedModel {
 
 	public static class WeaponOverride extends ItemOverrideList {
 		public static final WeaponOverride inst = new WeaponOverride();
-		private Cache<CacheKey, IBakedModel> othercache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(10, TimeUnit.SECONDS).build();
+		private Cache<CacheKey, IBakedModel> othercache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.MINUTES).build();
 
 		//private HashMap<CacheKey, IBakedModel> cache = new HashMap<CacheKey, IBakedModel>();
 
@@ -169,7 +169,8 @@ public class ModelWeapon implements IBakedModel {
 
 				for (WeaponPerk wp : wsw.getPerks()) {
 					if (wp.equals(WeaponPerk.SHORT)) {
-						//do nothing, just in case it's horizontal
+						//do nothing
+						break;
 					}
 					if (wp.equals(WeaponPerk.MEDIUM)) {
 						ret.mul(2f);
@@ -177,6 +178,11 @@ public class ModelWeapon implements IBakedModel {
 						break;
 					}
 					if (wp.equals(WeaponPerk.LONG)) {
+						ret.mul(3f);
+						ret.m33 = 1f;
+						break;
+					}
+					if (wp.equals(WeaponPerk.CHAIN)) {
 						ret.mul(3f);
 						ret.m33 = 1f;
 						break;
@@ -219,7 +225,6 @@ public class ModelWeapon implements IBakedModel {
 				if (side != null) {
 					//System.out.println(p);
 					//System.out.println(Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(p.toStack(), null, null));
-					//missingno not turning up with rabbit foot but there is still no texture because it suddenly has no quads...
 					//Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, worldIn, entitylivingbaseIn);
 					ItemStack is = p.toStack();
 					for (WeaponPerk wp : handleRef.getWeaponSW().getPerks()) {
@@ -229,6 +234,10 @@ public class ModelWeapon implements IBakedModel {
 					IBakedModel quaddy = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(is, null, null);
 					//System.out.println(side==null);
 					//quads.addAll(quaddy.getQuads(state, null, rand));
+					//System.out.println(quaddy);
+					/*System.out.println(p);
+					System.out.println(quaddy.getQuads(state, side, rand));
+					System.out.println(quaddy.getQuads(state, null, rand));*/
 					for (BakedQuad bk : quaddy.getQuads(state, null, rand)) {
 						//scaleAndTranslateQuad(   ), getTranslation(weap, p), getScale(weap, p) 
 						quads.add(scaleAndTranslateQuad(new HackyBakedQuad(bk.getVertexData(), TaoConfigs.weapc.reverseLookupType(p.getPart()), bk.getFace(), bk.getSprite(), bk.shouldApplyDiffuseLighting(), bk.getFormat()), getTranslation(weap, p), getScale(weap, p)));

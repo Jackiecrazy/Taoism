@@ -95,6 +95,7 @@ public class Taoism {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init(event);
+		//TODO item mockup recipe
 	}
 
 	@EventHandler

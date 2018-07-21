@@ -28,7 +28,6 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -265,7 +264,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public boolean isValidAddition(ItemStack is, String s, PartData pd) {
 		//check if the pd actually works
 		ArrayList<String> perks = new ArrayList<String>();
-		WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
+		WeaponStatWrapper wsw = pd.getWeaponSW();
 		if (wsw == null) {
 			//System.out.println("proceeding");
 			return false;//can throw null

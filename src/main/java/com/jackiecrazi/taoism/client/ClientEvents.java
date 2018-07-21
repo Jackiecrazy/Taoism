@@ -43,7 +43,10 @@ public class ClientEvents {
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
 			//if(a.isHandle())ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
 			for (HandlePerk hp : WeaponPerk.REGISTEREDHANDLES.values()) {
-				if (a.acceptsHandle(hp)) ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
+				if (a.acceptsHandle(hp)){
+					
+					ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
+				}
 			}
 			//ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
 		}
@@ -54,7 +57,9 @@ public class ClientEvents {
 
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				if (!stack.hasTagCompound()) return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
+				if (!stack.hasTagCompound()){
+					return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
+				}
 				NBTTagCompound ntc = stack.getTagCompound();
 				//System.out.println(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()].toString() + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
 				return new ModelResourceLocation(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()] + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""), "inventory");
