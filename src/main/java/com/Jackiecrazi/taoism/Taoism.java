@@ -20,9 +20,11 @@ import org.apache.logging.log4j.Logger;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.block.TaoBlocks;
 import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.common.item.weapon.TaoArrow;
 import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
 import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
 import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.crafting.TaoCrafting;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.potions.TaoPotions;
 
@@ -79,13 +81,24 @@ public class Taoism {
 		}
 
 	};
+	
+	public static final CreativeTabs tabArr = new CreativeTabs("taoArr") {
+
+		@Override
+		public ItemStack getTabIconItem() {
+			return TaoBow.createRandomBow(null, unirand);
+		}
+
+	};
 
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(TaoItems.class);
 		MinecraftForge.EVENT_BUS.register(TaoBlocks.class);
+		MinecraftForge.EVENT_BUS.register(TaoCrafting.class);
 		MinecraftForge.EVENT_BUS.register(TaoPotions.class);
 		MinecraftForge.EVENT_BUS.register(TaoisticEventHandler.class);
+		
 		//MinecraftForge.EVENT_BUS.register(ClientProxy.class);
 		TaoConfigs.init(event.getModConfigurationDirectory() + "/taoism/");
 		net=NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
@@ -95,7 +108,6 @@ public class Taoism {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init(event);
-		//TODO item mockup recipe
 	}
 
 	@EventHandler

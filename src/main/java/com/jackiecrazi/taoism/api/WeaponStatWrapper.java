@@ -1,5 +1,7 @@
 package com.jackiecrazi.taoism.api;
 
+import javax.annotation.Nullable;
+
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 
@@ -17,12 +19,7 @@ public class WeaponStatWrapper {
 	private int cost, dtype, ordinal;
 	private String name, classification;
 	private WeaponPerk[] behaviour = new WeaponPerk[0];
-	/**
-	 * usually used to determine what handles accept it. OR-gated.
-	 */
-	private String[] whitelist = new String[0];
-	private String[] blacklist = new String[0];
-	private String[] handleList;
+	private HandlePerk[] handleList;
 	private float range, speed, damage, durabilityMultiplier,
 			elementalMultiplier = 1f;
 	private MaterialType type;
@@ -40,34 +37,21 @@ public class WeaponStatWrapper {
 		behaviour = wb;
 		classification = classify;
 		ordinal = order;
-		handleList=acceptableHandles;
-	}
-
-	/**
-	 * OR not AND
-	 * 
-	 * @return
-	 */
-	public String[] getWhitelist() {
-		return whitelist;
-	}
-
-	public WeaponStatWrapper setWhitelist(String... whitelist) {
-		this.whitelist = whitelist;
-		return this;
+		handleList=synthesise(acceptableHandles);
 	}
 	
-	public String[] getBlacklist() {
-		return blacklist;
-	}
-
-	public WeaponStatWrapper setBlacklist(String... blacklist) {
-		this.blacklist = blacklist;
-		return this;
+	private HandlePerk[] synthesise(String... b){
+		if (b.length == 1 && b[0].equals(" ")) { return new HandlePerk[0]; }
+		HandlePerk[] wp = new HandlePerk[b.length];
+		for (int a = 0; a < b.length; a++) {
+			if(WeaponPerk.lookUp(b[a]) instanceof HandlePerk)
+			wp[a] = (HandlePerk) WeaponPerk.lookUp(b[a]);
+		}
+		return wp;
 	}
 
 	public WeaponStatWrapper setBehaviour(WeaponPerk... b) {
-		if (b.length == 1 && b[0].equals(" ")) { return this; }
+		if (b.length == 1 && (b[0]==null)) { return this; }
 		behaviour = b;
 		return this;
 	}
@@ -78,8 +62,7 @@ public class WeaponStatWrapper {
 		for (int a = 0; a < b.length; a++) {
 			wp[a] = WeaponPerk.lookUp(b[a]);
 		}
-		behaviour = wp;
-		return this;
+		return setBehaviour(wp);
 	}
 
 	public int getCost() {
@@ -178,8 +161,8 @@ public class WeaponStatWrapper {
 
 	public boolean acceptsHandle(HandlePerk wp) {
 		if (this.isHandle()) return true;//getHP().equals(wp);
-		for (String s : getHandleList()) {
-			if (wp.name.equals(s))
+		for (HandlePerk s : getHandleList()) {
+			if (wp.equals(s))
 				return true;
 		}
 		
@@ -199,11 +182,23 @@ public class WeaponStatWrapper {
 	public boolean isHandle() {
 		for (WeaponPerk wp : getPerks()) {
 
-			if (wp != null && WeaponPerk.REGISTEREDHANDLES.containsKey(wp.name)) return true;
+			if (wp != null && wp instanceof HandlePerk) return true;
 		}
 		return false;
 	}
+	
+	@Nullable public HandlePerk getHandle(){
+		for (WeaponPerk wp : getPerks()) {
 
+			if (wp != null && wp instanceof HandlePerk) return (HandlePerk) wp;
+		}
+		return null;
+	}
+
+	/**
+	 * 
+	 * @return handle, head, etc.
+	 */
 	public String getClassification() {
 		return classification;
 	}
@@ -212,7 +207,7 @@ public class WeaponStatWrapper {
 		return ordinal;
 	}
 
-	public String[] getHandleList() {
+	public HandlePerk[] getHandleList() {
 		return handleList;
 	}
 }

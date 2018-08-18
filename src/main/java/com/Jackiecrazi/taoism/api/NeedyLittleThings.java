@@ -44,13 +44,14 @@ public class NeedyLittleThings {
 	public final static UUID MODIFIER_UUID = UUID.fromString("294093da-54f0-4c1b-9dbb-13b77534a84c");
 
 
-	public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player) {
+	public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, EnumHand hand) {
         if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
         if (targetEntity.canBeAttackedWithItem())
         {
             if (!targetEntity.hitByEntity(player))
             {
-            	ItemStack is=player.getHeldItemMainhand();
+            	
+            	ItemStack is = player.getHeldItem(hand);
             	ICustomRange tw=is.getItem() instanceof ICustomRange?(ICustomRange)is.getItem():null;
             	
                 float attack = (float)player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
@@ -58,11 +59,11 @@ public class NeedyLittleThings {
 
                 if (targetEntity instanceof EntityLivingBase)
                 {
-                    extraAttack = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), ((EntityLivingBase)targetEntity).getCreatureAttribute());
+                    extraAttack = EnchantmentHelper.getModifierForCreature(is, ((EntityLivingBase)targetEntity).getCreatureAttribute());
                 }
                 else
                 {
-                    extraAttack = EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
+                    extraAttack = EnchantmentHelper.getModifierForCreature(is, EnumCreatureAttribute.UNDEFINED);
                 }
 
                 float spamDebuff = player.getCooledAttackStrength(0.5F);
@@ -100,7 +101,7 @@ public class NeedyLittleThings {
 
                     if (charged && !crit && !sprinting && player.onGround && dist < (double)player.getAIMoveSpeed())
                     {
-                        ItemStack itemstack = player.getHeldItem(EnumHand.MAIN_HAND);
+                        ItemStack itemstack = player.getHeldItem(hand);
 
                         if (itemstack.getItem() instanceof ItemSword)
                         {
@@ -203,7 +204,7 @@ public class NeedyLittleThings {
                         }
 
                         EnchantmentHelper.applyArthropodEnchantments(player, targetEntity);
-                        ItemStack itemstack1 = player.getHeldItemMainhand();
+                        ItemStack itemstack1 = is;
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof MultiPartEntityPart)
@@ -223,8 +224,8 @@ public class NeedyLittleThings {
 
                             if (itemstack1.isEmpty())
                             {
-                                net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(player, beforeHitCopy, EnumHand.MAIN_HAND);
-                                player.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
+                                net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(player, beforeHitCopy, hand);
+                                player.setHeldItem(hand, ItemStack.EMPTY);
                             }
                         }
 
@@ -480,9 +481,6 @@ public class NeedyLittleThings {
 	}//the 3 here is a placeholder
 
 	/**
-	 * 
-	 * @param item
-	 * @param plus addition
 	 * @return the original itemstack
 	 */
 	public static ItemStack upgrade(ItemStack is, float plusdmg, float plusspd) {

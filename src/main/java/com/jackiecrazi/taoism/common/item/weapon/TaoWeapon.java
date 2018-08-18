@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.item.weapon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,13 +27,15 @@ import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.actors.threadpool.Arrays;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -42,43 +45,59 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartData;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.WeaponPerk;
+import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IAmModular;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ISwingSpeed;
+import com.jackiecrazi.taoism.client.KeyOverlord;
 import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
 import com.jackiecrazi.taoism.config.MaterialsConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 
 public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IElemental, ISwingSpeed {
 
-	private Cache<ItemStack, String> namecache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.SECONDS).build();
-	
 	public static ItemStack createRandomWeapon(EntityPlayer p, Random r) {
 		ItemStack ret = new ItemStack(TaoItems.weap);
-		int wsw = r.nextInt(TaoConfigs.weapc.getType(1).size());
 		String s = StaticRefs.HANDLE;
-		((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, TaoConfigs.weapc.lookup(s, wsw).matType()), wsw));
+		int wsw = r.nextInt(TaoConfigs.weapc.getType(s).size());
 
-		wsw = r.nextInt(TaoConfigs.weapc.getType(0).size() + 1);
+		((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw).matType()), wsw));
+		s = StaticRefs.HEAD;
+		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size() + 1);
 		if (wsw != 0) {
-			s = StaticRefs.HEAD;
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, TaoConfigs.weapc.lookup(s, wsw - 1).matType()), wsw));
+
+			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw - 1).matType()), wsw));
 		}
 
-		wsw = r.nextInt(TaoConfigs.weapc.getType(2).size() + 1);
+		s = StaticRefs.GUARD;
+		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size() + 1);
 		if (wsw != 0) {
-			s = StaticRefs.GUARD;
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, TaoConfigs.weapc.lookup(s, wsw - 1).matType()), wsw));
+			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw - 1).matType()), wsw));
 		}
 
-		wsw = r.nextInt(TaoConfigs.weapc.getType(3).size() + 1);
+		s = StaticRefs.POMMEL;
+		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size() + 1);
 		if (wsw != 0) {
-			s = StaticRefs.POMMEL;
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, TaoConfigs.weapc.lookup(s, wsw - 1).matType()), wsw));
+			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw - 1).matType()), wsw));
 		}
 
+		if (p != null) ret.getItem().onCreated(ret, p.world, p);
+		else ret.getItem().onCreated(ret, null, null);
+		return ret;
+	}
+
+	public static ItemStack createWeapon(EntityPlayer p, ArrayList<PartData> pd) {
+		ItemStack ret = new ItemStack(TaoItems.weap);
+		for (PartData par : pd) {
+			if (par.getWeaponSW().isHandle()) TaoItems.weap.setPart(par.getPart(), ret, par);
+		}
+		for (PartData par : pd) {
+			TaoItems.weap.setPart(par.getPart(), ret, par);
+		}
 		if (p != null) ret.getItem().onCreated(ret, p.world, p);
 		else ret.getItem().onCreated(ret, null, null);
 		return ret;
@@ -87,30 +106,50 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public static ItemStack createWeapon(EntityPlayer p, PartData... pd) {
 		ItemStack ret = new ItemStack(TaoItems.weap);
 		for (PartData par : pd) {
+			if (par.getWeaponSW().isHandle()) TaoItems.weap.setPart(par.getPart(), ret, par);
+		}
+		for (PartData par : pd) {
 			TaoItems.weap.setPart(par.getPart(), ret, par);
 		}
 		if (p != null) ret.getItem().onCreated(ret, p.world, p);
 		else ret.getItem().onCreated(ret, null, null);
 		return ret;
 	}
-	
-	public String getItemStackDisplayName(ItemStack stack)
-    {
-		/*String name=namecache.getIfPresent(stack);
-		if(name!=null)return name;
-		name=getName(stack);
-		
-		if(!name.isEmpty())return name;*/
-		return super.getItemStackDisplayName(stack);
-    }
 
-	private String getName(ItemStack stack) {
-		String ret="";
-		for(PartData pd:getParts(stack).values()){
-			pd.getWeaponSW().getClassification();
-		}
-		return ret;
-	}
+	private Cache<ItemStack, String> namecache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.SECONDS).build();
+
+	private List<Material> pickList = Arrays.asList(new Material[] {
+			Material.ANVIL,
+			Material.IRON,
+			Material.PISTON,
+			Material.REDSTONE_LIGHT,
+			Material.CIRCUITS,
+			Material.PACKED_ICE,
+			Material.ROCK,
+			Material.ICE,
+			Material.GLASS });
+	
+	private List<Material> shovelList = Arrays.asList(new Material[] {
+			Material.CAKE,
+			Material.CLAY,
+			Material.CRAFTED_SNOW,
+			Material.GRASS,
+			Material.GROUND,
+			Material.CARPET,
+			Material.SAND,
+			Material.SNOW });
+	
+	private List<Material> axeList = Arrays.asList(new Material[] {
+			Material.CACTUS,
+			Material.CLOTH,
+			Material.CORAL,
+			Material.GOURD,
+			Material.WOOD });
+
+	private List<Material> scytheList = Arrays.asList(new Material[] {
+			Material.LEAVES,
+			Material.PLANTS,
+			Material.VINE });
 
 	public TaoWeapon() {
 		super(ToolMaterial.IRON);
@@ -139,18 +178,39 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		for (PartData a : getParts(stack).values()) {
 			try {
-				if (a != null && a.getMat() != null) tooltip.add(I18n.format(a.getMat()) + " " + I18n.format(TaoConfigs.weapc.lookup(a.getPart(), a.getOrdinal()).getName()));
+				if (a != null && a.getMat() != null) tooltip.add(I18n.format(a.getMat()) + " " + I18n.format(AbstractWeaponConfigOverlord.lookup(a.getPart(), a.getOrdinal()).getName()));
 			} catch (Exception e) {
 
 			}
 		}
 		//increment in 5, max is 50
-		for (int i = 0; i < getAffinities(stack).length; i++) {
+		if (KeyOverlord.isShiftDown()) for (int i = 0; i < getAffinities(stack).length; i++) {
 			int pot = (int) getAffinities(stack)[i];
 			//System.out.println(pot);
 			int used = Math.round(pot / 2) * 2;
 			if (used != 0) tooltip.add(IElemental.ELEMC[i] + "" + TextFormatting.ITALIC + I18n.format(IElemental.ELEMS[i] + used + ".inscription") + TextFormatting.RESET);
 		}
+		else {
+			tooltip.add(I18n.format("taoism.shiftweapon"));
+		}
+		//perks
+		if (KeyOverlord.isControlDown()) {
+			tooltip.add(I18n.format(TextFormatting.BOLD + "part.perks") + TextFormatting.RESET);
+			for (WeaponPerk hp : this.getPerks(stack).keySet()) {
+				if (hp != null) tooltip.add(TextFormatting.BOLD + I18n.format("perk." + hp.name + ".name") + TextFormatting.RESET);
+			}
+		} else tooltip.add(TextFormatting.YELLOW + I18n.format("part.ctrl") + TextFormatting.RESET);
+	}
+
+	public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker)
+    {
+		return getPerks(stack).containsKey(WeaponPerk.CLEAVE)||getPerks(stack).containsKey(WeaponPerk.AXE);
+    }
+	
+	public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
+		if (getPartThatCanHarvestBlock(stack, state) != null) { return true; }
+		//System.out.println(ret);
+		return super.canHarvestBlock(state, stack);
 	}
 
 	public Entity createEntity(World world, Entity location, ItemStack itemstack) {
@@ -175,7 +235,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		Multimap<String, AttributeModifier> multimap = HashMultimap.<String, AttributeModifier> create();
 		if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
 			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", (double) fastatk(stack), 0));
-			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) fastspd(stack) - 4D, 0));
+			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) fastspd(stack) - 4d, 0));
 			multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getReach(null, stack) - 4d, 0));
 
 			//System.out.println(spd(stack));
@@ -185,13 +245,42 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return multimap;
 	}
 
+	public float getDestroySpeed(ItemStack stack, IBlockState state) {
+
+		float ret = super.getDestroySpeed(stack, state);
+		if (getPartThatCanHarvestBlock(stack, state) != null) ret = Math.max(ret, getPartThatCanHarvestBlock(stack, state).getMatSW().getDigSpeed());
+		return ret;
+	}
+
 	@Override
 	public float getHorizontalRange(EntityPlayer p, ItemStack is) {
-		return TaoConfigs.weapc.lookup(StaticRefs.GUARD, getParts(is).get(StaticRefs.GUARD).getOrdinal()).getRange();
+		return AbstractWeaponConfigOverlord.lookup(StaticRefs.GUARD, getParts(is).get(StaticRefs.GUARD).getOrdinal()).getRange();
+	}
+
+	public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
+		String repairName = "";
+
+		for (String s : getPartNames(toRepair)) {
+			if (getParts(toRepair).get(s) != null) {
+				repairName = getParts(toRepair).get(s).getMat();
+				break;
+			}
+		}
+		if (!repairName.isEmpty() && MaterialsConfig.findMat(repair).msw.equals(MaterialsConfig.findMat(repairName))) return true;
+		return false;
 	}
 
 	public int getItemEnchantability(ItemStack is) {
 		return magicness(is);
+	}
+
+	public String getItemStackDisplayName(ItemStack stack) {
+		/*String name=namecache.getIfPresent(stack);
+		if(name!=null)return name;
+		name=getName(stack);
+		
+		if(!name.isEmpty())return name;*/
+		return super.getItemStackDisplayName(stack);
 	}
 
 	public int getMaxDamage(ItemStack stack) {
@@ -199,24 +288,9 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return stack.getTagCompound().getInteger("dur");
 	}
 
-	/**
-	 * this will always return something so use it in emergency situations
-	 * 
-	 * @param is
-	 * @param key
-	 * @return
-	 */
-	public PartData getPart(ItemStack is, String key) {
-		NBTTagCompound ntc = getStorage(is);
-		if(ntc.hasKey(key))
-		return new PartData(ntc.getCompoundTag(key));
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public ArrayList<String> getPartNames(ItemStack is) {
-		return new ArrayList<String>(Arrays.asList(StaticRefs.weaponparts));
+	public String[] getPartNames(ItemStack is) {
+		return StaticRefs.weaponparts;
 	}
 
 	@Nullable
@@ -230,14 +304,33 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return ret;
 	}
 
+	@Nullable
+	public PartData getPartThatCanHarvestBlock(ItemStack is, IBlockState state) {
+		for (PartData pd : getParts(is).values())
+			for (WeaponPerk wp : pd.getWeaponSW().getPerks()) {
+				if (wp != null) {
+					if (wp.equals(WeaponPerk.PICK) && pickList.contains(state.getMaterial())) {
+						return pd;
+					} else if (wp.equals(WeaponPerk.AXE) && axeList.contains(state.getMaterial())) {
+						return pd;
+					} else if (wp.equals(WeaponPerk.SCYTHE) && scytheList.contains(state.getMaterial())) {
+						return pd;
+					} else if (wp.equals(WeaponPerk.SHOVEL) && shovelList.contains(state.getMaterial())) { return pd; }
+				}
+			}
+		return null;
+	}
+
+
+
 	@Override
 	public float getReach(EntityPlayer p, ItemStack is) {
 		float reach = 0F;
 		for (PartData pd : getParts(is).values()) {
-			reach += TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal()).getRange();
+			if (!pd.getPart().equals(StaticRefs.GUARD)) reach += AbstractWeaponConfigOverlord.lookup(pd).getRange();
 			//System.out.println(reach+" "+pd.getPart());
 		}
-
+		//System.out.println(reach);
 		return reach;
 	}
 
@@ -254,87 +347,24 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return false;
 	}
 
+	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
+		for (PartData pd : getParts(stack).values()) {
+			WeaponStatWrapper wsw = AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal());
+			for (WeaponPerk wp : wsw.getPerks()) {
+				if (wp != null) wp.hitEntity(attacker, target, stack);
+			}
+		}
+		return super.hitEntity(stack, target, attacker);
+	}
+
 	@Override
 	public float hungerUsed(ItemStack i) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	@Override
-	public boolean isValidAddition(ItemStack is, String s, PartData pd) {
-		//check if the pd actually works
-		ArrayList<String> perks = new ArrayList<String>();
-		WeaponStatWrapper wsw = pd.getWeaponSW();
-		if (wsw == null) {
-			//System.out.println("proceeding");
-			return false;//can throw null
-		}
-		//System.out.println(getParts(is));
-		//check 
-		for (PartData p : getParts(is).values()) {
-			//System.out.println(p);
-			if (p != null) {
-				//System.out.println(p.toString());
-				if (p.isValid()) {
-					if (TaoConfigs.weapc.lookup(p.getPart(), p.getOrdinal()) != null) {
-						WeaponStatWrapper w = TaoConfigs.weapc.lookup(p.getPart(), p.getOrdinal());
-						for (WeaponPerk wp : w.getPerks())
-							if (wp != null) perks.add(wp.name);
-					}
-				}
-			}
-		}
-		for (WeaponPerk wp : wsw.getPerks())
-			if (wp != null) perks.add(wp.name);
-		{
-			//System.out.println(perks);
-			for (String bl : wsw.getBlacklist()) {
-				//System.out.println("blacklist is " + bl);
-				if (perks.contains(bl) && !bl.isEmpty()) {
-					//System.out.println(bl+" is in the blacklist");
-					return false;
-				}
-			}
-			for (String wl : wsw.getWhitelist()) {
-				//System.out.println("whitelist is " + wl);
-				if (!perks.contains(wl) && !wl.replace(" ", "").equals("")) {
-					//System.out.println(wl+" is not in the whitelist");
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public boolean isValidConfiguration(ItemStack is) {
-		if (is == null) return false;
-		if (is.getItem() != TaoItems.weap) return false;
-		for (Entry<String, PartData> e : this.getParts(is).entrySet()) {
-			if (!this.isValidAddition(is, e.getKey(), e.getValue())) return false;
-		}
-		return true;
-	}
-
-	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
-		finalStat(stack, deriveStats(stack));
-	}
-
-	@Override
-	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		return false;
-	}
-
-	@Override
-	public void setAffinities(ItemStack is, float... affinities) {
-		for (int a = 0; a < Math.min(NUMOFELEM, affinities.length); a++) {
-			setAffinity(is, a, affinities[a]);
-		}
-	}
-
-	@Override
-	public void setAffinity(ItemStack is, int element, float affinity) {
-		getStorage(is).setFloat("element" + element, affinity);
+	public boolean isBroken(ItemStack stack){
+		return this.getMaxDamage(stack)-this.getDamage(stack)<=1;
 	}
 
 	/*private float atk(ItemStack is) {
@@ -357,125 +387,59 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return ret;
 	}*/
 
+	public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand)
+    {
+		//System.out.println(hand.equals(EnumHand.OFF_HAND));
+		if(hand.equals(EnumHand.OFF_HAND)&&getReach(playerIn,stack)*getReach(playerIn,stack)>=playerIn.getDistanceSq(target)){
+			Taoism.net.sendToServer(new PacketExtendThyReach(target.getEntityId(), false));
+			playerIn.swingArm(hand);
+			return true;
+		}
+        return false;
+    }
+
+	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
+		finalStat(stack, deriveStats(stack));
+	}
+
 	@Override
-	public boolean setPart(String partName, ItemStack is, PartData addition) {
-		//if (!partList.contains(partName)) return false;
-		if (addition == null) {
-			System.out.println("null parts what");
-			return false;
+	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+		//final HandlePerk handle = getPart(stack, StaticRefs.HANDLE).getWeaponSW().getHandle();
+		//if ((handle.equals(HandlePerk.LONG)||handle.equals(HandlePerk.FLEXIBLE)) && !entityLiving.getHeldItem(EnumHand.OFF_HAND).isEmpty()) return true;
+		return false;
+	}
+
+	public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand h) {
+		ItemStack is = p.getHeldItem(h);
+		HandlePerk handle = getPart(is, StaticRefs.HANDLE).getWeaponSW().getHandle();
+		if (handle.equals(HandlePerk.LONG) ){
+			//if(h.equals(EnumHand.MAIN_HAND))
+			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, is);
 		}
-		if (!isValidAddition(is, partName, addition)) {
-			//System.out.println("invalid");
-			return false;
+		else if (h.equals(EnumHand.OFF_HAND)) {
+			p.swingArm(h);
 		}
-		NBTTagCompound ntc = getStorage(is);
-		ntc.setTag(partName, addition.writeToNBT(new NBTTagCompound()));
-		is.getTagCompound().setTag("TaoistParts", ntc);
-		//System.out.println("part set");
-		return true;
+		return super.onItemRightClick(w, p, h);
+	}
+	@Override
+	public void setAffinities(ItemStack is, float... affinities) {
+		for (int a = 0; a < Math.min(NUMOFELEM, affinities.length); a++) {
+			setAffinity(is, a, affinities[a]);
+		}
+	}
+	@Override
+	public void setAffinity(ItemStack is, int element, float affinity) {
+		getStorage(is).setFloat("element" + element, affinity);
+	}
+
+
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
 	}
 
 	@Override
 	public float swingSpd(ItemStack i) {
 		return getStorage(i).getFloat("spd");
-	}
-
-	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-		for (PartData pd : getParts(stack).values()) {
-			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
-			for (WeaponPerk wp : wsw.getPerks()) {
-				if (wp != null) wp.hitEntity(attacker, target, stack);
-			}
-		}
-		return super.hitEntity(stack, target, attacker);
-	}
-
-	public HashMap<WeaponPerk, Integer> getPerks(ItemStack is) {
-		HashMap<WeaponPerk, Integer> ret = new HashMap<WeaponPerk, Integer>();
-		for (PartData pd : getParts(is).values()) {
-			for (WeaponPerk wp : TaoConfigs.weapc.lookup(pd).getPerks()) {
-				if (!ret.containsKey(wp)) ret.put(wp, 0);
-				else ret.put(wp, ret.get(wp) + 1);
-			}
-		}
-		return ret;
-	}
-
-	public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
-		String repairName = "";
-
-		for (String s : getPartNames(toRepair)) {
-			if (getParts(toRepair).get(s) != null) {
-				repairName = getParts(toRepair).get(s).getMat();
-				break;
-			}
-		}
-		if (!repairName.isEmpty() && MaterialsConfig.findMat(repair).msw.equals(MaterialsConfig.findMat(repairName))) return true;
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Material> pickList = Arrays.asList(new Material[] {
-			Material.ANVIL,
-			Material.IRON,
-			Material.PISTON,
-			Material.REDSTONE_LIGHT,
-			Material.CIRCUITS,
-			Material.PACKED_ICE,
-			Material.ROCK,
-			Material.ICE,
-			Material.GLASS });
-	@SuppressWarnings("unchecked")
-	public List<Material> shovelList = Arrays.asList(new Material[] {
-			Material.CAKE,
-			Material.CLAY,
-			Material.CRAFTED_SNOW,
-			Material.GRASS,
-			Material.GROUND,
-			Material.CARPET,
-			Material.SAND,
-			Material.SNOW });
-	@SuppressWarnings("unchecked")
-	public List<Material> axeList = Arrays.asList(new Material[] {
-			Material.CACTUS,
-			Material.CLOTH,
-			Material.CORAL,
-			Material.GOURD,
-			Material.WOOD });
-	@SuppressWarnings("unchecked")
-	public List<Material> scytheList = Arrays.asList(new Material[] {
-			Material.LEAVES,
-			Material.PLANTS,
-			Material.VINE });
-
-	public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
-		if (getPartThatCanHarvestBlock(stack, state) != null) { return true; }
-		//System.out.println(ret);
-		return super.canHarvestBlock(state, stack);
-	}
-
-	@Nullable
-	public PartData getPartThatCanHarvestBlock(ItemStack is, IBlockState state) {
-		for (PartData pd : getParts(is).values())
-			for (WeaponPerk wp : pd.getWeaponSW().getPerks()) {
-				if (wp != null) {
-					if (wp.equals(WeaponPerk.PICK) && pickList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.AXE) && axeList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.SCYTHE) && scytheList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.SHOVEL) && shovelList.contains(state.getMaterial())) { return pd; }
-				}
-			}
-		return null;
-	}
-
-	public float getDestroySpeed(ItemStack stack, IBlockState state) {
-
-		float ret = super.getDestroySpeed(stack, state);
-		if (getPartThatCanHarvestBlock(stack, state) != null) ret = Math.max(ret, getPartThatCanHarvestBlock(stack, state).getMatSW().getDigSpeed());
-		return ret;
 	}
 
 	private float[] deriveStats(ItemStack is) {
@@ -490,7 +454,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		int numofparts = 0;
 		for (PartData pd : getParts(is).values()) {
 
-			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
+			WeaponStatWrapper wsw = AbstractWeaponConfigOverlord.lookup(pd);
 			if (wsw == null || MaterialsConfig.findMat(pd.getMat()) == null) {
 				//System.out.println(TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal()));
 				//System.out.println(MaterialsConfig.findMat(pd.getMat()));
@@ -498,11 +462,13 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 				continue;
 			}
 			ret[0] += wsw.getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
-			ret[1] += wsw.getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
+			float bigdamage = wsw.getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
+			//if(ret[1]<bigdamage)ret[1]=bigdamage;
+			ret[1] += bigdamage;
 			//dur
 			ret[2] += wsw.getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
 			//ran
-			ret[3] += wsw.getRange();
+			if (!pd.getWeaponSW().getClassification().equals(StaticRefs.GUARD)) ret[3] += wsw.getRange();
 			//kin moku sui hi do
 			ret[4] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
 			ret[5] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
@@ -514,21 +480,44 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 			numofparts++;
 			//} else System.out.println("null part");
 		}
-		if (numofparts != 0) for (int x = 0; x < ret.length; x++) {
-			 ret[x] /= numofparts;//if (x < 4)
+		if (numofparts != 0) for (int x = 4; x < ret.length; x++) {
+			ret[x] /= numofparts;//if (x < 4)
+			
 		}
+		ret[2]*=(4/numofparts);
+		//ret[0]/=4;
 		//System.out.println(ret);
 		return ret;
 	}
 
 	private float fastatk(ItemStack is) {
-		if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
-		return is.getTagCompound().getFloat("dam");
+		float atk = 0F;
+		int counter = 0;
+		for (PartData pd : getParts(is).values()) {
+			if (!pd.getPart().equals(StaticRefs.GUARD)) {
+				//if(atk<pd.getWeaponSW().getDamageMultiplier() * pd.getMatSW().damageOrSpringiness;)
+				atk += pd.getWeaponSW().getDamageMultiplier() * pd.getMatSW().damageOrSpringiness;
+				counter++;
+			}
+			//System.out.println(reach+" "+pd.getPart());
+		}
+		if (counter != 0) atk /= counter;
+		//System.out.println(reach);
+		return atk;
 	}
 
 	private float fastspd(ItemStack is) {
-		if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
-		return is.getTagCompound().getFloat("spd");
+		float spd = 0F;
+		int counter = 0;
+		for (PartData pd : getParts(is).values()) {
+			if (pd.getWeaponSW().getClassification().equals(StaticRefs.POMMEL)) spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().mass;
+			spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().mass;
+			counter++;
+			//System.out.println(reach+" "+pd.getPart());
+		}
+		//System.out.println(reach);
+		if (counter != 0) spd /= (counter);
+		return spd;
 	}
 
 	private void finalStat(ItemStack is, float... stats) {
@@ -542,10 +531,14 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		//upgrade(is, stats[1], stats[0]);
 	}
 
-	private NBTTagCompound getStorage(ItemStack is) {
-		if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
-		return is.getTagCompound().getCompoundTag("TaoistParts");
+	private String getName(ItemStack stack) {
+		String ret = "";
+		for (PartData pd : getParts(stack).values()) {
+			pd.getWeaponSW().getClassification();
+		}
+		return ret;
 	}
+
 
 	private int magicness(ItemStack is) {
 		int ret = 1;

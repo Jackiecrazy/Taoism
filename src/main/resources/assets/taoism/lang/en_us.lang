@@ -2,6 +2,48 @@
 item.weapon.name=Weapon
 
 <Weapon Parts>
+part.name=Name:%s
+part.type=Type:%s
+part.cost=Cost:%s units
+part.range=Reach:&s
+
+part.damagetypem0=Blunt
+part.damagetypem1=Slicing
+part.damagetypem2=Piercing
+
+part.damagem=Damage multiplier:%s
+part.durabilitym=Durability multiplier:%s
+part.speedm=Swing speed multiplier:%s
+part.elementm=Elemental multiplier:%s
+
+part.damage=Damage:%s
+part.durability=Durability:%s
+part.speed=Swing speed:%s
+part.element=Elements:%s
+
+part.shift=SHIFT for stat info...
+part.alt=ALT for handle info...
+part.ctrl=CTRL for perks...
+part.perks=Possessing perks:
+part.handledhandles=Can be applied to:
+handle.name=Handle type:%s
+perk.bleed.name=bleed
+perk.daze.name=daze
+perk.hook.name=hook
+perk.parry.name=parry
+perk.axe.name=axe
+perk.shovel.name=shovel
+perk.pick.name=pickaxe
+perk.hoe.name=hoe
+perk.scythe.name=scythe
+perk.control.name=controlling
+perk.fear.name=fear
+perk.cleave.name=cleave
+handle.flexible.name=flexible
+handle.horizontal.name=horizontal
+handle.short.name=short
+handle.medium.name=medium
+handle.long.name=long
 
 <Resources>
 

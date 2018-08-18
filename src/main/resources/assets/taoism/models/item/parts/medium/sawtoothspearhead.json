@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/medium/sawtoothspear"
+    "layer0": "taoism:weapon/long/sawtoothspear"
   }
 }

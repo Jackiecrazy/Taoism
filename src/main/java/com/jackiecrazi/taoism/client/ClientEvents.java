@@ -19,7 +19,7 @@ import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.client.stupidmodels.ModelWeapon;
 import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
@@ -28,8 +28,9 @@ public class ClientEvents {
 	public static void model(ModelRegistryEvent e) {
 		ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(TaoItems.bow, 0, new ModelResourceLocation(TaoItems.bow.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
 
-		for (WeaponStatWrapper a : TaoConfigs.weapc.enabledParts.values()) {
+		for (WeaponStatWrapper a : AbstractWeaponConfigOverlord.enabledParts) {
 			//int damage = TaoConfigs.weapc.lookupDamage(a.getName());
 
 			/*for (MaterialStatWrapper m : MaterialsConfig.loggedMaterials.values()) {
@@ -37,15 +38,13 @@ public class ClientEvents {
 				ModelBakery.registerItemVariants(TaoItems.parts, new ModelResourceLocation(Taoism.MODID + ":parts/"+  m.name +"/" + a.getName().toLowerCase().replace(" ", "") , "inventory"));
 
 			}*/
-			//ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, damage, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
-
+			
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
 			//ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
 			//if(a.isHandle())ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
-			for (HandlePerk hp : WeaponPerk.REGISTEREDHANDLES.values()) {
+			for (HandlePerk hp : WeaponPerk.REGISTEREDHANDLES) {
 				if (a.acceptsHandle(hp)){
-					
-					ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
+					ModelBakery.registerItemVariants(TaoItems.part, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
 				}
 			}
 			//ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
@@ -53,7 +52,7 @@ public class ClientEvents {
 		//ModelLoader.setCustomModelResourceLocation(TaoItems.dummy, 0, new ModelResourceLocation(Taoism.MODID + ":parts/part", "inventory"));
 		//vvvv not being called???
 		//System.out.println("eyy");
-		ModelLoader.setCustomMeshDefinition(TaoItems.dummy, new ItemMeshDefinition() {
+		ModelLoader.setCustomMeshDefinition(TaoItems.part, new ItemMeshDefinition() {
 
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
@@ -61,8 +60,8 @@ public class ClientEvents {
 					return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
 				}
 				NBTTagCompound ntc = stack.getTagCompound();
-				//System.out.println(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()].toString() + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
-				return new ModelResourceLocation(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.keySet().toArray()[stack.getItemDamage()] + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""), "inventory");
+				//System.out.println(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.get(stack.getItemDamage()).name + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
+				return new ModelResourceLocation(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.get(stack.getItemDamage()).name + "/" + AbstractWeaponConfigOverlord.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName(), "inventory");
 				
 			}
 
@@ -71,8 +70,8 @@ public class ClientEvents {
 
 	public static int veryLazy(String s) {
 		int ret = 0;
-		for (Object st : WeaponPerk.REGISTEREDHANDLES.keySet().toArray()) {
-			if (st.equals(s)) {
+		for (HandlePerk st : WeaponPerk.REGISTEREDHANDLES) {
+			if (st.name.equals(s)) {
 				//System.out.println(ret);
 				return ret;
 			}

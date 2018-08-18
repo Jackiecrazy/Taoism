@@ -35,6 +35,7 @@ import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.config.WeaponConfigOverlord;
 
 public class ModelWeapon implements IBakedModel {
 
@@ -79,7 +80,7 @@ public class ModelWeapon implements IBakedModel {
 
 		private IBakedModel retrieve(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
 
-			IBakedModel[] a = new IBakedModel[TaoConfigs.weapc.enabledPartsByType.size()];
+			IBakedModel[] a = new IBakedModel[WeaponConfigOverlord.enabledPartsByType.size()];
 			//int b = 0;
 			//System.out.println("a");
 			/*for (PartData p : TaoItems.weap.getParts(stack).values()) {
@@ -148,7 +149,7 @@ public class ModelWeapon implements IBakedModel {
 			if (pd == null){
 				return Pair.of(this, null);
 			}
-			WeaponStatWrapper wsw = TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal());
+			WeaponStatWrapper wsw = WeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal());
 			if (wsw == null) return Pair.of(this, null);
 			Matrix4f ret = new Matrix4f();
 			Optional<TRSRTransformation> trsr = UsefulTransformations.transforms.get("held").apply(Optional.of(t));
@@ -182,7 +183,7 @@ public class ModelWeapon implements IBakedModel {
 						ret.m33 = 1f;
 						break;
 					}
-					if (wp.equals(WeaponPerk.CHAIN)) {
+					if (wp.equals(WeaponPerk.FLEXIBLE)) {
 						ret.mul(3f);
 						ret.m33 = 1f;
 						break;
@@ -218,7 +219,7 @@ public class ModelWeapon implements IBakedModel {
 			}*/
 			PartData handleRef = TaoItems.weap.getPart(weap, StaticRefs.HANDLE);
 			if(handleRef==null){
-				System.out.println("null!");
+				//System.out.println("null!");
 				return quads;
 			}
 			for (PartData p : TaoItems.weap.getParts(weap).values())
@@ -228,7 +229,7 @@ public class ModelWeapon implements IBakedModel {
 					//Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, worldIn, entitylivingbaseIn);
 					ItemStack is = p.toStack();
 					for (WeaponPerk wp : handleRef.getWeaponSW().getPerks()) {
-						if (ClientEvents.veryLazy(wp.name) != 0) is.setItemDamage(ClientEvents.veryLazy(wp.name));
+						if (wp!=null&&ClientEvents.veryLazy(wp.name) != 0) is.setItemDamage(ClientEvents.veryLazy(wp.name));
 					}
 					//System.out.println(is.getItemDamage());
 					IBakedModel quaddy = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(is, null, null);

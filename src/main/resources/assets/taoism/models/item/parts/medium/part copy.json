@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/medium/sword"
+    "layer0": "taoism:weapon/long/sword"
   },
 "overrides": [
     {

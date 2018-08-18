@@ -5,10 +5,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import com.jackiecrazi.taoism.common.block.special.BlockWorkstation;
-import com.jackiecrazi.taoism.common.tile.TileWorkstation;
 
 public class TaoBlocks {
 	public static BlockWorkstation workstation=new BlockWorkstation();

@@ -27,6 +27,8 @@ public class StaticRefs {
 	public static final String[] weaponparts={ HEAD,HANDLE,GUARD,POMMEL };
 	public static final String STAVE="stave",CABLE="cable",STRING="string",SIYAH="siyah";
 	public static final String[] bowparts={ STAVE,STRING,SIYAH };
+	public static final String SHAFT="shaft", FLETCH="fletch";
+	public static final String[] arrowparts={HEAD,SHAFT,FLETCH};
 
 	public static void populateLists(){
 		Iterator<Potion> i=Potion.REGISTRY.iterator();

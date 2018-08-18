@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/medium/crescent"
+    "layer0": "taoism:weapon/long/crescent"
   }
 }

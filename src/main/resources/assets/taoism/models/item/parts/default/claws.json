@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/default/claws"
+    "layer0": "taoism:weapon/short/claws"
   }
 }

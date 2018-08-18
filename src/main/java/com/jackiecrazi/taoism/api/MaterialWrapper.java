@@ -9,4 +9,8 @@ public class MaterialWrapper {
 		msw = m;
 		amount = amnt;
 	}
+	
+	public boolean isAnvilWorked(){
+		return msw.name.startsWith("ingot");
+	}
 }

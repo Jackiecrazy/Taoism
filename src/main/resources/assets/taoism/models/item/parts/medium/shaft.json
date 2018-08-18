@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/medium/shaft"
+    "layer0": "taoism:weapon/long/shaft"
   },
 "display": {
         "thirdperson": {

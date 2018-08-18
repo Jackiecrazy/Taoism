@@ -2,6 +2,44 @@
 item.weapon.name=武器
 
 <Weapon Parts>
+part.name=名字:%s
+part.type=类别:%s
+part.cost=造价:%s单位
+part.range=距离:&s
+
+part.damagem=伤害倍率:%s
+part.durabilitym=耐久倍率:%s
+part.speedm=挥动速度倍率:%s
+part.elementm=元素亲和倍率:%s
+
+part.damage=伤害:%s
+part.durability=耐久:%s
+part.speed=挥动速度:%s
+part.element=元素亲和:%s
+
+part.shift=SHIFT显示数据...
+part.alt=ALT显示手柄相关...
+part.ctrl=CTRL显示能力...
+part.perks=拥有能力:
+part.handledhandles=可被用于:
+handle.name=手柄类型:%s
+perk.bleed.name=流血
+perk.daze.name=晕厥
+perk.hook.name=拉拽
+perk.parry.name=格挡
+perk.axe.name=斧
+perk.shovel.name=铲
+perk.pick.name=镐
+perk.hoe.name=锄
+perk.scythe.name=镰
+perk.control.name=控制
+perk.fear.name=恐惧
+perk.cleave.name=破甲
+handle.flexible.name=绳索
+handle.horizontal.name=横柄
+handle.short.name=短柄
+handle.medium.name=中柄
+handle.long.name=长柄
 
 <Resources>
 
@@ -17,7 +55,7 @@ metal1.inscription=十步一杀
 metal2.inscription=千里不留
 metal3.inscription=都护铁衣
 metal4.inscription=满城金甲
-metal5.inscription=钢之试炼
+metal5.inscription=高堂明镜
 metal6.inscription=铁马冰河
 metal7.inscription=一夫当关
 metal8.inscription=金戈铁马

@@ -2,6 +2,45 @@
 item.weapon.name=
 
 <Weapon Parts>
+part.name=名字:%s
+part.type=類別:%s
+part.cost=造價:%s單位
+part.range=距離:&s
+
+part.damagem=傷害倍率:%s
+part.durabilitym=耐久倍率:%s
+part.speedm=揮動速度倍率:%s
+part.elementm=元素親和倍率:%s
+
+part.damage=傷害:%s
+part.durability=耐久:%s
+part.speed=揮動速度:%s
+part.element=元素親和:%s
+
+part.shift=SHIFT顯示數據...
+part.alt=ALT顯示手柄相關...
+part.ctrl=CTRL顯示能力...
+part.perks=擁有能力:
+part.handledhandles=可被用於:
+handle.name=手柄類型:%s
+perk.bleed.name=流血
+perk.daze.name=暈厥
+perk.hook.name=拉拽
+perk.parry.name=格擋
+perk.axe.name=斧
+perk.shovel.name=鏟
+perk.pick.name=鎬
+perk.hoe.name=鋤
+perk.scythe.name=鐮
+perk.control.name=控制
+perk.fear.name=恐懼
+perk.cleave.name=破甲
+handle.flexible.name=繩索
+handle.horizontal.name=橫柄
+handle.short.name=短柄
+handle.medium.name=中柄
+handle.long.name=長柄
+
 
 <Resources>
 
@@ -18,7 +57,7 @@ metal1.inscription=十步一殺
 metal2.inscription=千里不留
 metal3.inscription=都護鐵衣
 metal4.inscription=滿城金甲
-metal5.inscription=鋼之試煉
+metal5.inscription=高堂明鏡
 metal6.inscription=鐵馬冰河
 metal7.inscription=一夫當關
 metal8.inscription=金戈鐵馬
@@ -65,7 +104,7 @@ fire11.inscription=紅油火鍋
 earth1.inscription=塵埃落定
 earth2.inscription=千錘萬鑿
 earth3.inscription=化作春泥
-earth4.inscription=山亦無稜
+earth4.inscription=山亦無陵
 earth5.inscription=三十功名
 earth6.inscription=一騎紅塵
 earth7.inscription=亂石穿空

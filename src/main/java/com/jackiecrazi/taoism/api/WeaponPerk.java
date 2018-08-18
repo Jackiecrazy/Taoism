@@ -1,10 +1,12 @@
 package com.jackiecrazi.taoism.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -14,7 +16,7 @@ import com.jackiecrazi.taoism.potions.TaoPotions;
 
 public abstract class WeaponPerk {
 	public static final HashMap<String, WeaponPerk> REGISTERED = new HashMap<String, WeaponPerk>();
-	public static final HashMap<String, HandlePerk> REGISTEREDHANDLES = new HashMap<String, HandlePerk>();
+	public static final ArrayList<HandlePerk> REGISTEREDHANDLES = new ArrayList<HandlePerk>();
 
 	@Nullable
 	public static WeaponPerk get(String s) {
@@ -42,6 +44,7 @@ public abstract class WeaponPerk {
 
 		@Override
 		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f)
 			uke.knockBack(seme, 1F, (double) -MathHelper.sin(seme.rotationYaw * 0.017453292F), (double) (MathHelper.cos(seme.rotationYaw * 0.017453292F)));
 		}
 
@@ -67,21 +70,38 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk CONTROL = new WeaponPerk("control") {
 	};
 	public static final WeaponPerk FEAR = new WeaponPerk("fear") {
-		//????
+		@Override
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f){
+				uke.setRevengeTarget(null);
+			}
+			
+		}
 	};
 	public static final WeaponPerk CLEAVE = new WeaponPerk("cleave") {
-		//damage armor?
+		@Override
+		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f){
+				//damage armor
+				for(ItemStack is:uke.getArmorInventoryList()){
+					if(!is.isEmpty()){
+						is.damageItem(1, uke);
+					}
+				}
+			}
+			
+		}
 	};
-	public static final HandlePerk CHAIN = new HandlePerk("chain") {
-	};
-	public static final HandlePerk HORIZONTAL = new HandlePerk("horizontal") {
-	};
-	public static final HandlePerk SHORT = new HandlePerk("short") {
-	};
-	public static final HandlePerk MEDIUM = new HandlePerk("medium") {
-	};
-	public static final HandlePerk LONG = new HandlePerk("long") {
-	};
+	/**
+	 * only used as a dummy.
+	 */
+	@SuppressWarnings("unused")
+	private static final HandlePerk DEFAULT = new HandlePerk("default");
+	public static final HandlePerk FLEXIBLE = new HandlePerk("flexible");
+	public static final HandlePerk HORIZONTAL = new HandlePerk("horizontal");
+	public static final HandlePerk SHORT = new HandlePerk("short");
+	public static final HandlePerk MEDIUM = new HandlePerk("medium");
+	public static final HandlePerk LONG = new HandlePerk("long");
 	public final String name;
 
 	public static WeaponPerk lookUp(String s) {
@@ -97,11 +117,11 @@ public abstract class WeaponPerk {
 
 	}
 
-	public static abstract class HandlePerk extends WeaponPerk {
+	public static class HandlePerk extends WeaponPerk {
 
 		public HandlePerk(String name) {
 			super(name);
-			REGISTEREDHANDLES.put(name, this);
+			REGISTEREDHANDLES.add(this);
 		}
 
 	}

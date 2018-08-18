@@ -17,7 +17,7 @@ public class CommonProxy {
     {
 		int dis=0;
     	Taoism.net.registerMessage(ExtendReachHandler.class, PacketExtendThyReach.class, dis++, Side.SERVER);
-
+    	
     }
 
     public void init(FMLInitializationEvent event)

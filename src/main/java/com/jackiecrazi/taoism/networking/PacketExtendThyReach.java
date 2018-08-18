@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
 
 public class PacketExtendThyReach implements IMessage {
@@ -43,7 +44,7 @@ public class PacketExtendThyReach implements IMessage {
 		@Override
 		public IMessage onMessage(final PacketExtendThyReach message,
 				MessageContext ctx) {
-			System.out.println("packet acquired!");
+			//System.out.println("packet acquired!");
 			final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
 					.getPlayerEntityFromContext(ctx);
 
@@ -51,7 +52,7 @@ public class PacketExtendThyReach implements IMessage {
 					.getEntityByID(message.entityId);
 			ItemStack heldItem = thePlayer.getHeldItem(message.isMainHand?EnumHand.MAIN_HAND:EnumHand.OFF_HAND);
 			if (heldItem != null && theEntity != null) {
-				System.out.println("nonnull again!");
+				//System.out.println("nonnull again!");
 				if (heldItem.getItem() instanceof ICustomRange
 						&& theEntity.isEntityAlive()) {
 					ICustomRange theExtendedReachWeapon = (ICustomRange) heldItem.getItem();
@@ -62,8 +63,7 @@ public class PacketExtendThyReach implements IMessage {
 							* theExtendedReachWeapon.getReach(thePlayer,
 									heldItem);
 					if (reachSq >= distanceSq) {
-							thePlayer
-									.attackTargetEntityWithCurrentItem(theEntity);
+							NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, message.isMainHand?EnumHand.MAIN_HAND:EnumHand.OFF_HAND);
 					}
 
 				}
