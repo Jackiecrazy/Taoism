@@ -1,13 +1,15 @@
 package com.jackiecrazi.taoism.client.stupidmodels;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.jackiecrazi.taoism.api.PartData;
+import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.WeaponPerk;
+import com.jackiecrazi.taoism.api.WeaponStatWrapper;
+import com.jackiecrazi.taoism.client.ClientEvents;
+import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.config.WeaponConfigOverlord;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -23,19 +25,14 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.model.TRSRTransformation;
-
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.jackiecrazi.taoism.api.PartData;
-import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.api.WeaponPerk;
-import com.jackiecrazi.taoism.api.WeaponStatWrapper;
-import com.jackiecrazi.taoism.client.ClientEvents;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.config.TaoConfigs;
-import com.jackiecrazi.taoism.config.WeaponConfigOverlord;
+import javax.annotation.Nullable;
+import javax.vecmath.Matrix4f;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class ModelWeapon implements IBakedModel {
 
@@ -259,12 +256,10 @@ public class ModelWeapon implements IBakedModel {
 	private static float getScale(ItemStack i, PartData p) {
 		switch (p.getPart()) {
 		//these don't need scaling... right?
-		case StaticRefs.POMMEL:
+		case StaticRefs.FITTING:
 			return 1f;
 		case StaticRefs.HANDLE:
 			return 0.999f;
-		case StaticRefs.GUARD:
-			return 1f;//slight scale up to make it pop
 		case StaticRefs.HEAD:
 			return 1f;
 		default:

@@ -1,9 +1,8 @@
 package com.jackiecrazi.taoism.api;
 
-import javax.annotation.Nullable;
-
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
+
+import javax.annotation.Nullable;
 
 public class WeaponStatWrapper {
 	//head goes on the tip of the stick 
@@ -39,6 +38,36 @@ public class WeaponStatWrapper {
 		ordinal = order;
 		handleList=synthesise(acceptableHandles);
 	}
+
+    /**
+     * Only used for the default config. Do not use by yourself!
+     */
+	public WeaponStatWrapper(String name, int cost, double range, double speed, double damage, double durmultiplier, double elem, int damageType, boolean isHard, HandlePerk... handle) {
+		this.name = name;
+		this.cost = cost;
+		this.range = (float)range;
+		this.speed = (float)speed;
+		this.damage = (float)damage;
+		this.durabilityMultiplier = (float)durmultiplier;
+		this.dtype = damageType;
+		this.type = isHard?MaterialType.HARD:MaterialType.SOFT;
+		elementalMultiplier = (float)elem;
+		handleList=handle;
+	}
+    /**
+     * Only used for the default config. Do not use by yourself!
+     */
+    public WeaponStatWrapper(String name, int cost, double range, double speed, double damage, double durmultiplier, double elem, int damageType, boolean isHard) {
+        this.name = name;
+        this.cost = cost;
+        this.range = (float)range;
+        this.speed = (float)speed;
+        this.damage = (float)damage;
+        this.durabilityMultiplier = (float)durmultiplier;
+        this.dtype = damageType;
+        this.type = isHard?MaterialType.HARD:MaterialType.SOFT;
+        elementalMultiplier = (float)elem;
+    }
 	
 	private HandlePerk[] synthesise(String... b){
 		if (b.length == 1 && b[0].equals(" ")) { return new HandlePerk[0]; }
@@ -102,30 +131,6 @@ public class WeaponStatWrapper {
 
 	public String getName() {
 		return name;
-	}
-
-	public WeaponStatWrapper(String complex) {
-		name = complex.substring(0, complex.indexOf(":"));
-		String lesscomplex = complex.substring(complex.indexOf(":") + 1);
-		//System.out.println(lesscomplex);
-		String[] parsed = lesscomplex.split(",");
-		try {
-
-			cost = Integer.valueOf(parsed[0].trim());
-			range = Float.valueOf(parsed[1].trim());
-			speed = Float.valueOf(parsed[2].trim());
-			damage = Float.valueOf(parsed[3].trim());
-			durabilityMultiplier = Float.valueOf(parsed[4].trim());
-			if (parsed.length > 5) elementalMultiplier = Float.valueOf(parsed[5].trim());
-		} catch (Exception e) {
-			Taoism.logger.warn("malformed string " + complex + " for weapon stats, assuming default of 1 on everything");
-			e.printStackTrace();
-			cost = 1;
-			range = 1f;
-			speed = 1f;
-			damage = 1f;
-			durabilityMultiplier = 1f;
-		}
 	}
 
 	/**
@@ -210,4 +215,22 @@ public class WeaponStatWrapper {
 	public HandlePerk[] getHandleList() {
 		return handleList;
 	}
+	public String[] handle(){
+	    String[] ret=new String[0];
+	    if(handleList==null)return ret;
+	    ret=new String[handleList.length];
+	    for(int a=0;a<handleList.length;a++){
+	        ret[a]=handleList[a].name;
+        }
+        return ret;
+    }
+    public String[] perk(){
+        String[] ret=new String[0];
+        if(behaviour==null)return ret;
+        ret=new String[behaviour.length];
+        for(int a=0;a<behaviour.length;a++){
+            ret[a]=behaviour[a].name;
+        }
+        return ret;
+    }
 }

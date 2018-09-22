@@ -1,20 +1,21 @@
 package com.jackiecrazi.taoism.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import javax.annotation.Nullable;
-
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoArrow;
+import com.jackiecrazi.taoism.potions.TaoPotions;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-import com.jackiecrazi.taoism.potions.TaoPotions;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-public abstract class WeaponPerk {
+public class WeaponPerk {
 	public static final HashMap<String, WeaponPerk> REGISTERED = new HashMap<String, WeaponPerk>();
 	public static final ArrayList<HandlePerk> REGISTEREDHANDLES = new ArrayList<HandlePerk>();
 
@@ -26,61 +27,59 @@ public abstract class WeaponPerk {
 	public static final WeaponPerk BLEED = new WeaponPerk("bleed") {
 
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
 			if (uke.getActivePotionEffect(TaoPotions.Bleed) == null) uke.addPotionEffect(new PotionEffect(TaoPotions.Bleed, 80, 0));
 			else uke.addPotionEffect(new PotionEffect(TaoPotions.Bleed, uke.getActivePotionEffect(TaoPotions.Bleed).getDuration(), uke.getActivePotionEffect(TaoPotions.Bleed).getAmplifier() + 1));
+			return 1;
 		}
 
 	};
 	public static final WeaponPerk DAZE = new WeaponPerk("daze") {
 
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
 			uke.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 10, 0));
+			return 1;
 		}
 
 	};
 	public static final WeaponPerk HOOK = new WeaponPerk("hook") {
 
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
 			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f)
 			uke.knockBack(seme, 1F, (double) -MathHelper.sin(seme.rotationYaw * 0.017453292F), (double) (MathHelper.cos(seme.rotationYaw * 0.017453292F)));
+			return 1;
 		}
 
 	};
 	public static final WeaponPerk PARRY = new WeaponPerk("parry") {
 
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
 			//what do?
+            return 1;
 		}
 
 	};
-	public static final WeaponPerk AXE = new WeaponPerk("axe") {
-	};
-	public static final WeaponPerk SHOVEL = new WeaponPerk("spade") {
-	};
-	public static final WeaponPerk PICK = new WeaponPerk("pick") {
-	};
-	public static final WeaponPerk HOE = new WeaponPerk("hoe") {
-	};
-	public static final WeaponPerk SCYTHE = new WeaponPerk("scythe") {
-	};
-	public static final WeaponPerk CONTROL = new WeaponPerk("control") {
-	};
+	public static final WeaponPerk AXE = new WeaponPerk("axe");
+	public static final WeaponPerk SHOVEL = new WeaponPerk("spade");
+	public static final WeaponPerk PICK = new WeaponPerk("pick");
+	public static final WeaponPerk HOE = new WeaponPerk("hoe");
+	public static final WeaponPerk SCYTHE = new WeaponPerk("scythe");
+	public static final WeaponPerk CONTROL = new WeaponPerk("control");
 	public static final WeaponPerk FEAR = new WeaponPerk("fear") {
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
-			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f){
-				uke.setRevengeTarget(null);
-			}
-			
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
+			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f) {
+                uke.setRevengeTarget(null);
+            }
+			return 1;
 		}
 	};
 	public static final WeaponPerk CLEAVE = new WeaponPerk("cleave") {
 		@Override
-		public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
 			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f){
 				//damage armor
 				for(ItemStack is:uke.getArmorInventoryList()){
@@ -89,9 +88,10 @@ public abstract class WeaponPerk {
 					}
 				}
 			}
-			
+			return 1;
 		}
 	};
+
 	/**
 	 * only used as a dummy.
 	 */
@@ -113,7 +113,23 @@ public abstract class WeaponPerk {
 		this.name = name;
 	}
 
-	public void hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i) {
+	public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
+		return 1;
+	}
+
+	public void arrowConstruct(EntityTaoArrow arrow, EntityLivingBase seme, int level){
+
+	}
+
+    public void arrowTickFly(EntityTaoArrow arrow, EntityLivingBase seme, int level){
+
+    }
+
+    public void arrowTickLand(EntityTaoArrow arrow, EntityLivingBase seme, int level, int ticksInGround){
+
+    }
+
+	public void onHitBlock(EntityTaoArrow arrow, EntityLivingBase seme, int level, IBlockState blockState, BlockPos pos){
 
 	}
 

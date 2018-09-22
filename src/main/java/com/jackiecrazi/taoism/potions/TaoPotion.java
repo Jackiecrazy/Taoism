@@ -24,10 +24,10 @@ public class TaoPotion extends Potion {
 	public void performEffect(EntityLivingBase l, int amplifier) {
 		if (this == TaoPotions.Bleed) {
 			l.attackEntityFrom(DamageSource.GENERIC, amplifier);
-			if (amplifier >= 5) {
-				l.attackEntityFrom(DamageSource.GENERIC, l.getMaxHealth() / 10);
-				l.removePotionEffect(TaoPotions.Bleed);
-			}
+//			if (amplifier >= 5) {
+//				l.attackEntityFrom(DamageSource.GENERIC, l.getMaxHealth() / 10);
+//				l.removePotionEffect(TaoPotions.Bleed);
+//			}//essentially useless so archived for now
 		}
 		if (this == TaoPotions.Hide)
 		;

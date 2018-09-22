@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/long/spade"
+    "layer0": "taoism:weapon/short/spade"
   }
 }

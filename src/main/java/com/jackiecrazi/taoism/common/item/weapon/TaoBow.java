@@ -1,14 +1,14 @@
 package com.jackiecrazi.taoism.common.item.weapon;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import javax.annotation.Nullable;
-
+import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.PartData;
+import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IAmModular;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
+import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
+import com.jackiecrazi.taoism.config.MaterialsConfig;
+import com.jackiecrazi.taoism.config.TaoConfigs;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -25,26 +25,16 @@ import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.PartData;
-import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.api.WeaponPerk;
-import com.jackiecrazi.taoism.api.WeaponStatWrapper;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IAmModular;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
-import com.jackiecrazi.taoism.config.MaterialsConfig;
-import com.jackiecrazi.taoism.config.TaoConfigs;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class TaoBow extends ItemBow implements IAmModular, IElemental {
 	public static ItemStack createRandomBow(EntityPlayer p, Random r) {
@@ -228,46 +218,6 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 	//elements: average
 
 	@Override
-	public boolean isValidAddition(ItemStack is, String s, PartData pd) {
-
-		ArrayList<String> perks = new ArrayList<String>();
-		WeaponStatWrapper wsw = AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal());
-		if (wsw == null) {
-			//System.out.println("proceeding");
-			return false;//can throw null
-		}
-		//System.out.println(wsw.getName());
-		for (PartData p : getParts(is).values())
-			if (p != null) {
-				if (AbstractWeaponConfigOverlord.lookup(p.getPart(), p.getOrdinal()) != null) {
-					WeaponStatWrapper w = AbstractWeaponConfigOverlord.lookup(p.getPart(), p.getOrdinal());
-					for (WeaponPerk wp : w.getPerks())
-						if (wp != null) perks.add(wp.name);
-				}
-			}
-		for (WeaponPerk wp : wsw.getPerks())
-			if (wp != null) perks.add(wp.name);
-		{
-			//System.out.println(perks);
-			/*for (String bl : wsw.getBlacklist()) {
-				//System.out.println("blacklist is " + bl);
-				if (perks.contains(bl) && !bl.isEmpty()) {
-					System.out.println(bl + " is in the blacklist");
-					return false;
-				}
-			}*/
-			/*for (String wl : wsw.getWhitelist()) {
-				//System.out.println("whitelist is " + wl);
-				if (!perks.contains(wl) && !wl.isEmpty() && !wl.replace(" ", "").equals("")) {
-					System.out.println(wl + " is not in the whitelist");
-					return false;
-				}
-			}*/
-		}
-		return true;
-	}
-
-	@Override
 	public boolean isValidConfiguration(ItemStack is) {
 		if (is == null) return false;
 		if (is.getItem() != TaoItems.bow) return false;
@@ -401,85 +351,10 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 		}
 	}
 
-	/*private float[] fastStats(ItemStack is) {
-		float[] ret = new float[9];
-		int numofparts = 0;
-		for (String s : getPartNames(is)) {
-			if (getPart(is, s) != null) {
-				PartData pd = getPart(is, s);
-				if (TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-					System.out.println(TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()));
-					System.out.println(MaterialsConfig.findMat(pd.getMat()));
-
-					continue;
-				}
-				ret[0] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
-				ret[1] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
-				//dur
-				ret[2] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
-				//ran
-				ret[3] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getRange();
-				//kin moku sui hi do
-				ret[4] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
-				ret[5] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
-				ret[6] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
-				ret[7] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
-				ret[8] += TaoConfigs.bowc.lookup(pd.getPart(), pd.getOrdinal()).getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
-				//(part damage modifier * material damage)/((1/(part attack time modifier*material attack time)))
-				numofparts++;
-			} else System.out.println("null part");
-		}
-		if (numofparts != 0) for (int x = 0; x < ret.length; x++) {
-			ret[x] /= numofparts;
-		}
-		return ret;
-	}*/
-
 	@Override
 	public void setAffinity(ItemStack is, int element, float affinity) {
 		getStorage(is).setFloat("element" + element, affinity);
 	}
-
-	//	public boolean isValidAddition(ItemStack base, ItemStack input){
-	//		String[] parts = new String[4];
-	//		
-	//		for (PartData pd : getParts(input).values()) {
-	//			String i=pd.getMat();
-	//			if (i == null) continue;
-	//			//if there is no overlap and each requirement is met then continue, else flash red and return false;
-	//			if (parts[(WeaponConfig.read(i)[0])] == null) {
-	//				parts[(WeaponConfig.read(i)[0])] = TaoConfigs.bowc.lookup(i).getName();
-	//			} else {
-	//				System.out.println("forgot");
-	//				return false;
-	//			}
-	//		}
-	//		ArrayList<String> perks = new ArrayList<String>();
-	//		for (int x = 0; x < 2; x++)
-	//			for (String s : parts) {
-	//				WeaponStatWrapper wsw = TaoConfigs.bowc.lookup(s);
-	//				if (wsw == null){
-	//					System.out.println("proceeding");
-	//					continue;//can throw null
-	//				}
-	//				if (x == 0) for (WeaponPerk wp : wsw.getPerks())
-	//					if (wp != null) perks.add(wp.name);
-	//					else {
-	//						for (String bl : wsw.getBlacklist())
-	//							if (perks.contains(bl)&&!bl.isEmpty()){
-	//								System.out.println(bl+" is in the blacklist");
-	//								return false;
-	//							}
-	//						for (String wl : wsw.getWhitelist())
-	//							if (!perks.contains(wl)&&!wl.isEmpty()){
-	//								System.out.println(wl+" is not in the whitelist");
-	//								return false;
-	//							}
-	//					}
-	//			}
-	//		System.out.println("success!");
-	//		return true;
-	//	}
 
 	/*public static ItemStack createBow(EntityPlayer p, World w, ItemStack... inputs) {
 		ItemStack ret = new ItemStack(TaoItems.bow);

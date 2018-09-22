@@ -1,19 +1,17 @@
 package com.jackiecrazi.taoism.api.alltheinterfaces;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.jackiecrazi.taoism.api.PartData;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.WeaponPerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
 import net.minecraft.item.ItemStack;
-
-import com.jackiecrazi.taoism.api.PartData;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 public interface IAmModular {
 	/**
@@ -48,7 +46,7 @@ public interface IAmModular {
 	 * stores a part as a name under an itemstack.
 	 * @param partName make sure you check under the individual weapons
 	 * @param is original itemstack
-	 * @param addition the itemstack that will be added. Should implement {@link IAmModular}, but I ain't checkin'
+	 * @param addition the itemstack that will be added.
 	 * @return whether it was successfully set
 	 */
 	default boolean setPart(String partName, ItemStack is, PartData addition){
@@ -81,9 +79,15 @@ public interface IAmModular {
             return false;//can throw null
         }
         //check handle
-        if (pd.getWeaponSW().isHandle()) return true;
-        if (!pd.getWeaponSW().acceptsHandle((WeaponPerk.HandlePerk) getPart(is, StaticRefs.HANDLE).getWeaponSW().getPerks()[0])) return false;
-
+		if(is.getItem()==TaoItems.weap) {
+            if (pd.getWeaponSW().isHandle()) return true;
+            if (!pd
+					.getWeaponSW()
+					.acceptsHandle((WeaponPerk.HandlePerk) getPart(is, StaticRefs.HANDLE)
+							.getWeaponSW()
+							.getPerks()[0]))
+                return false;
+        }
         return true;
 	}
 

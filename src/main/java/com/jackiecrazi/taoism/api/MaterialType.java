@@ -3,5 +3,5 @@ package com.jackiecrazi.taoism.api;
 public enum MaterialType{
 	  HARD,
 	  SOFT,
-	  FLETCHING
+	FLETCH
   }

@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism;
 
 import java.util.Random;
 
+import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -30,6 +31,9 @@ import com.jackiecrazi.taoism.potions.TaoPotions;
 
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
+	@Mod.Instance(Taoism.MODID)
+    public static Taoism INST=new Taoism();
+
 	public static String BLACK = "\u00A70";
 	public static String DARK_BLUE = "\u00A71";
 	public static String DARK_GREEN = "\u00A72";
@@ -103,6 +107,7 @@ public class Taoism {
 		TaoConfigs.init(event.getModConfigurationDirectory() + "/taoism/");
 		net=NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
 		proxy.preinit(event);
+        TaoEntities.init();
 	}
 
 	@EventHandler
