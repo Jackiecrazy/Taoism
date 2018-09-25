@@ -138,7 +138,7 @@ public class WeaponStatWrapper {
 	 */
 	public Float[] toStats() {
 		Float[] ret = new Float[6];
-		ret[0] = Float.valueOf(cost);
+		ret[0] = (float)cost;
 		ret[1] = range;
 		ret[2] = speed;
 		ret[3] = damage;

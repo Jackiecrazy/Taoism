@@ -409,7 +409,7 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 
 					continue;
 				}
-				ret[0] += AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
+				ret[0] += AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.lightness;
 				ret[1] += AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
 				//dur
 				ret[2] += AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal()).getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
@@ -491,7 +491,7 @@ public class TaoBow extends ItemBow implements IAmModular, IElemental {
 			//System.out.println(TaoConfigs.bowc.lookup(pd.getPart(), pd.getDam()));
 			//System.out.println(MaterialsConfig.findMat(pd.getMat()));//null!
 			ret = AbstractWeaponConfigOverlord.lookup(pd.getPart(), pd.getOrdinal()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.drawSpeed;
-			//System.out.println(s + "   "+TaoConfigs.bowc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).mass);
+			//System.out.println(s + "   "+TaoConfigs.bowc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness);
 		} else System.out.println("null part like seriously this shouldn't even exist");
 		//System.out.println(""+ret);
 		//System.out.println(numofparts);

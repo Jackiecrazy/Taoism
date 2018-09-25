@@ -68,7 +68,7 @@ public class ItemDummy extends Item {
 				tooltip.add(TextFormatting.BOLD + I18n.format("part.damagetypem" + wsw.getDamageType()) + TextFormatting.RESET);
 				tooltip.add(TextFormatting.BOLD + I18n.format("part.durabilitym", wsw.getDurabilityMultiplier() * msw.durability) + TextFormatting.RESET);
 				tooltip.add(TextFormatting.BOLD + I18n.format("part.range", wsw.getRange()) + TextFormatting.RESET);
-				tooltip.add(TextFormatting.BOLD + I18n.format("part.speedm", wsw.getSpeedMultiplier() * msw.mass) + TextFormatting.RESET);
+				tooltip.add(TextFormatting.BOLD + I18n.format("part.speedm", wsw.getSpeedMultiplier() * msw.lightness) + TextFormatting.RESET);
 
 				tooltip.add(I18n.format(TextFormatting.BOLD + "part.elementm", wsw.getElementalMultiplier()) + TextFormatting.RESET);//TODO display per element
 			} else tooltip.add(TextFormatting.RED + I18n.format("part.shift") + TextFormatting.RESET);

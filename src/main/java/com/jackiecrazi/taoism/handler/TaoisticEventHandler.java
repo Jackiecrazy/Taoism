@@ -1,5 +1,17 @@
 package com.jackiecrazi.taoism.handler;
 
+import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.MaterialWrapper;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.PartData;
+import com.jackiecrazi.taoism.api.WeaponStatWrapper;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
+import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.common.item.weapon.ItemBlueprint;
+import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
+import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.config.MaterialsConfig;
+import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,19 +26,6 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
-import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.MaterialWrapper;
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.api.PartData;
-import com.jackiecrazi.taoism.api.WeaponStatWrapper;
-import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.common.item.weapon.ItemBlueprint;
-import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
-import com.jackiecrazi.taoism.config.MaterialsConfig;
-import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 
 public class TaoisticEventHandler {
 	@SubscribeEvent
@@ -49,26 +48,26 @@ public class TaoisticEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void pleasekillmeoff(PlayerInteractEvent.RightClickItem e) {
-		//System.out.println("hi");
-		EntityPlayer p = e.getEntityPlayer();
-		if (e.getItemStack().equals(e.getEntityPlayer().getHeldItem(EnumHand.MAIN_HAND))) return;
-		ItemStack i = p.getHeldItem(EnumHand.OFF_HAND);
-		if (!i.isEmpty()) {
-			//System.out.println("nonnull");
-			if (i.getItem() instanceof ICustomRange) {
-				//System.out.println("range!");
-				ICustomRange icr = (ICustomRange) i.getItem();
-
-				EntityLivingBase elb = NeedyLittleThings.raytraceEntities(p.world, p, icr.getReach(p, i));
-				if (elb != null) {
-					//System.out.println("sending packet!");
-					Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
-				}
-			}
-		}
-	}
+//	@SubscribeEvent
+//	public static void pleasekillmeoff(PlayerInteractEvent.RightClickItem e) {
+//		//System.out.println("hi");
+//		EntityPlayer p = e.getEntityPlayer();
+//		if (e.getItemStack().equals(e.getEntityPlayer().getHeldItem(EnumHand.MAIN_HAND))) return;
+//		ItemStack i = p.getHeldItem(EnumHand.OFF_HAND);
+//		if (!i.isEmpty()) {
+//			//System.out.println("nonnull");
+//			if (i.getItem() instanceof ICustomRange) {
+//				//System.out.println("range!");
+//				ICustomRange icr = (ICustomRange) i.getItem();
+//
+//				EntityLivingBase elb = NeedyLittleThings.raytraceEntities(p.world, p, icr.getReach(p, i));
+//				if (elb != null) {
+//					//System.out.println("sending packet!");
+//					Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
+//				}
+//			}
+//		}
+//	} //stop stealing other people's jobs!
 
 	@SubscribeEvent
 	public static void pleasedontkillme(AttackEntityEvent e) {
@@ -89,6 +88,15 @@ public class TaoisticEventHandler {
 			}
 		}
 	}
+
+//	@SubscribeEvent(priority=EventPriority.HIGHEST)
+//	public static void modifyDamage(LivingHurtEvent e){
+//	    //offhand item compensation
+//		if(e.getSource().getTrueSource() instanceof EntityLivingBase){
+//            EntityLivingBase elb=(EntityLivingBase)e.getSource().getTrueSource();
+//            if()
+//		}
+//	}
 
 	@SubscribeEvent
 	public static void holdItem(EntityJoinWorldEvent ev) {

@@ -8,7 +8,6 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartData;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.WeaponPerk;
-import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
 import com.jackiecrazi.taoism.api.WeaponStatWrapper;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IAmModular;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
@@ -224,9 +223,10 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	@Override
 	public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
 		Multimap<String, AttributeModifier> multimap = HashMultimap.<String, AttributeModifier> create();
+		if(isBroken(stack))return multimap;
 		if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
-			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", (double) fastatk(stack), 0));
-			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) fastspd(stack) - 4d, 0));
+			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", (double) fastatk(stack)-this.getAttackDamage(), 0));
+			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) fastspd(stack), 0));
 			multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getReach(null, stack) - 4d, 0));
 
 			//System.out.println(spd(stack));
@@ -317,6 +317,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	@Override
 	public float getReach(EntityPlayer p, ItemStack is) {
 		float reach = 0F;
+		if(isBroken(is))return reach;
 		for (PartData pd : getParts(is).values()) {
 			reach += AbstractWeaponConfigOverlord.lookup(pd).getRange();
 			//System.out.println(reach+" "+pd.getPart());
@@ -327,8 +328,8 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
 		if (this.isInCreativeTab(tab)) {
-			//items.add(createWeapon((EntityPlayer) null, new PartData(StaticRefs.HEAD, "ingotIron", 2), new PartData(StaticRefs.HANDLE, "logWood", 1), new PartData(StaticRefs.FITTING, "ingotIron", 1)).setStackDisplayName("Plain Old Sword"));
-			//items.add(createWeapon((EntityPlayer) null, new PartData(StaticRefs.HEAD, "gemDiamond", 18), new PartData(StaticRefs.HANDLE, "logWood", 4), new PartData(StaticRefs.FITTING, "ingotIron", 3)).setStackDisplayName("The All-Miner"));
+			items.add(createWeapon( null, new PartData(StaticRefs.HEAD, "ingotIron", 2), new PartData(StaticRefs.HANDLE, "logWood", 1), new PartData(StaticRefs.FITTING, "ingotIron", 1)).setStackDisplayName("Plain Old Sword"));
+			items.add(createWeapon( null, new PartData(StaticRefs.HEAD, "gemDiamond", 18), new PartData(StaticRefs.HANDLE, "logWood", 4)).setStackDisplayName("The All-Miner"));
 			for (int a = 0; a < 88; a++)
 				items.add(createRandomWeapon(null, Taoism.unirand));
 		}
@@ -354,6 +355,8 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	public boolean isBroken(ItemStack stack){
 		return this.getMaxDamage(stack)-this.getDamage(stack)<=1;
 	}
+
+
 
 	/*private float atk(ItemStack is) {
 		int numofparts = 0;
@@ -399,14 +402,14 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 
 	public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand h) {
 		ItemStack is = p.getHeldItem(h);
-		HandlePerk handle = getPart(is, StaticRefs.HANDLE).getWeaponSW().getHandle();
-		if (handle.equals(HandlePerk.LONG) ){
+		//disable offhand with long items (i.e. more than 4.5 block range)
+		if (getReach(p,is)>=4.5f){
 			//if(h.equals(EnumHand.MAIN_HAND))
 			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, is);
 		}
-		else if (h.equals(EnumHand.OFF_HAND)) {
-			p.swingArm(h);
-		}
+//		else if (h.equals(EnumHand.OFF_HAND)) {
+//			p.swingArm(h);
+//		}
 		return super.onItemRightClick(w, p, h);
 	}
 	@Override
@@ -449,7 +452,7 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 
 				continue;
 			}
-			ret[0] += wsw.getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.mass;
+			ret[0] += wsw.getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.lightness;
 			float bigdamage = wsw.getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
 			//if(ret[1]<bigdamage)ret[1]=bigdamage;
 			ret[1] += bigdamage;
@@ -479,33 +482,59 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 	}
 
 	private float fastatk(ItemStack is) {
+        //TODO christ.
 		float atk = 0F;
 		int counter = 0;
-		for (PartData pd : getParts(is).values()) {
-			//if (!pd.getPart().equals(StaticRefs.GUARD)) {
-				//if(atk<pd.getWeaponSW().getDamageMultiplier() * pd.getMatSW().damageOrSpringiness;)
-				atk += pd.getWeaponSW().getDamageMultiplier() * pd.getMatSW().damageOrSpringiness;
-				counter++;
-			//}
-			//System.out.println(reach+" "+pd.getPart());
-		}
-		if (counter != 0) atk /= counter;
+		if(this.getPart(is,StaticRefs.HEAD)!=null){
+		    atk=damFromPD(this.getPart(is,StaticRefs.HEAD))/2;
+        }
+        else if(this.getPart(is,StaticRefs.HANDLE)!=null){
+            atk=damFromPD(this.getPart(is,StaticRefs.HANDLE))/2;
+        }
+//		for (PartData pd : getParts(is).values()) {
+//			//if (!pd.getPart().equals(StaticRefs.GUARD)) {
+//				if(atk<(damFromPD(pd)*(6f/11f)))
+//				atk = damFromPD(pd)*(6f/11f);
+//				//counter++;
+//			//}
+//			//System.out.println(reach+" "+pd.getPart());
+//		}
+		//if (counter != 0) atk /= counter;
 		//System.out.println(reach);
 		return atk;
 	}
 
+	private float damFromPD(PartData pd){
+	    switch(pd.getWeaponSW().getDamageType()){
+            case 0://blunt
+                //System.out.println(pd.getMatSW().lightness);
+                return pd.getWeaponSW().getDamageMultiplier()/pd.getMatSW().lightness;
+            case 1://cutting
+                //System.out.println("sharp");
+                return pd.getWeaponSW().getDamageMultiplier()*pd.getMatSW().damageOrSpringiness;
+            case 2://piercing
+                //System.out.println("pokey");
+                return pd.getWeaponSW().getDamageMultiplier()*pd.getMatSW().damageOrSpringiness;
+            default:
+                return 1f;
+        }
+    }
+
 	private float fastspd(ItemStack is) {
+
 		float spd = 0F;
-		int counter = 0;
+		//int counter = 0;
 		for (PartData pd : getParts(is).values()) {
-			if (pd.getWeaponSW().getClassification().equals(StaticRefs.FITTING)) spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().mass;
-			spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().mass;
-			counter++;
+			//if (!pd.getWeaponSW().getClassification().equals(StaticRefs.FITTING))// spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().lightness;
+			spd += (pd.getWeaponSW().getSpeedMultiplier() * (pd.getMatSW().lightness));
+			//counter++;
 			//System.out.println(reach+" "+pd.getPart());
 		}
-		//System.out.println(reach);
-		if (counter != 0) spd /= (counter);
-		return spd;
+		//System.out.println(spd);
+		spd=(float)Math.pow(spd,0.35);
+		//if (counter != 0) spd *= ((float)StaticRefs.weaponparts.length/(float)counter);
+        //System.out.println(spd);
+		return spd-4;
 	}
 
 	private void finalStat(ItemStack is, float... stats) {
@@ -527,6 +556,12 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 		return ret;
 	}
 
+    public void setDamage(ItemStack stack, int damage)
+    {
+        if(damage<=stack.getMaxDamage()){
+            stack.setItemDamage(stack.getMaxDamage()-1);
+        }
+    }
 
 	private int magicness(ItemStack is) {
 		int ret = 1;
@@ -550,9 +585,9 @@ public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IE
 
 					continue;
 				}
-				ret += TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).mass;
-				//System.out.println(s + "   "+TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).mass);
-				if (TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).mass != 0) numofparts++;
+				ret += TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness;
+				//System.out.println(s + "   "+TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness);
+				if (TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness != 0) numofparts++;
 			}// else System.out.println("null part");
 		}
 		//System.out.println(""+ret);

@@ -36,8 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ModelWeapon implements IBakedModel {
 
-	//FIXME blade and guard have missing models
-	//yes you need to pretty much use the old textures -.-
+
 	IBakedModel base;
 
 	public ModelWeapon(IBakedModel orig) {
@@ -167,7 +166,8 @@ public class ModelWeapon implements IBakedModel {
 
 				for (WeaponPerk wp : wsw.getPerks()) {
 					if (wp.equals(WeaponPerk.SHORT)) {
-						//do nothing
+						ret.mul(1.2f);
+						ret.m33 = 1f;
 						break;
 					}
 					if (wp.equals(WeaponPerk.MEDIUM)) {

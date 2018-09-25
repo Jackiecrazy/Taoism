@@ -9,7 +9,6 @@ public class HackyBakedQuad extends BakedQuad {
 
 	public HackyBakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn, TextureAtlasSprite spriteIn, boolean applyDiffuseLighting, VertexFormat format) {
 		super(vertexDataIn, tintIndexIn, faceIn, spriteIn, applyDiffuseLighting, format);
-		// TODO Auto-generated constructor stub
 	}
 
 	public int getTintIndex()

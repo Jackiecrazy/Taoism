@@ -47,8 +47,11 @@ public class WeaponPerk {
 
 		@Override
 		public int hitEntity(EntityLivingBase seme, EntityLivingBase uke, ItemStack i, int level) {
-			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f)
-			uke.knockBack(seme, 1F, (double) -MathHelper.sin(seme.rotationYaw * 0.017453292F), (double) (MathHelper.cos(seme.rotationYaw * 0.017453292F)));
+			System.out.println(((EntityPlayer)seme).getCooledAttackStrength(0f));
+			if(!(seme instanceof EntityPlayer) ||((EntityPlayer)seme).getCooledAttackStrength(0)>0.9f) {
+			    System.out.println("commencing kb");
+                uke.knockBack(seme, 1F, (double) -MathHelper.sin(seme.rotationYaw * 0.017453292F), (double) (MathHelper.cos(seme.rotationYaw * 0.017453292F)));
+            }
 			return 1;
 		}
 

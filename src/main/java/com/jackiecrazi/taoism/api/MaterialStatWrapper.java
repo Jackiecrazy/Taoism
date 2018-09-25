@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public class MaterialStatWrapper {
 	public final String name;
-	public final float mass;
+	public final float lightness;
 	  public final float damageOrSpringiness;
 	  public final float durability;
 	  public final float affinityMetal;
@@ -24,7 +24,7 @@ public class MaterialStatWrapper {
 	  public MaterialStatWrapper(String name,MaterialType type, float m, float h, float f, float ji, float mu, float sh, float hu, float tu, Color c, int dom, int la, float ds, float as)
 	  {
 	    this.type=type;
-	    this.mass = m;
+	    this.lightness = m;
 	    this.durability = f;
 	    this.damageOrSpringiness = h;
 	    this.affinityMetal = ji;
@@ -62,7 +62,7 @@ public class MaterialStatWrapper {
 	    this.name=arg.substring(0, arg.indexOf(":"));
 	    String noname = arg.substring(arg.indexOf(":") + 1);
 	    String[] less = noname.split(",");
-	    this.mass = Float.valueOf(less[0].trim()).floatValue();
+	    this.lightness = Float.valueOf(less[0].trim()).floatValue();
 	    this.damageOrSpringiness = Float.valueOf(less[1].trim()).floatValue();
 	    this.durability = Float.valueOf(less[2].trim()).floatValue();
 	    this.affinityMetal = Float.valueOf(less[3].trim()).floatValue();
