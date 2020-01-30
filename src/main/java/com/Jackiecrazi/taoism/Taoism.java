@@ -1,9 +1,17 @@
 package com.jackiecrazi.taoism;
 
-import java.util.Random;
-
+import com.jackiecrazi.taoism.common.CommonProxy;
+import com.jackiecrazi.taoism.common.block.TaoBlocks;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
+import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.config.TaoConfigs;
+import com.jackiecrazi.taoism.crafting.TaoCrafting;
+import com.jackiecrazi.taoism.handler.TaoCapabilityHandler;
+import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
+import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -14,20 +22,12 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.jackiecrazi.taoism.common.CommonProxy;
-import com.jackiecrazi.taoism.common.block.TaoBlocks;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.common.item.weapon.TaoArrow;
-import com.jackiecrazi.taoism.common.item.weapon.TaoBow;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
-import com.jackiecrazi.taoism.config.TaoConfigs;
-import com.jackiecrazi.taoism.crafting.TaoCrafting;
-import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
-import com.jackiecrazi.taoism.potions.TaoPotions;
+import java.lang.reflect.Field;
+import java.util.Random;
 
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
@@ -50,6 +50,8 @@ public class Taoism {
 	public static String LIGHT_PURPLE = "\u00A7d";
 	public static String YELLOW = "\u00A7e";
 	public static String WHITE = "\u00A7f";
+	public static final Field atk = ReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD", "ticksSinceLastSwing", "aE");
+
 
 	public static final String MODID = "taoism";
 	public static final String VERSION = "1.0";
@@ -67,16 +69,17 @@ public class Taoism {
 		}
 
 	};
-	
-	public static final CreativeTabs tabWea = new CreativeTabs("taoWea") {
 
+
+	public static final CreativeTabs tabWea = new CreativeTabs("taoWea") {
+		ItemStack icon=new ItemStack(Items.IRON_SWORD);
 		@Override
 		public ItemStack getTabIconItem() {
-			return TaoWeapon.createRandomWeapon(null, unirand);
+			return icon;
 		}
 
 	};
-	
+	/*
 	public static final CreativeTabs tabBow = new CreativeTabs("taoBow") {
 
 		@Override
@@ -95,19 +98,22 @@ public class Taoism {
 
 	};
 
+	 */
+
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(TaoItems.class);
 		MinecraftForge.EVENT_BUS.register(TaoBlocks.class);
 		MinecraftForge.EVENT_BUS.register(TaoCrafting.class);
-		MinecraftForge.EVENT_BUS.register(TaoPotions.class);
+		MinecraftForge.EVENT_BUS.register(TaoPotion.class);
 		MinecraftForge.EVENT_BUS.register(TaoisticEventHandler.class);
-		
+		MinecraftForge.EVENT_BUS.register(TaoCapabilityHandler.class);
+		MinecraftForge.EVENT_BUS.register(TaoEntities.class);
+
 		//MinecraftForge.EVENT_BUS.register(ClientProxy.class);
 		TaoConfigs.init(event.getModConfigurationDirectory() + "/taoism/");
 		net=NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
 		proxy.preinit(event);
-        TaoEntities.init();
 	}
 
 	@EventHandler

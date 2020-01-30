@@ -1,96 +1,201 @@
 package com.jackiecrazi.taoism.client;
 
-import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelBakery;
+import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
+import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.networking.PacketBeginParry;
+import com.jackiecrazi.taoism.networking.PacketDodge;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 
-import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.WeaponPerk;
-import com.jackiecrazi.taoism.api.WeaponPerk.HandlePerk;
-import com.jackiecrazi.taoism.api.WeaponStatWrapper;
-import com.jackiecrazi.taoism.client.stupidmodels.ModelWeapon;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
+import java.lang.reflect.Field;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
-	
+
+    @SubscribeEvent
+    public static void model(ModelRegistryEvent e) {
+        for(Item i:TaoWeapon.listOfWeapons){
+            regWeap(i);
+        }
+    }
+
+    private static void regWeap(Item i){
+        ModelLoader.setCustomModelResourceLocation(i,0,new ModelResourceLocation(i.getRegistryName(), "inventory"));
+    }
+
+    @SubscribeEvent
+    public static void modelTheWeapons(ModelBakeEvent event) {
+
+    }
+
+    @SubscribeEvent
+    public static void modelThePlayer(RenderPlayerEvent.Pre e) {//TODO find a way to have the hands move in tandem with swing progress
+        EntityPlayer p=e.getEntityPlayer();
+        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX+=37;
+    }
+
+    //Reflection time!
+	public static final Field zaHando = ReflectionHelper.findField(ItemRenderer.class, "field_187471_h", "equippedProgressOffHand", "h");
+    public static final Field okuyasu = ReflectionHelper.findField(ItemRenderer.class, "field_187472_i", "prevEquippedProgressOffHand", "i");
+    /**
+     * left, back, right
+     */
+    private static long[] lastTap={0,0,0};
+    private static final int ALLOWANCE=7;
+    private static long lastSneak=0;
+
+    @SubscribeEvent
+    public static void doju(InputEvent.KeyInputEvent e){
+        Minecraft mc=Minecraft.getMinecraft();
+        if(mc.gameSettings.keyBindLeft.isPressed()){
+            if(mc.world.getTotalWorldTime()-lastTap[0]<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketDodge(0));
+            }
+            lastTap[0]=mc.world.getTotalWorldTime();
+        }
+        if(mc.gameSettings.keyBindBack.isPressed()){
+            if(mc.world.getTotalWorldTime()-lastTap[1]<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketDodge(1));
+            }
+            lastTap[1]=mc.world.getTotalWorldTime();
+        }
+        if(mc.gameSettings.keyBindRight.isPressed()){
+            if(mc.world.getTotalWorldTime()-lastTap[2]<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketDodge(2));
+            }
+            lastTap[2]=mc.world.getTotalWorldTime();
+        }
+        if(mc.gameSettings.keyBindSneak.isPressed()){
+            //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketBeginParry());
+            //}//TODO this is broken, make it activate on a brief sneak
+            lastSneak=mc.world.getTotalWorldTime();
+        }
+    }
+
 	@SubscribeEvent
-	public static void model(ModelRegistryEvent e) {
-		ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(TaoItems.bow, 0, new ModelResourceLocation(TaoItems.bow.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
+	public static void handRaising(RenderSpecificHandEvent e) {
+    	if(e.getHand().equals(EnumHand.MAIN_HAND))return;
+        AbstractClientPlayer p= Minecraft.getMinecraft().player;
+        //cancel event so two handed weapons give a visual cue to their two-handedness
+        if(p.getHeldItemMainhand().getItem() instanceof ITwoHanded){
+            if(((TaoWeapon)p.getHeldItemMainhand().getItem()).isTwoHanded(p.getHeldItemMainhand())){
+                e.setCanceled(true);
 
-		for (WeaponStatWrapper a : AbstractWeaponConfigOverlord.enabledParts) {
-			//int damage = TaoConfigs.weapc.lookupDamage(a.getName());
-
-			/*for (MaterialStatWrapper m : MaterialsConfig.loggedMaterials.values()) {
-				//System.out.println(new ModelResourceLocation(Taoism.MODID + ":parts/"+  m.name +"/" + a.getName().toLowerCase().replace(" ", "")).getResourcePath());
-				ModelBakery.registerItemVariants(TaoItems.parts, new ModelResourceLocation(Taoism.MODID + ":parts/"+  m.name +"/" + a.getName().toLowerCase().replace(" ", "") , "inventory"));
-
-			}*/
-			
-			//ModelLoader.setCustomModelResourceLocation(TaoItems.blueprint, 0, new ModelResourceLocation(TaoItems.blueprint.getRegistryName(), "inventory"));
-			//ModelLoader.setCustomModelResourceLocation(TaoItems.weap, 0, new ModelResourceLocation(TaoItems.weap.getRegistryName(), "inventory"));
-			//if(a.isHandle())ModelBakery.registerItemVariants(TaoItems.dummy, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
-			for (HandlePerk hp : WeaponPerk.REGISTEREDHANDLES) {
-				if (a.acceptsHandle(hp)){
-					ModelBakery.registerItemVariants(TaoItems.part, new ModelResourceLocation(Taoism.MODID + ":parts/" + hp.name + "/" + a.getName().toLowerCase().replace(" ", ""), "inventory"));
-				}
-			}
-			//ModelBakery.registerItemVariants(TaoItems.weap, new ModelResourceLocation(Taoism.MODID + ":parts/" + a.getName().toLowerCase().replace(" ", ""),"inventory"));
-		}
-		//ModelLoader.setCustomModelResourceLocation(TaoItems.dummy, 0, new ModelResourceLocation(Taoism.MODID + ":parts/part", "inventory"));
-		//vvvv not being called???
-		//System.out.println("eyy");
-		ModelLoader.setCustomMeshDefinition(TaoItems.part, new ItemMeshDefinition() {
-
-			@Override
-			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				if (!stack.hasTagCompound()){
-					return new ModelResourceLocation(Taoism.MODID + ":parts/sword");
-				}
-				NBTTagCompound ntc = stack.getTagCompound();
-				//System.out.println(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.get(stack.getItemDamage()).name + "/" + TaoConfigs.weapc.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName().replace(" ", ""));
-				return new ModelResourceLocation(Taoism.MODID + ":parts/" + WeaponPerk.REGISTEREDHANDLES.get(stack.getItemDamage()).name + "/" + AbstractWeaponConfigOverlord.lookup(ntc.getString("part"), ntc.getInteger("dam")).getName(), "inventory");
-				
-			}
-
-		});
+                return;
+            }
+        }
+        if(!(e.getItemStack().getItem() instanceof TaoWeapon))return;
+        e.setCanceled(true);
+    	ItemRenderer ir=Minecraft.getMinecraft().getItemRenderer();
+        float f1 = p.prevRotationPitch + (p.rotationPitch - p.prevRotationPitch) * e.getPartialTicks();
+        //MathHelper.clamp((!requipM ? f * f * f : 0.0F) - this.equippedProgressMainHand, -0.4F, 0.4F);//mainhand add per
+        float cd= NeedyLittleThings.getCooledAttackStrengthOff(p,e.getPartialTicks());
+        float f6 = 1-(cd*cd*cd);
+        ir.renderItemInFirstPerson(p, e.getPartialTicks(), f1, EnumHand.OFF_HAND, e.getSwingProgress(), p.getHeldItemOffhand(), f6);
 	}
 
-	public static int veryLazy(String s) {
-		int ret = 0;
-		for (HandlePerk st : WeaponPerk.REGISTEREDHANDLES) {
-			if (st.name.equals(s)) {
-				//System.out.println(ret);
-				return ret;
-			}
-			ret++;
-		}
-		return 0;
-	}
+    @SubscribeEvent
+    public static void displayCoolie(RenderGameOverlayEvent event) {
+        ScaledResolution sr = event.getResolution();
+        if (event.getType().equals(RenderGameOverlayEvent.ElementType.CROSSHAIRS)) {
+            //draw offhand cooldown, crosshair type
+            {
+                GameSettings gamesettings = Minecraft.getMinecraft().gameSettings;
 
-	@SubscribeEvent
-	public static void modelTheWeapons(ModelBakeEvent event) {
-		//renderitem has an interesting method
-		ModelResourceLocation mrl = new ModelResourceLocation(Taoism.MODID + ":taoweapon", "inventory");
-		Object object = event.getModelRegistry().getObject(mrl);
-		if (object instanceof IBakedModel) {
-			IBakedModel existingModel = (IBakedModel) object;
-			event.getModelRegistry().putObject(mrl, new ModelWeapon(existingModel));
-		}
-		Taoism.logger.debug("registered the weapon models");
-	}
+                if (gamesettings.thirdPersonView == 0) {
+                    int width = sr.getScaledWidth();
+                    int height = sr.getScaledHeight();
+
+                    EntityPlayerSP player = Minecraft.getMinecraft().player;
+                    if (!gamesettings.showDebugInfo || gamesettings.hideGUI || player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
+                        if (Minecraft.getMinecraft().gameSettings.attackIndicator == 1) {
+                            GlStateManager.enableAlpha();
+                            float cooldown = NeedyLittleThings.getCooldownPeriodOff(player);
+                            boolean hyperspeed = false;
+
+                            if (Minecraft.getMinecraft().pointedEntity != null && Minecraft.getMinecraft().pointedEntity instanceof EntityLivingBase && cooldown >= 1.0F) {
+                                hyperspeed = NeedyLittleThings.getCooldownPeriodOff(player) > 5.0F;
+                                hyperspeed = hyperspeed & ((EntityLivingBase) Minecraft.getMinecraft().pointedEntity).isEntityAlive();
+                            }
+
+                            int y = height / 2 - 7 + 16+16;
+                            int x = width / 2 - 8;
+
+                            if (hyperspeed) {
+                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 68, 94, 16, 16);//94
+                            } else if (cooldown < 1.0F) {
+                                int k = (int) (cooldown * 17.0F);
+                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 36, 94, 16, 4);
+                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 52, 94, k, 4);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (event.getType().equals(RenderGameOverlayEvent.ElementType.HOTBAR)) {
+            //draw offhand cooldown, hotbar type
+            if (Minecraft.getMinecraft().getRenderViewEntity() instanceof EntityPlayer) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                EntityPlayer p = (EntityPlayer) Minecraft.getMinecraft().getRenderViewEntity();
+                ItemStack itemstack = p.getHeldItemOffhand();
+                EnumHandSide oppositeHand = p.getPrimaryHand().opposite();
+                int halfOfScreen = sr.getScaledWidth() / 2;
+
+                GlStateManager.enableRescaleNormal();
+                GlStateManager.enableBlend();
+                GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                RenderHelper.enableGUIStandardItemLighting();
+
+                if (Minecraft.getMinecraft().gameSettings.attackIndicator == 2) {
+                    float strength = NeedyLittleThings.getCooledAttackStrengthOff(p, 0);
+
+                    if (strength < 1.0F) {
+                        int y = sr.getScaledHeight() - 20;
+                        int x = halfOfScreen + 91 + 6;
+
+                        if (oppositeHand == EnumHandSide.LEFT) {
+                            x = halfOfScreen - 91 - 22;
+                        }
+
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+                        int modStrength = (int) (strength * 19.0F);
+                        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 0, 94, 18, 18);
+                        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y + 18 - modStrength, 18, 112 - modStrength, 18, modStrength);
+                    }
+                }
+
+                RenderHelper.disableStandardItemLighting();
+                GlStateManager.disableRescaleNormal();
+                GlStateManager.disableBlend();
+            }
+        }
+    }
 
 	/*@SubscribeEvent
 	public static void colorize(ColorHandlerEvent event){

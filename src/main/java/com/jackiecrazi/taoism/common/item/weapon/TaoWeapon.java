@@ -1,600 +1,498 @@
 package com.jackiecrazi.taoism.common.item.weapon;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.PartData;
-import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.api.WeaponPerk;
-import com.jackiecrazi.taoism.api.WeaponStatWrapper;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IAmModular;
-import com.jackiecrazi.taoism.api.alltheinterfaces.ICustomRange;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
-import com.jackiecrazi.taoism.api.alltheinterfaces.ISwingSpeed;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.alltheinterfaces.*;
+import com.jackiecrazi.taoism.capability.ITaoStatCapability;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.client.KeyOverlord;
-import com.jackiecrazi.taoism.common.item.TaoItems;
-import com.jackiecrazi.taoism.config.AbstractWeaponConfigOverlord;
-import com.jackiecrazi.taoism.config.MaterialsConfig;
-import com.jackiecrazi.taoism.config.TaoConfigs;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.IItemPropertyGetter;
+import net.minecraft.item.EnumAction;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-public class TaoWeapon extends ItemSword implements IAmModular, ICustomRange, IElemental, ISwingSpeed {
+public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded {
+    public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
+    //booleans only used when attacking to determine what type of attack it is
+    public static boolean aerial = false, off = false, right = false;
+    //booleans only used when attacking to determine the specific phase of attack
+    public static boolean effect = true, aoe = true, spawn = true;
+    private final double speed;
+    private final int damageType;
+    private final double dmg;
+    private final float base;
+    //0
+    private List<Material> pickList = Arrays.asList(
+            Material.ANVIL,
+            Material.IRON,
+            Material.PISTON,
+            Material.REDSTONE_LIGHT,
+            Material.CIRCUITS,
+            Material.PACKED_ICE,
+            Material.ROCK,
+            Material.ICE,
+            Material.GLASS);
+    //1
+    private List<Material> shovelList = Arrays.asList(
+            Material.CAKE,
+            Material.CLAY,
+            Material.CRAFTED_SNOW,
+            Material.GRASS,
+            Material.GROUND,
+            Material.CARPET,
+            Material.SAND,
+            Material.SNOW);
+    //2
+    private List<Material> axeList = Arrays.asList(
+            Material.CACTUS,
+            Material.CLOTH,
+            Material.CORAL,
+            Material.GOURD,
+            Material.WOOD);
+    //3
+    private List<Material> scytheList = Arrays.asList(
+            Material.LEAVES,
+            Material.PLANTS,
+            Material.VINE);
 
-	public static ItemStack createRandomWeapon(EntityPlayer p, Random r) {
-		ItemStack ret = new ItemStack(TaoItems.weap);
-		String s = StaticRefs.HANDLE;
-		int wsw = r.nextInt(TaoConfigs.weapc.getType(s).size());
-
-		((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw).matType()), wsw));
-		s = StaticRefs.HEAD;
-		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size());
-		if (wsw != 0) {
-
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw).matType()), wsw));
-		}
-/*
-		s = StaticRefs.GUARD;
-		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size() + 1);
-		if (wsw != 0) {
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw - 1).matType()), wsw));
-		}*/
-
-		s = StaticRefs.FITTING;
-		wsw = r.nextInt(TaoConfigs.weapc.getType(s).size());
-		if (wsw != 0) {
-			((TaoWeapon) ret.getItem()).setPart(s, ret, new PartData(s, MaterialsConfig.getRandomMat(r, AbstractWeaponConfigOverlord.lookup(s, wsw).matType()), wsw));
-		}
-
-		if (p != null) ret.getItem().onCreated(ret, p.world, p);
-		else ret.getItem().onCreated(ret, null, null);
-		return ret;
-	}
-
-	public static ItemStack createWeapon(EntityPlayer p, ArrayList<PartData> pd) {
-		ItemStack ret = new ItemStack(TaoItems.weap);
-		for (PartData par : pd) {
-			if (par.getWeaponSW().isHandle()) TaoItems.weap.setPart(par.getPart(), ret, par);
-		}
-		for (PartData par : pd) {
-			TaoItems.weap.setPart(par.getPart(), ret, par);
-		}
-		if (p != null) ret.getItem().onCreated(ret, p.world, p);
-		else ret.getItem().onCreated(ret, null, null);
-		return ret;
-	}
-
-	public static ItemStack createWeapon(EntityPlayer p, PartData... pd) {
-		ItemStack ret = new ItemStack(TaoItems.weap);
-		for (PartData par : pd) {
-			if (par.getWeaponSW().isHandle()) TaoItems.weap.setPart(par.getPart(), ret, par);
-		}
-		for (PartData par : pd) {
-
-			TaoItems.weap.setPart(par.getPart(), ret, par);
-		}
-		if (p != null) ret.getItem().onCreated(ret, p.world, p);
-		else ret.getItem().onCreated(ret, null, null);
-		return ret;
-	}
-
-	private Cache<ItemStack, String> namecache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.SECONDS).build();
-
-	private List<Material> pickList = Arrays.asList(new Material[] {
-			Material.ANVIL,
-			Material.IRON,
-			Material.PISTON,
-			Material.REDSTONE_LIGHT,
-			Material.CIRCUITS,
-			Material.PACKED_ICE,
-			Material.ROCK,
-			Material.ICE,
-			Material.GLASS });
-	
-	private List<Material> shovelList = Arrays.asList(new Material[] {
-			Material.CAKE,
-			Material.CLAY,
-			Material.CRAFTED_SNOW,
-			Material.GRASS,
-			Material.GROUND,
-			Material.CARPET,
-			Material.SAND,
-			Material.SNOW });
-	
-	private List<Material> axeList = Arrays.asList(new Material[] {
-			Material.CACTUS,
-			Material.CLOTH,
-			Material.CORAL,
-			Material.GOURD,
-			Material.WOOD });
-
-	private List<Material> scytheList = Arrays.asList(new Material[] {
-			Material.LEAVES,
-			Material.PLANTS,
-			Material.VINE });
-
-	public TaoWeapon() {
-		super(ToolMaterial.IRON);
-		this.setUnlocalizedName("weapon");
-		this.setRegistryName("taoweapon");
-		this.setCreativeTab(Taoism.tabWea);
-		this.setFull3D();
-		this.addPropertyOverride(new ResourceLocation("pull"), new IItemPropertyGetter() {
-
-			@Override
-			public float apply(ItemStack stack, World worldIn, EntityLivingBase entityIn) {
-				return 0;
-			}
-
-		});
-	}
-
-	@Override
-	public void addAffinity(ItemStack is, float... aff) {
-		for (int a = 0; a < Math.min(NUMOFELEM, aff.length); a++) {
-			setAffinity(is, a, aff[a] + getAffinity(is, a));
-		}
-	}
-
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-		for (PartData a : getParts(stack).values()) {
-			try {
-				if (a != null && a.getMat() != null) tooltip.add(I18n.format(a.getMat()) + " " + I18n.format(AbstractWeaponConfigOverlord.lookup(a.getPart(), a.getOrdinal()).getName()));
-			} catch (Exception e) {
-
-			}
-		}
-		//increment in 5, max is 50
-		if (KeyOverlord.isShiftDown()) for (int i = 0; i < getAffinities(stack).length; i++) {
-			int pot = (int) getAffinities(stack)[i];
-			//System.out.println(pot);
-			int used = Math.round(pot / 2) * 2;
-			if (used != 0) tooltip.add(IElemental.ELEMC[i] + "" + TextFormatting.ITALIC + I18n.format(IElemental.ELEMS[i] + used + ".inscription") + TextFormatting.RESET);
-		}
-		else {
-			tooltip.add(I18n.format("taoism.shiftweapon"));
-		}
-		//perks
-		if (KeyOverlord.isControlDown()) {
-			tooltip.add(I18n.format(TextFormatting.BOLD + "part.perks") + TextFormatting.RESET);
-
-			HashMap<WeaponPerk,Integer> weaponPerks = this.getPerks(stack);
-			for (WeaponPerk hp : ( weaponPerks).keySet()) {
-				if (hp != null) tooltip.add(TextFormatting.BOLD + I18n.format("perk." + hp.name + ".name")+ ": "+ weaponPerks.get(hp) + TextFormatting.RESET);
-			}
-		} else tooltip.add(TextFormatting.YELLOW + I18n.format("part.ctrl") + TextFormatting.RESET);
-	}
-
-	public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker)
-    {
-		return getPerks(stack).containsKey(WeaponPerk.CLEAVE)||getPerks(stack).containsKey(WeaponPerk.AXE);
+    public TaoWeapon(int damageType, double swingSpeed, double damage, float BasePostureConsumption) {
+        super();
+        this.damageType = damageType;
+        speed = swingSpeed;
+        this.setMaxDamage(0);
+        this.setMaxStackSize(1);
+        dmg = damage;
+        base = BasePostureConsumption;
+        this.setCreativeTab(Taoism.tabWea);
+        String name = getClass().getSimpleName().substring(4).toLowerCase();
+        this.setRegistryName(name);
+        this.setUnlocalizedName(name);
+        listOfWeapons.add(this);
     }
-	
-	public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
-		if (getPartThatCanHarvestBlock(stack, state) != null) { return true; }
-		//System.out.println(ret);
-		return super.canHarvestBlock(state, stack);
-	}
 
-	public Entity createEntity(World world, Entity location, ItemStack itemstack) {
-		return new EntityItem(world, location.posX, location.posY, location.posZ, itemstack);
-	}
+    @Override
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return base + (getDamDist(item) * amount);
+    }
 
-	@Override
-	public float[] getAffinities(ItemStack is) {
-		float[] ret = new float[NUMOFELEM];
-		for (int a = 0; a < NUMOFELEM; a++)
-			ret[a] = getAffinity(is, a);
-		return ret;
-	}
+    @Override
+    public EnumAction getItemUseAction(final ItemStack stack) {
+        return EnumAction.NONE;
+    }
 
-	@Override
-	public float getAffinity(ItemStack is, int element) {
-		return getStorage(is).getFloat("element" + element);
-	}
+//    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+//        //Taoism.net.sendToServer(new PacketMakeMove(entityLiving));
+//        return true;
+//    }
 
-	@Override
-	public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
-		Multimap<String, AttributeModifier> multimap = HashMultimap.<String, AttributeModifier> create();
-		if(isBroken(stack))return multimap;
-		if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
-			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", (double) fastatk(stack)-this.getAttackDamage(), 0));
-			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) fastspd(stack), 0));
-			multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getReach(null, stack) - 4d, 0));
+//    @Override
+//    public boolean onLeftClickEntity(final ItemStack stack, final EntityPlayer player, final Entity entity) {
+//        return notSpecialing;
+//    }
 
-			//System.out.println(spd(stack));
-		}
+    public int getDamageType(ItemStack is) {
+        return damageType;
+    }
 
-		// TODO Some weapons should give you buffs in other things too
-		return multimap;
-	}
-
-	public float getDestroySpeed(ItemStack stack, IBlockState state) {
-
-		float ret = super.getDestroySpeed(stack, state);
-		if (getPartThatCanHarvestBlock(stack, state) != null) ret = Math.max(ret, getPartThatCanHarvestBlock(stack, state).getMatSW().getDigSpeed());
-		return ret;
-	}
-
-	@Override
-	public float getHorizontalRange(EntityPlayer p, ItemStack is) {
-		return AbstractWeaponConfigOverlord.lookup(StaticRefs.HEAD, getParts(is).get(StaticRefs.HEAD).getOrdinal()).getRange();
-	}
-
-	public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
-		String repairName = "";
-
-		for (String s : getPartNames(toRepair)) {
-			if (getParts(toRepair).get(s) != null) {
-				repairName = getParts(toRepair).get(s).getMat();
-				break;
-			}
-		}
-		if (!repairName.isEmpty() && MaterialsConfig.findMat(repair).msw.equals(MaterialsConfig.findMat(repairName))) return true;
-		return false;
-	}
-
-	public int getItemEnchantability(ItemStack is) {
-		return magicness(is);
-	}
-
-	public String getItemStackDisplayName(ItemStack stack) {
-		/*String name=namecache.getIfPresent(stack);
-		if(name!=null)return name;
-		name=getName(stack);
-		
-		if(!name.isEmpty())return name;*/
-		return super.getItemStackDisplayName(stack);
-	}
-
-	public int getMaxDamage(ItemStack stack) {
-		if (!stack.hasTagCompound()) return super.getMaxDamage(stack);
-		return stack.getTagCompound().getInteger("dur");
-	}
-
-	@Override
-	public String[] getPartNames(ItemStack is) {
-		return StaticRefs.weaponparts;
-	}
-
-	@Nullable
-	@Override
-	public HashMap<String, PartData> getParts(ItemStack is) {
-		HashMap<String, PartData> ret = new HashMap<String, PartData>();
-		NBTTagCompound ntc = getStorage(is);
-		for (String s : getPartNames(is)) {
-			if (ntc.hasKey(s)) ret.put(s, new PartData(ntc.getCompoundTag(s)));
-		}
-		return ret;
-	}
-
-	@Nullable
-	public PartData getPartThatCanHarvestBlock(ItemStack is, IBlockState state) {
-		for (PartData pd : getParts(is).values())
-			for (WeaponPerk wp : pd.getWeaponSW().getPerks()) {
-				if (wp != null) {
-					if (wp.equals(WeaponPerk.PICK) && pickList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.AXE) && axeList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.SCYTHE) && scytheList.contains(state.getMaterial())) {
-						return pd;
-					} else if (wp.equals(WeaponPerk.SHOVEL) && shovelList.contains(state.getMaterial())) { return pd; }
-				}
-			}
-		return null;
-	}
-
-
-
-	@Override
-	public float getReach(EntityPlayer p, ItemStack is) {
-		float reach = 0F;
-		if(isBroken(is))return reach;
-		for (PartData pd : getParts(is).values()) {
-			reach += AbstractWeaponConfigOverlord.lookup(pd).getRange();
-			//System.out.println(reach+" "+pd.getPart());
-		}
-		//System.out.println(reach);
-		return reach;
-	}
-
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-		if (this.isInCreativeTab(tab)) {
-			items.add(createWeapon( null, new PartData(StaticRefs.HEAD, "ingotIron", 2), new PartData(StaticRefs.HANDLE, "logWood", 1), new PartData(StaticRefs.FITTING, "ingotIron", 1)).setStackDisplayName("Plain Old Sword"));
-			items.add(createWeapon( null, new PartData(StaticRefs.HEAD, "gemDiamond", 18), new PartData(StaticRefs.HANDLE, "logWood", 4)).setStackDisplayName("The All-Miner"));
-			for (int a = 0; a < 88; a++)
-				items.add(createRandomWeapon(null, Taoism.unirand));
-		}
-	}
-
-	public boolean hasCustomEntity(ItemStack stack) {
-		return false;
-	}
-
-	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-		Map<WeaponPerk,Integer> m=this.getPerks(stack);
-			for (WeaponPerk wp : m.keySet()) {
-				if (wp != null) wp.hitEntity(attacker, target, stack,m.get(wp));
-		}
-		return super.hitEntity(stack, target, attacker);
-	}
-
-	@Override
-	public float hungerUsed(ItemStack i) {
-		return 0;
-	}
-
-	public boolean isBroken(ItemStack stack){
-		return this.getMaxDamage(stack)-this.getDamage(stack)<=1;
-	}
-
-
-
-	/*private float atk(ItemStack is) {
-		int numofparts = 0;
-		float ret = 0;
-		for (String s : getPartNames(is)) {
-			if (getPart(is, s) != null) {
-				PartData pd = getPart(is, s);
-				if (TaoConfigs.weapc.lookup(pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-					//System.out.println(TaoConfigs.weapc.lookup(pd.getDam()));
-					//System.out.println(MaterialsConfig.findMat(pd.getMat()));
-
-					continue;
-				}
-				ret += TaoConfigs.weapc.lookup(pd.getDam()).getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).damageOrSpringiness;
-				numofparts++;
-			} //else System.out.println("null part");
-		}
-		if (numofparts != 0) ret /= numofparts;
-		return ret;
-	}*/
-
-	public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand)
-    {
-		//System.out.println(hand.equals(EnumHand.OFF_HAND));
-		if(hand.equals(EnumHand.OFF_HAND)&&getReach(playerIn,stack)*getReach(playerIn,stack)>=playerIn.getDistanceSq(target)){
-			Taoism.net.sendToServer(new PacketExtendThyReach(target.getEntityId(), false));
-			playerIn.swingArm(hand);
-			return true;
-		}
+    @Override
+    public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
         return false;
     }
 
-	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
-		finalStat(stack, deriveStats(stack));
-	}
+    public double getDamage() {
+        return dmg;
+    }
 
-	@Override
-	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		//final HandlePerk handle = getPart(stack, StaticRefs.HANDLE).getWeaponSW().getHandle();
-		//if ((handle.equals(HandlePerk.LONG)||handle.equals(HandlePerk.FLEXIBLE)) && !entityLiving.getHeldItem(EnumHand.OFF_HAND).isEmpty()) return true;
-		return false;
-	}
+    public double getAttackSpeed() {
+        return speed - 4d;
+    }
 
-	public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand h) {
-		ItemStack is = p.getHeldItem(h);
-		//disable offhand with long items (i.e. more than 4.5 block range)
-		if (getReach(p,is)>=4.5f){
-			//if(h.equals(EnumHand.MAIN_HAND))
-			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, is);
-		}
-//		else if (h.equals(EnumHand.OFF_HAND)) {
-//			p.swingArm(h);
-//		}
-		return super.onItemRightClick(w, p, h);
-	}
-	@Override
-	public void setAffinities(ItemStack is, float... affinities) {
-		for (int a = 0; a < Math.min(NUMOFELEM, affinities.length); a++) {
-			setAffinity(is, a, affinities[a]);
-		}
-	}
-	@Override
-	public void setAffinity(ItemStack is, int element, float affinity) {
-		getStorage(is).setFloat("element" + element, affinity);
-	}
+    @Override
+    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
+        Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot, stack);
 
-
-	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-		return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-	}
-
-	@Override
-	public float swingSpd(ItemStack i) {
-		return getStorage(i).getFloat("spd");
-	}
-
-	private float[] deriveStats(ItemStack is) {
-		//range: add all except guard
-		//horizontal range: guard
-		//speed: all
-		//damage: all, each part deals their respective damage type
-		//durability: average? sum?
-		//elements: average
-
-		float[] ret = new float[9];
-		int numofparts = 0;
-		for (PartData pd : getParts(is).values()) {
-
-			WeaponStatWrapper wsw = AbstractWeaponConfigOverlord.lookup(pd);
-			if (wsw == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-				//System.out.println(TaoConfigs.weapc.lookup(pd.getPart(), pd.getOrdinal()));
-				//System.out.println(MaterialsConfig.findMat(pd.getMat()));
-
-				continue;
-			}
-			ret[0] += wsw.getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.lightness;
-			float bigdamage = wsw.getDamageMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.damageOrSpringiness;
-			//if(ret[1]<bigdamage)ret[1]=bigdamage;
-			ret[1] += bigdamage;
-			//dur
-			ret[2] += wsw.getDurabilityMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.durability;
-			//ran
-			//if (!pd.getWeaponSW().getClassification().equals(StaticRefs.GUARD)) ret[3] += wsw.getRange();
-			//kin moku sui hi do
-			ret[4] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityMetal;
-			ret[5] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWood;
-			ret[6] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityWater;
-			ret[7] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityFire;
-			ret[8] += wsw.getElementalMultiplier() * MaterialsConfig.findMat(pd.getMat()).msw.affinityEarth;
-
-			//(part damage modifier * material damage)/((1/(part attack time modifier*material attack time)))
-			numofparts++;
-			//} else System.out.println("null part");
-		}
-		if (numofparts != 0) for (int x = 4; x < ret.length; x++) {
-			ret[x] /= numofparts;//if (x < 4)
-			
-		}
-		ret[2]*=(4/numofparts);
-		//ret[0]/=4;
-		//System.out.println(ret);
-		return ret;
-	}
-
-	private float fastatk(ItemStack is) {
-        //TODO christ.
-		float atk = 0F;
-		int counter = 0;
-		if(this.getPart(is,StaticRefs.HEAD)!=null){
-		    atk=damFromPD(this.getPart(is,StaticRefs.HEAD))/2;
+        if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
+            multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", attackDamage(stack) - 1, 0));
+            multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", speed(stack), 0));
+            //for (int x = 0; x < IElemental.ATTRIBUTES.length; x++)
+            //multimap.put(IElemental.ATTRIBUTES[x].getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getAffinity(stack, x), 0));
         }
-        else if(this.getPart(is,StaticRefs.HANDLE)!=null){
-            atk=damFromPD(this.getPart(is,StaticRefs.HANDLE))/2;
-        }
-//		for (PartData pd : getParts(is).values()) {
-//			//if (!pd.getPart().equals(StaticRefs.GUARD)) {
-//				if(atk<(damFromPD(pd)*(6f/11f)))
-//				atk = damFromPD(pd)*(6f/11f);
-//				//counter++;
-//			//}
-//			//System.out.println(reach+" "+pd.getPart());
-//		}
-		//if (counter != 0) atk /= counter;
-		//System.out.println(reach);
-		return atk;
-	}
+        // TODO Some weapons should give you buffs in other things too
+        return multimap;
+    }
 
-	private float damFromPD(PartData pd){
-	    switch(pd.getWeaponSW().getDamageType()){
-            case 0://blunt
-                //System.out.println(pd.getMatSW().lightness);
-                return pd.getWeaponSW().getDamageMultiplier()/pd.getMatSW().lightness;
-            case 1://cutting
-                //System.out.println("sharp");
-                return pd.getWeaponSW().getDamageMultiplier()*pd.getMatSW().damageOrSpringiness;
-            case 2://piercing
-                //System.out.println("pokey");
-                return pd.getWeaponSW().getDamageMultiplier()*pd.getMatSW().damageOrSpringiness;
-            default:
-                return 1f;
+    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+
+        return false;
+    }
+
+    public double attackDamage(ItemStack stack) {
+        return dmg;
+    }
+
+    public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
+        updateWielderData(stack, attacker);
+        int chi = 0;
+        boolean swing = true;
+        if (attacker.hasCapability(TaoCasterData.CAP, null)) {
+            ITaoStatCapability itsc = attacker.getCapability(TaoCasterData.CAP, null);
+            itsc.setQi(itsc.getQi() + 1);
+            chi = itsc.getQiFloored();
+            swing = itsc.getSwing() >= 0.9f;
+        }
+        if (swing) {
+            if (aoe) {
+                aoe = false;
+                aoe(stack, target, attacker, chi);
+                TaoCasterData.getTaoCap(attacker).addQi(1f);
+                aoe = true;
+            }
+            if (effect) {
+                effect = false;
+                applyEffects(stack, target, attacker, chi);
+                effect = true;
+            }
+            if (spawn) {
+                spawn = false;
+                spawnExtraMoves(stack, target, attacker, chi);
+                spawn = true;
+            }
+        }
+        return super.hitEntity(stack, target, attacker);
+    }
+
+    void updateWielderData(ItemStack stack, EntityLivingBase attacker) {
+        ITaoStatCapability itsc = attacker.getCapability(TaoCasterData.CAP, null);
+        NBTTagCompound ntc = gettagfast(stack);
+        ntc.setFloat("qi", itsc.getQi());
+        ntc.setInteger("qifloor", itsc.getQiFloored());
+    }
+
+    /**
+     * this implementation is for single handed weapons' offhand attack, double handed weapons will need to override this.
+     */
+    public boolean itemInteractionForEntity(ItemStack i, EntityPlayer p, EntityLivingBase target, EnumHand hand) {
+//        if (hand == EnumHand.OFF_HAND)
+//            if (!i.isEmpty()) {
+//                //System.out.println("nonnull");
+//
+//                EntityLivingBase elb = NeedyLittleThings.raytraceEntities(p.world, p, getReach(p, i));
+//                if (elb != null) {
+//                    //experimental!
+//                    Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
+////                    NeedyLittleThings.swapItemInHands(p);
+////                    p.attackTargetEntityWithCurrentItem(elb);
+////                    NeedyLittleThings.swapItemInHands(p);
+//                }
+//            }
+        return super.itemInteractionForEntity(i, p, target, hand);
+    }
+
+    /**
+     * Called when the equipped item is right clicked.
+     */
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
+        if (isTwoHanded(p.getHeldItem(handIn))) {
+            //can't put a two handed weapon in an offhand slot, you can't carry it!
+            if (handIn == EnumHand.OFF_HAND)
+                return new ActionResult<ItemStack>(EnumActionResult.FAIL, p.getHeldItem(handIn));
+            else {
+                right = true;
+                if (worldIn.isRemote) {
+                    EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, p.getHeldItemOffhand()));
+                    if (elb != null) {
+                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
+                    }
+                    p.swingArm(handIn);
+                }
+                right = false;
+            }
+        }
+
+        if (handIn == EnumHand.OFF_HAND) {
+            if (!p.getHeldItemOffhand().isEmpty()) {
+                //System.out.println("nonnull");
+                if (worldIn.isRemote) {
+                    EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, p.getHeldItemOffhand()));
+                    if (elb != null) {
+                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
+                    }
+                    p.swingArm(handIn);
+                    TaoCasterData.getTaoCap(p).setOffhandCool(0);
+                }
+//                if (!worldIn.isRemote&&elb!=null) {
+//                    NeedyLittleThings.swapItemInHands(p);
+//                    p.attackTargetEntityWithCurrentItem(elb);
+//                    NeedyLittleThings.swapItemInHands(p);
+//                }
+            }
+
+        }
+        return super.onItemRightClick(worldIn, p, handIn);
+    }
+
+    protected void splash(EntityLivingBase attacker, List<Entity> targets) {
+        for (Entity target : targets) {
+
+            if (target == attacker) continue;
+            ItemStack is = off ? attacker.getHeldItemOffhand() : attacker.getHeldItemMainhand();
+            if (NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
+                continue;
+            if (attacker instanceof EntityPlayer) {
+                EntityPlayer p = (EntityPlayer) attacker;
+                try {
+                    if (off)
+                        TaoCasterData.getTaoCap(attacker).setOffhandCool(TaoCasterData.getTaoCap(attacker).getSwing());
+                    else Taoism.atk.setInt(p, (int) p.getCapability(TaoCasterData.CAP, null).getSwing());
+                } catch (IllegalAccessException ignored) {
+                }
+                NeedyLittleThings.taoWeaponAttack(target, p, attacker.getHeldItem(off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND), !off, false);
+            } else attacker.attackEntityAsMob(target);
         }
     }
 
-	private float fastspd(ItemStack is) {
+    protected void splash(EntityLivingBase attacker, EntityLivingBase target, double radius) {
+        splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(radius, 1.5d, radius), null));
+    }
 
-		float spd = 0F;
-		//int counter = 0;
-		for (PartData pd : getParts(is).values()) {
-			//if (!pd.getWeaponSW().getClassification().equals(StaticRefs.FITTING))// spd += pd.getWeaponSW().getSpeedMultiplier() * pd.getMatSW().lightness;
-			spd += (pd.getWeaponSW().getSpeedMultiplier() * (pd.getMatSW().lightness));
-			//counter++;
-			//System.out.println(reach+" "+pd.getPart());
-		}
-		//System.out.println(spd);
-		spd=(float)Math.pow(spd,0.35);
-		//if (counter != 0) spd *= ((float)StaticRefs.weaponparts.length/(float)counter);
-        //System.out.println(spd);
-		return spd-4;
-	}
-
-	private void finalStat(ItemStack is, float... stats) {
-
-		if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
-		is.getTagCompound().setFloat("spd", stats[0]);
-		is.getTagCompound().setFloat("dam", stats[1]);
-		is.getTagCompound().setInteger("dur", (int) stats[2]);
-		is.getTagCompound().setFloat("ran", stats[3]);
-		setAffinities(is, stats[4], stats[5], stats[6], stats[7], stats[8]);
-		//upgrade(is, stats[1], stats[0]);
-	}
-
-	private String getName(ItemStack stack) {
-		String ret = "";
-		for (PartData pd : getParts(stack).values()) {
-			pd.getWeaponSW().getClassification();
-		}
-		return ret;
-	}
-
-    public void setDamage(ItemStack stack, int damage)
-    {
-        if(damage<=stack.getMaxDamage()){
-            stack.setItemDamage(stack.getMaxDamage()-1);
+    protected void coolDown(EntityLivingBase attacker, int duration) {
+        if (attacker instanceof EntityPlayer) {
+            EntityPlayer p = (EntityPlayer) attacker;
+            p.getCooldownTracker().setCooldown(this, duration);
         }
     }
 
-	private int magicness(ItemStack is) {
-		int ret = 1;
-		Collection<PartData> s = getParts(is).values();
-		for (PartData pd : s) {
-			ret += MaterialsConfig.findMat(pd.getMat()).msw.lingAbility;
-		}
-		ret /= s.size();
-		return ret;
-	}
+    @Override
+    public void chargeWeapon(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, int ticks) {
+        item.damageItem(ticks, defender);
+    }
 
-	/*private float spd(ItemStack is) {
-		int numofparts = 0;
-		float ret = 0;
-		for (String s : getPartNames(is)) {
-			if (getPart(is, s) != null) {
-				PartData pd = getPart(is, s);
-				if (TaoConfigs.weapc.lookup(pd.getDam()) == null || MaterialsConfig.findMat(pd.getMat()) == null) {
-					//System.out.println(TaoConfigs.weapc.lookup(pd.getDam()));
-					//System.out.println(MaterialsConfig.findMat(pd.getMat()));
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        item.setItemDamage(0);
+    }
 
-					continue;
-				}
-				ret += TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness;
-				//System.out.println(s + "   "+TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness);
-				if (TaoConfigs.weapc.lookup(pd.getDam()).getSpeedMultiplier() * MaterialsConfig.findMat(pd.getMat()).lightness != 0) numofparts++;
-			}// else System.out.println("null part");
-		}
-		//System.out.println(""+ret);
-		if (numofparts != 0) ret /= (numofparts);
-		//System.out.println(numofparts);
-		//System.out.println(ret);
-		return ret * 1.6f;
-	}*/
+    @Override
+    public boolean isCharged(EntityLivingBase elb, ItemStack item) {
+        return item.getItemDamage() != 0;
+    }
 
+    /**
+     * gradually discharges the weapon
+     */
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        if (stack.isItemDamaged() && e instanceof EntityLivingBase) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            if (onHand)
+                stack.damageItem(-1, elb);
+            else stack.setItemDamage(0);
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        for (Map.Entry<String, String> a : getParts(stack).entrySet()) {
+            try {
+                tooltip.add(I18n.format(a.getValue() + " " + a.getKey()));
+            } catch (Exception ignored) {
+
+            }
+        }
+        //increment in 5, max is 50
+        if (KeyOverlord.isShiftDown()){
+//            int pot = (int) getAffinities(stack)[i];
+//            //System.out.println(pot);
+//            int used = Math.round(pot / 2) * 2;
+//            if (used != 0)
+//                tooltip.add(IElemental.ELEMC[i] + "" + TextFormatting.ITALIC + I18n.format(IElemental.ELEMS[i] + used + ".inscription") + TextFormatting.RESET);
+            statDesc(stack, worldIn, tooltip, flagIn);
+        }
+        else {
+            tooltip.add(I18n.format("taoism.shiftweapon"));
+        }
+        //perks
+        if (KeyOverlord.isControlDown()) {
+            perkDesc(stack, worldIn, tooltip, flagIn);
+        } else tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponctrl") + TextFormatting.RESET);
+
+    }
+
+    abstract protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn);
+
+    /**
+     * default method! Override for complex weapons!
+     */
+    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.WHITE+I18n.format("taoism.weaponReach", getReach(null, stack))+TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW+I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0))+TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED+I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0))+TextFormatting.RESET);
+        tooltip.add(TextFormatting.GREEN+I18n.format("taoism.weaponAttMult", getDamDist(stack))+TextFormatting.RESET);
+    }
+
+    private double speed(ItemStack stack) {
+        return getAttackSpeed();
+    }
+
+    public float getAffinity(ItemStack is, int element) {
+        if (is.isEmpty()) return 0f;
+        if (getElementBase(is).hasKey("element" + element)) return getElementBase(is).getFloat("element" + element);
+        float ret = 0;
+        if (is.getItem() instanceof IAmModular) {
+            IAmModular iam = (IAmModular) is.getItem();
+            for (String pd : iam.getParts(is).values()) {
+                //ret += pd.getMatSW().affinity()[element % ELEMS.length] * pd.getWeaponSW().getElementalMultiplier();
+            }
+        }
+        return ret;
+    }
+
+    protected NBTTagCompound gettagfast(ItemStack is) {
+        if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
+        return is.getTagCompound();
+    }
+
+    public int getCombo(EntityLivingBase wielder, ItemStack is) {
+        return gettagfast(is).getInteger("combo");
+    }
+
+    public void setCombo(EntityLivingBase wielder, ItemStack is, int to) {
+        if (!is.hasTagCompound())
+            is.setTagCompound(new NBTTagCompound());
+        assert is.getTagCompound() != null;
+        is.getTagCompound().setInteger("combo", to % getComboLength(wielder, is));
+    }
+
+    public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
+        return gettagfast(is).getLong("lastAttack");
+    }
+
+    public void updateLastAttackTime(EntityLivingBase elb, ItemStack is) {
+        gettagfast(is).setLong("lastAttack", elb.world.getTotalWorldTime());
+    }
+
+    public boolean isBroken(ItemStack stack) {
+        return this.getMaxDamage(stack) - stack.getItemDamage() <= 1;
+    }
+
+    public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
+        boolean[] h = harvestable(stack);
+        if (pickList.contains(state.getMaterial()) && h[0]) {
+            return true;
+        }
+        if (shovelList.contains(state.getMaterial()) && h[1]) {
+            return true;
+        }
+        if (axeList.contains(state.getMaterial()) && h[2]) {
+            return true;
+        }
+        if (scytheList.contains(state.getMaterial()) && h[3]) {
+            return true;
+        }
+        //System.out.println(ret);
+        return super.canHarvestBlock(state, stack);
+    }
+
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    protected boolean[] harvestable(ItemStack is) {
+        return new boolean[]{false, false, false, false};
+    }
+
+    /**
+     * Here's a little lesson in trickery!
+     */
+    @SideOnly(value = Side.CLIENT)
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean changed) {
+        if (!changed) try {
+            float swing = NeedyLittleThings.getCooledAttackStrengthOff(Minecraft.getMinecraft().player, 1f);
+            float newSwing = ClientEvents.okuyasu.getFloat(Minecraft.getMinecraft().getItemRenderer());
+            newSwing += MathHelper.clamp((swing * swing * swing) - newSwing, -0.4F, 0.4F);
+            ClientEvents.zaHando.setFloat(Minecraft.getMinecraft().getItemRenderer(), newSwing);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return changed;
+    }
+
+    @Override
+    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
+
+    }
+
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+
+    }
+
+    @Override
+    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return orig;
+    }
+
+    @Override
+    public float damageEnd(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return orig;
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return orig;
+    }
+
+    public boolean isTwoHanded(ItemStack is) {
+        return false;
+    }
+
+    /**
+     * AoE
+     */
+    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+
+    }
+
+    /**
+     * generally applies some effects
+     */
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+
+    }
+
+    /**
+     * spawns entities etc.
+     */
+    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+
+    }
 }

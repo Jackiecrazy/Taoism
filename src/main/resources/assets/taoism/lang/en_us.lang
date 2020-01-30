@@ -1,61 +1,87 @@
-<Items>
+<Attributes>=
+attribute.name.generic.armorDeflectChance=Deflection Chance
+attribute.name.generic.armorAbsorption=Hard Reduction
+attribute.name.generic.affWood=Wood Affinity
+attribute.name.generic.affEarth=Earth Affinity
+attribute.name.generic.affWater=Water Affinity
+attribute.name.generic.affFire=Fire Affinity
+attribute.name.generic.affMetal=Metal Affinity
+
+
 item.weapon.name=Weapon
 
-<Weapon Parts>
-part.name=Name:%s
-part.type=Type:%s
-part.cost=Cost:%s units
-part.range=Reach:&s
+<Weapons>=
 
-part.damagetypem0=Blunt
-part.damagetypem1=Slicing
-part.damagetypem2=Piercing
+taoism.weaponshift=SHIFT for stats...
+taoism.weaponctrl=CTRL for perks...
+weapon.hands=this weapon is two-handed and will disable offhand item use
+taoism.weaponReach=attack range: %s
+taoism.weaponDefMult=defense posture multiplier: %s
+taoism.weaponAttMult=attack posture multiplier: %s
+taoism.weaponAttBase=base attack posture damage: %s
 
-part.damagem=Damage multiplier:%s
-part.durabilitym=Durability multiplier:%s
-part.speedm=Swing speed multiplier:%s
-part.elementm=Elemental multiplier:%s
+item.ken.name=Jian
+ken.combo=normal attack chains up to 3 times before needing recharge
+ken.aoe=attacks all enemies in a 1.5 block radius
+ken.stab=if an attack would only strike one target, deal 1.2x damage
+ken.leap=if airborne, deal 1.8x damage without sweep
+ken.riposte=riposte: combo lengthened to 9 hits for 9 seconds
 
-part.damage=Damage:%s
-part.durability=Durability:%s
-part.speed=Swing speed:%s
-part.element=Elements:%s
+item.banfu.name=Sapper's Axe
+banfu.leap=leap attacks deal double damage
+banfu.cleave=reduces defense by 2 per chi level
+banfu.riposte=riposte: resets opponent attack time. The next attack in 5 seconds causes 0.35*damage posture loss regardless of block
 
-part.shift=SHIFT for stat info...
-part.alt=ALT for handle info...
-part.ctrl=CTRL for perks...
-part.perks=Possessing perks:
-part.handledhandles=Can be applied to:
-handle.name=Handle type:%s
-perk.bleed.name=bleed
-perk.daze.name=daze
-perk.hook.name=hook
-perk.parry.name=parry
-perk.axe.name=axe
-perk.shovel.name=shovel
-perk.pick.name=pickaxe
-perk.hoe.name=hoe
-perk.scythe.name=scythe
-perk.control.name=controlling
-perk.fear.name=fear
-perk.cleave.name=cleave
-handle.flexible.name=flexible
-handle.horizontal.name=horizontal
-handle.short.name=short
-handle.medium.name=medium
-handle.long.name=long
+item.balisong.name=Balisong
+balisong.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+balisong.backstab=backstabs deal double damage
+balisong.hammer=combos limit extended by 1 per chi level, up to 5 at level 10
+balisong.riposte=riposte: launches defender behind the attacker and resets combo, the next backstab in 3 seconds deals triple damage
 
-<Resources>
+item.karambit.name=Karambit
+karambit.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+karambit.backstab=backstabs deal 1.5x damage
+karambit.bleed=inflicts a layer of bleed if target is unarmored, bleed infliction ignores 6 points of armor per chi level
+karambit.riposte=riposte: launches defender behind the attacker and resets combo, the next hit in 3 seconds adds 2 layers of bleed for 3 seconds
+karambit.harvest=can also be used to harvest shear-applicable blocks
 
-<Blocks>
+item.chui.name=Ball Mace
+chui.leap=leap attacks deal double damage
+chui.stagger=damage against a staggered target is doubled
+chui.riposte=riposte: the next attack in 5 seconds causes 0.5*damage posture loss regardless of block
+
+item.cestus.name=Cestus
+cestus.armor=naturally adds 2 armor points
+cestus.leap=leap attacks deal 1.5x damage
+cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 10 chi
+cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
+cestus.riposte=riposte:grapples the enemy, the next attack while grappled cannot be parried, deals 1.3x damage, and pulls them into the ground for 3.5 posture damage
+
+item.kampilan.name=Kampilan
+kampilan.aoe=attacks all enemies in a 2.5 block radius
+kampilan.leap=leap attacks deal 1.5x single target damage
+kampilan.combo=chains 3 times at 3 chi, and 5 times at 9 chi
+kampilan.knockback=converts knockback to extra damage at 6 chi
+kampilan.riposte=riposte: successful hits in the next combo within 5 seconds will additionally convert knockback to posture damage
+
+item.qiang.name=Tasseled Spear
+qiang.stab=stabs enemies, piercing them to the max range
+qiang.stab.riposte=when charged, normal attack will cut 3 times with a 1-tick interval
+qiang.bash=right click to bash an enemy back, dealing half the attack power as blunt damage
+qiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
+qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
+
+<Resources>=
+
+<Blocks>=
 tile.TaoisticAnvil.name=
 
 
-<GUI>
+<GUI>=
 
-<Multiple name items>
+<Multiple name items>=
 
-<Weapon inscriptions>
+<Weapon inscriptions>=
 metal1.inscription=Ore
 metal2.inscription=Knife
 metal3.inscription=Dagger
@@ -71,10 +97,10 @@ metal11.inscription=Coldplay
 wood1.inscription=Sprout
 wood2.inscription=Flourish
 wood3.inscription=Mulberry
-wood4.inscription=Cherry Blossom
+wood4.inscription=Sakura
 wood5.inscription=Eucalyptus
 wood6.inscription=Apricot
-wood7.inscription=Weeping Willow
+wood7.inscription=Willow
 wood8.inscription=Jubokko
 wood9.inscription=Fusou
 wood10.inscription=Yggdrasil

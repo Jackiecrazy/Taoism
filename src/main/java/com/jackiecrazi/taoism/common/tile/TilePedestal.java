@@ -21,15 +21,6 @@ public abstract class TilePedestal extends TaoisticInvTE {
 	
 	/**
 	 * for organization's sake
-	 * @param worldIn
-	 * @param pos
-	 * @param state
-	 * @param playerIn
-	 * @param hand
-	 * @param facing
-	 * @param hitX
-	 * @param hitY
-	 * @param hitZ
 	 * @return
 	 */
 	public abstract boolean onRightClick(EntityPlayer p, EnumHand hand, EnumFacing facing, float x, float y, float z);

@@ -1,3 +1,13 @@
+<Attributes>
+attribute.name.generic.armorDeflectChance=擦彈概率
+attribute.name.generic.armorAbsorption=傷害吸收
+attribute.name.generic.affWood=木靈性
+attribute.name.generic.affEarth=土靈性
+attribute.name.generic.affWater=水靈性
+attribute.name.generic.affFire=火靈性
+attribute.name.generic.affMetal=金靈性
+
+
 <Items>
 item.weapon.name=
 
