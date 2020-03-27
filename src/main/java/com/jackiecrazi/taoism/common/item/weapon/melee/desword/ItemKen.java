@@ -1,8 +1,8 @@
-package com.jackiecrazi.taoism.common.item.weapon.desword;
+package com.jackiecrazi.taoism.common.item.weapon.melee.desword;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;

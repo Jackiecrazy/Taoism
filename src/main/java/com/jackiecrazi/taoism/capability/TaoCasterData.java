@@ -1,11 +1,14 @@
 package com.jackiecrazi.taoism.capability;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.common.entity.EntityMove;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.moves.MovesOverlord;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -35,6 +38,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 
     private static boolean isHoldingEligibleItem(EntityLivingBase entity) {
         ItemStack main = entity.getHeldItemMainhand(), off = entity.getHeldItemOffhand();
+        if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main) && !(main.getItem() instanceof IStaminaPostureManipulable))
+            return false;
         return main.getItem() instanceof IStaminaPostureManipulable || off.getItem() instanceof IStaminaPostureManipulable || CombatConfig.parryCapableItems.contains(main.getUnlocalizedName()) || CombatConfig.parryCapableItems.contains(off.getUnlocalizedName());
     }
 
@@ -72,7 +77,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     }
 
     /**
-     * I just split them because base posture damage is reflected onto attacker at 40% rate.
+     * I just split them because base posture damage is reflected onto attacker at a 40% rate.
      */
     public static float requiredPosture(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
         return requiredPostureAtk(defender, attacker, attack, amount) * requiredPostureDef(defender, attacker, attack, amount);
@@ -87,15 +92,22 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         ItemStack off = defender.getHeldItem(EnumHand.OFF_HAND);
         float defMult = CombatConfig.defaultMultiplierPostureDefend;
         if (isEntityParrying(defender, attacker) || isEntityBlocking(defender, attacker)) {
+            if (main.getItem() instanceof ITwoHanded) {
+                if (main.getItem() instanceof IStaminaPostureManipulable) {
+                    return ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, defender, main, amount);
+                } else if (CombatConfig.parryCapableItems.contains(main.getItem().getUnlocalizedName())) {
+                    return CombatConfig.defaultMultiplierPostureDefend;
+                } else ;//sorry, no parry for you!
+            }
             //is shield, highest priority
             if (off.getItem().isShield(off, defender) || main.getItem().isShield(main, defender))
                 defMult = CombatConfig.defaultMultiplierPostureDefend;
-            //offhand
-            if (off.getItem() instanceof IStaminaPostureManipulable)
-                defMult = Math.min(((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, defender, off, amount), defMult);
             //mainhand
             if (main.getItem() instanceof IStaminaPostureManipulable)
                 defMult = Math.min(((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, defender, main, amount), defMult);
+            //offhand
+            if (off.getItem() instanceof IStaminaPostureManipulable)
+                defMult = Math.min(((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, defender, off, amount), defMult);
             //default parry
             if (CombatConfig.parryCapableItems.contains(off.getItem().getUnlocalizedName()) || CombatConfig.parryCapableItems.contains(main.getItem().getUnlocalizedName()))
                 defMult = Math.min(CombatConfig.defaultMultiplierPostureDefend, defMult);
@@ -114,7 +126,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     /**
      * ticks the caster for however many ticks dictated by the second argument.
      */
-    public static void tickCasterData(EntityLivingBase elb, int ticks) {
+    public static void tickCasterData(EntityLivingBase elb, final int ticks) {
         ITaoStatCapability itsc = elb.getCapability(CAP, null);
         int diff = ticks;
         //spirit power recharge
@@ -141,7 +153,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
             itsc.addPosture(getPostureRegenAmount(elb, diff));
         } else itsc.setPostureRechargeCD(itsc.getPostureRechargeCD() - ticks);
         diff = ticks;
-        itsc.setPosInvulTime(itsc.getPosInvulTime()-diff);
+        //value updating
+        itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
         itsc.addParryCounter(diff);
         itsc.addRollCounter(diff);
         /*if(itsc.getRollCounter()>=CombatConfig.rollCooldown){
@@ -151,6 +164,13 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         }*/
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
         itsc.setQi(Math.max(itsc.getQi() - 0.02f * ticks, 0));
+
+        if (!(elb instanceof EntityPlayer))//hacky I guess, but it works...???
+            try {
+                Taoism.atk.setInt(elb, Taoism.atk.getInt(elb) + ticks);
+            } catch (Exception ignored) {
+            }
+        //TODO hijack melee code to force respect cooldowns
         itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
 
     }

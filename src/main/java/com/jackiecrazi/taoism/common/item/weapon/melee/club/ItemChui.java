@@ -1,9 +1,9 @@
-package com.jackiecrazi.taoism.common.item.weapon.hammer;
+package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,7 +18,7 @@ public class ItemChui extends TaoWeapon {
 
     //a powerful crushing weapon. Brutal, somewhat defensive, with decent reach but low trickery potential
     //leap attacks deal double instead of 1.5x damage. Attacks always decrease posture,
-    // and will additionally deal double damage against staggered targets
+    // and will additionally deal 1.5x damage against staggered targets for a total of triple damage
 
     public ItemChui() {
         super(0, 1.2f, 4.5f, 1.7f);
@@ -42,7 +42,7 @@ public class ItemChui extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float ground=attacker.onGround?1f:2f;
-        float breach= TaoCasterData.getTaoCap(target).getDownTimer()!=0?2f:1f;
+        float breach= TaoCasterData.getTaoCap(target).getDownTimer()!=0?1.5f:1f;
         return ground*breach;
 
     }

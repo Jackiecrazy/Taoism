@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.item.weapon;
+package com.jackiecrazi.taoism.common.item.weapon.melee;
 
 import com.google.common.collect.Multimap;
 import com.jackiecrazi.taoism.Taoism;
@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.client.KeyOverlord;
+import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -114,6 +115,19 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
 //        //Taoism.net.sendToServer(new PacketMakeMove(entityLiving));
 //        return true;
 //    }
+    /*
+    First and foremost, attacks and defences can be "hard" or "soft".
+An attack has a windup, wound and recovery phase. These phases preclude all other phases on that hand:
+the windup phase can be interrupted by jumping, dodging, taking damage or directly inputing another attack command (e.g. left slash interrupted by right slash), so you can feint or be punished for late counters.
+the wound phase is the only one that deals damage. This is generally comparatively long.
+the recovery phase cannot be canceled except by starting another attack. Your options are basically to jump away or keep hitting. Only whiffs and hits give full recovery phase.
+The block is automatically executed as long as you have an idle hand with a weapon or shield in the direction of the attack. It negates damage at a certain efficiency, converting it to posture.
+Blocks can reduce their posture cost with a backpedal, and vice versa. Certain attacks cannot be blocked. Shields additionally block projectiles.
+An attack will cancel another attack if both are in wound phase. This is called a parry. Due to the offensive nature of a parry, it is almost always usable.
+Moves are "soft" or "hard". Soft-soft gives no recovery phase, soft-hard causes defense breach respectively, hard-hard leads to a disengage-able blade lock, enabling parry specials. Soft has less windup.
+In a round of blow trading against a hit (m), you can hit back (yomi 1), which is countered by a dodge (yomi 2) that causes you to whiff, which is countered by a feint (yomi 3) while they're recovering, which is countered by the attack (m)
+I should optimize sidesteps and perhaps vary the combos with movement keys, now that I'm going full overhaul. They could be fixed chains of combos (left swipe-right swipe) or dynamic (consult blade symphony), but then parrying becomes an issue...
+     */
 
 //    @Override
 //    public boolean onLeftClickEntity(final ItemStack stack, final EntityPlayer player, final Entity entity) {
@@ -268,14 +282,14 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
             ItemStack is = off ? attacker.getHeldItemOffhand() : attacker.getHeldItemMainhand();
             if (NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;
+            try {
+                if (off)
+                    TaoCasterData.getTaoCap(attacker).setOffhandCool(TaoCasterData.getTaoCap(attacker).getSwing());
+                else Taoism.atk.setInt(attacker, TaoCasterData.getTaoCap(attacker).getSwing());
+            } catch (IllegalAccessException ignored) {
+            }
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;
-                try {
-                    if (off)
-                        TaoCasterData.getTaoCap(attacker).setOffhandCool(TaoCasterData.getTaoCap(attacker).getSwing());
-                    else Taoism.atk.setInt(p, (int) p.getCapability(TaoCasterData.CAP, null).getSwing());
-                } catch (IllegalAccessException ignored) {
-                }
                 NeedyLittleThings.taoWeaponAttack(target, p, attacker.getHeldItem(off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND), !off, false);
             } else attacker.attackEntityAsMob(target);
         }
@@ -307,15 +321,21 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         return item.getItemDamage() != 0;
     }
 
+    @Override
+    public int getChargeTimeLeft(EntityLivingBase elb, ItemStack item) {
+        return item.getItemDamage();
+    }
+
     /**
      * gradually discharges the weapon
      */
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        if (stack.isItemDamaged() && e instanceof EntityLivingBase) {
+        if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (onHand)
-                stack.damageItem(-1, elb);
-            else stack.setItemDamage(0);
+            if (onHand) {
+                if (stack.isItemDamaged()) stack.damageItem(-1, elb);
+            } else stack.setItemDamage(0);
+            //TODO stuff
         }
     }
 
@@ -330,15 +350,14 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
             }
         }
         //increment in 5, max is 50
-        if (KeyOverlord.isShiftDown()){
+        if (KeyOverlord.isShiftDown()) {
 //            int pot = (int) getAffinities(stack)[i];
 //            //System.out.println(pot);
 //            int used = Math.round(pot / 2) * 2;
 //            if (used != 0)
 //                tooltip.add(IElemental.ELEMC[i] + "" + TextFormatting.ITALIC + I18n.format(IElemental.ELEMS[i] + used + ".inscription") + TextFormatting.RESET);
             statDesc(stack, worldIn, tooltip, flagIn);
-        }
-        else {
+        } else {
             tooltip.add(I18n.format("taoism.shiftweapon"));
         }
         //perks
@@ -354,10 +373,10 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
      * default method! Override for complex weapons!
      */
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE+I18n.format("taoism.weaponReach", getReach(null, stack))+TextFormatting.RESET);
-        tooltip.add(TextFormatting.YELLOW+I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0))+TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED+I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0))+TextFormatting.RESET);
-        tooltip.add(TextFormatting.GREEN+I18n.format("taoism.weaponAttMult", getDamDist(stack))+TextFormatting.RESET);
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.GREEN + I18n.format("taoism.weaponAttMult", getDamDist(stack)) + TextFormatting.RESET);
     }
 
     private double speed(ItemStack stack) {
@@ -422,6 +441,11 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         //System.out.println(ret);
         return super.canHarvestBlock(state, stack);
     }
+
+    protected void multiHit(EntityLivingBase attacker, Entity target, int interval, int duration) {
+        attacker.world.spawnEntity(new MoveMultiStrike(attacker, target, interval, duration));
+    }
+
 
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
@@ -494,5 +518,9 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
      */
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
 
+    }
+
+    public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        //because tonfas.
     }
 }

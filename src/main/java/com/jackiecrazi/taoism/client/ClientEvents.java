@@ -3,7 +3,7 @@ package com.jackiecrazi.taoism.client;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import net.minecraft.client.Minecraft;
@@ -25,9 +25,9 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.lang.reflect.Field;
@@ -58,8 +58,8 @@ public class ClientEvents {
     }
 
     //Reflection time!
-	public static final Field zaHando = ReflectionHelper.findField(ItemRenderer.class, "field_187471_h", "equippedProgressOffHand", "h");
-    public static final Field okuyasu = ReflectionHelper.findField(ItemRenderer.class, "field_187472_i", "prevEquippedProgressOffHand", "i");
+	public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
+    public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
     /**
      * left, back, right
      */

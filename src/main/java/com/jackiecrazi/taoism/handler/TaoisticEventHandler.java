@@ -6,7 +6,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.*;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import net.minecraft.entity.Entity;
@@ -173,7 +173,6 @@ public class TaoisticEventHandler {
                 ItemStack hero = TaoCasterData.getParryingItemStack(seme, uke, e.getAmount());
                 if (hero.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) hero.getItem()).parrySkill(seme, uke, hero);
-                    System.out.println("target has executed parry skill!");
                 }
                 if (uke instanceof EntityPlayer) {
                     EntityPlayer p = (EntityPlayer) uke;
@@ -189,6 +188,7 @@ public class TaoisticEventHandler {
                 e.setCanceled(true);
                 //block code, reflect posture damage
                 TaoCasterData.getTaoCap(seme).consumePosture(postureUse1 * 0.4f, false);
+                ((IStaminaPostureManipulable) TaoCasterData.getParryingItemStack(seme, uke, e.getAmount()).getItem()).onBlock(seme, uke, TaoCasterData.getParryingItemStack(seme, uke, e.getAmount()));
                 if (uke instanceof EntityPlayer) {
                     EntityPlayer p = (EntityPlayer) uke;
                     p.sendStatusMessage(new TextComponentTranslation("you have blocked! You have " + ukeCap.getPosture() + " posture left"), true);
@@ -197,7 +197,6 @@ public class TaoisticEventHandler {
                     EntityPlayer p = (EntityPlayer) seme;
                     p.sendStatusMessage(new TextComponentTranslation("the target has blocked! They have " + ukeCap.getPosture() + " posture left"), true);
                 }
-                System.out.println("target has blocked!");
             }
         }
     }

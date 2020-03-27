@@ -11,6 +11,7 @@ import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -21,40 +22,27 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.lang.reflect.Field;
 
 public class EntityTaoArrow extends EntityArrow implements IDamageType {
 
     public static final int maxCharge = 300;
-
-    public enum WARHEADS{
-          NONE,
-        INCENDIARY,
-        POISONSMOKE,
-        FRAGMENTING
-    }
-
-    public int getCharge() {
-        return charge;
-    }
-
-    public void setCharge(int charge) {
-        this.charge = charge;
-    }
-
     protected int charge = 0;
     protected int warhead = 0;//0 for nothing, 1 for incendiary, 2 for poison smoke, 3 for fragmenting
     private ItemStack arrow = new ItemStack(Items.ARROW);
-
-    public int getWarhead() {
-        return warhead;
-    }
-
-    public void setWarhead(int warhead) {
-        this.warhead = warhead;
-    }
+    private Field
+            inTile = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_145790_g"),
+            inData = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_70253_h"),
+            ticksInGround = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_70252_j"),
+            ticksInAir = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_70257_an"),
+            xTile = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_145791_d"),
+            yTile = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_145792_e"),
+            zTile = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_145789_f"),
+            kbStrength = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_70256_ap");
 
     public EntityTaoArrow(World worldIn) {
         super(worldIn);
@@ -71,10 +59,25 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
         init(shooter, is);
     }
 
-
     public EntityTaoArrow(World worldIn, ItemStack is) {
         super(worldIn);
         init(is);
+    }
+
+    public int getCharge() {
+        return charge;
+    }
+
+    public void setCharge(int charge) {
+        this.charge = charge;
+    }
+
+    public int getWarhead() {
+        return warhead;
+    }
+
+    public void setWarhead(int warhead) {
+        this.warhead = warhead;
     }
 
     protected void init() {
@@ -123,70 +126,137 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
     }
 
     protected Block getInTile() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "inTile", "field_145790_g", "av");
+        try {
+            return (Block) inTile.get(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return Blocks.AIR;
+        }
     }
 
     protected void setInTile(Block b) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, b, "inTile", "field_145790_g", "av");
+        try {
+            inTile.set(this, b);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getInData() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "inData", "field_70253_h", "aw");
+        try {
+            return inData.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setInData(int inData) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, inData, "inData", "field_70253_h", "aw");
+        try {
+            this.inData.setInt(this, inData);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getTicksInGround() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "ticksInGround", "field_70252_j", "ax");
+        try {
+            return ticksInGround.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setTicksInGround(int ticksInGround) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, ticksInGround, "ticksInGround", "field_70252_j", "ax");
+        try {
+            this.ticksInGround.setInt(this, ticksInGround);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getTicksInAir() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "ticksInGround", "field_70257_an", "ay");
+        try {
+            return ticksInAir.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setTicksInAir(int ticksInAir) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, ticksInAir, "ticksInGround", "field_70257_an", "ay");
+        try {
+            this.ticksInAir.setInt(this, ticksInAir);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getX() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "xTile", "field_145791_d", "h");
+        try {
+            return xTile.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setX(int xTile) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, xTile, "xTile", "field_145791_d", "h");
+        try {
+            this.xTile.setInt(this, xTile);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getY() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "yTile", "field_145792_e", "at");
+        try {
+            return yTile.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setY(int yTile) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, yTile, "yTile", "field_145792_e", "at");
+        try {
+            this.yTile.setInt(this, yTile);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getZ() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "zTile", "field_145789_f", "au");
+        try {
+            return zTile.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     protected void setZ(int zTile) {
-        ReflectionHelper.setPrivateValue(EntityArrow.class, this, zTile, "zTile", "field_145789_f", "au");
+        try {
+            this.zTile.setInt(this, zTile);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     protected int getKnockbackStrenth() {
-        return ReflectionHelper.getPrivateValue(EntityArrow.class, this, "knockbackStrength", "field_70256_ap", "aA");
+        try {
+            return kbStrength.getInt(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     @Override
-    public void extinguish()
-    {
+    public void extinguish() {
         super.extinguish();
-        charge=0;
+        charge = 0;
     }
 
     @Override
@@ -199,10 +269,9 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
         }
         if (inGround) {
             updateInGround();
-        }else if(this.isRiding()){
+        } else if (this.isRiding()) {
             updateInEntity(getRidingEntity());
-        }
-        else {
+        } else {
             updateInAir();
         }
     }
@@ -428,10 +497,11 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
 
     /**
      * does stuff while in the entity, mostly emit smoke or poison, etc.
+     *
      * @param e the riding entity, passed for simplicity's sake
      */
-    protected void updateInEntity(Entity e){
-        switch(getWarhead()){
+    protected void updateInEntity(Entity e) {
+        switch (getWarhead()) {
             case 2://poison smoke
 
                 break;
@@ -439,7 +509,6 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
                 break;
         }
     }
-
 
     @Override
     protected void onHit(RayTraceResult raytraceResultIn) {
@@ -545,12 +614,12 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
     @Override
     protected void arrowHit(EntityLivingBase living) {
         super.arrowHit(living);
-        switch(getWarhead()){
+        switch (getWarhead()) {
             case 1: //incendiary
-                living.setFire(charge/20);
+                living.setFire(charge / 20);
                 break;
             case 3: //explosive
-                world.createExplosion(this,posX,posY,posZ,(float)charge/100,false);
+                world.createExplosion(this, posX, posY, posZ, (float) charge / 100, false);
                 this.setDead();
                 break;
         }
@@ -560,5 +629,12 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
     public int getDamageType(ItemStack is) {
         if (arrow == null || arrow.isEmpty()) return 1;
         return arrow.getItem() instanceof IDamageType ? ((IDamageType) arrow.getItem()).getDamageType(arrow) : 1;
+    }
+
+    public enum WARHEADS {
+        NONE,
+        INCENDIARY,
+        POISONSMOKE,
+        FRAGMENTING
     }
 }

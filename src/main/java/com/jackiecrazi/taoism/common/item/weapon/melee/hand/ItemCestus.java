@@ -1,10 +1,10 @@
-package com.jackiecrazi.taoism.common.item.weapon.hand;
+package com.jackiecrazi.taoism.common.item.weapon.melee.hand;
 
 import com.google.common.collect.Multimap;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;

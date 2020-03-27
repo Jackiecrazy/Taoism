@@ -18,7 +18,7 @@ import net.minecraft.item.ItemArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -29,9 +29,9 @@ import java.util.List;
 
 public class TaoArrow extends ItemArrow implements IDamageType {
     private Constructor[] factories = {
-            ReflectionHelper.findConstructor(EntityTaoArrowBlunt.class, World.class, EntityLivingBase.class,ItemStack.class),
-            ReflectionHelper.findConstructor(EntityTaoArrowScream.class, World.class, EntityLivingBase.class,ItemStack.class),
-            ReflectionHelper.findConstructor(EntityTaoArrowHarpoon.class, World.class, EntityLivingBase.class,ItemStack.class)
+            ObfuscationReflectionHelper.findConstructor(EntityTaoArrowBlunt.class, World.class, EntityLivingBase.class,ItemStack.class),
+            ObfuscationReflectionHelper.findConstructor(EntityTaoArrowScream.class, World.class, EntityLivingBase.class,ItemStack.class),
+            ObfuscationReflectionHelper.findConstructor(EntityTaoArrowHarpoon.class, World.class, EntityLivingBase.class,ItemStack.class)
     };
 
     public TaoArrow() {

@@ -12,6 +12,11 @@ public interface ITaoStatCapability {
      void setLing(float amount);
      float addLing(float amount);
      boolean consumeLing(float amount);
+     /**
+      * this will return the cached cooldown for players, and will track mob swing instead. Because Mojang didn't implement attack timers and nobody else bothered.
+      *
+      * not cool, Mojang, not cool. If you want a combat update, start with attack windups and recoveries.
+      */
      int getSwing();
      void setSwing(int amount);
      float getPosture();
@@ -52,5 +57,4 @@ public interface ITaoStatCapability {
      void setProtected (boolean protect);
      int getDownTimer();
      void setDownTimer(int time);
-
 }

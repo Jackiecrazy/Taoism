@@ -12,4 +12,6 @@ public interface IChargeableWeapon {
     void dischargeWeapon(EntityLivingBase attacker, ItemStack item);
 
     boolean isCharged(EntityLivingBase elb, ItemStack item);
+
+    int getChargeTimeLeft(EntityLivingBase elb, ItemStack item);
 }

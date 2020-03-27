@@ -1,5 +1,5 @@
 <Attributes>=
-attribute.name.generic.armorDeflectChance=Deflection Chance
+attribute.name.generic.armorDeflect=Deflection
 attribute.name.generic.armorAbsorption=Hard Reduction
 attribute.name.generic.affWood=Wood Affinity
 attribute.name.generic.affEarth=Earth Affinity
@@ -51,11 +51,11 @@ chui.stagger=damage against a staggered target is doubled
 chui.riposte=riposte: the next attack in 5 seconds causes 0.5*damage posture loss regardless of block
 
 item.cestus.name=Cestus
-cestus.armor=naturally adds 2 armor points
+cestus.armor=naturally adds 3 armor points
 cestus.leap=leap attacks deal 1.5x damage
 cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 10 chi
 cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
-cestus.riposte=riposte:grapples the enemy, the next attack while grappled cannot be parried, deals 1.3x damage, and pulls them into the ground for 3.5 posture damage
+cestus.riposte=riposte: grapples the enemy for 2 seconds, the next attack while grappled cannot be parried, deals 1.3x damage, and pulls them into the ground for 3.5 posture damage
 
 item.kampilan.name=Kampilan
 kampilan.aoe=attacks all enemies in a 2.5 block radius

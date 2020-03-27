@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.item.weapon;
+package com.jackiecrazi.taoism.common.item.weapon.melee;
 
 import com.jackiecrazi.taoism.Taoism;
 import net.minecraft.item.Item;

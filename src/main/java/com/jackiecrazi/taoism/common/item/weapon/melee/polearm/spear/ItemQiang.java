@@ -1,10 +1,9 @@
-package com.jackiecrazi.taoism.common.item.weapon.spear;
+package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
-import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,9 +18,13 @@ import java.util.List;
 
 public class ItemQiang extends TaoWeapon {
     /*
-    First two handed weapon! High reach and speed, medium power and combo, low defense potential
+    First two handed weapon! High reach and combo, medium power and speed, low defense
     left click for a normal stab, piercing enemies up to the max range.
     right click to do a bash that knocks the target a fair distance away and inflicts blunt damage, at cost of lower damage
+    These two attacks have independent cooldowns,so you can continuously chain them.
+    riposte:
+    //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
+    //the next stab in 4 seconds deals cutting damage 3 times with an interval of 1 tick
      */
 
     private final PartDefinition[] parts = {
@@ -101,7 +104,7 @@ public class ItemQiang extends TaoWeapon {
 
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack) && !right) {
-            attacker.world.spawnEntity(new MoveMultiStrike(attacker, target, 2, 4));
+            multiHit(attacker, target, 2, 4);
             dischargeWeapon(attacker, stack);
         }
     }

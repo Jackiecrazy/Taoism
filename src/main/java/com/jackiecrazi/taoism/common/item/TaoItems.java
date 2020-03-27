@@ -1,15 +1,15 @@
 package com.jackiecrazi.taoism.common.item;
 
 import com.jackiecrazi.taoism.common.item.arrows.TaoArrow;
-import com.jackiecrazi.taoism.common.item.weapon.ItemBlueprint;
-import com.jackiecrazi.taoism.common.item.weapon.axe.ItemBanFu;
-import com.jackiecrazi.taoism.common.item.weapon.dagger.ItemBalisong;
-import com.jackiecrazi.taoism.common.item.weapon.dagger.ItemKarambit;
-import com.jackiecrazi.taoism.common.item.weapon.hammer.ItemChui;
-import com.jackiecrazi.taoism.common.item.weapon.hand.ItemCestus;
-import com.jackiecrazi.taoism.common.item.weapon.sesword.ItemKampilan;
-import com.jackiecrazi.taoism.common.item.weapon.desword.ItemKen;
-import com.jackiecrazi.taoism.common.item.weapon.spear.ItemQiang;
+import com.jackiecrazi.taoism.common.item.weapon.melee.ItemBlueprint;
+import com.jackiecrazi.taoism.common.item.weapon.melee.axe.ItemBanFu;
+import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.ItemBalisong;
+import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.ItemKarambit;
+import com.jackiecrazi.taoism.common.item.weapon.melee.club.ItemChui;
+import com.jackiecrazi.taoism.common.item.weapon.melee.hand.ItemCestus;
+import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.ItemKampilan;
+import com.jackiecrazi.taoism.common.item.weapon.melee.desword.ItemKen;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.ItemQiang;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;

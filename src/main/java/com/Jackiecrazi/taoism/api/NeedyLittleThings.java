@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;

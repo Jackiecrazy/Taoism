@@ -1,15 +1,14 @@
-package com.jackiecrazi.taoism.common.item.weapon.axe;
+package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
@@ -56,11 +55,10 @@ public class ItemBanFu extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //trap the opponent's weapon, resetting attack timer.
         //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
-        if (attacker instanceof EntityPlayer)
-            try {
-                Taoism.atk.setInt(attacker, 0);
-            } catch (Exception ignored) {
-            }
+        try {
+            Taoism.atk.setInt(attacker, 0);
+        } catch (Exception ignored) {
+        }
         chargeWeapon(attacker, defender, item, 100);
     }
 

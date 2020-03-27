@@ -1,5 +1,5 @@
-<Attributes>
-attribute.name.generic.armorDeflectChance=擦弹概率
+<Attributes>=
+attribute.name.generic.armorDeflect=擦弹
 attribute.name.generic.armorAbsorption=伤害吸收
 attribute.name.generic.affWood=木灵性
 attribute.name.generic.affEarth=土灵性
@@ -8,59 +8,80 @@ attribute.name.generic.affFire=火灵性
 attribute.name.generic.affMetal=金灵性
 
 
-<Items>
 item.weapon.name=武器
 
-<Weapon Parts>
-part.name=名字:%s
-part.type=类别:%s
-part.cost=造价:%s单位
-part.range=距离:&s
+<Weapons>=
 
-part.damagem=伤害倍率:%s
-part.durabilitym=耐久倍率:%s
-part.speedm=挥动速度倍率:%s
-part.elementm=元素亲和倍率:%s
+taoism.weaponshift=SHIFT 查看数据...
+taoism.weaponctrl=CTRL 查看特性...
+weapon.hands=装备此武器时无法以任何方式使用副手物品
+taoism.weaponReach=攻击范围: %s
+taoism.weaponDefMult=防御架势倍率: %s
+taoism.weaponAttMult=攻击架势倍率: %s
+taoism.weaponAttBase=基础架势伤害: %s
 
-part.damage=伤害:%s
-part.durability=耐久:%s
-part.speed=挥动速度:%s
-part.element=元素亲和:%s
+item.ken.name=剑
+ken.combo=普攻挽出三个剑花后才进入冷却期
+ken.aoe=攻击半径为1.5方块
+ken.stab=若攻击只命中一个敌人，造成1.2倍伤害
+ken.leap=若攻击时腾空，造成1.8倍的单体伤害
+ken.riposte=反击：九秒内连击上限上升至九
 
-part.shift=SHIFT显示数据...
-part.alt=ALT显示手柄相关...
-part.ctrl=CTRL显示能力...
-part.perks=拥有能力:
-part.handledhandles=可被用于:
-handle.name=手柄类型:%s
-perk.bleed.name=流血
-perk.daze.name=晕厥
-perk.hook.name=拉拽
-perk.parry.name=格挡
-perk.axe.name=斧
-perk.shovel.name=铲
-perk.pick.name=镐
-perk.hoe.name=锄
-perk.scythe.name=镰
-perk.control.name=控制
-perk.fear.name=恐惧
-perk.cleave.name=破甲
-handle.flexible.name=绳索
-handle.horizontal.name=横柄
-handle.short.name=短柄
-handle.medium.name=中柄
-handle.long.name=长柄
+item.banfu.name=板斧
+banfu.leap=腾空攻击造成双倍伤害
+banfu.cleave=攻击附加三秒破防，每层气使敌方护甲减少2点
+banfu.riposte=反击：重置敌人的攻击时间，五秒内的下一次攻击造成相当于伤害乘以0.35的架势伤害，不论是否被抵挡
 
-<Resources>
+item.balisong.name=蝴蝶刀
+balisong.switch=空手装备此武器或在双手之间交替此武器时不会重置其冷却
+balisong.backstab=背刺造成双倍伤害
+balisong.hammer=连击上限每两层气增加一，最多连击五次
+balisong.riposte=反击：跳到敌人身后并重置连击次数，三秒内的下一次背刺造成三倍伤害
 
-<Blocks>
+item.karambit.name=爪刀
+karambit.switch=空手装备此武器或在双手之间交替此武器时不会重置其冷却
+karambit.backstab=背刺造成1.5倍伤害
+karambit.bleed=若目标没有护甲则造成一层持续一秒的流血效果，每层气使本效果无视6点护甲
+karambit.riposte=反击：跳到敌人身后，三秒内的下一次攻击额外附加两层持续三秒的流血
+karambit.harvest=可以采集任何剪刀可以采集的方块
+
+item.chui.name=锤
+chui.leap=腾空攻击造成双倍伤害
+chui.stagger=被对击倒的目标造成双倍伤害
+chui.riposte=反击：五秒内下一次攻击造成相当于攻击伤害一半的架势伤害，不论是否被抵挡
+
+item.cestus.name=拳套
+cestus.armor=增加三点护甲值
+cestus.leap=腾空攻击造成1.5倍伤害
+cestus.debuff=三层气时附加缓慢I、六层气时附加缓慢II、十层气时致盲
+cestus.damage=伤害在1、2、4、5层气时增加1，每层6以上的气增加2
+cestus.riposte=反击：擒拿对手两秒。下一次攻击造成1.2倍伤害、无法被抵挡、且造成3.5架势伤害
+
+item.kampilan.name=坎佩兰刀
+kampilan.aoe=攻击半径为2.5方块
+kampilan.leap=腾空攻击造成1.5倍的单体伤害
+kampilan.combo=三层气以上连击3次，九层气以上连击5次
+kampilan.knockback=六层气时将击退效果转化为额外伤害
+kampilan.riposte=反击：五秒内，下一套连击的击退效果将会额外转化为架势伤害
+
+item.qiang.name=枪
+qiang.stab=贯穿攻击范围内所有准星上的生物
+qiang.stab.riposte=枪花效果下，普攻将会在3tick内攻击三次，造成切割伤害
+qiang.bash=右击使用枪杆击退敌人，造成0.5倍的钝器伤害
+qiang.bash.riposte=枪花效果下，击退拥有范围半径2方块，且对所有击退的敌人造成一秒的缓慢I
+qiang.riposte=反击：四秒内的下一次攻击将会舞出枪花
+
+<Resources>=
+
+<Blocks>=
 tile.TaoisticAnvil.name=
 
-<GUI>
 
-<Multiple name items>
+<GUI>=
 
-<Weapon inscriptions>
+<Multiple name items>=
+
+<Weapon inscriptions>=
 metal1.inscription=十步一杀
 metal2.inscription=千里不留
 metal3.inscription=都护铁衣

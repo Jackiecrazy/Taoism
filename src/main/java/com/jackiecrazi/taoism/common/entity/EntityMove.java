@@ -1,7 +1,7 @@
 package com.jackiecrazi.taoism.common.entity;
 
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.TaoWeapon;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;

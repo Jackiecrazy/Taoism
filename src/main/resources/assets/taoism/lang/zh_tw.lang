@@ -1,5 +1,5 @@
-<Attributes>
-attribute.name.generic.armorDeflectChance=擦彈概率
+<Attributes>=
+attribute.name.generic.armorDeflect=擦彈
 attribute.name.generic.armorAbsorption=傷害吸收
 attribute.name.generic.affWood=木靈性
 attribute.name.generic.affEarth=土靈性
@@ -8,68 +8,87 @@ attribute.name.generic.affFire=火靈性
 attribute.name.generic.affMetal=金靈性
 
 
-<Items>
-item.weapon.name=
+item.weapon.name=武器
 
-<Weapon Parts>
-part.name=名字:%s
-part.type=類別:%s
-part.cost=造價:%s單位
-part.range=距離:&s
+<Weapons>=
 
-part.damagem=傷害倍率:%s
-part.durabilitym=耐久倍率:%s
-part.speedm=揮動速度倍率:%s
-part.elementm=元素親和倍率:%s
+taoism.weaponshift=SHIFT 查看數據...
+taoism.weaponctrl=CTRL 查看特性...
+weapon.hands=裝備此武器時無法以任何方式使用副手物品
+taoism.weaponReach=攻擊範圍: %s
+taoism.weaponDefMult=防禦架勢倍率: %s
+taoism.weaponAttMult=攻擊架勢倍率: %s
+taoism.weaponAttBase=基礎架勢傷害: %s
 
-part.damage=傷害:%s
-part.durability=耐久:%s
-part.speed=揮動速度:%s
-part.element=元素親和:%s
+item.ken.name=劍
+ken.combo=普攻挽出三個劍花後才進入冷卻期
+ken.aoe=攻擊半徑為1.5方塊
+ken.stab=若攻擊只命中壹個敵人，造成1.2倍傷害
+ken.leap=若攻擊時騰空，造成1.8倍的單體傷害
+ken.riposte=反擊：九秒內連擊上限上升至九
 
-part.shift=SHIFT顯示數據...
-part.alt=ALT顯示手柄相關...
-part.ctrl=CTRL顯示能力...
-part.perks=擁有能力:
-part.handledhandles=可被用於:
-handle.name=手柄類型:%s
-perk.bleed.name=流血
-perk.daze.name=暈厥
-perk.hook.name=拉拽
-perk.parry.name=格擋
-perk.axe.name=斧
-perk.shovel.name=鏟
-perk.pick.name=鎬
-perk.hoe.name=鋤
-perk.scythe.name=鐮
-perk.control.name=控制
-perk.fear.name=恐懼
-perk.cleave.name=破甲
-handle.flexible.name=繩索
-handle.horizontal.name=橫柄
-handle.short.name=短柄
-handle.medium.name=中柄
-handle.long.name=長柄
+item.banfu.name=板斧
+banfu.leap=騰空攻擊造成雙倍傷害
+banfu.cleave=攻擊附加三秒破防，每層氣使敵方護甲減少2點
+banfu.riposte=反擊：重置敵人的攻擊時間，五秒內的下壹次攻擊造成相當於傷害乘以0.35的架勢傷害，不論是否被抵擋
 
+item.balisong.name=蝴蝶刀
+balisong.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
+balisong.backstab=背刺造成雙倍傷害
+balisong.hammer=連擊上限每兩層氣增加壹，最多連擊五次
+balisong.riposte=反擊：跳到敵人身後並重置連擊次數，三秒內的下壹次背刺造成三倍傷害
 
-<Resources>
+item.karambit.name=爪刀
+karambit.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
+karambit.backstab=背刺造成1.5倍傷害
+karambit.bleed=若目標沒有護甲則造成壹層持續壹秒的流血效果，每層氣使本效果無視6點護甲
+karambit.riposte=反擊：跳到敵人身後，三秒內的下壹次攻擊額外附加兩層持續三秒的流血
+karambit.harvest=可以采集任何剪刀可以采集的方塊
 
-<Blocks>
+item.chui.name=錘
+chui.leap=騰空攻擊造成雙倍傷害
+chui.stagger=被對擊倒的目標造成雙倍傷害
+chui.riposte=反擊：五秒內下壹次攻擊造成相當於攻擊傷害壹半的架勢傷害，不論是否被抵擋
+
+item.cestus.name=拳套
+cestus.armor=增加三點護甲值
+cestus.leap=騰空攻擊造成1.5倍傷害
+cestus.debuff=三層氣時附加緩慢I、六層氣時附加緩慢II、十層氣時致盲
+cestus.damage=傷害在1、2、4、5層氣時增加1，每層6以上的氣增加2
+cestus.riposte=反擊：擒拿對手兩秒。下壹次攻擊造成1.2倍傷害、無法被抵擋、且造成3.5架勢傷害
+
+item.kampilan.name=坎佩蘭刀
+kampilan.aoe=攻擊半徑為2.5方塊
+kampilan.leap=騰空攻擊造成1.5倍的單體傷害
+kampilan.combo=三層氣以上連擊3次，九層氣以上連擊5次
+kampilan.knockback=六層氣時將擊退效果轉化為額外傷害
+kampilan.riposte=反擊：五秒內，下壹套連擊的擊退效果將會額外轉化為架勢傷害
+
+item.qiang.name=槍
+qiang.stab=貫穿攻擊範圍內所有準星上的生物
+qiang.stab.riposte=槍花效果下，普攻將會在3tick內攻擊三次，造成切割傷害
+qiang.bash=右擊使用槍桿擊退敵人，造成0.5倍的鈍器傷害
+qiang.bash.riposte=槍花效果下，擊退擁有範圍半徑2方塊，且對所有擊退的敵人造成壹秒的緩慢I
+qiang.riposte=反擊：四秒內的下壹次攻擊將會舞出槍花
+
+<Resources>=
+
+<Blocks>=
 tile.TaoisticAnvil.name=
 
 
-<GUI>
+<GUI>=
 
-<Multiple name items>
+<Multiple name items>=
 
-<Weapon inscriptions>
-metal1.inscription=十步一殺
-metal2.inscription=千里不留
+<Weapon inscriptions>=
+metal1.inscription=十步壹殺
+metal2.inscription=千裏不留
 metal3.inscription=都護鐵衣
 metal4.inscription=滿城金甲
 metal5.inscription=高堂明鏡
 metal6.inscription=鐵馬冰河
-metal7.inscription=一夫當關
+metal7.inscription=壹夫當關
 metal8.inscription=金戈鐵馬
 metal9.inscription=鐵索連舟
 metal10.inscription=定奪生死
@@ -88,13 +107,13 @@ wood10.inscription=建木神樹
 wood11.inscription=呆若木雞
 
 water1.inscription=男兒有淚
-water2.inscription=一江春水
+water2.inscription=壹江春水
 water3.inscription=滄海月明
 water4.inscription=江水為竭
 water5.inscription=不盡長江
 water6.inscription=驚濤拍岸
-water7.inscription=曾今滄海
-water8.inscription=身世浮沉
+water7.inscription=曾經滄海
+water8.inscription=身世浮沈
 water9.inscription=奔流入海
 water10.inscription=浩瀚星河
 water11.inscription=百度貼吧
@@ -116,9 +135,9 @@ earth2.inscription=千錘萬鑿
 earth3.inscription=化作春泥
 earth4.inscription=山亦無陵
 earth5.inscription=三十功名
-earth6.inscription=一騎紅塵
+earth6.inscription=壹騎紅塵
 earth7.inscription=亂石穿空
 earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎
-earth10.inscription=天地以和
+earth10.inscription=天地以合
 earth11.inscription=大花棉襖
