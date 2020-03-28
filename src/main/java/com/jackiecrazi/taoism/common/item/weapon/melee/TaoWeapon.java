@@ -118,7 +118,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     /*
     First and foremost, attacks and defences can be "hard" or "soft".
 An attack has a windup, wound and recovery phase. These phases preclude all other phases on that hand:
-the windup phase can be interrupted by jumping, dodging, taking damage or directly inputing another attack command (e.g. left slash interrupted by right slash), so you can feint or be punished for late counters.
+the windup phase can be interrupted by jumping, dodging, taking damage or directly inputting another attack command (e.g. left slash interrupted by right slash), so you can feint or be punished for late counters.
 the wound phase is the only one that deals damage. This is generally comparatively long.
 the recovery phase cannot be canceled except by starting another attack. Your options are basically to jump away or keep hitting. Only whiffs and hits give full recovery phase.
 The block is automatically executed as long as you have an idle hand with a weapon or shield in the direction of the attack. It negates damage at a certain efficiency, converting it to posture.

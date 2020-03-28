@@ -35,15 +35,25 @@ import java.lang.reflect.Field;
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
 
+    //Reflection time!
+    public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
+    public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
+    private static final int ALLOWANCE = 7;
+    /**
+     * left, back, right
+     */
+    private static long[] lastTap = {0, 0, 0};
+    private static long lastSneak = 0;
+
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
-        for(Item i:TaoWeapon.listOfWeapons){
+        for (Item i : TaoWeapon.listOfWeapons) {
             regWeap(i);
         }
     }
 
-    private static void regWeap(Item i){
-        ModelLoader.setCustomModelResourceLocation(i,0,new ModelResourceLocation(i.getRegistryName(), "inventory"));
+    private static void regWeap(Item i) {
+        ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
     }
 
     @SubscribeEvent
@@ -53,73 +63,64 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void modelThePlayer(RenderPlayerEvent.Pre e) {//TODO find a way to have the hands move in tandem with swing progress
-        EntityPlayer p=e.getEntityPlayer();
-        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX+=37;
+        EntityPlayer p = e.getEntityPlayer();
+        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX += 37;
     }
-
-    //Reflection time!
-	public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
-    public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
-    /**
-     * left, back, right
-     */
-    private static long[] lastTap={0,0,0};
-    private static final int ALLOWANCE=7;
-    private static long lastSneak=0;
 
     @SubscribeEvent
-    public static void doju(InputEvent.KeyInputEvent e){
-        Minecraft mc=Minecraft.getMinecraft();
-        if(mc.gameSettings.keyBindLeft.isPressed()){
-            if(mc.world.getTotalWorldTime()-lastTap[0]<=ALLOWANCE){
+    public static void doju(InputEvent.KeyInputEvent e) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.gameSettings.keyBindLeft.isPressed()) {
+            if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(0));
             }
-            lastTap[0]=mc.world.getTotalWorldTime();
+            lastTap[0] = mc.world.getTotalWorldTime();
         }
-        if(mc.gameSettings.keyBindBack.isPressed()){
-            if(mc.world.getTotalWorldTime()-lastTap[1]<=ALLOWANCE){
+        if (mc.gameSettings.keyBindBack.isPressed()) {
+            if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(1));
             }
-            lastTap[1]=mc.world.getTotalWorldTime();
+            lastTap[1] = mc.world.getTotalWorldTime();
         }
-        if(mc.gameSettings.keyBindRight.isPressed()){
-            if(mc.world.getTotalWorldTime()-lastTap[2]<=ALLOWANCE){
+        if (mc.gameSettings.keyBindRight.isPressed()) {
+            if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(2));
             }
-            lastTap[2]=mc.world.getTotalWorldTime();
+            lastTap[2] = mc.world.getTotalWorldTime();
         }
-        if(mc.gameSettings.keyBindSneak.isPressed()){
+        if (mc.gameSettings.keyBindSneak.isPressed()) {
             //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-                Taoism.net.sendToServer(new PacketBeginParry());
+            Taoism.net.sendToServer(new PacketBeginParry());
             //}//TODO this is broken, make it activate on a brief sneak
-            lastSneak=mc.world.getTotalWorldTime();
+            lastSneak = mc.world.getTotalWorldTime();
         }
     }
 
-	@SubscribeEvent
-	public static void handRaising(RenderSpecificHandEvent e) {
-    	if(e.getHand().equals(EnumHand.MAIN_HAND))return;
-        AbstractClientPlayer p= Minecraft.getMinecraft().player;
+    @SubscribeEvent
+    public static void handRaising(RenderSpecificHandEvent e) {
+        if (e.getHand().equals(EnumHand.MAIN_HAND)) return;
+        AbstractClientPlayer p = Minecraft.getMinecraft().player;
         //cancel event so two handed weapons give a visual cue to their two-handedness
-        if(p.getHeldItemMainhand().getItem() instanceof ITwoHanded){
-            if(((TaoWeapon)p.getHeldItemMainhand().getItem()).isTwoHanded(p.getHeldItemMainhand())){
+        if (p.getHeldItemMainhand().getItem() instanceof ITwoHanded) {
+            if (((TaoWeapon) p.getHeldItemMainhand().getItem()).isTwoHanded(p.getHeldItemMainhand())) {
                 e.setCanceled(true);
 
                 return;
             }
         }
-        if(!(e.getItemStack().getItem() instanceof TaoWeapon))return;
+        //force offhand to have some semblance of cooldown
+        if (!(e.getItemStack().getItem() instanceof TaoWeapon)) return;
         e.setCanceled(true);
-    	ItemRenderer ir=Minecraft.getMinecraft().getItemRenderer();
+        ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();
         float f1 = p.prevRotationPitch + (p.rotationPitch - p.prevRotationPitch) * e.getPartialTicks();
         //MathHelper.clamp((!requipM ? f * f * f : 0.0F) - this.equippedProgressMainHand, -0.4F, 0.4F);//mainhand add per
-        float cd= NeedyLittleThings.getCooledAttackStrengthOff(p,e.getPartialTicks());
-        float f6 = 1-(cd*cd*cd);
+        float cd = NeedyLittleThings.getCooledAttackStrengthOff(p, e.getPartialTicks());
+        float f6 = 1 - (cd * cd * cd);
         ir.renderItemInFirstPerson(p, e.getPartialTicks(), f1, EnumHand.OFF_HAND, e.getSwingProgress(), p.getHeldItemOffhand(), f6);
-	}
+    }
 
     @SubscribeEvent
-    public static void displayCoolie(RenderGameOverlayEvent event) {
+    public static void displayCoolie(RenderGameOverlayEvent.Post event) {
         ScaledResolution sr = event.getResolution();
         if (event.getType().equals(RenderGameOverlayEvent.ElementType.CROSSHAIRS)) {
             //draw offhand cooldown, crosshair type
@@ -134,19 +135,19 @@ public class ClientEvents {
                     if (!gamesettings.showDebugInfo || gamesettings.hideGUI || player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
                         if (Minecraft.getMinecraft().gameSettings.attackIndicator == 1) {
                             GlStateManager.enableAlpha();
-                            float cooldown = NeedyLittleThings.getCooldownPeriodOff(player);
+                            float cooldown = NeedyLittleThings.getCooledAttackStrengthOff(player, 0f);
                             boolean hyperspeed = false;
 
                             if (Minecraft.getMinecraft().pointedEntity != null && Minecraft.getMinecraft().pointedEntity instanceof EntityLivingBase && cooldown >= 1.0F) {
                                 hyperspeed = NeedyLittleThings.getCooldownPeriodOff(player) > 5.0F;
-                                hyperspeed = hyperspeed & ((EntityLivingBase) Minecraft.getMinecraft().pointedEntity).isEntityAlive();
+                                hyperspeed = hyperspeed & (Minecraft.getMinecraft().pointedEntity).isEntityAlive();
                             }
 
-                            int y = height / 2 - 7 + 16+16;
+                            int y = height / 2 - 7 -7;
                             int x = width / 2 - 8;
 
                             if (hyperspeed) {
-                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 68, 94, 16, 16);//94
+                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 68, 94, 16, 16);
                             } else if (cooldown < 1.0F) {
                                 int k = (int) (cooldown * 17.0F);
                                 Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 36, 94, 16, 4);

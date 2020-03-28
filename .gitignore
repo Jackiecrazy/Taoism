@@ -16,7 +16,6 @@ eclipse
 options.txt
 usernamecache.json
 .gradle/2.14/taskArtifacts/cache.properties.lock
-*.log
-*.bin
-.gradle/2.14/taskArtifacts/fileHashes.bin
+.idea
 usercache.json
+.gradle
