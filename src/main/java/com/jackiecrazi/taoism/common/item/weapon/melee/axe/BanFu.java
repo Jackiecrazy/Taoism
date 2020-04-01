@@ -12,17 +12,18 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemBanFu extends TaoWeapon {
+public class BanFu extends TaoWeapon {
     //Like the axe, a powerful weapon designed to counter heavy armor. Good power and defense potential, decent reach, combo and trickery
     //Leap attacks deal double damage, attacks always decrease posture,
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
 
-    public ItemBanFu() {
+    public BanFu() {
         super(3, 1.2, 7.5f, 1.7f);
     }
 
@@ -55,11 +56,12 @@ public class ItemBanFu extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //trap the opponent's weapon, resetting attack timer.
         //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
-        try {
-            Taoism.atk.setInt(attacker, 0);
-        } catch (Exception ignored) {
-        }
-        chargeWeapon(attacker, defender, item, 100);
+        Taoism.setAtk(defender, 0);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    public int getMaxChargeTime() {
+        return 100;
     }
 
     @Override
@@ -83,9 +85,14 @@ public class ItemBanFu extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("banfu.leap"));
         tooltip.add(I18n.format("banfu.cleave"));
         tooltip.add(I18n.format("banfu.riposte"));
+    }
+
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return !attacker.onGround;
     }
 
 }

@@ -12,9 +12,13 @@ item.weapon.name=Weapon
 
 <Weapons>=
 
-taoism.weaponshift=SHIFT for stats...
-taoism.weaponctrl=CTRL for perks...
+weapon.shift=SHIFT for stats...
+weapon.ctrl=CTRL for perks...
+weapon.dummy=THIS ITEM IS ONLY A DUMMY FOR CLEANER CODE. IT WILL BE REMOVED WHEN THE TWO HANDED WEAPON IS UNEQUIPPED.
 weapon.hands=this weapon is two-handed and will disable offhand item use
+weapon.parry=this weapon cannot block or parry
+weapon.ignore=this weapon ignores blocks, parries, and shields
+weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %s
 taoism.weaponDefMult=defense posture multiplier: %s
 taoism.weaponAttMult=attack posture multiplier: %s
@@ -47,7 +51,7 @@ karambit.harvest=can also be used to harvest shear-applicable blocks
 
 item.chui.name=Ball Mace
 chui.leap=leap attacks deal double damage
-chui.stagger=damage against a staggered target is doubled
+chui.stagger=damage against a staggered target is multiplied by 1.5
 chui.riposte=riposte: the next attack in 5 seconds causes 0.5*damage posture loss regardless of block
 
 item.cestus.name=Cestus
@@ -71,6 +75,39 @@ qiang.bash=right click to bash an enemy back, dealing half the attack power as b
 qiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
 qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
 
+item.tonfa.name=Tonfa
+tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
+tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
+tonfa.parry=chi will increase by 1 per parry, both hands will briefly activate riposte after a parry
+tonfa.reset=at 3 chi and above, blocks and parries reset attack cooldown
+tonfa.defbreak=at 7 chi and above, blocks inflict defense break and parries additionally add fatigue
+tonfa.riposte=riposte: next attack in 1 second will add resistance to self lasting for the remainder of that second; cannot be staggered for 2 seconds
+
+item.chickensickle.name=Chicken Sickle
+chickensickle.normal=attacks hook enemies in and stack hemorrhage II for 5 seconds
+chickensickle.riposte1=riposte: next attack in 5 seconds stacks hemorrhage III for 5 seconds and detonates hemorrhage,
+chickensickle.riposte2=dealing (layer)% of max hp and inflicting 5 seconds of bleed, potency being a third of hemorrhage's
+
+item.catninetail.name=Cat of Nine Tails
+catninetail.lacerate=inflicts laceration III for 5 seconds and stacks bleed III for 1 second on hit targets
+catninetail.armord=duration decreases for each point of armor
+catninetail.armorp=potency decreases for every 5 points of armor, rounding down
+
+item.pollaxe.name=Pole Axe
+pollaxe.leap=leap attacks deal double damage
+pollaxe.cleave=chops through enemy armor, stacking armor break II for 3 seconds
+pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double of potency of armor break
+pollaxe.swipe=right click to swipe in a 5 block radius, knocking enemies back slightly. When leaping, this is a single target knockback move
+pollaxe.swipe.riposte=when charged, swipe will add armor break III for 5 seconds; its damage is multiplied by 1+(cleave potency/10)
+pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additionally inflicting 0.35*damage posture loss regardless of block
+
+item.changchui.name=Great Hammer
+changchui.leap=leap attacks deal double damage
+changchui.downed=deals double damage against a downed target, for a total of quadruple damage
+changchui.swipe=right click to swipe in a 4 block radius, knocking enemies back. When leaping, this is a single target high knockback move
+changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
+changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove half of their max posture
+
 <Resources>=
 
 <Blocks>=
@@ -79,7 +116,9 @@ tile.TaoisticAnvil.name=
 
 <GUI>=
 
-<Multiple name items>=
+<Damage sources>=
+death.attack.bleed=%1$s bled to death
+death.attack.bleed.player=%1$s bled to death from %2$s
 
 <Weapon inscriptions>=
 metal1.inscription=Ore
@@ -116,7 +155,7 @@ water7.inscription=Yellow River
 water8.inscription=Poseidon
 water9.inscription=Antediluvian
 water10.inscription=The Cosmic River
-water11.inscription=Tieba
+water11.inscription=Davy Jones
 
 fire1.inscription=Embers
 fire2.inscription=Will-o-wisp
@@ -128,7 +167,7 @@ fire7.inscription=Pompeii
 fire8.inscription=Hephaestus
 fire9.inscription=Divine Lightning
 fire10.inscription=Rain of Brimstone
-fire11.inscription=Spicy Hot Pot
+fire11.inscription=This Girl
 
 earth1.inscription=Dust
 earth2.inscription=Pebble
@@ -140,4 +179,4 @@ earth7.inscription=Olympus
 earth8.inscription=Mantle
 earth9.inscription=Core
 earth10.inscription=Terra
-earth11.inscription=Socks with Sandals
+earth11.inscription=Dirt

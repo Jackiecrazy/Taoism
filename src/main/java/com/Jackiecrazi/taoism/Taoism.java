@@ -10,9 +10,11 @@ import com.jackiecrazi.taoism.handler.TaoCapabilityHandler;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -32,6 +34,7 @@ import java.util.Random;
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
     public static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
+    public static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
     public static final String MODID = "taoism";
     public static final String VERSION = "1.0";
     public static final Random unirand = new Random();
@@ -58,6 +61,30 @@ public class Taoism {
     public static CommonProxy proxy;
     public static SimpleNetworkWrapper net;
     public static Logger logger = LogManager.getLogger(MODID);
+
+    public static void setBypassArmor(DamageSource ds, boolean value) {
+        try {
+            bypassArmor.setBoolean(ds, value);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    public static void setAtk(Entity e, int cooldown) {
+        try {
+            atk.setInt(e, cooldown);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    public static int getAtk(Entity e) {
+        try {
+            return atk.getInt(e);
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
 	/*
 	public static final CreativeTabs tabBow = new CreativeTabs("taoBow") {
 

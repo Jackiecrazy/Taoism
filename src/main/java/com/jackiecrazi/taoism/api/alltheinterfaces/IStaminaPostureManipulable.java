@@ -36,6 +36,8 @@ public interface IStaminaPostureManipulable {
     it also works as a "downed" indicator to show whether the player should constantly regenerate posture for a comeback
     high vanilla damage sources to keep in mind: (charged) creeper 73(145), ghast 25, golem 31, ravager 18, dragon 15
      */
+    boolean canBlock(EntityLivingBase defender, ItemStack item);
+
     void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
 
     void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);

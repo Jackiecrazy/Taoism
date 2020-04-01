@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemBalisong extends TaoWeapon {
+public class Balisong extends TaoWeapon {
     //A stabbing dagger that is fast and relentless, but short in reach. Can be flicked open and closed.
     //has no switch in cooldown, and can be switched from hand to hand without cooldown as well.
     //backstabs deal double damage.
@@ -25,7 +25,7 @@ public class ItemBalisong extends TaoWeapon {
     //pierces 1 point of armor every chi level in reverse grip
 
 
-    public ItemBalisong() {
+    public Balisong() {
         super(2, 2, 4f, 0);
     }
 
@@ -55,14 +55,19 @@ public class ItemBalisong extends TaoWeapon {
     }
 
     @Override
+    public int getMaxChargeTime() {
+        return 60;
+    }
+
+    @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //TODO circles to the back of the attacker and resets combo, the next hit in 3 sec deals 3x damage
         setCombo(defender, item, 0);
-        defender.setPositionAndRotation(defender.posX,defender.posY,defender.posZ,attacker.rotationYaw,attacker.rotationPitch);
+        defender.setPositionAndRotation(defender.posX, defender.posY, defender.posZ, attacker.rotationYaw, attacker.rotationPitch);
         Vec3d look = attacker.getLookVec();
         defender.addVelocity(-look.x, -look.y, -look.z);
-        defender.velocityChanged=true;
-        chargeWeapon(attacker, defender, item, 60);
+        defender.velocityChanged = true;
+        super.parrySkill(attacker, defender, item);
     }
 
     @Override

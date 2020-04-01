@@ -14,13 +14,13 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemKampilan extends TaoWeapon {
+public class Kampilan extends TaoWeapon {
     private float knock = 0;
 
     //relentless and intimidating weapon, with a decent reach and defense but low trickery potential
     //high attack speed, has a big sweep, sinawalis at 3 chi, converts knockback to extra damage at 6 chi,
     // and follows up with 2 extra attacks at 9 chi
-    public ItemKampilan() {
+    public Kampilan() {
         super(1, 1.6d, 6d, 1f);
     }
 
@@ -38,7 +38,7 @@ public class ItemKampilan extends TaoWeapon {
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (attacker.onGround) {
-            splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(4d, 1.5d, 4d), null));
+            splash(attacker, target, 5);
         }
     }
 
@@ -68,7 +68,12 @@ public class ItemKampilan extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //resets combo, the next combo sequence in 5 seconds additionally has its knockback converted to true posture damage
         setCombo(defender, item, 0);
-        chargeWeapon(attacker, defender, item, 100);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 100;
     }
 
     @Override

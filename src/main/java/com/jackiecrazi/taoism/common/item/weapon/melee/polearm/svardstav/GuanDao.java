@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav;
 
-public class ItemGuanDao {
+public class GuanDao {
     /*
      * Retains versatility and relentlessness from its smaller cousin. High range and combo, medium speed and power, low defense
      * Right click switches between guard and strike forms, with a 1s(-chi/20) cooldown.

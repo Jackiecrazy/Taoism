@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.sectional;
 
-public class ItemNunchaku {
+public class Nunchaku {
     /*
      * A flexible blunt weapon that still hurts. High power and defense, medium speed and combo, low range
      * Can be wielded in one or two hands, so it functions both as a single weapon and in pairs

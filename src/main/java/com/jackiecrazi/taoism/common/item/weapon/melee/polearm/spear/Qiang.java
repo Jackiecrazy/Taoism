@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemQiang extends TaoWeapon {
+public class Qiang extends TaoWeapon {
     /*
     First two handed weapon! High reach and combo, medium power and speed, low defense
     left click for a normal stab, piercing enemies up to the max range.
@@ -33,7 +33,7 @@ public class ItemQiang extends TaoWeapon {
             new PartDefinition("tassel", StaticRefs.STRING)
     };
 
-    public ItemQiang() {
+    public Qiang() {
         super(2, (double) 1.2, 5d, 1f);
     }
 
@@ -45,13 +45,13 @@ public class ItemQiang extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float aerial = !attacker.onGround ? 1.5f : 1f;
-        float bash = right ? 0.5f : 1f;
+        float bash = off ? 0.5f : 1f;
         return aerial * bash;
     }
 
     @Override
     public int getDamageType(ItemStack is) {
-        return TaoWeapon.right ? 0 : isCharged(null, is) ? 1 : 2;
+        return off ? 0 : isCharged(null, is) ? 1 : 2;
     }
 
     @Override
@@ -70,10 +70,8 @@ public class ItemQiang extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
-        //the next stab in 4 seconds deals cutting damage 3 times with an interval of 1 tick
-        chargeWeapon(attacker, defender, item, 80);
+    public int getMaxChargeTime() {
+        return 80;
     }
 
     @Override
@@ -87,23 +85,23 @@ public class ItemQiang extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (right && isCharged(attacker, stack))
+        if (off && isCharged(attacker, stack))
             splash(attacker, target, 2f);
-        else if (!right)
+        else if (!off)
             splash(attacker, NeedyLittleThings.raytraceEntities(target.world, attacker, target, getReach(attacker, stack)));
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (right) {
+        if (off) {
             if (isCharged(attacker, stack)) {
-                NeedyLittleThings.knockBack(target, attacker, 1);//FIXME 1 strength?
+                NeedyLittleThings.knockBack(target, attacker, 0.6f);//FIXME 1 strength?
                 target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20, 0));
             }
         }
     }
 
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (isCharged(attacker, stack) && !right) {
+        if (isCharged(attacker, stack) && !off) {
             multiHit(attacker, target, 2, 4);
             dischargeWeapon(attacker, stack);
         }
@@ -111,11 +109,11 @@ public class ItemQiang extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED+I18n.format("weapon.hands")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.stab"));
-        tooltip.add(TextFormatting.ITALIC+I18n.format("qiang.stab.riposte")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.stab.riposte") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.bash"));
-        tooltip.add(TextFormatting.ITALIC+I18n.format("qiang.bash.riposte")+TextFormatting.RESET);
-        tooltip.add(TextFormatting.BOLD+I18n.format("qiang.riposte")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.bash.riposte") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
     }
 }

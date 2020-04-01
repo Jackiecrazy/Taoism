@@ -16,26 +16,26 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class PacketExtendThyReach implements IMessage {
 
     private int entityId;
-    private boolean isMainHand;
+    private boolean off;
 
     public PacketExtendThyReach() {
     }
 
-    public PacketExtendThyReach(int parEntityId, boolean right) {
+    public PacketExtendThyReach(int parEntityId, boolean mainHand) {
         entityId = parEntityId;
-        isMainHand = right;
+        off = mainHand;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         entityId = ByteBufUtils.readVarInt(buf, 4);
-        isMainHand = buf.readBoolean();
+        off = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeVarInt(buf, entityId, 4);
-        buf.writeBoolean(isMainHand);
+        buf.writeBoolean(off);
     }
 
     public static class ExtendReachHandler implements
@@ -49,7 +49,7 @@ public class PacketExtendThyReach implements IMessage {
             thePlayer.getServerWorld().addScheduledTask(() -> {
                 Entity theEntity = thePlayer.world
                         .getEntityByID(message.entityId);
-                ItemStack heldItem = thePlayer.getHeldItem(message.isMainHand ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+                ItemStack heldItem = thePlayer.getHeldItem(message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
                 if (theEntity != null) {
                     //System.out.println("nonnull again!");
                     if (heldItem.getItem() instanceof IRange
@@ -61,7 +61,7 @@ public class PacketExtendThyReach implements IMessage {
                                 * ir.getReach(thePlayer,
                                 heldItem);
                         if (reachSq >= distanceSq) {
-                            NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, heldItem, message.isMainHand, true);
+                            NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, heldItem, message.off, true);
                         }
 
                     }

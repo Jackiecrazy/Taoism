@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemCestus extends TaoWeapon {
+public class Cestus extends TaoWeapon {
     final PartDefinition[] parts = {
             new PartDefinition("wrap", StaticRefs.FABRIC),
             new PartDefinition("binding", StaticRefs.STRING)
@@ -29,7 +29,7 @@ public class ItemCestus extends TaoWeapon {
     //Intimidating and relentless weapon fit for a pugilist. Short range, straightforward, decent at defense
     //naturally adds 2 armor points, applies slow 1 at 3 chi, and slow 2 at 6 chi. At 10 chi blindness. Damage scales with chi
     //to compensate for so many perks, is single target and short range, but no knockback
-    public ItemCestus() {
+    public Cestus() {
         super(0, 2, 3d, 1.3f);
     }
 
@@ -76,8 +76,8 @@ public class ItemCestus extends TaoWeapon {
         if (qi >= 10) {
             target.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 40, 0));
         }
-        if(isCharged(attacker,stack)){
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f,true);
+        if (isCharged(attacker, stack)) {
+            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true);
         }
     }
 
@@ -103,7 +103,12 @@ public class ItemCestus extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //TODO grapples the enemy. The next attack pulls them into the ground for 5 posture damage and increases the damage they take by 1.3x
         TaoCasterData.getTaoCap(defender).addQi(2f);
-        chargeWeapon(attacker, defender, item, 40);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 40;
     }
 
     @Override
@@ -116,7 +121,7 @@ public class ItemCestus extends TaoWeapon {
             TaoCasterData.getTaoCap(target).consumePosture(3.5f, true);
             ds.setDamageIsAbsolute();
         }
-        dischargeWeapon(attacker,item);
+        dischargeWeapon(attacker, item);
     }
 
     @Override

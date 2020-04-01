@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.entity;
 
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -16,9 +15,9 @@ import java.util.ArrayList;
 public abstract class EntityMove extends Entity {
     public static final ArrayList<Class<? extends EntityMove>> moves = new ArrayList<>();
 
-    public static EntityMove create(EntityLivingBase attacker) {
-        return TaoCasterData.getMoveFromEntity(attacker);
-    }
+    /*public static EntityMove create(EntityLivingBase attacker) {
+        return TaoCombatUtils.getMoveFromEntity(attacker);
+    }*/
 
     protected EntityLivingBase attacker;
     @Nullable

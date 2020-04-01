@@ -14,19 +14,24 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemChui extends TaoWeapon {
+public class Chui extends TaoWeapon {
 
     //a powerful crushing weapon. Brutal, somewhat defensive, with decent reach but low trickery potential
     //leap attacks deal double instead of 1.5x damage. Attacks always decrease posture,
     // and will additionally deal 1.5x damage against staggered targets for a total of triple damage
 
-    public ItemChui() {
+    public Chui() {
         super(0, 1.2f, 4.5f, 1.7f);
     }
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         return 0f;
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 100;
     }
 
     @Override
@@ -53,12 +58,6 @@ public class ItemChui extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //TODO the next attack in 5 seconds deals an extra 0.5*damage posture regardless of block
-        chargeWeapon(attacker,defender,item, 100);
-    }
-
-    @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.5f;
     }
@@ -76,4 +75,5 @@ public class ItemChui extends TaoWeapon {
         tooltip.add(I18n.format("chui.stagger"));
         tooltip.add(I18n.format("chui.riposte"));
     }
+
 }

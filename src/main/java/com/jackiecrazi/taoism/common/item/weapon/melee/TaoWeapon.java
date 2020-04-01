@@ -25,9 +25,11 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagFloat;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -35,6 +37,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -42,10 +46,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded {
+public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded {//, IMove
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     //booleans only used when attacking to determine what type of attack it is
-    public static boolean aerial = false, off = false, right = false;
+    public static boolean aerial = false, off = false;//FIXME alt dictates whether a two handed weapon does normal or alt attack
     //booleans only used when attacking to determine the specific phase of attack
     public static boolean effect = true, aoe = true, spawn = true;
     private final double speed;
@@ -90,12 +94,12 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         super();
         this.damageType = damageType;
         speed = swingSpeed;
-        this.setMaxDamage(0);
+        this.setMaxDamage(getMaxChargeTime());
         this.setMaxStackSize(1);
         dmg = damage;
         base = BasePostureConsumption;
         this.setCreativeTab(Taoism.tabWea);
-        String name = getClass().getSimpleName().substring(4).toLowerCase();
+        String name = getClass().getSimpleName().toLowerCase();
         this.setRegistryName(name);
         this.setUnlocalizedName(name);
         listOfWeapons.add(this);
@@ -166,8 +170,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+        stack.setTagInfo("startCD", new NBTTagFloat(Taoism.getAtk(entityLiving)));
+        stack.setTagInfo("startTick", new NBTTagInt(entityLiving.ticksExisted));
+        return super.onEntitySwing(entityLiving, stack);
+    }
 
-        return false;
+    public double getDurabilityForDisplay(ItemStack stack) {
+        return (double) (stack.getMaxDamage() - stack.getItemDamage()) / (double) stack.getMaxDamage();
     }
 
     public double attackDamage(ItemStack stack) {
@@ -206,7 +215,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     void updateWielderData(ItemStack stack, EntityLivingBase attacker) {
-        ITaoStatCapability itsc = attacker.getCapability(TaoCasterData.CAP, null);
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(attacker);
         NBTTagCompound ntc = gettagfast(stack);
         ntc.setFloat("qi", itsc.getQi());
         ntc.setInteger("qifloor", itsc.getQiFloored());
@@ -236,27 +245,29 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      * Called when the equipped item is right clicked.
      */
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
-        if (isTwoHanded(p.getHeldItem(handIn))) {
-            //can't put a two handed weapon in an offhand slot, you can't carry it!
-            if (handIn == EnumHand.OFF_HAND)
-                return new ActionResult<ItemStack>(EnumActionResult.FAIL, p.getHeldItem(handIn));
-            else {
-                right = true;
-                if (worldIn.isRemote) {
-                    EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, p.getHeldItemOffhand()));
-                    if (elb != null) {
-                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
-                    }
-                    p.swingArm(handIn);
-                }
-                right = false;
-            }
-        }
+//        if (isTwoHanded(p.getHeldItem(handIn))) {
+//            gettagfast(p.getHeldItem(handIn)).setBoolean("alt", true);
+//            //can't put a two handed weapon in an offhand slot, you can't carry it!
+//            if (handIn == EnumHand.OFF_HAND)
+//                return new ActionResult<ItemStack>(EnumActionResult.FAIL, p.getHeldItem(handIn));
+//            else {
+//                if (worldIn.isRemote) {
+//                    EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, p.getHeldItemOffhand()));
+//                    if (elb != null) {
+//                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
+//                    }
+//                    p.swingArm(handIn);
+//                }
+//            }
+//        }
 
         if (handIn == EnumHand.OFF_HAND) {
             if (!p.getHeldItemOffhand().isEmpty()) {
+                if (isDummy(p.getHeldItemOffhand()) && p.getHeldItemMainhand().getItem() != p.getHeldItemOffhand().getItem()) {
+                    p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(p.getHeldItemOffhand()));
+                }
                 //System.out.println("nonnull");
-                if (worldIn.isRemote) {
+                else if (worldIn.isRemote) {
                     EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, p.getHeldItemOffhand()));
                     if (elb != null) {
                         Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
@@ -280,6 +291,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
             if (target == attacker) continue;
             ItemStack is = off ? attacker.getHeldItemOffhand() : attacker.getHeldItemMainhand();
+            //!NeedyLittleThings.isFacingEntity(attacker,target)||
             if (NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;
             try {
@@ -307,8 +319,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        chargeWeapon(attacker, defender, item, getMaxChargeTime());
+    }
+
+    @Override
     public void chargeWeapon(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, int ticks) {
-        item.damageItem(ticks, defender);
+        item.setItemDamage(ticks);
     }
 
     @Override
@@ -326,6 +343,26 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return item.getItemDamage();
     }
 
+    private ItemStack makeDummy(ItemStack from) {
+        ItemStack ret = new ItemStack(this);
+        gettagfast(ret).setTag("sub", from.writeToNBT(new NBTTagCompound()));
+        gettagfast(ret).setBoolean("taodummy", true);
+        //ret.addEnchantment(Enchantment.getEnchantmentByID(10),1);
+        return ret;
+    }
+
+    private ItemStack unwrapDummy(ItemStack from) {
+        NBTTagCompound sub = from.getSubCompound("sub");
+        if (sub != null) {
+            return new ItemStack(sub);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private boolean isDummy(ItemStack item) {
+        return gettagfast(item).getBoolean("taodummy");
+    }
+
     /**
      * gradually discharges the weapon
      */
@@ -335,13 +372,45 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             if (onHand) {
                 if (stack.isItemDamaged()) stack.damageItem(-1, elb);
             } else stack.setItemDamage(0);
-            //TODO stuff
+            //TODO update swing and proc damage when it should
+            if (isTwoHanded(stack)) {
+                if (onHand) {
+                    if (elb.getHeldItemMainhand() == stack) {
+                        if (!isDummy(elb.getHeldItemOffhand())) {
+                            elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(elb.getHeldItemOffhand()));
+                        }
+                    }
+                } else {
+                    boolean dumdum = isDummy(stack);
+                    boolean handDiff = elb.getHeldItemMainhand().getItem() != stack.getItem();
+                    boolean notOff = elb.getHeldItemOffhand() != stack;
+                    if (dumdum && (handDiff || notOff)) {//FIXME last slot overflow to first slot bug
+                        //check where to unwrap the stack to
+                        ItemStack unwrap = unwrapDummy(stack);
+                        if (elb.getHeldItemOffhand() == stack) {
+                            elb.setHeldItem(EnumHand.OFF_HAND, unwrap);
+                        } else {
+                            // Get the entity's main inventory
+                            final IItemHandler mainInventory = e.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
+                            // If this item is in their main inventory and it can be extracted.
+                            if (mainInventory != null && mainInventory.getStackInSlot(slot) == stack && mainInventory.extractItem(slot, stack.getCount(), true) != null) {
+                                mainInventory.extractItem(slot, stack.getCount(), false);
+                                mainInventory.insertItem(slot, unwrap, false);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+        if(isDummy(stack)){
+            tooltip.add(I18n.format("weapon.dummy"));
+            return;
+        }
         for (Map.Entry<String, String> a : getParts(stack).entrySet()) {
             try {
                 tooltip.add(I18n.format(a.getValue() + " " + a.getKey()));
@@ -358,25 +427,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 //                tooltip.add(IElemental.ELEMC[i] + "" + TextFormatting.ITALIC + I18n.format(IElemental.ELEMS[i] + used + ".inscription") + TextFormatting.RESET);
             statDesc(stack, worldIn, tooltip, flagIn);
         } else {
-            tooltip.add(I18n.format("taoism.shiftweapon"));
+            tooltip.add(I18n.format("weapon.shift"));
         }
         //perks
         if (KeyOverlord.isControlDown()) {
             perkDesc(stack, worldIn, tooltip, flagIn);
-        } else tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponctrl") + TextFormatting.RESET);
+        } else tooltip.add(TextFormatting.YELLOW + I18n.format("weapon.ctrl") + TextFormatting.RESET);
 
-    }
-
-    abstract protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn);
-
-    /**
-     * default method! Override for complex weapons!
-     */
-    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.GREEN + I18n.format("taoism.weaponAttMult", getDamDist(stack)) + TextFormatting.RESET);
     }
 
     private double speed(ItemStack stack) {
@@ -446,6 +503,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         attacker.world.spawnEntity(new MoveMultiStrike(attacker, target, interval, duration));
     }
 
+//    public EnumPhase getPhase(final ItemStack stack){
+//
+//    }
 
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
@@ -469,6 +529,22 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             e.printStackTrace();
         }
         return changed;
+    }
+
+    abstract protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn);
+
+    /**
+     * default method! Override for complex weapons!
+     */
+    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.GREEN + I18n.format("taoism.weaponAttMult", getDamDist(stack)) + TextFormatting.RESET);
+    }
+
+    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
+        return true;
     }
 
     @Override

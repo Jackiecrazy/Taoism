@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff;
 
-public class ItemGun {
+public class Staff {
     /*
      * A long weapon with great flexibility of moves. High range and combo, medium speed and defense, low power
      * Leap attacks deal double posture damage

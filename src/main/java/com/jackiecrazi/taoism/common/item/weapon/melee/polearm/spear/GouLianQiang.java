@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 
-public class ItemGouLianQiang {
+public class GouLianQiang {
     /*
     A spear weapon that specializes in hooking and grabbing. High range and speed, medium combo and defense, low power
     Reference: a guisarme can be used to catch incoming blades

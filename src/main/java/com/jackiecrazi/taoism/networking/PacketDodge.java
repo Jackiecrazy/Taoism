@@ -1,7 +1,7 @@
 package com.jackiecrazi.taoism.networking;
 
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -36,7 +36,7 @@ public class PacketDodge implements IMessage {
             //System.out.println("packet dodge received");
             final EntityPlayerMP p = Taoism.proxy
                     .getPlayerEntityFromContext(ctx);
-            TaoCasterData.attemptDodge(p, message.side);
+            TaoCombatUtils.attemptDodge(p, message.side);
             return null;
         }
     }

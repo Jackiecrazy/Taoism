@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.rope;
 
-public class ItemRopeDart {
+public class RopeDart {
     /*
      * A rope weapon that charges up into fast, unblockable and constricting hits. High speed and range, medium power and defense, low combo
      * Two handed.

@@ -13,10 +13,10 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemKen extends TaoWeapon {
+public class Ken extends TaoWeapon {
     //relentless.
     //normal attack chains up to 3 times before requiring cooldown (sword flowers). Small AoE
-    public ItemKen() {
+    public Ken() {
         super(1, 1.6, 6.5, 1f);
     }
 
@@ -28,18 +28,18 @@ public class ItemKen extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (!attacker.isAirBorne) {
-            splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(3d, 1.5d, 3d), null));
+        if (attacker.onGround) {
+            splash(attacker, target, 3);
         }
     }
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return getCombo(elb, is) != getComboLength(elb, is)-1 ? 0.8f : 0f;
+        return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
     }
 
     private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
-        if(attacker.isAirBorne)return true;
+        if (!attacker.onGround) return true;
         List<Entity> list = attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(3d, 1.5d, 3d), null);
         list.remove(attacker);
         return !list.isEmpty();
@@ -47,7 +47,7 @@ public class ItemKen extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = attacker.isAirBorne ? 1.5f : 1f;
+        float air = attacker.onGround ? 1f : 1.5f;
         float aoe = isAoE(attacker, target) ? 1f : 1.2f;
         return air * aoe;
     }
@@ -59,7 +59,7 @@ public class ItemKen extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        if(isCharged(wielder,is))return 9;
+        if (isCharged(wielder, is)) return 9;
         return 3;
     }
 
@@ -67,7 +67,12 @@ public class ItemKen extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //combo limit is raised to 9 for the next 9 seconds
         setCombo(defender, item, 0);
-        chargeWeapon(attacker, defender, item, 180);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 180;
     }
 
     @Override

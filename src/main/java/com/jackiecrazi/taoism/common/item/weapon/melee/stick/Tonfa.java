@@ -7,6 +7,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
@@ -17,7 +18,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemTonfa extends TaoWeapon {
+public class Tonfa extends TaoWeapon {
     /*
     Defensive punching weapon for quick counters. High defense and combo, decent power and speed, low range
     Normal attack is an auto 2-hit combo in the mainhand, and a heavy punch that inflicts brief weakness and slowness in the offhand
@@ -31,13 +32,18 @@ public class ItemTonfa extends TaoWeapon {
             StaticRefs.HANDLE
     };
 
-    public ItemTonfa() {
+    public Tonfa() {
         super(0, 1.8, 3f, 1.3f);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(I18n.format("tonfa.main"));
+        tooltip.add(I18n.format("tonfa.off"));
+        tooltip.add(I18n.format("tonfa.parry"));
+        tooltip.add(I18n.format("tonfa.reset"));
+        tooltip.add(I18n.format("tonfa.defbreak"));
+        tooltip.add(I18n.format("tonfa.riposte"));
     }
 
     @Override
@@ -47,7 +53,7 @@ public class ItemTonfa extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 0;
+        return 1;
     }
 
     @Override
@@ -68,37 +74,37 @@ public class ItemTonfa extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         TaoCasterData.getTaoCap(attacker).addQi(1f);
-        if (attacker.getHeldItemMainhand().getItem() instanceof IChargeableWeapon)
-            ((IChargeableWeapon) attacker.getHeldItemMainhand().getItem()).chargeWeapon(attacker, defender, attacker.getHeldItemMainhand(), 20);
-        if (attacker.getHeldItemOffhand().getItem() instanceof IChargeableWeapon)
-            ((IChargeableWeapon) attacker.getHeldItemOffhand().getItem()).chargeWeapon(attacker, defender, attacker.getHeldItemOffhand(), 20);
-        int qi=TaoCasterData.getTaoCap(defender).getQiFloored();
-        if(qi>=3) {
-            try {
-                Taoism.atk.setInt(attacker, 0);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+        if (attacker.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
+            IChargeableWeapon icw = (IChargeableWeapon) attacker.getHeldItemMainhand().getItem();
+            icw.chargeWeapon(attacker, defender, attacker.getHeldItemMainhand(), icw.getMaxChargeTime());
         }
-        if(qi>=7){
-            defender.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK,100,qi-7));
-            defender.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE,100,qi-7));
+        if (attacker.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
+            IChargeableWeapon icw = ((IChargeableWeapon) attacker.getHeldItemOffhand().getItem());
+            icw.chargeWeapon(attacker, defender, attacker.getHeldItemOffhand(), icw.getMaxChargeTime());
+        }
+        int qi = TaoCasterData.getTaoCap(defender).getQiFloored();
+        if (qi >= 3) {
+            Taoism.setAtk(defender, 0);
+        }
+        if (qi >= 7) {
+            defender.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
+            defender.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7));
         }
     }
 
     @Override
-    public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item){
-        int qi=TaoCasterData.getTaoCap(defender).getQiFloored();
-        if(qi>=3) {//reset cooldown
-            try {
-                Taoism.atk.setInt(attacker, 0);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        if(qi>=7){
-            defender.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK,100,qi-7));
+    public int getMaxChargeTime() {
+        return 20;
+    }
 
+    @Override
+    public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        int qi = TaoCasterData.getTaoCap(defender).getQiFloored();
+        if (qi >= 3) {//reset cooldown
+            Taoism.setAtk(defender, 0);
+        }
+        if (qi >= 7) {
+            defender.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
         }
     }
 
@@ -113,9 +119,9 @@ public class ItemTonfa extends TaoWeapon {
             target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20));
             target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 20));
         }
-        if(isCharged(attacker,stack)){
-            attacker.addPotionEffect(new PotionEffect(MobEffects.RESISTANCE,getChargeTimeLeft(attacker,stack)));
-            attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION,40));
+        if (isCharged(attacker, stack)) {
+            attacker.addPotionEffect(new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)));
+            attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 40));
 
         }
     }

@@ -51,34 +51,42 @@ public class NeedyLittleThings {
     });
 
     /**
-     * increases the potion amplifier on the entity, with the duration being combined, max duration, or max potency
+     * increases the potion amplifier on the entity, with options on the duration
      */
     public static PotionEffect stackPot(EntityLivingBase elb, PotionEffect toAdd, POTSTACKINGMETHOD method) {
         PotionEffect pe = elb.getActivePotionEffect(toAdd.getPotion());
+        if (pe == null){
+            return toAdd;
+        }
         Potion p = toAdd.getPotion();
         int length = pe.getDuration();
-        int potency = pe.getAmplifier();
-        if (pe != null) {
-            switch (method) {
-                case ADD:
-                    length += pe.getDuration();
-                    break;
-                case MAXDURATION:
-                    length = Math.max(pe.getDuration(), toAdd.getDuration());
-                    break;
-                case MAXPOTENCY:
-                    length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.max(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() > toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
-                    break;
-            }
+        int potency = pe.getAmplifier()+1+toAdd.getAmplifier();
+
+        switch (method) {
+            case ADD:
+                length += pe.getDuration();
+                break;
+            case MAXDURATION:
+                length = Math.max(pe.getDuration(), toAdd.getDuration());
+                break;
+            case MAXPOTENCY:
+                length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.max(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() > toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
+                break;
+            case MINDURATION:
+                length = Math.min(pe.getDuration(), toAdd.getDuration());
+                break;
+            case MINPOTENCY:
+                length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.min(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() < toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
+                break;
         }
-        return new PotionEffect(p, length, potency-1);
+        return new PotionEffect(p, length, potency);
     }
 
     /**
      * knocks the target back, simplified call of the other knockback function because I'm too lazy to type.
      */
-    public static void knockBack(EntityLivingBase to, Entity from, float strength){
-        knockBack(to,from,strength,MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
+    public static void knockBack(EntityLivingBase to, Entity from, float strength) {
+        knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
     }
 
     /**
@@ -158,41 +166,36 @@ public class NeedyLittleThings {
         for (AttributeModifier am : off.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
             operator.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).applyModifier(am);
         }
-        try {
-            int offCD = TaoCasterData.getTaoCap(operator).getOffhandCool();
-            int mainCD = Taoism.atk.getInt(operator);
-            Taoism.atk.setInt(operator, offCD);
-            TaoCasterData.getTaoCap(operator).setOffhandCool(mainCD);
-        } catch (Exception ignored) {
-        }
+        int offCD = TaoCasterData.getTaoCap(operator).getOffhandCool();
+        int mainCD = Taoism.getAtk(operator);
+        Taoism.setAtk(operator, offCD);
+        TaoCasterData.getTaoCap(operator).setOffhandCool(mainCD);
     }
 
     /**
-     * returns true if attacker is within a 90 degree sector in front of the target
+     * returns true if entity is within a 90 degree sector in front of the target
      */
-    public static boolean isFacingEntity(EntityLivingBase attacker, EntityLivingBase target) {
-        float arot = attacker.rotationYaw, trot = target.rotationYaw;
-        float min = trot + 135, max = trot + 225;
-        if (max > 360) max %= 360;
-        if (min < 0) min += 360;
-        boolean loop = max < min;
-        if (loop) {
-            return arot < max || arot > min;
-        } else return arot < max && arot > min;
+    public static boolean isFacingEntity(EntityLivingBase entity, Entity target) {
+        Vec3d posVec = entity.getPositionVector();
+        Vec3d lookVec = target.getLook(1.0F);
+        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
+        relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
+        System.out.println(relativePosVec.toString());
+
+        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        return dotsq < -0.5D;
     }
 
     /**
-     * returns true if attacker is within a 90 degree sector behind the target
+     * returns true if entity is within a 90 degree sector behind the target
      */
-    public static boolean isBehindEntity(EntityLivingBase attacker, EntityLivingBase target) {
-        float arot = attacker.rotationYaw, trot = target.rotationYaw;
-        float min = trot - 45, max = trot + 45;
-        if (max > 360) max %= 360;
-        if (min < 0) min += 360;
-        boolean loop = max < min;
-        if (loop) {
-            return arot < max || arot > min;
-        } else return arot < max && arot > min;
+    public static boolean isBehindEntity(EntityLivingBase entity, Entity target) {
+        Vec3d posVec = entity.getPositionVector();
+        Vec3d lookVec = target.getLook(1.0F);
+        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
+        relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
+        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        return dotsq > 0.5D;
     }
 
     public static DamageSource causeLivingDamage(EntityLivingBase elb) {
@@ -206,8 +209,9 @@ public class NeedyLittleThings {
      */
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff) {
         {
-            if (updateOff)
+            if (updateOff) {
                 TaoWeapon.off = !main;
+            }
             if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
             if (targetEntity.canBeAttackedWithItem()) {
                 if (!targetEntity.hitByEntity(player)) {
@@ -393,8 +397,9 @@ public class NeedyLittleThings {
                             }
                         }
                     }
-                    if (updateOff)
+                    if (updateOff) {
                         TaoWeapon.off = false;
+                    }
                 }
             }
         }
@@ -499,7 +504,9 @@ public class NeedyLittleThings {
     public enum POTSTACKINGMETHOD {
         ADD,
         MAXDURATION,
-        MAXPOTENCY
+        MAXPOTENCY,
+        MINDURATION,
+        MINPOTENCY,
     }
 
     public static class HitResult {

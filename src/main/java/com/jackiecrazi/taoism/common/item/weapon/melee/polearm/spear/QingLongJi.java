@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 
-public class ItemQingLongJi {
+public class QingLongJi {
     /*
      * A polearm capable of continuous attack. High range and combo, medium defense and power, low speed
      * I have to admit, this is technically a pollaxe, but it handles much more like a spear with a cutting edge, and pollaxes are getting crowded.
