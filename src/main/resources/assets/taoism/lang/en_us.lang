@@ -14,7 +14,7 @@ item.weapon.name=Weapon
 
 weapon.shift=SHIFT for stats...
 weapon.ctrl=CTRL for perks...
-weapon.dummy=THIS ITEM IS ONLY A DUMMY FOR CLEANER CODE. IT WILL BE REMOVED WHEN THE TWO HANDED WEAPON IS UNEQUIPPED.
+weapon.dummy=this item is only a dummy for cleaner code. It will revert back to whatever item it used to be once the two-handed weapon is unequipped
 weapon.hands=this weapon is two-handed and will disable offhand item use
 weapon.parry=this weapon cannot block or parry
 weapon.ignore=this weapon ignores blocks, parries, and shields
@@ -75,6 +75,22 @@ qiang.bash=right click to bash an enemy back, dealing half the attack power as b
 qiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
 qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
 
+item.goulianqiang.name=Hooked Spear
+goulianqiang.trip=hit a target to ensnare them. Attacking the same target again will trip them for 2+(armor/5) posture damage
+goulianqiang.trip.riposte=when charged, only one attack is needed.
+goulianqiang.bash=right click to bash an enemy back, dealing half the attack power as blunt damage
+goulianqiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
+goulianqiang.riposte=riposte: charges the weapon's next attack for 4 seconds
+
+item.qinglongji.name=Qinglong Ji
+qinglongji.stab=normal attack is a stab that deals (1.5+chi/10)x damage
+qinglongji.alt=right click attacks all enemies in a 3+(chi/2) range
+qinglongji.alt.bash=in normal form this inflicts chi/10 seconds of slowness and flipping ends for 5 seconds
+qinglongji.alt.cut=when held by the other end, this switches back to the main end, inflicting bleed for chi/2 seconds
+qinglongji.atkspd=attack speed scales with chi, up to a maximum of 1.9
+qinglongji.qi=only alternating attacks will accumulate chi
+qinglongji.riposte=riposte: instantly gain 2 layers of chi
+
 item.tonfa.name=Tonfa
 tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
 tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
@@ -96,17 +112,26 @@ catninetail.armorp=potency decreases for every 5 points of armor, rounding down
 item.pollaxe.name=Pole Axe
 pollaxe.leap=leap attacks deal double damage
 pollaxe.cleave=chops through enemy armor, stacking armor break II for 3 seconds
-pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double of potency of armor break
-pollaxe.swipe=right click to swipe in a 5 block radius, knocking enemies back slightly. When leaping, this is a single target knockback move
+pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double the potency of armor break
+pollaxe.swipe=right click to swipe in a 4 block radius, knocking enemies back slightly. When leaping, this is a single target knockback move
 pollaxe.swipe.riposte=when charged, swipe will add armor break III for 5 seconds; its damage is multiplied by 1+(cleave potency/10)
 pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additionally inflicting 0.35*damage posture loss regardless of block
 
 item.changchui.name=Great Hammer
 changchui.leap=leap attacks deal double damage
 changchui.downed=deals double damage against a downed target, for a total of quadruple damage
-changchui.swipe=right click to swipe in a 4 block radius, knocking enemies back. When leaping, this is a single target high knockback move
+changchui.swipe=right click to swipe in a 3 block radius, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
 changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
 changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove half of their max posture
+
+item.staff.name=Quarterstaff
+staff.leap=leap attacks deal 1.5x damage
+staff.flick=a normal strike on a grounded target will flick them into the air
+staff.smash=attacking an airborne target will instead pummel them into the ground, dealing extra fall damage
+staff.swipe=right click to swipe in a 4 block radius, knocking enemies back slightly
+staff.block=while blocking, a whirling flurry deflects projectiles with velocity less than current chi
+staff.riposte=riposte: for the next 10 seconds, combo limit is increased to 2
+staff.block.riposte=additionally, staff whirl automatically attacks once per second and deflects all projectiles; any projectile that would normally be deflected is now reflected towards its launcher
 
 <Resources>=
 

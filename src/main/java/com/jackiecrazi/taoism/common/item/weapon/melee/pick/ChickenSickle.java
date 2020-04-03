@@ -49,11 +49,6 @@ public class ChickenSickle extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 3;
     }

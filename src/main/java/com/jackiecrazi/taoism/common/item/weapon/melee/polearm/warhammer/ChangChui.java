@@ -33,8 +33,13 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0f;
+    protected double speed(ItemStack stack) {
+        double ret=super.speed(stack)+4d;
+        if(isDummy(stack)){
+            ret/=1.5d;
+        }
+        ret-=4d;
+        return ret;
     }
 
     @Override
@@ -58,14 +63,14 @@ public class ChangChui extends TaoWeapon {
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (attacker.onGround && TaoWeapon.off) {
-            splash(attacker, target, 4);
+            splash(attacker, target, 3);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (TaoWeapon.off) {
-            float groundKB = attacker.onGround ? 1f : 1.5f;
+            float groundKB = attacker.onGround ? 1f : 1.3f;
             float chargeKB = isCharged(attacker, stack) ? 2f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
         } else {
@@ -76,14 +81,13 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (TaoWeapon.off)
-            dischargeWeapon(target, stack);
+    protected void afterSwing(EntityLivingBase elb, ItemStack is){
+        if(isDummy(is))dischargeWeapon(elb,is);
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
+        return isDummy(is)?4f: 6f;
     }
 
     @Override
@@ -98,7 +102,8 @@ public class ChangChui extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            if(TaoWeapon.off)TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture()/2f, true);
+            if (TaoWeapon.off)
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true);
             else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true);
         }
     }
@@ -106,6 +111,7 @@ public class ChangChui extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("changchui.leap"));
         tooltip.add(I18n.format("changchui.downed"));
         tooltip.add(I18n.format("changchui.swipe"));

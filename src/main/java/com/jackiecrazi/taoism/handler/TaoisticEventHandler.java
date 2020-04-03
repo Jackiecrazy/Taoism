@@ -12,7 +12,6 @@ import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -129,7 +128,7 @@ public class TaoisticEventHandler {
             //if you cannot parry, posture damage will always be applied.
             //suck it, wither.
             boolean smart = uke instanceof IAmVerySmart || uke instanceof EntityPlayer;
-            if (!TaoCombatUtils.isEntityBlocking(uke, seme) && !TaoCombatUtils.isEntityParrying(uke, seme) && smart)
+            if (!TaoCombatUtils.isEntityBlocking(uke) && !TaoCombatUtils.isEntityParrying(uke) && smart)
                 return;
             ItemStack weapon = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
@@ -144,7 +143,7 @@ public class TaoisticEventHandler {
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
             float postureUse2 = TaoCombatUtils.requiredPostureDef(uke, seme, weapon, e.getAmount());
-            if (!ukeCap.consumePosture(postureUse1 * postureUse2, !TaoCombatUtils.isEntityParrying(uke, seme))) {
+            if (!ukeCap.consumePosture(postureUse1 * postureUse2, !TaoCombatUtils.isEntityParrying(uke))) {
                 //sudden stagger prevention is handled by consumePosture, so this only happens if ssp fails.
                 //dismount, knock away, and set the target downed for damage*10, between 10 and 60
                 uke.dismountRidingEntity();
@@ -164,7 +163,7 @@ public class TaoisticEventHandler {
                 down = true;
                 return;
             }
-            if (TaoCombatUtils.isEntityParrying(uke, (EntityLivingBase) e.getSource().getTrueSource()) && NeedyLittleThings.isFacingEntity(uke, seme)) {
+            if (TaoCombatUtils.isEntityParrying(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
                 System.out.println("target has parried!");
@@ -185,7 +184,7 @@ public class TaoisticEventHandler {
                 }
                 return;
             }
-            if (TaoCombatUtils.isEntityBlocking(uke, (EntityLivingBase) e.getSource().getTrueSource()) && NeedyLittleThings.isFacingEntity(uke, seme)) {
+            if (TaoCombatUtils.isEntityBlocking(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 //block code, reflect posture damage
                 TaoCasterData.getTaoCap(seme).consumePosture(postureUse1 * 0.4f, false);
@@ -362,7 +361,7 @@ public class TaoisticEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void tickStuff(TickEvent.PlayerTickEvent e) throws IllegalAccessException {
+    public static void tickStuff(TickEvent.PlayerTickEvent e){
         EntityPlayer p = e.player;
         if (e.phase.equals(TickEvent.Phase.END)) {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
@@ -371,15 +370,16 @@ public class TaoisticEventHandler {
             //hacky, but well...
             ItemStack mainhand = p.getHeldItemMainhand();
             ItemStack offhand = p.getHeldItemOffhand();
-            //FIXME why did I make them global? Can't remember...
-            if (Taoism.atk.getInt(p) == 0) {//fresh switch in, do not execute following code
+            if (Taoism.getAtk(p) == 0) {//fresh switch in, do not execute following code
                 if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND)
                     TaoCasterData.getTaoCap(p).setSwitchIn(true);
             }
-            if (Taoism.atk.getInt(p) == 1) {
+            if (Taoism.getAtk(p) == 1) {
                 if (!TaoCasterData.getTaoCap(p).isSwitchIn()) {
+                    TaoCasterData.getTaoCap(p).addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE,p,EnumHand.MAIN_HAND));
                     //System.out.println("update combo main");
                     if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND) {
+
                         ICombo tw = (ICombo) mainhand.getItem();
                         long cache = tw.lastAttackTime(p, mainhand);
                         tw.updateLastAttackTime(p, mainhand);
@@ -387,10 +387,8 @@ public class TaoisticEventHandler {
                         if (newcache - cache > CombatConfig.timeBetweenAttacks) {
                             tw.setCombo(p, mainhand, 0);
                         }
-                        double cd = tw.newCooldown(p, mainhand);
-                        double totalSeconds = 20 / p.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue();
-                        if (cd != 0f)
-                            Taoism.atk.setInt(p, (int) (cd * totalSeconds));
+                        float cd = tw.newCooldown(p, mainhand);
+                        TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd);
                         tw.setCombo(p, mainhand, tw.getCombo(p, mainhand) + 1);
                     }
                 } else {
@@ -403,6 +401,7 @@ public class TaoisticEventHandler {
             }
             if (offhand.getItem() instanceof ICombo) {
                 if (TaoCasterData.getTaoCap(p).getOffhandCool() == 1) {
+                    TaoCasterData.getTaoCap(p).addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE,p,EnumHand.OFF_HAND));
                     //System.out.println("update combo off");
                     ICombo tw = (ICombo) offhand.getItem();
                     long cache = tw.lastAttackTime(p, offhand);
@@ -411,10 +410,8 @@ public class TaoisticEventHandler {
                     if (newcache - cache > CombatConfig.timeBetweenAttacks) {
                         tw.setCombo(p, offhand, 0);
                     }
-                    double cd = tw.newCooldown(p, offhand);
-                    double totalSeconds = 20 / NeedyLittleThings.getOffhandCD(p);
-                    if (cd != 0f)
-                        TaoCasterData.getTaoCap(p).setOffhandCool((int) (cd * totalSeconds));
+                    float cd = tw.newCooldown(p, offhand);
+                    TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd);
                     tw.setCombo(p, offhand, tw.getCombo(p, offhand) + 1);
                 }
             }

@@ -9,6 +9,8 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
@@ -38,7 +40,10 @@ public class TaoItems {
             chickensickle = new ChickenSickle(),
             ninetail = new CatNineTail(),
             pollaxe = new Pollaxe(),
-            changchui = new ChangChui();
+            changchui = new ChangChui(),
+            goulianqiang = new GouLianQiang(),
+            qinglongji = new QingLongJi();
+
 
     //public static ItemDummy part = new ItemDummy();
     //public static TaoWeapon weap = new TaoWeapon();
@@ -67,6 +72,8 @@ public class TaoItems {
         e.getRegistry().register(chickensickle);
         e.getRegistry().register(pollaxe);
         e.getRegistry().register(changchui);
+        e.getRegistry().register(goulianqiang);
+        e.getRegistry().register(qinglongji);
         //weapon
         //e.getRegistry().register(weap);
         //armor

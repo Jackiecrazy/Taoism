@@ -36,11 +36,6 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
-    }
-
-    @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
     }
@@ -57,7 +52,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
+        return isDummy(is) ? 4f : 6f;
     }
 
     @Override
@@ -81,18 +76,13 @@ public class Pollaxe extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (TaoWeapon.off) {
-            NeedyLittleThings.knockBack(target, attacker, attacker.onGround ? 0.6f : 1f);
+            NeedyLittleThings.knockBack(target, attacker, attacker.onGround ? 1f : 1.3f);
             if (isCharged(attacker, stack)) {
                 target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 100, 2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
             }
         } else {
             target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
         }
-    }
-
-    @Override
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        dischargeWeapon(target, stack);
     }
 
     @Override

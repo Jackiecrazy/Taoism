@@ -43,12 +43,9 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+    protected void afterSwing(EntityLivingBase elb, ItemStack is){
         boolean thingy = getCombo(elb, is) != getComboLength(elb, is) - 1;
         if (thingy) dischargeWeapon(elb, is);
-        if (elb.getCapability(TaoCasterData.CAP, null).getQi() >= 3)
-            return thingy ? 0.8f : 0;
-        return 0f;
     }
 
     @Override

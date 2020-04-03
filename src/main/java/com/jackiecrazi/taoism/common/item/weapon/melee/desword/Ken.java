@@ -34,9 +34,7 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
-    }
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) { }
 
     private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
         if (!attacker.onGround) return true;

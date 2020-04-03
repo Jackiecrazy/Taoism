@@ -4,12 +4,14 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -21,7 +23,7 @@ public class Qiang extends TaoWeapon {
     First two handed weapon! High reach and combo, medium power and speed, low defense
     left click for a normal stab, piercing enemies up to the max range.
     right click to do a bash that knocks the target a fair distance away and inflicts blunt damage, at cost of lower damage
-    These two attacks have independent cooldowns,so you can continuously chain them.
+    These two attacks have independent cooldowns, and doing one will instantly halve the other's,so you can continuously chain them.
     riposte:
     //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
     //the next stab in 4 seconds deals cutting damage 3 times with an interval of 1 tick
@@ -34,7 +36,7 @@ public class Qiang extends TaoWeapon {
     };
 
     public Qiang() {
-        super(2, (double) 1.2, 5d, 1f);
+        super(2, 1.2, 5d, 1f);
     }
 
     @Override
@@ -57,11 +59,6 @@ public class Qiang extends TaoWeapon {
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
     }
 
     @Override
@@ -93,17 +90,20 @@ public class Qiang extends TaoWeapon {
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (off) {
+            NeedyLittleThings.knockBack(target, attacker, 1f);
             if (isCharged(attacker, stack)) {
-                NeedyLittleThings.knockBack(target, attacker, 0.6f);//FIXME 1 strength?
                 target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20, 0));
             }
+        }
+        EnumHand other = off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        if(TaoCombatUtils.getHandCoolDown(attacker,other)<0.5f){
+            TaoCombatUtils.rechargeHand(attacker, other, 0.5f);
         }
     }
 
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack) && !off) {
             multiHit(attacker, target, 2, 4);
-            dischargeWeapon(attacker, stack);
         }
     }
 

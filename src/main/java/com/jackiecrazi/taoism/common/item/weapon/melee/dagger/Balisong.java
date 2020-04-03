@@ -31,7 +31,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return gettagfast(is).getInteger("qifloor") / 10f;
+        return getQiFromStack(is) / 10f;
     }
 
     @Override

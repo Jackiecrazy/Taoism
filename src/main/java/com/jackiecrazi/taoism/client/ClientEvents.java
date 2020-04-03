@@ -1,11 +1,13 @@
 package com.jackiecrazi.taoism.client;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
+import com.jackiecrazi.taoism.networking.PacketMakeMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -97,6 +99,14 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
+    public static void updateMove(MouseEvent e) {
+        if (!e.isButtonstate()) return;
+        GameSettings gs = Minecraft.getMinecraft().gameSettings;
+        MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isPressed());
+        Taoism.net.sendToServer(new PacketMakeMove(move));
+    }
+
+    @SubscribeEvent
     public static void handRaising(RenderSpecificHandEvent e) {
         if (e.getHand().equals(EnumHand.MAIN_HAND)) return;
         AbstractClientPlayer p = Minecraft.getMinecraft().player;
@@ -143,7 +153,7 @@ public class ClientEvents {
                                 hyperspeed = hyperspeed & (Minecraft.getMinecraft().pointedEntity).isEntityAlive();
                             }
 
-                            int y = height / 2 - 7 -7;
+                            int y = height / 2 - 7 - 7;
                             int x = width / 2 - 8;
 
                             if (hyperspeed) {

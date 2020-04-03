@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.networking;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -15,8 +16,8 @@ public class PacketMakeMove implements IMessage {
     public PacketMakeMove() {
     }
 
-    public PacketMakeMove(byte code) {
-        this.code = code;
+    public PacketMakeMove(MoveCode code) {
+        this.code = code.toByte();
     }
 
     @Override

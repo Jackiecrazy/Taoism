@@ -10,6 +10,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -50,17 +51,30 @@ public class NeedyLittleThings {
         }
     });
 
+    public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
+        IAttributeInstance a = elb.getEntityAttribute(ia);
+        for(AttributeModifier am: a.getModifiers()){
+            if(!am.getName().equals("Weapon Modifier")){
+                a.applyModifier(am);
+            }
+        }
+        for(AttributeModifier am:elb.getHeldItem(hand).getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(ia.getName())){
+            a.applyModifier(am);
+        }
+        return a.getAttributeValue();
+    }
+
     /**
      * increases the potion amplifier on the entity, with options on the duration
      */
     public static PotionEffect stackPot(EntityLivingBase elb, PotionEffect toAdd, POTSTACKINGMETHOD method) {
         PotionEffect pe = elb.getActivePotionEffect(toAdd.getPotion());
-        if (pe == null){
+        if (pe == null) {
             return toAdd;
         }
         Potion p = toAdd.getPotion();
         int length = pe.getDuration();
-        int potency = pe.getAmplifier()+1+toAdd.getAmplifier();
+        int potency = pe.getAmplifier() + 1 + toAdd.getAmplifier();
 
         switch (method) {
             case ADD:
@@ -131,7 +145,7 @@ public class NeedyLittleThings {
         return x * x + y * y + z * z;
     }
 
-    public static double getOffhandCD(EntityLivingBase attacker) {
+    public static double getOffhandAttackSpeed(EntityLivingBase attacker) {
         IAttributeInstance toUse = new AttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         IAttributeInstance att = attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         toUse.setBaseValue(att.getBaseValue());
@@ -148,8 +162,16 @@ public class NeedyLittleThings {
         return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
     }
 
+    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+    }
+
     public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / getOffhandCD(elb) * 20.0D);
+        return (float) (1.0D / getOffhandAttackSpeed(elb) * 20.0D);
+    }
+
+    public static float getCooldownPeriod(EntityLivingBase elb) {
+        return (float) (1.0D / elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue() * 20.0D);
     }
 
     /**
@@ -180,7 +202,6 @@ public class NeedyLittleThings {
         Vec3d lookVec = target.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
-        System.out.println(relativePosVec.toString());
 
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         return dotsq < -0.5D;

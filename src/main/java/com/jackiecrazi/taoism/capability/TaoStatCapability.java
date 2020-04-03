@@ -128,11 +128,17 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setQi(float amount) {
         qi = amount;
+        if (qi > 10) qi = 10f;
     }
 
     @Override
     public float addQi(float amount) {
         qi += amount;
+        amount = 0;
+        if (qi > 10) {
+            amount = qi - 10;
+            qi = 10f;
+        }
         return amount;
     }
 
@@ -251,7 +257,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosInvulTime(int time) {
-        protec = Math.max(time,0);
+        protec = Math.max(time, 0);
     }
 
     @Override

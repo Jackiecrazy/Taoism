@@ -90,11 +90,6 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0f;
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
     }

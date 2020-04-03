@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/whole/yari"
+    "layer0": "taoism:weapon/whole/fu3"
   },
   "overrides": [
     {
