@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
+import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -51,17 +52,31 @@ public class NeedyLittleThings {
         }
     });
 
-    public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
-        IAttributeInstance a = elb.getEntityAttribute(ia);
-        for(AttributeModifier am: a.getModifiers()){
-            if(!am.getName().equals("Weapon Modifier")){
-                a.applyModifier(am);
+    public static void setSize(Entity e, float width, float height) {
+        if (width != e.width || height != e.height) {
+            float f = e.width;
+            e.width = width;
+            e.height = height;
+
+            if (e.width < f) {
+                double d0 = (double) width / 2.0D;
+                e.setEntityBoundingBox(new AxisAlignedBB(e.posX - d0, e.posY, e.posZ - d0, e.posX + d0, e.posY + (double) e.height, e.posZ + d0));
+                if(!e.world.isRemote){
+                    Taoism.net.sendToAllTracking(new PacketUpdateSize(e.getEntityId(), e.width, e.height), e);
+                }
+                return;
+            }
+
+            AxisAlignedBB axisalignedbb = e.getEntityBoundingBox();
+            e.setEntityBoundingBox(new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double) e.width, axisalignedbb.minY + (double) e.height, axisalignedbb.minZ + (double) e.width));
+
+            if (!e.world.isRemote) {
+                if(e.width > f) {
+                    e.move(MoverType.SELF, (f - e.width), 0.0D, (f - e.width));
+                }
+                Taoism.net.sendToAllTracking(new PacketUpdateSize(e.getEntityId(), e.width, e.height), e);
             }
         }
-        for(AttributeModifier am:elb.getHeldItem(hand).getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(ia.getName())){
-            a.applyModifier(am);
-        }
-        return a.getAttributeValue();
     }
 
     /**
@@ -145,16 +160,19 @@ public class NeedyLittleThings {
         return x * x + y * y + z * z;
     }
 
-    public static double getOffhandAttackSpeed(EntityLivingBase attacker) {
-        IAttributeInstance toUse = new AttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-        IAttributeInstance att = attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-        toUse.setBaseValue(att.getBaseValue());
-        for (AttributeModifier am : att.getModifiers()) {
-            if (!am.getName().equals("Weapon modifier"))
+    public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
+        IAttributeInstance a = elb.getEntityAttribute(ia);
+        IAttributeInstance toUse = new AttributeMap().registerAttribute(ia);
+        toUse.setBaseValue(a.getBaseValue());
+        for (AttributeModifier am : a.getModifiers()) {
+            if (!am.getName().equals("Weapon modifier")) {
+                toUse.applyModifier(am);
+            }
+        }
+        for (AttributeModifier am : elb.getHeldItem(hand).getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(ia.getName())) {
+            if (!a.hasModifier(am))
                 toUse.applyModifier(am);
         }
-        for (AttributeModifier atm : attacker.getHeldItemOffhand().getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(SharedMonsterAttributes.ATTACK_SPEED.getName()))
-            toUse.applyModifier(atm);
         return toUse.getAttributeValue();
     }
 
@@ -167,40 +185,20 @@ public class NeedyLittleThings {
     }
 
     public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / getOffhandAttackSpeed(elb) * 20.0D);
+        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
     public static float getCooldownPeriod(EntityLivingBase elb) {
-        return (float) (1.0D / elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue() * 20.0D);
+        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND) * 20.0D);
     }
 
     /**
-     * swaps held items and their cooldowns
+     * returns true if entity2 is within a 90 degree sector in front of entity1
      */
-    public static void swapItemInHands(EntityLivingBase operator) {
-        ItemStack main = operator.getHeldItemMainhand().copy();
-        ItemStack off = operator.getHeldItemOffhand().copy();
-        operator.setHeldItem(EnumHand.MAIN_HAND, off);
-        operator.setHeldItem(EnumHand.OFF_HAND, main);
-        for (AttributeModifier am : main.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
-            operator.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).removeModifier(am);
-        }
-        for (AttributeModifier am : off.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
-            operator.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).applyModifier(am);
-        }
-        int offCD = TaoCasterData.getTaoCap(operator).getOffhandCool();
-        int mainCD = Taoism.getAtk(operator);
-        Taoism.setAtk(operator, offCD);
-        TaoCasterData.getTaoCap(operator).setOffhandCool(mainCD);
-    }
-
-    /**
-     * returns true if entity is within a 90 degree sector in front of the target
-     */
-    public static boolean isFacingEntity(EntityLivingBase entity, Entity target) {
-        Vec3d posVec = entity.getPositionVector();
-        Vec3d lookVec = target.getLook(1.0F);
-        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
+    public static boolean isFacingEntity(Entity entity1, Entity entity2) {
+        Vec3d posVec = entity2.getPositionVector();
+        Vec3d lookVec = entity1.getLook(1.0F);
+        Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector()).normalize();
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
 
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
@@ -210,7 +208,7 @@ public class NeedyLittleThings {
     /**
      * returns true if entity is within a 90 degree sector behind the target
      */
-    public static boolean isBehindEntity(EntityLivingBase entity, Entity target) {
+    public static boolean isBehindEntity(Entity entity, Entity target) {
         Vec3d posVec = entity.getPositionVector();
         Vec3d lookVec = target.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
@@ -504,7 +502,6 @@ public class NeedyLittleThings {
         Vec3d end = start.add(look);
         ArrayList<Entity> ret = new ArrayList<>();
         List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), ARROW_TARGETS::test);
-        double d0 = 0.0D;
 
         for (Entity entity1 : list) {
             if (entity1 != attacker && entity1 != target) {

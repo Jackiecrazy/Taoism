@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 
+import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
@@ -34,7 +35,7 @@ public class QingLongJi extends TaoWeapon {
      * Riposte: instantly gain two layers of chi.
      */
     public QingLongJi() {
-        super(2, 1.2, 4d, 1f);
+        super(2, 1.2, 4.5d, 1f);
     }
 
     @Override
@@ -45,12 +46,12 @@ public class QingLongJi extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float chimult = TaoCasterData.getTaoCap(attacker).getQiFloored() / 10f;
-        return off ? 1f : 1.5f * chimult;
+        return getHand(item) == EnumHand.OFF_HAND ? 1f : 1.5f * (1 + chimult);
     }
 
     @Override
     public int getDamageType(ItemStack is) {
-        return off ? isCharged(null, is) ? 1 : 0 : 2;
+        return getHand(is) == EnumHand.OFF_HAND ? isCharged(null, is) ? 1 : 0 : 2;
     }
 
     @Override
@@ -63,8 +64,10 @@ public class QingLongJi extends TaoWeapon {
     }
 
     protected float getQiAccumulationRate(ItemStack is) {
-        boolean lastIsNormalAtk = getLastMove(is).isLeftClick();
-        return lastIsNormalAtk ^ off ? 1f : 0;
+        MoveCode mc = getLastMove(is);
+        if (!mc.isValid()) return 1f;
+        boolean lastIsNormalAtk = mc.isLeftClick();
+        return lastIsNormalAtk ^ getHand(is) == EnumHand.OFF_HAND ? 1f : 0;
     }
 
     @Override
@@ -93,11 +96,11 @@ public class QingLongJi extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (off) splash(attacker, target, 3f + chi / 5f);
+        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, target, 3f + chi / 5f);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (off) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
             if (isCharged(attacker, stack)) {
                 //crescent cut!
@@ -107,19 +110,17 @@ public class QingLongJi extends TaoWeapon {
                 target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0));
             }
         }
-        EnumHand other = off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        if (TaoCombatUtils.getHandCoolDown(attacker, other) < 0.5f) {
-            TaoCombatUtils.rechargeHand(attacker, other, 0.5f);
-        }
     }
 
     @Override
     protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
-        if (isDummy(stack)) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             if (isCharged(attacker, stack)) {
                 dischargeWeapon(attacker, stack);
             } else chargeWeapon(attacker, null, stack, 100);
         }
+        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);
     }
 
     @Override
@@ -129,6 +130,7 @@ public class QingLongJi extends TaoWeapon {
         tooltip.add(I18n.format("qinglongji.alt"));
         tooltip.add(I18n.format("qinglongji.alt.bash"));
         tooltip.add(I18n.format("qinglongji.alt.cut"));
+        tooltip.add(I18n.format("qinglongji.oscillate"));
         tooltip.add(I18n.format("qinglongji.atkspd"));
         tooltip.add(TextFormatting.YELLOW + I18n.format("qinglongji.qi") + TextFormatting.RESET);
         tooltip.add(TextFormatting.BOLD + I18n.format("qinglongji.riposte") + TextFormatting.RESET);

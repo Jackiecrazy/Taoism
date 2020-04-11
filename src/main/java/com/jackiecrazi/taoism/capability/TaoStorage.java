@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.capability;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -31,6 +32,8 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         nbt.setInteger("dodge",instance.getRollCounter());
         nbt.setFloat("prevWidth",instance.getPrevSizes().getFirst());
         nbt.setFloat("prevHeight",instance.getPrevSizes().getSecond());
+        nbt.setInteger("protec", instance.getPosInvulTime());
+        nbt.setTag("offhandInfo",instance.getOffHand().writeToNBT(new NBTTagCompound()));
         return nbt;
     }
 
@@ -55,5 +58,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         instance.setDownTimer(n.getInteger("down"));
         instance.setRollCounter(n.getInteger("dodge"));
         instance.setPrevSizes(n.getFloat("prevWidth"),n.getFloat("prevHeight"));
+        instance.setPosInvulTime(n.getInteger("protec"));
+        instance.setOffHand(new ItemStack(n.getCompoundTag("offhandInfo")));
     }
 }

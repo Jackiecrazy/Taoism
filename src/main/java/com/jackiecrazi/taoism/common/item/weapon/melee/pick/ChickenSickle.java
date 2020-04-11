@@ -23,7 +23,7 @@ public class ChickenSickle extends TaoWeapon {
      * Riposte: for 3 seconds, next attack stacks hemorrhage 4/5 and detonates hemorrhage into layer% of hp and stacks bleed layer/10
      */
     public ChickenSickle() {
-        super(2, 1.6, 6.5, 1f);
+        super(2, 1.6, 7, 1f);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ChickenSickle extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-        NeedyLittleThings.knockBack(target,attacker,-1);
+        NeedyLittleThings.knockBack(target,attacker,-0.5f);
         if(isCharged(attacker,stack)){
             target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
             PotionEffect pe=target.removeActivePotionEffect(TaoPotion.HEMORRHAGE);

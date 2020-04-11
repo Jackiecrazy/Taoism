@@ -24,7 +24,7 @@ public class BanFu extends TaoWeapon {
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
 
     public BanFu() {
-        super(3, 1.2, 7.5f, 1.7f);
+        super(3, 1.2, 7f, 1.7f);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class BanFu extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (chi > 0)
-            target.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 60, chi - 1));
+            target.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
     }
 
     @Override

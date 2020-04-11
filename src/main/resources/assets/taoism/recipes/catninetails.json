@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "n n",
+    "rr ",
+    "srn"
+  ],
+  "key":
+  {
+    "n":
+    {
+      "type": "forge:ore_dict",
+      "ore": "nuggetIron"
+    },
+    "r":
+    {
+      "type": "forge:ore_dict",
+      "ore": "string"
+    },
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:catninetails"
+  }
+}

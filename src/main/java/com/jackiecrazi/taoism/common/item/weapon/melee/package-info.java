@@ -84,10 +84,9 @@ Weapons include:
         ^not as well as whips, unfortunately.
         Flexible as they themselves are.
     sectional weapons:
-        high power and defense, medium speed and combo, low range
+        high speed and defense, medium power and combo, low range
         Generally flexible in one-handed or two-handed usage, though using with only one hand will lock out some moves.
         Due to higher mass and less flexibility, can be used to parry, but cannot be used to grab onto things.
-        Still hits around shields though.
         Unlike other flexible weapons, does not need to be charged up, and handles more like a slightly unpredictable staff.
 
     ***Ranged weapons***

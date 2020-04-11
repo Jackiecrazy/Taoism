@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -30,7 +31,7 @@ public class Staff extends TaoWeapon {
      */
 
     public Staff() {
-        super(0, 1.4f, 5f, 1f);
+        super(0, 1.4f, 6f, 1f);
     }
 
     @Override
@@ -40,8 +41,8 @@ public class Staff extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        double ret = super.speed(stack);
-        if (isDummy(stack)) {
+        double ret = super.speed(stack) + 4f;
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             ret /= 1.2d;
         }
         ret -= 4d;
@@ -55,7 +56,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return isCharged(wielder, is) && !off ? 2 : 1;
+        return isCharged(wielder, is) && getHand(is) != EnumHand.OFF_HAND ? 2 : 1;
     }
 
     @Override
@@ -66,22 +67,22 @@ public class Staff extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (TaoWeapon.off) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             splash(attacker, target, 4);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (TaoWeapon.off) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             float groundKB = attacker.onGround ? 1f : 1.3f;
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
             if (target.onGround) {
-                target.addVelocity(0, 2, 0);
+                target.addVelocity(0, 0.3, 0);
             } else {
                 NeedyLittleThings.knockBack(target, attacker, 1f);
-                target.addVelocity(0, -2, 0);
+                target.addVelocity(0, -1, 0);
                 target.fallDistance += 3f;
             }
             target.velocityChanged = true;
@@ -94,7 +95,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return isDummy(is) ? 4f : 6f;
+        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6.5f;
     }
 
     @Override
@@ -114,6 +115,7 @@ public class Staff extends TaoWeapon {
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
         tooltip.add(I18n.format("staff.swipe"));
+        tooltip.add(I18n.format("staff.oscillate"));
         tooltip.add(I18n.format("staff.block"));
         tooltip.add(I18n.format("staff.riposte"));
         tooltip.add(TextFormatting.ITALIC + I18n.format("staff.block.riposte") + TextFormatting.RESET);
@@ -132,8 +134,8 @@ public class Staff extends TaoWeapon {
             if (TaoCombatUtils.isEntityBlocking(elb)) {
                 if (getChargeTimeLeft(elb, stack) % 20 == 1)
                     splash(elb, elb, 4);
-                for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 1.5d, 3), null)) {
-                    if (ent instanceof IProjectile && NeedyLittleThings.isFacingEntity(elb, ent)) {
+                for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
+                    if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
                         IProjectile ip = (IProjectile) ent;
                         Vec3d velocity = new Vec3d(ent.motionX, ent.motionY, ent.motionZ);
                         boolean isCharged = isCharged(elb, stack);
@@ -149,6 +151,7 @@ public class Staff extends TaoWeapon {
                             ent.motionX = 0;
                             ent.motionZ = 0;
                         }
+                        ent.velocityChanged=true;
                     }
                 }
             }

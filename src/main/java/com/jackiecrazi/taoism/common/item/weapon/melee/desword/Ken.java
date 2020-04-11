@@ -37,8 +37,8 @@ public class Ken extends TaoWeapon {
     protected void afterSwing(EntityLivingBase elb, ItemStack is) { }
 
     private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
-        if (!attacker.onGround) return true;
-        List<Entity> list = attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(3d, 1.5d, 3d), null);
+        if (!attacker.onGround) return false;
+        List<Entity> list = attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(1.5d, 1.5d, 1.5d), null);
         list.remove(attacker);
         return !list.isEmpty();
     }

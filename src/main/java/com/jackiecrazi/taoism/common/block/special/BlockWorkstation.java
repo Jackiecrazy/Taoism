@@ -1,5 +1,7 @@
 package com.jackiecrazi.taoism.common.block.special;
 
+import com.jackiecrazi.taoism.common.tile.TilePedestal;
+import com.jackiecrazi.taoism.common.tile.TileWorkstation;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -12,22 +14,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.common.tile.TilePedestal;
-import com.jackiecrazi.taoism.common.tile.TileWorkstation;
-
 public class BlockWorkstation extends BlockContainer {
 	
 	public BlockWorkstation() {
 		super(Material.ROCK);
-		this.setCreativeTab(Taoism.tabBlu);
+		//this.setCreativeTab(Taoism.tabBlu);
 		this.setRegistryName("workstation");
 		this.setUnlocalizedName("workstation");
 	}
 
 	public BlockWorkstation(Material blockMaterialIn, MapColor blockMapColorIn) {
 		super(blockMaterialIn, blockMapColorIn);
-		this.setCreativeTab(Taoism.tabBlu);
+		//this.setCreativeTab(Taoism.tabBlu);
 		this.setRegistryName("workstation");
 		this.setUnlocalizedName("workstation");
 	}

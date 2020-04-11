@@ -11,12 +11,14 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.QingLongJi;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.stick.Tonfa;
-import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTail;
+import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -38,11 +40,13 @@ public class TaoItems {
             qiang = new Qiang(),
             tonfa = new Tonfa(),
             chickensickle = new ChickenSickle(),
-            ninetail = new CatNineTail(),
+            ninetail = new CatNineTails(),
             pollaxe = new Pollaxe(),
             changchui = new ChangChui(),
             goulianqiang = new GouLianQiang(),
-            qinglongji = new QingLongJi();
+            qinglongji = new QingLongJi(),
+            gun = new Staff(),
+            yyd = new GuanDao();
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -58,7 +62,7 @@ public class TaoItems {
     public static void init(RegistryEvent.Register<Item> e) {
         //base
         //e.getRegistry().register(part);
-        e.getRegistry().register(blueprint);
+        //e.getRegistry().register(blueprint);
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);
@@ -74,6 +78,8 @@ public class TaoItems {
         e.getRegistry().register(changchui);
         e.getRegistry().register(goulianqiang);
         e.getRegistry().register(qinglongji);
+        e.getRegistry().register(gun);
+        e.getRegistry().register(yyd);
         //weapon
         //e.getRegistry().register(weap);
         //armor
@@ -83,7 +89,7 @@ public class TaoItems {
 //        e.getRegistry().register(boot);
         //archery
         //e.getRegistry().register(bow);
-        e.getRegistry().register(arrow);
+        //e.getRegistry().register(arrow);
     }
 
 }

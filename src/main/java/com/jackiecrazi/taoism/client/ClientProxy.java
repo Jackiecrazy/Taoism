@@ -3,7 +3,7 @@ package com.jackiecrazi.taoism.client;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -61,8 +61,8 @@ public class ClientProxy extends CommonProxy {
          */
     }
 
-    public EntityPlayerMP getPlayerEntityFromContext(MessageContext ctx) {
-        return (EntityPlayerMP) (ctx.side.isClient() ? Minecraft.getMinecraft().player : super.getPlayerEntityFromContext(ctx));
+    public EntityPlayer getPlayerEntityFromContext(MessageContext ctx) {
+        return (ctx.side.isClient() ? Minecraft.getMinecraft().player : super.getPlayerEntityFromContext(ctx));
     }
 
 }

@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class CatNineTail extends TaoWeapon {
+public class CatNineTails extends TaoWeapon {
     //whipping implement used on prisoners, causing grievous lacerations. High power and speed, medium defense and range, low combo potential
     //whips around shields, cannot block
     //inflicts laceration
@@ -28,8 +28,8 @@ public class CatNineTail extends TaoWeapon {
             new PartDefinition("handlewrap", false, StaticRefs.STRING)
     };
 
-    public CatNineTail() {
-        super(1, 1.4f, 3f, 0.6f);
+    public CatNineTails() {
+        super(1, 1.4f, 5f, 0.6f);
     }
 
     @Override
@@ -93,9 +93,9 @@ public class CatNineTail extends TaoWeapon {
         if (armor >= 10) return;//15 armor and above means no laceration, can't rip a guy in full iron...
         else {
             potency = 2 - (Math.floorDiv(armor, 5));
-            duration = 20 - (armor * 2);
+            duration = 100 - (armor * 10);
         }
-        target.addPotionEffect(new PotionEffect(TaoPotion.LACERATION, duration*5, potency));
+        target.addPotionEffect(new PotionEffect(TaoPotion.LACERATION, duration, potency));
         target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, duration, potency), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
     }
 
@@ -105,8 +105,8 @@ public class CatNineTail extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         Taoism.setBypassArmor(ds,false);
-        return super.damageStart(ds, attacker, target, item, orig);
+        return super.hurtStart(ds, attacker, target, item, orig);
     }
 }

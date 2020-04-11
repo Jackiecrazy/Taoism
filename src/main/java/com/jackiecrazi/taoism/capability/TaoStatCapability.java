@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.capability;
 
 import com.jackiecrazi.taoism.config.CombatConfig;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
@@ -13,6 +14,8 @@ public class TaoStatCapability implements ITaoStatCapability {
     private boolean swi, protecc;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
+    private ItemStack lastTickOffhand;
+    public static final float MAXQI=9.99f;
 
     @Override
     public float getPosture() {
@@ -127,17 +130,16 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setQi(float amount) {
-        qi = amount;
-        if (qi > 10) qi = 10f;
+        qi = MathHelper.clamp(amount, 0, MAXQI);
     }
 
     @Override
     public float addQi(float amount) {
         qi += amount;
         amount = 0;
-        if (qi > 10) {
-            amount = qi - 10;
-            qi = 10f;
+        if (qi > MAXQI) {
+            amount = qi - MAXQI;
+            qi = MAXQI;
         }
         return amount;
     }
@@ -198,6 +200,11 @@ public class TaoStatCapability implements ITaoStatCapability {
         setProtected(from.isProtected());
         setDownTimer(from.getDownTimer());
         setRollCounter(from.getRollCounter());
+        setPostureRechargeCD(from.getPostureRechargeCD());
+        setStaminaRechargeCD(from.getStaminaRechargeCD());
+        setPosInvulTime(from.getPosInvulTime());
+        setLastUpdatedTime(from.getLastUpdatedTime());
+        setOffHand(getOffHand());
     }
 
     @Override
@@ -288,6 +295,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setOffhandCool(int oc) {
         ohcool = oc;
+    }
+
+    @Override
+    public ItemStack getOffHand() {
+        return lastTickOffhand == null ? ItemStack.EMPTY : lastTickOffhand;
+    }
+
+    @Override
+    public void setOffHand(ItemStack is) {
+        lastTickOffhand = is.copy();
     }
 
     @Override

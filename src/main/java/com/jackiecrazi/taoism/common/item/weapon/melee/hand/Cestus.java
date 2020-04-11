@@ -30,7 +30,7 @@ public class Cestus extends TaoWeapon {
     //naturally adds 2 armor points, applies slow 1 at 3 chi, and slow 2 at 6 chi. At 10 chi blindness. Damage scales with chi
     //to compensate for so many perks, is single target and short range, but no knockback
     public Cestus() {
-        super(0, 2, 3d, 1.3f);
+        super(0, 2, 4d, 1.3f);
     }
 
     @Override
@@ -68,12 +68,11 @@ public class Cestus extends TaoWeapon {
         return ret;
     }
 
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        int qi = attacker.getCapability(TaoCasterData.CAP, null).getQiFloored();
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int qi) {
         if (qi >= 3) {
             target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1));
         }
-        if (qi >= 10) {
+        if (qi >= 9) {
             target.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 40, 0));
         }
         if (isCharged(attacker, stack)) {

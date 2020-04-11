@@ -30,7 +30,6 @@ public class GouLianQiang extends TaoWeapon {
 
     left click for a normal stab. Doing this attack twice to the same target (first time has half cooldown) will grab and trip, inflicting (2+armor/5) posture damage
     right click to do a bash that knocks the target a fair distance away and inflicts blunt damage, at cost of lower damage
-    These two attacks have independent cooldowns,so you can continuously chain them.
     TODO this loses the spear's ability to pierce. Instead, winning a blade lock will disable the opponent's weapon for 1 second.
     riposte:
     //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
@@ -38,7 +37,7 @@ public class GouLianQiang extends TaoWeapon {
      */
 
     public GouLianQiang() {
-        super(2, 1.2, 4d, 1f);
+        super(2, 1.2, 5d, 1f);
     }
 
     @Override
@@ -49,18 +48,18 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float aerial = !attacker.onGround ? 1.5f : 1f;
-        float bash = off ? 0.5f : 1f;
+        float bash = getHand(item)==EnumHand.OFF_HAND ? 0.5f : 1f;
         return aerial * bash;
     }
 
     @Override
     public int getDamageType(ItemStack is) {
-        return off ? 0 : 2;
+        return getHand(is)==EnumHand.OFF_HAND ? 0 : 2;
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return isDummy(is) ? 1 : 2;
+        return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
     @Override
@@ -70,7 +69,7 @@ public class GouLianQiang extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5.5f;
+        return 6f;
     }
 
     @Override
@@ -89,14 +88,12 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (off && isCharged(attacker, stack))
-            splash(attacker, target, 2f);
-        else if (!off)
-            splash(attacker, NeedyLittleThings.raytraceEntities(target.world, attacker, target, getReach(attacker, stack)));
+        if (getHand(stack)==EnumHand.OFF_HAND && isCharged(attacker, stack))
+            splash(attacker, target, 4);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (off) {
+        if (getHand(stack)==EnumHand.OFF_HAND) {
             if (isCharged(attacker, stack)) {
                 NeedyLittleThings.knockBack(target, attacker, 1f);
                 target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20, 0));
@@ -108,10 +105,6 @@ public class GouLianQiang extends TaoWeapon {
                 TaoCasterData.getTaoCap(target).consumePosture(2f + target.getTotalArmorValue() / 5f, true);
             }
         }
-        EnumHand other = off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        if (TaoCombatUtils.getHandCoolDown(attacker, other) < 0.5f) {
-            TaoCombatUtils.rechargeHand(attacker, other, 0.5f);
-        }
     }
 
     @Override
@@ -122,5 +115,11 @@ public class GouLianQiang extends TaoWeapon {
         tooltip.add(I18n.format("goulianqiang.bash"));
         tooltip.add(TextFormatting.ITALIC + I18n.format("goulianqiang.bash.riposte") + TextFormatting.RESET);
         tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        super.afterSwing(elb, is);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
     }
 }

@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
@@ -18,18 +19,20 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.MovementInput;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.lang.reflect.Field;
@@ -45,7 +48,8 @@ public class ClientEvents {
      * left, back, right
      */
     private static long[] lastTap = {0, 0, 0};
-    private static long lastSneak = 0;
+    private static boolean[] tapped = {false, false, false};
+    private static boolean sneak = false;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -59,42 +63,67 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void modelTheWeapons(ModelBakeEvent event) {
-
+    public static void down(RenderLivingEvent.Pre event) {
+        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(event.getX(), event.getY(), event.getZ());
+            GlStateManager.rotate(180f, 0, 0, 0);
+            GlStateManager.rotate(90f, 1, 0, 0);
+            GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
+            GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+            GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
+        }
     }
 
     @SubscribeEvent
-    public static void modelThePlayer(RenderPlayerEvent.Pre e) {//TODO find a way to have the hands move in tandem with swing progress
-        EntityPlayer p = e.getEntityPlayer();
-        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX += 37;
+    public static void downEnd(RenderLivingEvent.Post event) {
+        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
+            GlStateManager.popMatrix();
+        }
     }
 
     @SubscribeEvent
-    public static void doju(InputEvent.KeyInputEvent e) {
+    public static void modelThePlayer(RenderPlayerEvent.Pre e) {
+//        EntityPlayer p = e.getEntityPlayer();
+//        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX += 37;
+        //what was I doing? I can't remember...
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void doju(InputUpdateEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.gameSettings.keyBindLeft.isPressed()) {
+        MovementInput mi = e.getMovementInput();
+        if (mi.leftKeyDown && !tapped[0]) {
             if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(0));
             }
             lastTap[0] = mc.world.getTotalWorldTime();
         }
-        if (mc.gameSettings.keyBindBack.isPressed()) {
+        tapped[0] = mi.leftKeyDown;
+        if (mi.backKeyDown && !tapped[1]) {
             if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(1));
             }
             lastTap[1] = mc.world.getTotalWorldTime();
         }
-        if (mc.gameSettings.keyBindRight.isPressed()) {
+        tapped[1] = mi.backKeyDown;
+        if (mi.rightKeyDown && !tapped[2]) {
             if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE) {
                 Taoism.net.sendToServer(new PacketDodge(2));
             }
             lastTap[2] = mc.world.getTotalWorldTime();
         }
-        if (mc.gameSettings.keyBindSneak.isPressed()) {
+        tapped[2] = mi.rightKeyDown;
+        if (mi.sneak && !sneak) {
             //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
             Taoism.net.sendToServer(new PacketBeginParry());
-            //}//TODO this is broken, make it activate on a brief sneak
-            lastSneak = mc.world.getTotalWorldTime();
+            //}
+        }
+        sneak = mi.sneak;
+
+        if (TaoCasterData.getTaoCap(mc.player).getDownTimer() > 0) {
+            //no moving while you're down! (except for a safety roll)
+            KeyBinding.unPressAllKeys();
         }
     }
 
@@ -102,7 +131,7 @@ public class ClientEvents {
     public static void updateMove(MouseEvent e) {
         if (!e.isButtonstate()) return;
         GameSettings gs = Minecraft.getMinecraft().gameSettings;
-        MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isPressed());
+        MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
         Taoism.net.sendToServer(new PacketMakeMove(move));
     }
 

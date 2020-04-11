@@ -95,11 +95,7 @@ public class Karambit extends TaoWeapon {
 
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
-            try {
-                Taoism.atk.setInt(elb, 5);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            Taoism.setAtk(elb, 5);
         }
     }
 

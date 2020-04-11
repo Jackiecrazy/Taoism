@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee;
 
-import com.jackiecrazi.taoism.Taoism;
 import net.minecraft.item.Item;
 
 public class ItemBlueprint extends Item {
@@ -11,7 +10,7 @@ public class ItemBlueprint extends Item {
 	public ItemBlueprint() {
 		this.setUnlocalizedName("burupurinto");
 		this.setRegistryName("taoblueprint");
-		this.setCreativeTab(Taoism.tabBlu);
+		//this.setCreativeTab(Taoism.tabBlu);
 		this.setHasSubtypes(true);
 		this.setMaxStackSize(1);
 	}

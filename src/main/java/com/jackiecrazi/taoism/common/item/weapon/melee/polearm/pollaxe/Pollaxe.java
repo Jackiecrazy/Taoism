@@ -6,12 +6,14 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -52,7 +54,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return isDummy(is) ? 4f : 6f;
+        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6.5f;
     }
 
     @Override
@@ -68,14 +70,14 @@ public class Pollaxe extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (TaoWeapon.off) {
-            splash(attacker, target, 5);
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            splash(attacker, target, 4);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (TaoWeapon.off) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, attacker.onGround ? 1f : 1.3f);
             if (isCharged(attacker, stack)) {
                 target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 100, 2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
@@ -93,17 +95,18 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        float doot=super.hurtStart(ds, attacker,target,item,orig);
         if (isCharged(attacker, item) && target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null) {
             PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
-            if (TaoWeapon.off)
-                return orig * ((pe.getAmplifier() + 1) / 10f);
+            if (getHand(item) == EnumHand.OFF_HAND)
+                return doot * ((pe.getAmplifier() + 1) / 10f);
             else {
                 target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
-                return orig + (pe.getAmplifier() / 2f);
+                return doot + (pe.getAmplifier() / 2f);
             }
         }
-        return orig;
+        return doot;
     }
 
     @Override
@@ -130,5 +133,11 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public int getDamageType(ItemStack is) {
         return isCharged(null, is) ? 2 : 3;
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        super.afterSwing(elb,is);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
     }
 }

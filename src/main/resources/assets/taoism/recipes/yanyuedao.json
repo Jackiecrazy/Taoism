@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "  a",
+    " s ",
+    "s  "
+  ],
+  "key":
+  {
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "a":
+    {
+      "item": "minecraft:iron_sword"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:guandao"
+  }
+}

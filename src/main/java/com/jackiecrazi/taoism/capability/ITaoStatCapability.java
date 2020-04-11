@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.capability;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
 
 public interface ITaoStatCapability {
@@ -53,6 +54,8 @@ public interface ITaoStatCapability {
      void setSwitchIn(boolean suichi);
      int getOffhandCool();
      void setOffhandCool(int oc);
+     ItemStack getOffHand();
+     void setOffHand(ItemStack is);
      boolean isProtected();
      void setProtected (boolean protect);
      int getDownTimer();

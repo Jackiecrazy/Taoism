@@ -1,16 +1,21 @@
 [
-{
-  "modid": "taoism",
-  "name": "Taoism",
-  "description": "Immortality!",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "taoism",
+    "name": "Taoism",
+    "description": "Immortality! Mostly adds some semi-realistic and complex weapons for now.",
+    "version": "",
+    "mcversion": "",
+    "url": "https://discord.gg/wZTrp53",
+    "updateUrl": "",
+    "authorList": [
+      "Jackiecrazy",
+      "Shousi",
+      "QianRenXi",
+      "DianJiangTiaoZao"
+    ],
+    "credits": "Forge guys, Vazkii, and the open source projects that helped me learn.",
+    "logoFile": "logo.png",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]

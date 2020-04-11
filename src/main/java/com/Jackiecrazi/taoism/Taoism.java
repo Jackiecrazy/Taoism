@@ -33,19 +33,11 @@ import java.util.Random;
 
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
-    public static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
-    public static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
+    private static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
+    private static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
     public static final String MODID = "taoism";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "2.0";
     public static final Random unirand = new Random();
-    public static final CreativeTabs tabBlu = new CreativeTabs("taoBlu") {
-
-        @Override
-        public ItemStack getTabIconItem() {
-            return new ItemStack(TaoItems.blueprint);
-        }
-
-    };
     public static final CreativeTabs tabWea = new CreativeTabs("taoWea") {
         ItemStack icon = new ItemStack(Items.IRON_SWORD);
 
@@ -115,9 +107,11 @@ public class Taoism {
         MinecraftForge.EVENT_BUS.register(TaoisticEventHandler.class);
         MinecraftForge.EVENT_BUS.register(TaoCapabilityHandler.class);
         MinecraftForge.EVENT_BUS.register(TaoEntities.class);
+        atk.setAccessible(true);
+        bypassArmor.setAccessible(true);
 
         //MinecraftForge.EVENT_BUS.register(ClientProxy.class);
-        TaoConfigs.init(event.getModConfigurationDirectory() + "/taoism/");
+        TaoConfigs.init(event.getModConfigurationDirectory());
         net = NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
         proxy.preinit(event);
     }

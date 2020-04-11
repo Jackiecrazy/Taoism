@@ -58,7 +58,9 @@ public class StaticRefs {
     FITTING=new PartDefinition("fitting", HARD),
     HANDLEWRAP=new PartDefinition("handlewrap", false,FABRIC),
     SCABBARD=new PartDefinition("sheath",HARD),
-    SCABBARDWRAP=new PartDefinition("sheathwrap", false,FABRIC);
+    SCABBARDWRAP=new PartDefinition("sheathwrap", false,FABRIC),
+    CHAIN=new PartDefinition("chain",HARD),
+    ROPE=new PartDefinition("rope",STRING);
     public static final PartDefinition[]
             SWORD={HEAD,HANDLE,FITTING,HANDLEWRAP,SCABBARD,SCABBARDWRAP};
     public static final PartDefinition[] SIMPLE={

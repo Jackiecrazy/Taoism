@@ -21,7 +21,7 @@ public class Chui extends TaoWeapon {
     // and will additionally deal 1.5x damage against staggered targets for a total of triple damage
 
     public Chui() {
-        super(0, 1.2f, 4.5f, 1.7f);
+        super(0, 1.2f, 7f, 1.7f);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Chui extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float ground=attacker.onGround?1f:2f;
-        float breach= TaoCasterData.getTaoCap(target).getDownTimer()!=0?1.5f:1f;
+        float breach= TaoCasterData.getTaoCap(target).getDownTimer()>0?1.5f:1f;
         return ground*breach;
 
     }

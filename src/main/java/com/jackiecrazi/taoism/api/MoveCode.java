@@ -30,6 +30,43 @@ public class MoveCode {
         isLeftClick = BinaryMachiavelli.getBoolean(data, 7);
     }
 
+    public static enum CriteriaType{
+        ON,
+        OFF,
+        IGNORE
+    }
+    private static CriteriaType[] quickLookup={
+            CriteriaType.OFF,
+            CriteriaType.IGNORE,
+            CriteriaType.ON
+    };
+
+    public static class MoveCriteria{
+        public final CriteriaType isForwardPressed, isBackPressed, isLeftPressed, isRightPressed, isJumpPressed, isSneakPressed, isLeftClick;
+        public MoveCriteria(CriteriaType forward, CriteriaType back, CriteriaType left, CriteriaType right, CriteriaType jump, CriteriaType sneak, CriteriaType isLeft){
+            isForwardPressed = forward;
+            isBackPressed = back;
+            isLeftPressed = left;
+            isRightPressed = right;
+            isJumpPressed = jump;
+            isSneakPressed = sneak;
+            isLeftClick = isLeft;
+        }
+
+        /**
+         * -1 for off, 0 for ignore, 1 for on
+         */
+        public MoveCriteria(int forward, int back, int left, int right, int jump, int sneak, int leftClick){
+            isForwardPressed = quickLookup[forward+1];
+            isBackPressed = quickLookup[back+1];
+            isLeftPressed = quickLookup[left+1];
+            isRightPressed = quickLookup[right+1];
+            isJumpPressed = quickLookup[jump+1];
+            isSneakPressed = quickLookup[sneak+1];
+            isLeftClick = quickLookup[leftClick+1];
+        }
+    }
+
     public byte toByte() {
         int out = 0;
         out = BinaryMachiavelli.setBoolean(out, 0, isValid);
@@ -41,6 +78,25 @@ public class MoveCode {
         out = BinaryMachiavelli.setBoolean(out, 6, isSneakPressed);
         out = BinaryMachiavelli.setBoolean(out, 7, isLeftClick);
         return (byte) out;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof MoveCode))return false;
+        MoveCode mc= (MoveCode)obj;
+        return (this.toByte() == mc.toByte());
+    }
+
+    public boolean compareTo(MoveCriteria mc){
+        if(!isValid)return false;
+        if(mc.isForwardPressed!=CriteriaType.IGNORE&&(isForwardPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isForwardPressed)return false;
+        if(mc.isBackPressed!=CriteriaType.IGNORE&&(isBackPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isBackPressed)return false;
+        if(mc.isLeftPressed!=CriteriaType.IGNORE&&(isLeftPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isLeftPressed)return false;
+        if(mc.isRightPressed!=CriteriaType.IGNORE&&(isRightPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isRightPressed)return false;
+        if(mc.isJumpPressed!=CriteriaType.IGNORE&&(isJumpPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isJumpPressed)return false;
+        if(mc.isSneakPressed!=CriteriaType.IGNORE&&(isSneakPressed?CriteriaType.ON:CriteriaType.OFF)!=mc.isSneakPressed)return false;
+        if(mc.isLeftClick!=CriteriaType.IGNORE&&(isLeftClick?CriteriaType.ON:CriteriaType.OFF)!=mc.isLeftClick)return false;
+        return true;
     }
 
     public boolean isValid() {

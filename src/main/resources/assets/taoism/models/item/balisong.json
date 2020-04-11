@@ -3,6 +3,13 @@
   "textures": {
     "layer0": "taoism:weapon/whole/balisong"
   },
+  "overrides": [
+    {
+      "predicate": {
+        "offhand": 1
+      },
+      "model": "taoism:item/balisong_inverted"
+    }],
   "display": {
     "thirdperson_righthand": {
       "rotation": [ 0, -90, 55 ],

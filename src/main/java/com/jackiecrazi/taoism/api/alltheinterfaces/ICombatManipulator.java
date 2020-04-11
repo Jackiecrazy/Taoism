@@ -16,20 +16,20 @@ public interface ICombatManipulator {
     void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
+     * this is called on LivingKnockBackEvent
+     * @return a new knockback if necessary
+     */
+    float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
      * this is called on LivingHurtEvent, before armor reductions
      * @return a new damage if necessary
      */
-    float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+    float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
      * this is called on LivingDamageEvent, after armor, absorption, and all other reductions
      * @return a new damage if necessary
      */
-    float damageEnd(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
-
-    /**
-     * this is called on LivingKnockBackEvent
-     * @return a new knockback if necessary
-     */
-    float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+    float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 }

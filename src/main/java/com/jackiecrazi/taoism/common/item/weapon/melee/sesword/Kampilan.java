@@ -43,7 +43,7 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is){
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         boolean thingy = getCombo(elb, is) != getComboLength(elb, is) - 1;
         if (thingy) dischargeWeapon(elb, is);
     }
@@ -87,11 +87,11 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
             TaoCasterData.getTaoCap(target).consumePosture(knock, true);
         }
-        return orig + knock;
+        return super.hurtStart(ds, attacker, target, item, orig) + knock;
     }
 
     @Override

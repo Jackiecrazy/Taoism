@@ -13,12 +13,14 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 sourceSets {
     sourceSets ->
         main
+        //delete this before compiling, and delete out and build, to prevent stupid errors
         main {
             output.resourcesDir = output.classesDir
         }
+        //add it back in afterwards otherwise the textures don't load, sadface
 }
 
-version = "1.3.0.2"
+version = "2.0.0.0"
 group = "com.jackiecrazi.taoism" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "taoism"
 

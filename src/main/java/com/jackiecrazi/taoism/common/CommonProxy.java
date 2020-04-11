@@ -4,13 +4,10 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoStorage;
-import com.jackiecrazi.taoism.networking.PacketBeginParry;
-import com.jackiecrazi.taoism.networking.PacketDodge;
-import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
+import com.jackiecrazi.taoism.networking.*;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach.ExtendReachHandler;
-import com.jackiecrazi.taoism.networking.PacketMakeMove;
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -30,6 +27,8 @@ public class CommonProxy {
         Taoism.net.registerMessage(PacketMakeMove.MakeMoveHandler.class, PacketMakeMove.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketBeginParry.ParryHandler.class, PacketBeginParry.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketDodge.DodgeHandler.class, PacketDodge.class, dis++, Side.SERVER);
+        Taoism.net.registerMessage(PacketUpdateClientPainful.UpdateClientHandler.class, PacketUpdateClientPainful.class, dis++, Side.CLIENT);
+        Taoism.net.registerMessage(PacketUpdateSize.UpdateSizeHandler.class, PacketUpdateSize.class, dis++, Side.CLIENT);
 
         CapabilityManager.INSTANCE.register(ITaoStatCapability.class, new TaoStorage(), TaoStatCapability::new);
     }
@@ -44,7 +43,7 @@ public class CommonProxy {
         
     }
 
-	public EntityPlayerMP getPlayerEntityFromContext(MessageContext ctx) {
+	public EntityPlayer getPlayerEntityFromContext(MessageContext ctx) {
 		return ctx.getServerHandler().player;
 	}
     public ModelBase getModel(int index){

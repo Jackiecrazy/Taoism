@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "li",
+    "ll"
+  ],
+  "key":
+  {
+    "i":
+    {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    },
+    "l":
+    {
+      "item": "minecraft:leather"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:cestus"
+  }
+}

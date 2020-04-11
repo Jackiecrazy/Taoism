@@ -6,15 +6,20 @@ attribute.name.generic.affEarth=土靈性
 attribute.name.generic.affWater=水靈性
 attribute.name.generic.affFire=火靈性
 attribute.name.generic.affMetal=金靈性
+attribute.name.generic.qiGen=攻擊增加氣
 
 
 item.weapon.name=武器
 
 <Weapons>=
 
-taoism.weaponshift=SHIFT 查看數據...
-taoism.weaponctrl=CTRL 查看特性...
+weapon.shift=SHIFT查看數據...
+weapon.ctrl=CTRL查看能力...
+weapon.dummy=此物品僅占位用，停止裝備雙手兵器時會自動變回原來物品
 weapon.hands=裝備此武器時無法以任何方式使用副手物品
+weapon.parry=無法格擋或招架
+weapon.ignore=無視格擋、招架與盾牌
+weapon.disshield=騰空攻擊可禁用敵方盾牌
 taoism.weaponReach=攻擊範圍: %s
 taoism.weaponDefMult=防禦架勢倍率: %s
 taoism.weaponAttMult=攻擊架勢倍率: %s
@@ -29,13 +34,15 @@ ken.riposte=反擊：九秒內連擊上限上升至九
 
 item.banfu.name=板斧
 banfu.leap=騰空攻擊造成雙倍傷害
-banfu.cleave=攻擊附加三秒破防，每層氣使敵方護甲減少2點
+banfu.cleave=攻擊附加三秒破甲，每層氣使敵方護甲減少2點
 banfu.riposte=反擊：重置敵人的攻擊時間，五秒內的下壹次攻擊造成相當於傷害乘以0.35的架勢傷害，不論是否被抵擋
 
 item.balisong.name=蝴蝶刀
 balisong.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
 balisong.backstab=背刺造成雙倍傷害
-balisong.hammer=連擊上限每兩層氣增加壹，最多連擊五次
+balisong.stance=主手的蝴蝶刀為正握，副手的蝴蝶刀為反握
+balisong.hammer=正握時連擊上限每兩層氣增加壹，最多連擊五次
+balisong.reverse=反握時每層氣使本次攻擊無視壹點護甲
 balisong.riposte=反擊：跳到敵人身後並重置連擊次數，三秒內的下壹次背刺造成三倍傷害
 
 item.karambit.name=爪刀
@@ -45,12 +52,12 @@ karambit.bleed=若目標沒有護甲則造成壹層持續壹秒的流血效果�
 karambit.riposte=反擊：跳到敵人身後，三秒內的下壹次攻擊額外附加兩層持續三秒的流血
 karambit.harvest=可以采集任何剪刀可以采集的方塊
 
-item.chui.name=錘
+item.chui.name=博浪錘
 chui.leap=騰空攻擊造成雙倍傷害
-chui.stagger=被對擊倒的目標造成雙倍傷害
+chui.stagger=對被擊倒的目標造成1.5倍傷害
 chui.riposte=反擊：五秒內下壹次攻擊造成相當於攻擊傷害壹半的架勢傷害，不論是否被抵擋
 
-item.cestus.name=拳套
+item.cestus.name=鐵拳套
 cestus.armor=增加三點護甲值
 cestus.leap=騰空攻擊造成1.5倍傷害
 cestus.debuff=三層氣時附加緩慢I、六層氣時附加緩慢II、十層氣時致盲
@@ -61,15 +68,82 @@ item.kampilan.name=坎佩蘭刀
 kampilan.aoe=攻擊半徑為2.5方塊
 kampilan.leap=騰空攻擊造成1.5倍的單體傷害
 kampilan.combo=三層氣以上連擊3次，九層氣以上連擊5次
-kampilan.knockback=六層氣時將擊退效果轉化為額外傷害
+kampilan.knockback=六層氣時將擊退效果轉化為傷害
 kampilan.riposte=反擊：五秒內，下壹套連擊的擊退效果將會額外轉化為架勢傷害
 
-item.qiang.name=槍
+item.qiang.name=環子槍
 qiang.stab=貫穿攻擊範圍內所有準星上的生物
-qiang.stab.riposte=槍花效果下，普攻將會在3tick內攻擊三次，造成切割傷害
-qiang.bash=右擊使用槍桿擊退敵人，造成0.5倍的鈍器傷害
+qiang.stab.riposte=槍花效果下，普攻將會在6刻內攻擊三次並造成切割傷害
+qiang.bash=右擊使用槍桿擊退敵人，造成0.5倍的鈍傷害
 qiang.bash.riposte=槍花效果下，擊退擁有範圍半徑2方塊，且對所有擊退的敵人造成壹秒的緩慢I
+qiang.oscillate=兩種攻擊冷卻獨立，且成功攻擊會使另壹種攻擊冷卻減半
 qiang.riposte=反擊：四秒內的下壹次攻擊將會舞出槍花
+
+item.goulianqiang.name=鉤鐮槍
+goulianqiang.trip=普攻同壹目標兩次後會拉住並勾倒目標，造成 2+(敵方護甲/5) 點架勢傷害
+goulianqiang.trip.riposte="梁山"狀態下，壹次攻擊即可觸發此效果
+goulianqiang.bash=右擊使用槍桿擊退敵人，造成0.5倍的鈍傷害
+goulianqiang.bash.riposte="梁山"狀態下, 擊退擁有範圍半徑2方塊，且對所有擊退的敵人造成壹秒的緩慢I
+goulianqiang.riposte=反擊：進入"梁山"狀態，持續四秒
+
+item.qinglongji.name=青龍戟
+qinglongji.stab=普攻造成1.5倍傷害，每有壹層氣額外提升10%
+qinglongji.alt=右擊可傷害並擊退直徑3+(氣/2)方塊內的生物
+qinglongji.alt.bash=備戰勢下此攻擊造成短暫緩慢並翻轉為逆鱗勢五秒
+qinglongji.alt.cut=逆鱗勢下此攻擊造成短暫流血並翻轉回備戰勢
+qinglongji.atkspd=攻速隨氣增加，最高1.9
+qinglongji.oscillate=兩種攻擊冷卻獨立，且成功攻擊會使另壹種攻擊冷卻減半
+qinglongji.qi=只有交替攻擊才會積攢氣
+qinglongji.riposte=反擊：獲得兩層氣
+
+item.tonfa.name=鴛鴦拐
+tonfa.main=主手中高速旋擊，造成兩次傷害
+tonfa.off=副手中重拳出擊，附加短暫緩慢與虛弱
+tonfa.parry=招架時獲得壹層氣，並同時激活雙手的反擊能力
+tonfa.reset=三層氣以上，格擋與招架均會重置攻擊冷卻
+tonfa.defbreak=七層氣以上，格擋為敵方附加破甲，招架額外附加疲勞
+tonfa.riposte=反擊：壹秒內的攻擊會為自己增加壹秒抗性，並在兩秒之內屹立不倒
+
+item.chickensickle.name=雞刀鐮
+chickensickle.normal=攻擊拉入敵人並疊加五秒的內傷II
+chickensickle.riposte1=反擊：五秒內下壹次攻擊疊加五秒的內傷III，然後引爆內傷
+chickensickle.riposte2=每層內傷造成1%的最大生命傷害，隨後疊加五秒強度等同於內傷三分之壹的流血
+
+item.catninetail.name=九尾鞭
+catninetail.lacerate=攻擊附加五秒撕裂III並疊加壹秒流血III
+catninetail.armord=敵方每點護甲值減少撕裂和流血的持續時間
+catninetail.armorp=敵方每五點護甲值減少壹層效果強度，擁有十點護甲以上則完全免疫
+
+item.pollaxe.name=日華斧
+pollaxe.leap=騰空攻擊造成雙倍傷害
+pollaxe.cleave=普攻疊加三秒破甲II
+pollaxe.cleave.riposte=重劈狀態下，普攻造成穿刺傷害並引爆破甲，每層破甲造成2點穿刺傷害
+pollaxe.swipe=右擊可橫砍並擊退半徑2方塊的敵人，騰空時為單體擊退攻擊
+pollaxe.swipe.riposte=重劈狀態下，橫砍疊加五秒破甲III，每層破甲使該次傷害增加10%
+pollaxe.riposte=反擊：五秒內的下壹次攻擊將會打出重劈，造成相當於傷害乘以0.35的架勢傷害，不論是否被抵擋
+
+item.changchui.name=立瓜錘
+changchui.leap=騰空攻擊造成雙倍傷害
+changchui.downed=對被擊倒的敵人造成雙倍傷害，總共四倍
+changchui.swipe=右擊可橫掃，擊退半徑2.5方塊的敵人，此攻擊擁有平常1.5倍的冷卻時間。騰空時為單體高擊退攻擊
+changchui.riposte=反擊：五秒內敵人必定受到全額架勢傷害且無法回復架勢
+changchui.swipe.riposte=橫掃會立刻消耗此強化，大幅度擊退敵人並造成其最大架勢壹半的架勢傷害
+
+item.staff.name=齊眉棍
+staff.leap=騰空攻擊造成1.5倍傷害
+staff.flick=若敵人在地上，普攻可將其挑飛
+staff.smash=若敵人在空中，普攻則會將其劈向地面，造成額外跌落傷害
+staff.swipe=右擊可橫掃，擊退半徑2方塊的敵人
+staff.oscillate=兩種攻擊冷卻獨立，可持續交替使用
+staff.block=格擋時舞起花棍，可抵擋速度低於自身氣的拋射物
+staff.riposte=反擊：十秒內，連擊上限增加至二
+staff.block.riposte=花棍每秒自動攻擊壹次且可抵擋所有拋射物，速度低於自身氣的拋射物將會反彈給發射者
+
+item.guandao.name=偃月刀
+guandao.alt=右擊切換新月與血月模式，並立即重置普攻
+guandao.alt.attack=切換至血月模式時攻擊身前的敵人，切換回新月模式時攻擊身後的敵人
+guandao.guard=新月模式：範圍4，順劈半徑1.5，造成130%(每層氣提高5%)傷害。招架後獲得壹層氣
+guandao.strike=血月模式：範圍7，順劈半徑3，無招架特效
 
 <Resources>=
 
@@ -78,17 +152,20 @@ tile.TaoisticAnvil.name=
 
 
 <GUI>=
+itemGroup.taoWea=御靈武器
 
-<Multiple name items>=
+<Damage sources>=
+death.attack.bleed=%1$s 流血而死
+death.attack.bleed.player=%1$s 因 %2$s 流血而死
 
 <Weapon inscriptions>=
-metal1.inscription=十步壹殺
+metal1.inscription=十步一殺
 metal2.inscription=千裏不留
 metal3.inscription=都護鐵衣
 metal4.inscription=滿城金甲
 metal5.inscription=高堂明鏡
 metal6.inscription=鐵馬冰河
-metal7.inscription=壹夫當關
+metal7.inscription=一夫當關
 metal8.inscription=金戈鐵馬
 metal9.inscription=鐵索連舟
 metal10.inscription=定奪生死
@@ -107,7 +184,7 @@ wood10.inscription=建木神樹
 wood11.inscription=呆若木雞
 
 water1.inscription=男兒有淚
-water2.inscription=壹江春水
+water2.inscription=一江春水
 water3.inscription=滄海月明
 water4.inscription=江水為竭
 water5.inscription=不盡長江
@@ -133,9 +210,9 @@ fire11.inscription=紅油火鍋
 earth1.inscription=塵埃落定
 earth2.inscription=千錘萬鑿
 earth3.inscription=化作春泥
-earth4.inscription=山亦無陵
+earth4.inscription=山為無陵
 earth5.inscription=三十功名
-earth6.inscription=壹騎紅塵
+earth6.inscription=一騎紅塵
 earth7.inscription=亂石穿空
 earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎

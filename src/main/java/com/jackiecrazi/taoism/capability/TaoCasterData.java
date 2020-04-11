@@ -1,5 +1,7 @@
 package com.jackiecrazi.taoism.capability;
 
+import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -21,6 +23,12 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         ITaoStatCapability cap = entity.getCapability(CAP, null);
         assert cap != null;
         return cap;
+    }
+
+    public static void forceUpdateTrackingClients(EntityLivingBase entity) {
+        if (!entity.world.isRemote) {
+            Taoism.net.sendToAllTracking(new PacketUpdateClientPainful(entity), entity);
+        }
     }
 
     @Override
