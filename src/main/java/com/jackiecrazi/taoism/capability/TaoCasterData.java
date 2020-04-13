@@ -17,6 +17,11 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     @CapabilityInject(ITaoStatCapability.class)
     public static final Capability<ITaoStatCapability> CAP = null;
     private ITaoStatCapability inst = CAP.getDefaultInstance();
+    private EntityLivingBase elb;
+
+    public TaoCasterData(){
+
+    }
 
     @Nonnull
     public static ITaoStatCapability getTaoCap(EntityLivingBase entity) {

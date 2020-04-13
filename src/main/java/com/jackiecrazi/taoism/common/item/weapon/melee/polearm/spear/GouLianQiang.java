@@ -9,9 +9,9 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.MobEffects;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -24,12 +24,15 @@ public class GouLianQiang extends TaoWeapon {
     A spear weapon that specializes in hooking and grabbing. High range and speed, medium combo and defense, low power
     Reference: a guisarme can be used to catch incoming blades
     A guisarme can hook down an overhead parry for a stab
-    A goulian qiang has a blunt hook used for pulling. It's mainly used to pull people off horses, pull people off balance or trip horses
+    A goulian qiang has a blunt hook used for pulling. It's mainly used to pull people off horses, trip horses or pull horses off people... wait.
     I imagine the cavity would lead to great catching of blades.
     Anyway this trips people and counters parries.
 
-    left click for a normal stab. Doing this attack twice to the same target (first time has half cooldown) will grab and trip, inflicting (2+armor/5) posture damage
-    right click to do a bash that knocks the target a fair distance away and inflicts blunt damage, at cost of lower damage
+    left click for a normal stab. Like the misericorde, this ignores half armor when hitting a downed target
+    right click to hook for no damage. Doing this twice in a row will trip, inflicting 50% max posture damage
+    if the target is not facing the attacker, instantly trip
+    if the target is unaware of attacker, instantly down
+
     TODO this loses the spear's ability to pierce. Instead, winning a blade lock will disable the opponent's weapon for 1 second.
     riposte:
     //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
@@ -48,23 +51,18 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float aerial = !attacker.onGround ? 1.5f : 1f;
-        float bash = getHand(item)==EnumHand.OFF_HAND ? 0.5f : 1f;
-        return aerial * bash;
+        float hook = getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
+        return aerial * hook;
     }
 
     @Override
     public int getDamageType(ItemStack is) {
-        return getHand(is)==EnumHand.OFF_HAND ? 0 : 2;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.5f : 0f;
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
     }
 
     @Override
@@ -88,21 +86,16 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack)==EnumHand.OFF_HAND && isCharged(attacker, stack))
+        if (getHand(stack) == EnumHand.OFF_HAND && isCharged(attacker, stack))
             splash(attacker, target, 4);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack)==EnumHand.OFF_HAND) {
-            if (isCharged(attacker, stack)) {
-                NeedyLittleThings.knockBack(target, attacker, 1f);
-                target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20, 0));
-            }
-        } else {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             //main function. Check if previous move is also left click on the same target and trip if so
-            if ((getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack)) {
+            if ((!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker)) {
                 //we're going on a trip on our favourite hooked... ship?
-                TaoCasterData.getTaoCap(target).consumePosture(2f + target.getTotalArmorValue() / 5f, true);
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true);
             }
         }
     }
@@ -121,5 +114,14 @@ public class GouLianQiang extends TaoWeapon {
         super.afterSwing(elb, is);
         TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
         TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
+    }
+
+    @Override
+    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
+            //ignore half armor when downed
+            return armorCalc(target, target.getTotalArmorValue() / 2, target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, buffer);
+        }
+        return super.damageStart(ds, attacker, target, stack, orig);
     }
 }

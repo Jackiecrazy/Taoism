@@ -54,7 +54,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6.5f;
+        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6f;
     }
 
     @Override

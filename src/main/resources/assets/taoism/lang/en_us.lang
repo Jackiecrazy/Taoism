@@ -80,10 +80,10 @@ qiang.oscillate=the two attacks have separate cooldowns, and doing one will halv
 qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
 
 item.goulianqiang.name=Hooked Spear
-goulianqiang.trip=hit a target to ensnare them. Attacking the same target again will trip them for 2+(armor/5) posture damage
-goulianqiang.trip.riposte=when charged, only one attack is needed.
-goulianqiang.bash=right click to bash an enemy back, dealing half the attack power as blunt damage
-goulianqiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
+goulianqiang.trip=right click on a target to ensnare them, right click again on the same target to trip them, removing 33% of their max posture
+goulianqiang.trip.riposte=when charged or if the target is not facing the attacker, only one attack is needed.
+goulianqiang.bash=normal attack will ignore half of the target's armor if they are downed
+goulianqiang.bash.riposte=when charged, this does not require the target to be downed
 goulianqiang.riposte=riposte: charges the weapon for 4 seconds
 
 item.qinglongji.name=Qinglong Ji
@@ -118,22 +118,22 @@ item.pollaxe.name=Pole Axe
 pollaxe.leap=leap attacks deal double damage
 pollaxe.cleave=chops through enemy armor, stacking armor break II for 3 seconds
 pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double the potency of armor break
-pollaxe.swipe=right click to swipe in a 2 block radius, knocking enemies back slightly. When leaping, this is a single target knockback move
+pollaxe.swipe=right click to swipe in a 2 block radius with range 5, knocking enemies back slightly. When leaping, this is a single target knockback move
 pollaxe.swipe.riposte=when charged, swipe will add armor break III for 5 seconds; its damage is multiplied by 1+(cleave potency/10)
 pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additionally inflicting 0.35*damage posture loss regardless of block
 
 item.changchui.name=Great Hammer
 changchui.leap=leap attacks deal double damage
 changchui.downed=deals double damage against a downed target, for a total of quadruple damage
-changchui.swipe=right click to swipe in a 2.5 block radius, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
+changchui.swipe=right click to swipe in a 2.5 block radius with range 5, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
 changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
-changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove half of their max posture
+changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove a third of their max posture
 
 item.staff.name=Quarterstaff
 staff.leap=leap attacks deal 1.5x damage
 staff.flick=a normal strike on a grounded target will flick them into the air
 staff.smash=attacking an airborne target will pummel them into the ground, dealing extra fall damage
-staff.swipe=right click to swipe in a 2 block radius, knocking enemies back slightly
+staff.swipe=right click to swipe in a 2 block radius with range 4, knocking enemies back slightly
 staff.oscillate=the two attacks have separate cooldowns, allowing continuous alternating attacks
 staff.block=while blocking, a whirling flurry deflects projectiles with velocity less than current chi
 staff.riposte=riposte: for the next 10 seconds, combo limit is increased to 2

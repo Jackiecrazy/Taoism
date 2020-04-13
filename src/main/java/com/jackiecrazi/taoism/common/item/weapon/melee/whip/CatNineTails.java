@@ -90,7 +90,7 @@ public class CatNineTails extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         int armor = target.getTotalArmorValue();
         int potency, duration;
-        if (armor >= 10) return;//15 armor and above means no laceration, can't rip a guy in full iron...
+        if (armor >= 15) return;//15 armor and above means no laceration, can't rip a guy in full iron...
         else {
             potency = 2 - (Math.floorDiv(armor, 5));
             duration = 100 - (armor * 10);

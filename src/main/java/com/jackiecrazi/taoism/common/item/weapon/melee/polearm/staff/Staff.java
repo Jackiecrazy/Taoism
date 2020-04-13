@@ -79,7 +79,7 @@ public class Staff extends TaoWeapon {
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
             if (target.onGround) {
-                target.addVelocity(0, 0.3, 0);
+                target.addVelocity(0, 0.4, 0);
             } else {
                 NeedyLittleThings.knockBack(target, attacker, 1f);
                 target.addVelocity(0, -1, 0);
@@ -95,7 +95,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6.5f;
+        return getHand(is) == EnumHand.OFF_HAND ? 4f : 5f;
     }
 
     @Override

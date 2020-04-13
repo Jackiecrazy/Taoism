@@ -24,30 +24,30 @@ public class Nunchaku extends TaoWeapon {
      * Can be either one or two handed, with different movesets for both.
      * Nunchaku will become two-handed if in main hand and offhand is not another set of nunchaku
      * after a given attack, your nunchaku will end up on a certain side:
-     * top (t), middle (m) or low (l), same (s) or different (s) side
-     * Top is fast, middle is versatile, low is powerful
-     * Using an attack that starts on the same place as where you ended will cause a critical hit and halve subsequent cooldown
+     * high (h) or low (l), same (s) or different (d) side
+     * high is fast, low is powerful
+     * From a given stance it's possible to launch a high attack by default or a low attack by pressing back
      *
-     * Available moves (same side): tb smash, mb smash, mm flick, mb sweep, mm 8-spin, ?? jab, ?m recovery
-     * flick is very fast, done when movement input is invalid
-     * smash inflicts slowness and deals extra damage, atk+opposite+forward
-     * sweep hits in radius 1 and knocks back slightly, opposite+attack
-     * 8-spin hits chip damage 3 times with no knockback, back+attack
-     * recovery is the only move that can be chained after sweep or smash, same+attack
-     * jab is an extreme close range high posture move, sneak+attack
+     * Available moves (same side): hl smash, hh flick, ll sweep, lh 8-spin, ?? jab
+     * flick is very fast
+     * smash inflicts slowness and deals extra damage
+     * sweep hits in radius 1 and knocks back slightly
+     * 8-spin hits chip damage 3 times with no knockback
+     * jab is a close range high posture move
      *
-     * Extra moves when two-handed: stm backflip (default guard), dmt updraft
-     * When two-handed, you can chain without recovery due to rapidly switching hands
-     * backflip interrupts enemy attacks and knocks them back very slightly, by forward/backward-alt for top or bottom strike
-     * updraft switches sides, AoEs, hits through blocks and knocks back, done by strafe in other direction-alt
+     * Extra moves when two-handed: dhl backflip (default guard), dlh updraft
+     * When two-handed, you can chain with rapidly switching hands, causing independent cooldown as always
+     * backflip interrupts enemy attacks, switches sides and knocks them back very slightly, by back-alt
+     * updraft switches sides, AoEs, hits through blocks and knocks back, done by normal alt
      *
      * Riposte(one handed): automatically perform a flick, canceling the incoming attack and disorienting the enemy slightly
      * Riposte(two handed): catch the opponent's weapon in your chain, binding 3.
-     * your attacks instantly refill each other's gauges halfway and cannot be blocked for 6 seconds.
+     * your attacks instantly refill each other's gauges halfway and cannot be blocked for 6 seconds (so your attack speed is quadrupled).
      * if you are behind your opponent and in jab range, consume this buff to inflict slow 2/infinite, gain rooted 1/infinite (no knockback),
      * and causes the opponent to lose 5 bars of oxygen per second in a choke hold.
      * Lasts until distance > 3, at which point the opponent is tripped for 50% max posture damage
      * Alternatively, by dealing enough damage to you (threshold scales with higher chi) will end this state as well
+     *
      */
     private final Move[] moves = {
             //smash
@@ -63,7 +63,7 @@ public class Nunchaku extends TaoWeapon {
     };
 
     public Nunchaku() {
-        super(0, 1.5, 4f, 0.6f);
+        super(0, 1.5, 5f, 0.6f);
     }
 
     @Override

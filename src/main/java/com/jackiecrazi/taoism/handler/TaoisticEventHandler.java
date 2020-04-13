@@ -11,6 +11,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -119,7 +120,7 @@ public class TaoisticEventHandler {
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
-                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer()>0) {
+                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {
                     //suck it, slimes, you ain't staggerin' me no more!
                     e.setCanceled(true);
                     return;
@@ -143,17 +144,14 @@ public class TaoisticEventHandler {
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
             float postureUse2 = TaoCombatUtils.requiredPostureDef(uke, seme, weapon, e.getAmount());
-            if (!ukeCap.consumePosture(postureUse1 * postureUse2, !TaoCombatUtils.isEntityParrying(uke))) {
-                //sudden stagger prevention is handled by consumePosture, so this only happens if ssp fails.
-                //dismount, knock away, and set the target downed for damage*10, between 10 and 60
-                TaoCombatUtils.beatDown(uke, seme, e.getAmount());
+            if (!TaoCombatUtils.nomPosture(uke, seme, e.getAmount(), postureUse1 * postureUse2, !TaoCombatUtils.isEntityParrying(uke))) {
                 downingHit = true;
                 return;
             }
             if (TaoCombatUtils.isEntityParrying(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
-                System.out.println("target has parried!");
+                //System.out.println("target has parried!");
                 //parry code, execute parry special
                 semeCap.consumePosture(postureUse1, false);
 
@@ -249,13 +247,14 @@ public class TaoisticEventHandler {
             if (stack.getItem() instanceof ICombatManipulator) {
                 amnt = (((ICombatManipulator) stack.getItem()).hurtStart(ds, seme, uke, stack, amnt));
             }
-            if(CombatConfig.taoWeaponHitEntity) {
-                if (stack.getItem() instanceof TaoWeapon) {
-                    stack.getItem().hitEntity(stack, uke, seme);
-                } else if (CombatConfig.weaponHitEntity) {
-                    stack.getItem().hitEntity(stack, uke, seme);
+            if (seme instanceof EntityLiving)
+                if (CombatConfig.taoWeaponHitEntity) {
+                    if (stack.getItem() instanceof TaoWeapon) {
+                        stack.getItem().hitEntity(stack, uke, seme);
+                    } else if (CombatConfig.weaponHitEntity) {
+                        stack.getItem().hitEntity(stack, uke, seme);
+                    }
                 }
-            }
         }
 
         ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);

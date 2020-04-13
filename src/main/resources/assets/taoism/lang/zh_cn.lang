@@ -80,10 +80,10 @@ qiang.oscillate=两种攻击冷却独立，且成功攻击会使另一种攻击�
 qiang.riposte=反击：四秒内的下一次攻击将会舞出枪花
 
 item.goulianqiang.name=钩镰枪
-goulianqiang.trip=普攻同一目标两次后会拉住并勾倒目标，造成 2+(敌方护甲/5) 点架势伤害
-goulianqiang.trip.riposte="梁山"状态下，一次攻击即可触发此效果
-goulianqiang.bash=右击使用枪杆击退敌人，造成0.5倍的钝伤害
-goulianqiang.bash.riposte="梁山"状态下, 击退拥有范围半径2方块，且对所有击退的敌人造成一秒的缓慢I
+goulianqiang.trip=右击目标两次后会将其拉倒，造成最大架势33%的架势伤害
+goulianqiang.trip.riposte=若敌方没有正对自己或自身处于"梁山"状态下，一次攻击即可触发此效果
+goulianqiang.bash=普攻无视被击倒的敌人的一半护甲
+goulianqiang.bash.riposte="梁山"状态下被动无视一半护甲
 goulianqiang.riposte=反击：进入"梁山"状态，持续四秒
 
 item.qinglongji.name=青龙戟
@@ -127,7 +127,7 @@ changchui.leap=腾空攻击造成双倍伤害
 changchui.downed=对被击倒的敌人造成双倍伤害，总共四倍
 changchui.swipe=右击可横扫，击退半径2.5方块的敌人，此攻击拥有平常1.5倍的冷却时间。腾空时为单体高击退攻击
 changchui.riposte=反击：五秒内敌人必定受到全额架势伤害且无法回复架势
-changchui.swipe.riposte=横扫会立刻消耗此强化，大幅度击退敌人并造成其最大架势一半的架势伤害
+changchui.swipe.riposte=横扫会立刻消耗此强化，大幅度击退敌人并造成其最大架势三分之一的架势伤害
 
 item.staff.name=齐眉棍
 staff.leap=腾空攻击造成1.5倍伤害

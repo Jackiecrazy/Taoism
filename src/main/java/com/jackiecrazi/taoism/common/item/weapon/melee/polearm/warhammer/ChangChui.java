@@ -91,7 +91,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 4.5f : 6.5f;
+        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6f;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class ChangChui extends TaoWeapon {
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
             if (getHand(item)==EnumHand.OFF_HAND)
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true);
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true);
             else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true);
         }
     }

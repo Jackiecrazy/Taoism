@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -25,7 +26,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase entity, byte moveCode) {
         ItemStack is = getAttackingItemStackSensitive(entity);
-        if (is.getMaxStackSize() == 1) {
+        if (is.getMaxStackSize() == 1&&is.getItem() instanceof TaoWeapon) {
             if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
             is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
             is.setTagInfo("currentMove", new NBTTagByte(moveCode));
@@ -121,6 +122,15 @@ public class TaoCombatUtils {
         return defMult;
     }
 
+    /**
+     * TODO make entity capabilities store themselves, for easy interface
+     */
+    public static boolean nomPosture(EntityLivingBase elb, EntityLivingBase attacker, float damage, float pos, boolean canStagger){
+        boolean ret=TaoCasterData.getTaoCap(elb).consumePosture(pos,canStagger);
+        if(!ret)beatDown(elb, attacker, damage);
+        return ret;
+    }
+
     public static void beatDown(EntityLivingBase target, EntityLivingBase attacker, float damage) {
         target.dismountRidingEntity();
         NeedyLittleThings.knockBack(target, attacker, damage * 0.2F);
@@ -144,6 +154,13 @@ public class TaoCombatUtils {
         if (attacker instanceof EntityPlayer) {
             EntityPlayer p = (EntityPlayer) attacker;
             p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
+        }
+        //trip horse, trip person!
+        if (target.isBeingRidden()) {
+            Entity e = target.getControllingPassenger();
+            if (e instanceof EntityLivingBase) {
+                beatDown((EntityLivingBase) e, attacker, damage);
+            }
         }
         //System.out.println("target is downed for " + downtimer + " ticks!");
     }
@@ -216,10 +233,20 @@ public class TaoCombatUtils {
 
     public static void updateCasterData(EntityLivingBase elb) {
         ITaoStatCapability itsc = elb.getCapability(TaoCasterData.CAP, null);
-        itsc.setMaxPosture((float) Math.ceil(elb.width) * (float) Math.ceil(elb.width) * (float) Math.ceil(elb.height) * 5 * (1 + (elb.getTotalArmorValue() / 20f)));
-        //brings it to a tidy sum of 10 for the player, 20 with full armor. TODO toughness although I guess that's factored in already since damage and all?
+        itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
+        //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);//TODO ???
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
+    }
+
+    /**
+     * @return the entity's width (minimum 1) squared multiplied by the ceiling of its height, multiplied by 5 and added armor%, and finally rounded
+     */
+    private static float getMaxPosture(EntityLivingBase elb) {
+        float width = Math.min(elb.width, 1f);
+        float height= (float) Math.ceil(elb.height);
+        float armor =1 + (elb.getTotalArmorValue() / 20f);
+        return Math.round(width * width * height * 5 * armor);
     }
 
     /**
