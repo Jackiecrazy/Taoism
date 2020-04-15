@@ -4,29 +4,24 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
-import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.entity.TaoEntities;
-import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.CombatRules;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
 
 public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase entity, byte moveCode) {
         ItemStack is = getAttackingItemStackSensitive(entity);
-        if (is.getMaxStackSize() == 1&&is.getItem() instanceof TaoWeapon) {
+        if (is.getMaxStackSize() == 1 && is.getItem() instanceof TaoWeapon) {
             if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
             is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
             is.setTagInfo("currentMove", new NBTTagByte(moveCode));
@@ -91,7 +86,7 @@ public class TaoCombatUtils {
     }
 
     public static float requiredPostureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * 0.3f;
+        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * 0.15f;
     }
 
     public static float requiredPostureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
@@ -122,49 +117,6 @@ public class TaoCombatUtils {
         return defMult;
     }
 
-    /**
-     * TODO make entity capabilities store themselves, for easy interface
-     */
-    public static boolean nomPosture(EntityLivingBase elb, EntityLivingBase attacker, float damage, float pos, boolean canStagger){
-        boolean ret=TaoCasterData.getTaoCap(elb).consumePosture(pos,canStagger);
-        if(!ret)beatDown(elb, attacker, damage);
-        return ret;
-    }
-
-    public static void beatDown(EntityLivingBase target, EntityLivingBase attacker, float damage) {
-        target.dismountRidingEntity();
-        NeedyLittleThings.knockBack(target, attacker, damage * 0.2F);
-        int downtimer = MathHelper.clamp((int) damage * 10, 10, 100);
-        TaoCasterData.getTaoCap(target).setDownTimer(downtimer);
-        //do this first to prevent hurtbox curiosities
-        if (target instanceof EntityLiving) {
-            EntityLiving el = (EntityLiving) target;
-            el.tasks.addTask(0, new AIDowned(el));
-            el.targetTasks.addTask(0, new AIDowned(el));
-        }
-        //babe! it's 4pm, time for your flattening!
-        TaoCasterData.getTaoCap(target).setPrevSizes(target.width, target.height);//set this on the client as well
-        TaoCasterData.forceUpdateTrackingClients(target);
-        float min = Math.min(target.width, target.height), max = Math.max(target.width, target.height);
-        NeedyLittleThings.setSize(target, max, min);
-        if (target instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) target;
-            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
-        if (attacker instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) attacker;
-            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
-        //trip horse, trip person!
-        if (target.isBeingRidden()) {
-            Entity e = target.getControllingPassenger();
-            if (e instanceof EntityLivingBase) {
-                beatDown((EntityLivingBase) e, attacker, damage);
-            }
-        }
-        //System.out.println("target is downed for " + downtimer + " ticks!");
-    }
-
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
         if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && elb.onGround && !elb.isSneaking()) {
             //System.out.println("execute roll to side " + side);
@@ -189,7 +141,7 @@ public class TaoCombatUtils {
             x /= 1.5;
             z /= 1.5;
 
-            NeedyLittleThings.setSize(elb, min, min);
+            //NeedyLittleThings.setSize(elb, min, min);
 
             elb.addVelocity(x, y, z);
             elb.velocityChanged = true;
@@ -198,19 +150,10 @@ public class TaoCombatUtils {
         return false;
     }
 
-    /**
-     * unified to prevent discrepancy and allow easy tweaking in the future
-     */
-    private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
-        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
-        return ticks * armorMod * 0.25f * posMult * elb.getHealth() / elb.getMaxHealth();
-    }
-
 
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
-        if (percent != 0f)
+        if (percent != 0f)//this is because this is called in tickStuff on the first tick after cooldown starts, so constant resetting would just make the weapon dysfunctional
             switch (hand) {
                 case OFF_HAND:
                     TaoCasterData.getTaoCap(elb).setOffhandCool((int) (percent * totalSec));
@@ -231,109 +174,38 @@ public class TaoCombatUtils {
         return 0;
     }
 
-    public static void updateCasterData(EntityLivingBase elb) {
-        ITaoStatCapability itsc = elb.getCapability(TaoCasterData.CAP, null);
-        itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
-        //brings it to a tidy sum of 10 for the player, 20 with full armor.
-        itsc.setMaxLing(10f);//TODO ???
-        tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
-    }
+    private static float applyPotionDamageCalculations(EntityLivingBase elb, DamageSource source, float damage) {
+        if (source.isDamageAbsolute()) {
+            return damage;
+        } else {
+            if (elb.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+                int i = (elb.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
+                int j = 25 - i;
+                float f = damage * (float) j;
+                damage = f / 25.0F;
+            }
 
-    /**
-     * @return the entity's width (minimum 1) squared multiplied by the ceiling of its height, multiplied by 5 and added armor%, and finally rounded
-     */
-    private static float getMaxPosture(EntityLivingBase elb) {
-        float width = Math.min(elb.width, 1f);
-        float height= (float) Math.ceil(elb.height);
-        float armor =1 + (elb.getTotalArmorValue() / 20f);
-        return Math.round(width * width * height * 5 * armor);
-    }
+            if (damage <= 0.0F) {
+                return 0.0F;
+            } else {
+                int k = EnchantmentHelper.getEnchantmentModifierDamage(elb.getArmorInventoryList(), source);
 
-    /**
-     * ticks the caster for however many ticks dictated by the second argument.
-     */
-    public static void tickCasterData(EntityLivingBase elb, final int ticks) {
-        if (!elb.isEntityAlive()) return;
-        ITaoStatCapability itsc = elb.getCapability(TaoCasterData.CAP, null);
-        float lingMult = (float) elb.getEntityAttribute(TaoEntities.LINGREGEN).getAttributeValue();
-        int diff = ticks;
-        //spirit power recharge
-        if (itsc.getLingRechargeCD() >= diff) itsc.setLingRechargeCD(itsc.getLingRechargeCD() - diff);
-        else {
-            diff -= itsc.getLingRechargeCD();
-            itsc.addLing(diff * lingMult);
-            itsc.setLingRechargeCD(0);
-        }
-        //downed ticking
-        if (itsc.getDownTimer() > 0) {
-            itsc.setDownTimer(itsc.getDownTimer() - ticks);
-            if (itsc.getDownTimer() <= 0) {
-                //yes honey
-                Tuple<Float, Float> thing = itsc.getPrevSizes();
-                if (!elb.world.isRemote) {
-                    TaoCasterData.forceUpdateTrackingClients(elb);
-                    NeedyLittleThings.setSize(elb, thing.getFirst(), thing.getSecond());
+                if (k > 0) {
+                    damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
                 }
 
-                int overflow = -itsc.getDownTimer();
-                itsc.setDownTimer(0);
-                itsc.addPosture(getPostureRegenAmount(elb, overflow));
-            } else itsc.setPostureRechargeCD(itsc.getDownTimer());
-        }
-        diff = ticks;
-        if (itsc.getPostureRechargeCD() <= diff || !itsc.isProtected()) {
-            if (itsc.isProtected())
-                diff -= itsc.getPostureRechargeCD();
-            itsc.setPostureRechargeCD(0);
-            itsc.addPosture(getPostureRegenAmount(elb, diff));
-        } else itsc.setPostureRechargeCD(itsc.getPostureRechargeCD() - ticks);
-        diff = ticks;
-        //value updating
-        itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
-        itsc.addParryCounter(diff);
-        itsc.addRollCounter(diff);
-        //roll ticking
-        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
-            Tuple<Float, Float> thing = itsc.getPrevSizes();
-            elb.width = thing.getFirst();
-            elb.height = thing.getSecond();//FIXME!
-        }
-        itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
-        itsc.setQi(Math.max(itsc.getQi() - 0.1f * ticks, 0));
-
-        if (!(elb instanceof EntityPlayer))
-            itsc.setSwing(itsc.getSwing() + ticks);
-        itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
-
-    }
-
-    /**
-     * ticks the caster once, to save processing. For players only.
-     */
-    public static void tickCasterData(EntityLivingBase elb) {
-        ITaoStatCapability itsc = elb.getCapability(TaoCasterData.CAP, null);
-        if (itsc.getLingRechargeCD() == 0) itsc.addLing(1f);
-        else itsc.setLingRechargeCD(itsc.getLingRechargeCD() - 1);
-        if (itsc.getPostureRechargeCD() == 0 || !itsc.isProtected()) itsc.addPosture(getPostureRegenAmount(elb, 1));
-        else itsc.setPostureRechargeCD(itsc.getPostureRechargeCD() - 1);
-        itsc.addParryCounter(1);
-        itsc.setOffhandCool(itsc.getOffhandCool() + 1);
-        if (itsc.getDownTimer() > 0) {
-            itsc.setDownTimer(itsc.getDownTimer() - 1);
-            itsc.setPostureRechargeCD(itsc.getDownTimer());
-            if (itsc.getDownTimer() == 0) {
-                Tuple<Float, Float> thing = itsc.getPrevSizes();
-                elb.width = thing.getFirst();
-                elb.height = thing.getSecond();
+                return damage;
             }
         }
-        itsc.addRollCounter(1);
-        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
-            Tuple<Float, Float> thing = itsc.getPrevSizes();
-            elb.width = thing.getFirst();
-            elb.height = thing.getSecond();
-        }
-        itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
     }
 
+    private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
+        damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
+        damage = applyPotionDamageCalculations(target, ds, damage);
+        return damage;
+    }
+
+    public static float recalculateIgnoreArmor(EntityLivingBase target, DamageSource ds, float damage, float pointsToIgnore) {
+        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, damage);
+    }
 }

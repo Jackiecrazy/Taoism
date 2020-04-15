@@ -73,7 +73,7 @@ public class BanFu extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true);
+            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
         }
         dischargeWeapon(attacker, item);
     }

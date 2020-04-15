@@ -111,7 +111,7 @@ public class TaoisticEventHandler {
     public static void parryAndBlock(LivingAttackEvent e) {
         downingHit = false;
         EntityLivingBase uke = e.getEntityLiving();
-        TaoCombatUtils.updateCasterData(uke);
+        TaoCasterData.updateCasterData(uke);
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase) {
@@ -120,8 +120,8 @@ public class TaoisticEventHandler {
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
-                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {
-                    //suck it, slimes, you ain't staggerin' me no more!
+                if (semeCap.getDownTimer() > 0) {//semeCap.getSwing() < CombatConfig.mobForcedCooldown ||
+                    //take that, slimes, you ain't staggerin' me no more!
                     e.setCanceled(true);
                     return;
                 }
@@ -144,10 +144,17 @@ public class TaoisticEventHandler {
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
             float postureUse2 = TaoCombatUtils.requiredPostureDef(uke, seme, weapon, e.getAmount());
-            if (!TaoCombatUtils.nomPosture(uke, seme, e.getAmount(), postureUse1 * postureUse2, !TaoCombatUtils.isEntityParrying(uke))) {
+            if (ukeCap.consumePosture(postureUse1*postureUse2, !TaoCombatUtils.isEntityParrying(uke), seme, ds)>0) {
                 downingHit = true;
                 return;
             }
+            /*TODO clean up this crap
+            1. check if blocking or parrying
+            2. cancel event
+            3. proc effects
+            4. consume posture
+             */
+            ItemStack hero=TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
             if (TaoCombatUtils.isEntityParrying(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
@@ -155,7 +162,6 @@ public class TaoisticEventHandler {
                 //parry code, execute parry special
                 semeCap.consumePosture(postureUse1, false);
 
-                ItemStack hero = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
                 if (hero.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) hero.getItem()).parrySkill(seme, uke, hero);
                 }
@@ -173,7 +179,8 @@ public class TaoisticEventHandler {
                 e.setCanceled(true);
                 //block code, reflect posture damage
                 semeCap.consumePosture(postureUse1 * 0.4f, false);
-                ((IStaminaPostureManipulable) TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount()).getItem()).onBlock(seme, uke, TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount()));
+                if(hero.getItem() instanceof IStaminaPostureManipulable)
+                ((IStaminaPostureManipulable) hero.getItem()).onBlock(seme, uke, hero);
                 if (uke instanceof EntityPlayer) {
                     EntityPlayer p = (EntityPlayer) uke;
                     p.sendStatusMessage(new TextComponentTranslation("you have blocked! You have " + ukeCap.getPosture() + " posture left"), true);
@@ -191,6 +198,7 @@ public class TaoisticEventHandler {
     public static void critModifier(CriticalHitEvent e) {
         ItemStack is = TaoWeapon.off ? e.getEntityPlayer().getHeldItemOffhand() : e.getEntityPlayer().getHeldItemMainhand();
         if (!(e.getTarget() instanceof EntityLivingBase)) return;
+
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
             e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
@@ -258,11 +266,10 @@ public class TaoisticEventHandler {
         }
 
         ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
-        //if posture is broken, damage doubled, ignores deflection/absorption and resets posture
+        //if posture is broken, damage increased, ignores deflection/absorption and resets posture
         if (ukeCap.getDownTimer() > 0 && !downingHit) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
-                //FATALITY! FIXME send to client
                 for (int i = 0; i < 5; ++i) {
                     double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                     double d1 = Taoism.unirand.nextGaussian() * 0.02D;
@@ -271,9 +278,7 @@ public class TaoisticEventHandler {
                 }
             }
             //System.out.println("FATALITY!");
-            amnt *= 2;
             posBreak = true;
-            ukeCap.setPosture(ukeCap.getMaxPosture());
         }
         if (ds.isUnblockable()) return;//to prevent loops
 
@@ -302,14 +307,22 @@ public class TaoisticEventHandler {
     //♂ boy ♂ next ♂ door ♂
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void wail(LivingDamageEvent e) {
+        EntityLivingBase uke=e.getEntityLiving();
+        float amnt=e.getAmount();
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
+            if(TaoCasterData.getTaoCap(uke).getDownTimer()>0){
+                //oof argh ouch my lack of armor
+                amnt=TaoCombatUtils.recalculateIgnoreArmor(uke, e.getSource(), amnt, 9);
+                //this doesn't look much but actually increases damage by a lot
+            }
             ItemStack stack = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
             if (stack.getItem() instanceof ICombatManipulator) {
-                e.setAmount(((ICombatManipulator) stack.getItem()).damageStart(e.getSource(), seme, e.getEntityLiving(), stack, e.getAmount()));
+                amnt=((ICombatManipulator) stack.getItem()).damageStart(e.getSource(), seme, uke, stack, amnt);
             }
         }
+        e.setAmount(amnt);
     }
 
     //resets posture regen if dealt damage, and gives the attacker 1 chi
@@ -344,7 +357,7 @@ public class TaoisticEventHandler {
         if (e == null) return;
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            TaoCombatUtils.updateCasterData(elb);
+            TaoCasterData.updateCasterData(elb);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
         }
     }
@@ -354,7 +367,7 @@ public class TaoisticEventHandler {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(e.getEntityLiving());
         boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0;
         if (e.getEntityLiving().ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
-            TaoCombatUtils.updateCasterData(e.getEntityLiving());
+            TaoCasterData.updateCasterData(e.getEntityLiving());
         }
     }
 
@@ -363,7 +376,7 @@ public class TaoisticEventHandler {
         EntityPlayer p = e.player;
         if (e.phase.equals(TickEvent.Phase.END)) {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
-            TaoCombatUtils.updateCasterData(p);
+            TaoCasterData.updateCasterData(p);
             //recharge weapon
             //hacky, but well...
             ItemStack mainhand = p.getHeldItemMainhand();

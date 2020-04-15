@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.MovementInput;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -64,20 +65,35 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void down(RenderLivingEvent.Pre event) {
-        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height
+        Tuple<Float, Float> sizes = new Tuple<>(event.getEntity().width, event.getEntity().height);//TaoCasterData.getTaoCap(event.getEntity()).getPrevSizes();
+        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive()) {
             GlStateManager.pushMatrix();
-            GlStateManager.translate(event.getX(), event.getY(), event.getZ());
-            GlStateManager.rotate(180f, 0, 0, 0);
-            GlStateManager.rotate(90f, 1, 0, 0);
-            GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
-            GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
-            GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
+            //tall bois become flat bois
+            if (sizes.getFirst() < sizes.getSecond()) {
+                GlStateManager.translate(event.getX(), event.getY(), event.getZ());
+                GlStateManager.rotate(180f, 0, 0, 0);
+                GlStateManager.rotate(90f, 1, 0, 0);
+                GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
+                GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+                GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
+            }
+            //cube bois become side bois
+            //flat bois become inverted bois
+            if (sizes.getFirst() > sizes.getSecond()) {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
+                GlStateManager.translate(event.getX(), event.getY(), event.getZ());
+                GlStateManager.rotate(180f, 0, 0, 0);
+                GlStateManager.rotate(180f, 0, 1, 0);
+                //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
+                //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+                GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height, -event.getZ());
+            }
+            //multi bois do nothing
         }
     }
 
     @SubscribeEvent
     public static void downEnd(RenderLivingEvent.Post event) {
-        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive() && event.getEntity().width > event.getEntity().height) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
+        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive()) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
             GlStateManager.popMatrix();
         }
     }

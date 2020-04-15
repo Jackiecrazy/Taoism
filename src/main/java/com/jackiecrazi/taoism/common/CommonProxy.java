@@ -2,7 +2,7 @@ package com.jackiecrazi.taoism.common;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
-import com.jackiecrazi.taoism.capability.TaoStatCapability;
+import com.jackiecrazi.taoism.capability.TaoStatCapabilityDefault;
 import com.jackiecrazi.taoism.capability.TaoStorage;
 import com.jackiecrazi.taoism.networking.*;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach.ExtendReachHandler;
@@ -30,7 +30,7 @@ public class CommonProxy {
         Taoism.net.registerMessage(PacketUpdateClientPainful.UpdateClientHandler.class, PacketUpdateClientPainful.class, dis++, Side.CLIENT);
         Taoism.net.registerMessage(PacketUpdateSize.UpdateSizeHandler.class, PacketUpdateSize.class, dis++, Side.CLIENT);
 
-        CapabilityManager.INSTANCE.register(ITaoStatCapability.class, new TaoStorage(), TaoStatCapability::new);
+        CapabilityManager.INSTANCE.register(ITaoStatCapability.class, new TaoStorage(), TaoStatCapabilityDefault::new);
     }
 
     public void init(FMLInitializationEvent event)

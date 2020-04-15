@@ -36,9 +36,9 @@ public class CatNineTails extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.ignore") + TextFormatting.RESET);
-        tooltip.add(I18n.format("catninetail.lacerate"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetail.armord") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetail.armorp") + TextFormatting.RESET);
+        tooltip.add(I18n.format("catninetails.lacerate"));
+        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armord") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armorp") + TextFormatting.RESET);
     }
 
     @Override

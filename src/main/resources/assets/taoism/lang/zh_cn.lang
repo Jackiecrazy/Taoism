@@ -109,10 +109,10 @@ chickensickle.normal=攻击拉入敌人并叠加五秒的内伤II
 chickensickle.riposte1=反击：五秒内下一次攻击叠加五秒的内伤III，然后引爆内伤
 chickensickle.riposte2=每层内伤造成1%的最大生命伤害，随后叠加五秒强度等同于内伤三分之一的流血
 
-item.catninetail.name=九尾鞭
-catninetail.lacerate=攻击附加五秒撕裂III并叠加一秒流血III
-catninetail.armord=敌方每点护甲值减少撕裂和流血的持续时间
-catninetail.armorp=敌方每五点护甲值减少一层效果强度，拥有十点护甲以上则完全免疫
+item.catninetails.name=九尾鞭
+catninetails.lacerate=攻击附加五秒撕裂III并叠加一秒流血III
+catninetails.armord=敌方每点护甲值减少撕裂和流血的持续时间
+catninetails.armorp=敌方每五点护甲值减少一层效果强度，拥有十点护甲以上则完全免疫
 
 item.pollaxe.name=日华斧
 pollaxe.leap=腾空攻击造成双倍伤害

@@ -53,6 +53,9 @@ public class NeedyLittleThings {
     });
 
     public static void setSize(Entity e, float width, float height) {
+        if (e instanceof IEntityMultiPart||e instanceof MultiPartEntityPart){
+            return; //let the sleeping dragons lie
+        }
         if (width != e.width || height != e.height) {
             float f = e.width;
             e.width = width;
@@ -62,6 +65,9 @@ public class NeedyLittleThings {
                 double d0 = (double) width / 2.0D;
                 e.setEntityBoundingBox(new AxisAlignedBB(e.posX - d0, e.posY, e.posZ - d0, e.posX + d0, e.posY + (double) e.height, e.posZ + d0));
                 if(!e.world.isRemote){
+//                    if(e instanceof EntityPlayerMP){
+//                        Taoism.net.sendTo(new PacketUpdateSize(e.getEntityId(), e.width, e.height), (EntityPlayerMP) e);
+//                    }
                     Taoism.net.sendToAllTracking(new PacketUpdateSize(e.getEntityId(), e.width, e.height), e);
                 }
                 return;
@@ -74,9 +80,14 @@ public class NeedyLittleThings {
                 if(e.width > f) {
                     e.move(MoverType.SELF, (f - e.width), 0.0D, (f - e.width));
                 }
+//                if(e instanceof EntityPlayerMP){
+//                    Taoism.net.sendTo(new PacketUpdateSize(e.getEntityId(), e.width, e.height), (EntityPlayerMP) e);
+//                }
                 Taoism.net.sendToAllTracking(new PacketUpdateSize(e.getEntityId(), e.width, e.height), e);
             }
         }
+//        if(!e.world.isRemote)
+//        Taoism.net.sendToAllTracking(new PacketUpdateSize(e.getEntityId(),e.width,e.height),e);
     }
 
     /**
@@ -170,7 +181,7 @@ public class NeedyLittleThings {
             }
         }
         for (AttributeModifier am : elb.getHeldItem(hand).getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(ia.getName())) {
-            if (!a.hasModifier(am))
+            if (!toUse.hasModifier(am))
                 toUse.applyModifier(am);
         }
         return toUse.getAttributeValue();

@@ -19,7 +19,7 @@ public class TaoCapabilityHandler {
         //System.out.println("attaching cap");
         if(event.getObject() instanceof EntityLivingBase) {
             EntityLivingBase elb= (EntityLivingBase) event.getObject();
-            event.addCapability(TAOCAP, new TaoCasterData());
+            event.addCapability(TAOCAP, new TaoCasterData(elb));
         }
     }
 

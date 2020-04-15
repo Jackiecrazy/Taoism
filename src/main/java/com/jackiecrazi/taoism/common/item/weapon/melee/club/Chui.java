@@ -59,7 +59,7 @@ public class Chui extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true);
+            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true, attacker, ds);
         }
         dischargeWeapon(attacker,item);
     }

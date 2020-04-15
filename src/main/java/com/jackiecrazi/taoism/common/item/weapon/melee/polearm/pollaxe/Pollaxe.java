@@ -90,13 +90,13 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true);
+            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
         }
     }
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        float doot=super.hurtStart(ds, attacker,target,item,orig);
+        float doot = super.hurtStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item) && target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null) {
             PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
             if (getHand(item) == EnumHand.OFF_HAND)
@@ -136,8 +136,10 @@ public class Pollaxe extends TaoWeapon {
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        super.afterSwing(elb,is);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
+        super.afterSwing(elb, is);
+        if (getHand(is) == EnumHand.MAIN_HAND)
+            TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
+        else
+            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
     }
 }

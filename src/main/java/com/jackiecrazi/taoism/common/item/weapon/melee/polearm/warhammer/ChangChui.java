@@ -30,6 +30,7 @@ public class ChangChui extends TaoWeapon {
      * for the next 5 seconds, opponents will always take posture damage from you and cannot recover posture
      * Sweep will instantly use up this buff to majorly knock back all targets and remove half their current posture
      */
+    //private final AttributeModifier
     public ChangChui() {
         super(0, 0.8f, 8.5f, 2f);
     }
@@ -57,21 +58,21 @@ public class ChangChui extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float ground = attacker.onGround ? 1f : 2f;
-        float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 2f : 1f;
+        float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 1.5f : 1f;
         return ground * breach;
     }
 
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround && getHand(stack)==EnumHand.OFF_HAND) {
+        if (attacker.onGround && getHand(stack) == EnumHand.OFF_HAND) {
             splash(attacker, target, 5);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack)==EnumHand.OFF_HAND) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             float groundKB = attacker.onGround ? 1f : 1.3f;
             float chargeKB = isCharged(attacker, stack) ? 2f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
@@ -79,14 +80,19 @@ public class ChangChui extends TaoWeapon {
             if (isCharged(attacker, stack)) {
                 target.addPotionEffect(new PotionEffect(TaoPotion.ENFEEBLE, getChargeTimeLeft(attacker, stack)));
             }
+//            for(ItemStack armor:target.getArmorInventoryList()){
+//                armor.addAttributeModifier();
+//                armor.
+//            }
         }
+        //dent armor of downed targets, restricting movement
     }
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         if (getHand(is) == EnumHand.OFF_HAND) dischargeWeapon(elb, is);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
     }
 
     @Override
@@ -106,9 +112,9 @@ public class ChangChui extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            if (getHand(item)==EnumHand.OFF_HAND)
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true);
-            else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true);
+            if (getHand(item) == EnumHand.OFF_HAND)
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true, attacker, ds);
+            else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
         }
     }
 
@@ -130,5 +136,10 @@ public class ChangChui extends TaoWeapon {
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
+    }
+
+    @Override
+    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, 3);
     }
 }

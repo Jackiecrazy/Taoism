@@ -132,7 +132,7 @@ public class Staff extends TaoWeapon {
         if (onHand && e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (TaoCombatUtils.isEntityBlocking(elb)) {
-                if (getChargeTimeLeft(elb, stack) % 20 == 1)
+                if (e.ticksExisted % 20 == 1)
                     splash(elb, elb, 4);
                 for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
                     if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {

@@ -1,6 +1,8 @@
 package com.jackiecrazi.taoism.capability;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 
 public interface ITaoStatCapability {
@@ -23,7 +25,8 @@ public interface ITaoStatCapability {
      float getPosture();
      void setPosture(float amount);
      float addPosture(float amount);
-     boolean consumePosture(float amount, boolean canStagger);
+     float consumePosture(float amount, boolean canStagger);
+     float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds);
      int getParryCounter();
      void setParryCounter(int amount);
      void addParryCounter(int amount);

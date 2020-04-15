@@ -5,10 +5,10 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -105,7 +105,7 @@ public class Balisong extends TaoWeapon {
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //ignore 1 point of armor every chi level
-            return armorCalc(target, target.getTotalArmorValue() - getQiFromStack(stack), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, buffer);
+            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, getQiFromStack(stack));
         }
         return super.damageStart(ds, attacker, target, stack, orig);
     }

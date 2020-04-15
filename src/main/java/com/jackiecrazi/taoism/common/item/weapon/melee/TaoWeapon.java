@@ -17,13 +17,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.IItemPropertyGetter;
@@ -44,7 +42,10 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded {//, IMove
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
@@ -215,7 +216,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
         }
         if (swing) {
-            target.hurtResistantTime = 0;
+            target.hurtResistantTime = 1;
             if (aoe) {
                 aoe = false;
                 aoe(stack, target, attacker, chi);
@@ -590,41 +591,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         afterSwing(elb, is);
 
         return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
-    }
-
-    protected float applyPotionDamageCalculations(EntityLivingBase elb, DamageSource source, float damage) {
-        if (source.isDamageAbsolute()) {
-            return damage;
-        } else {
-            if (elb.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-                int i = (elb.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
-                int j = 25 - i;
-                float f = damage * (float) j;
-                damage = f / 25.0F;
-            }
-
-            if (damage <= 0.0F) {
-                return 0.0F;
-            } else {
-                int k = EnchantmentHelper.getEnchantmentModifierDamage(elb.getArmorInventoryList(), source);
-
-                if (k > 0) {
-                    damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
-                }
-
-                return damage;
-            }
-        }
-    }
-
-    protected final float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
-        damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
-        damage = applyPotionDamageCalculations(target, ds, damage);
-        return damage;
-    }
-
-    protected final float recalculateIgnoreArmor(EntityLivingBase target, DamageSource ds, float damage, float pointsToIgnore) {
-        return armorCalc(target, target.getTotalArmorValue() - pointsToIgnore, target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, damage);
     }
 
 //    public EnumPhase getPhase(final ItemStack stack){

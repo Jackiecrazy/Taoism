@@ -9,7 +9,6 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -95,7 +94,7 @@ public class GouLianQiang extends TaoWeapon {
             //main function. Check if previous move is also left click on the same target and trip if so
             if ((!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker)) {
                 //we're going on a trip on our favourite hooked... ship?
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true);
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, null);
             }
         }
     }
@@ -112,15 +111,15 @@ public class GouLianQiang extends TaoWeapon {
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
     }
 
     @Override
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
             //ignore half armor when downed
-            return armorCalc(target, target.getTotalArmorValue() / 2, target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, buffer);
+            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, target.getTotalArmorValue()/2f);
         }
         return super.damageStart(ds, attacker, target, stack, orig);
     }

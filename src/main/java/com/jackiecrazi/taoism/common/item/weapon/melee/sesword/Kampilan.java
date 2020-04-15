@@ -89,7 +89,7 @@ public class Kampilan extends TaoWeapon {
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(knock, true);
+            TaoCasterData.getTaoCap(target).consumePosture(knock, true, attacker, ds);
         }
         return super.hurtStart(ds, attacker, target, item, orig) + knock;
     }

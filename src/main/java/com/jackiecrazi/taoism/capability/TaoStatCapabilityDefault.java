@@ -1,21 +1,13 @@
 package com.jackiecrazi.taoism.capability;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.config.CombatConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
 
-public class TaoStatCapability implements ITaoStatCapability {
-    private static final float MAXQI = 9.99f;
-    private EntityLivingBase e;
+public class TaoStatCapabilityDefault implements ITaoStatCapability {
     private float qi, ling, posture;
     private int combo, swing, ohcool;
     private float maxLing, maxPosture, maxStamina;
@@ -25,10 +17,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
-
-    TaoStatCapability(EntityLivingBase elb) {
-        e = elb;
-    }
+    private static final float MAXQI=9.99f;
 
     @Override
     public float getPosture() {
@@ -39,7 +28,6 @@ public class TaoStatCapability implements ITaoStatCapability {
     public void setPosture(float amount) {
         posture = MathHelper.clamp(amount, 0f, getMaxPosture());
         if (posture == getMaxPosture()) setProtected(true);
-        //if (posture == 0) beatDown(null, 0);
     }
 
     @Override
@@ -62,8 +50,13 @@ public class TaoStatCapability implements ITaoStatCapability {
         down = time;
     }
 
+    /**
+     * @param amount
+     * @param canStagger
+     * @return overflowed posture
+     */
     @Override
-    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
+    public float consumePosture(float amount, boolean canStagger) {
         float cache = posture;
         posture -= amount;
         if (posture <= 0f) {
@@ -74,9 +67,8 @@ public class TaoStatCapability implements ITaoStatCapability {
                 if (canStagger && getPosInvulTime() <= 0) setPosInvulTime(CombatConfig.ssptime);
                 return 0f;
             }
-            amount = -posture;
+            amount=-posture;
             posture = 0f;
-            beatDown(assailant, amount);
             return amount;
         } else setPostureRechargeCD(CombatConfig.postureCD);
         //System.out.println(posture+" posture left on target");
@@ -84,45 +76,8 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, null, null);
-    }
-
-    private void beatDown(EntityLivingBase attacker, float overflow) {
-        e.dismountRidingEntity();
-        if (attacker != null)
-            NeedyLittleThings.knockBack(e, attacker, overflow * 0.2F);
-        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, 100);
-        TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
-        //do this first to prevent hurtbox curiosities
-        if (e instanceof EntityLiving) {
-            EntityLiving el = (EntityLiving) e;
-            el.tasks.addTask(0, new AIDowned(el));
-            el.targetTasks.addTask(0, new AIDowned(el));
-        }
-        //babe! it's 4pm, time for your flattening!
-        TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
-        TaoCasterData.forceUpdateTrackingClients(e);
-        float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
-        //NeedyLittleThings.setSize(e, max, min);
-        if (e instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) e;
-            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
-        if (e.getRevengeTarget() instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
-            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
-        //trip horse, trip person!
-        if (e.isBeingRidden()) {
-            for (Entity ent : e.getPassengers())
-                if (ent instanceof EntityLivingBase) {
-                    ent.removePassengers();
-                    ITaoStatCapability cap=TaoCasterData.getTaoCap((EntityLivingBase) ent);
-                    cap.consumePosture(cap.getMaxPosture()+1,true);
-                }
-        }
-        //System.out.println("target is downed for " + downtimer + " ticks!");
+    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
+        return 0;
     }
 
     @Override

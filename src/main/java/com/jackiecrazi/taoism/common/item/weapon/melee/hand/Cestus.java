@@ -76,7 +76,7 @@ public class Cestus extends TaoWeapon {
             target.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 40, 0));
         }
         if (isCharged(attacker, stack)) {
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true);
+            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker, null);
         }
     }
 
@@ -112,7 +112,7 @@ public class Cestus extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true);
+            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker, null);
             ds.setDamageIsAbsolute();
         }
         dischargeWeapon(attacker, item);
