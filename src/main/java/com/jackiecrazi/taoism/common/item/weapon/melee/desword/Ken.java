@@ -18,6 +18,7 @@ public class Ken extends TaoWeapon {
     //normal attack chains up to 3 times before requiring cooldown (sword flowers). Small AoE
     public Ken() {
         super(1, 1.6, 6.5, 1f);
+        this.setQiAccumulationRate(0.3f);//slight nerf to account for extremely high attack speed
     }
 
     @Override

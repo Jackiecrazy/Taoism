@@ -35,7 +35,7 @@ public class QingLongJi extends TaoWeapon {
      * Riposte: instantly gain two layers of chi.
      */
     public QingLongJi() {
-        super(2, 1.2, 4.5d, 1f);
+        super(2, 1.2, 5.5d, 1f);
     }
 
     @Override

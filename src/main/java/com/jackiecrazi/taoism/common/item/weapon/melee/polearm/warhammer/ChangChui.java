@@ -25,7 +25,7 @@ public class ChangChui extends TaoWeapon {
      * Just a long version of a chui. High range and power, medium defense, low speed and combo
      * Leap normal attacks deal double posture damage
      * Deals 2x downed damage in addition to the normal 2x, for a grand total of quadruple downed damage
-     * Right click to sweep with radius of 4 and medium knock back, has a shortish cooldown
+     * Right click to sweep with radius of 4 and medium knock back, and halve both hand cooldowns
      * Parry special:
      * for the next 5 seconds, opponents will always take posture damage from you and cannot recover posture
      * Sweep will instantly use up this buff to majorly knock back all targets and remove half their current posture
@@ -35,15 +35,15 @@ public class ChangChui extends TaoWeapon {
         super(0, 0.8f, 8.5f, 2f);
     }
 
-    @Override
-    protected double speed(ItemStack stack) {
-        double ret = super.speed(stack) + 4d;
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            ret /= 1.5d;
-        }
-        ret -= 4d;
-        return ret;
-    }
+//    @Override
+//    protected double speed(ItemStack stack) {
+//        double ret = super.speed(stack) + 4d;
+//        if (getHand(stack) == EnumHand.OFF_HAND) {
+//            ret /= 1.5d;
+//        }
+//        ret -= 4d;
+//        return ret;
+//    }
 
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
@@ -89,10 +89,11 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        if (getHand(is) == EnumHand.OFF_HAND) dischargeWeapon(elb, is);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
+    protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
+        if (getHand(stack) == EnumHand.OFF_HAND)
+            dischargeWeapon(elb, stack);
+        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class ChangChui extends TaoWeapon {
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (isCharged(attacker, item)) {
             if (getHand(item) == EnumHand.OFF_HAND)
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 3f, true, attacker, ds);
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
             else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
         }
     }
@@ -123,6 +124,7 @@ public class ChangChui extends TaoWeapon {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("changchui.leap"));
+        tooltip.add(I18n.format("changchui.armpen"));
         tooltip.add(I18n.format("changchui.downed"));
         tooltip.add(I18n.format("changchui.swipe"));
         tooltip.add(I18n.format("changchui.riposte"));

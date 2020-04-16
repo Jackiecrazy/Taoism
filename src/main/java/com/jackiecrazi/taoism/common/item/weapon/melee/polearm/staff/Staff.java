@@ -91,6 +91,8 @@ public class Staff extends TaoWeapon {
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 
     @Override

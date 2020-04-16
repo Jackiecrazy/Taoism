@@ -49,7 +49,10 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return !attacker.onGround ? 2f : 1f;
+        //nerf offhand damage
+        float leap=attacker.onGround?1f:2f;
+        float off=getHand(item)==EnumHand.OFF_HAND?0.4f:1f;
+        return leap*off;
     }
 
     @Override
@@ -137,9 +140,7 @@ public class Pollaxe extends TaoWeapon {
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        if (getHand(is) == EnumHand.MAIN_HAND)
-            TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
-        else
-            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 }

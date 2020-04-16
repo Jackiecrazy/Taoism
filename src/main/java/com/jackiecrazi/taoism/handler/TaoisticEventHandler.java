@@ -120,7 +120,7 @@ public class TaoisticEventHandler {
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
-                if (semeCap.getDownTimer() > 0) {//semeCap.getSwing() < CombatConfig.mobForcedCooldown ||
+                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {//
                     //take that, slimes, you ain't staggerin' me no more!
                     e.setCanceled(true);
                     return;

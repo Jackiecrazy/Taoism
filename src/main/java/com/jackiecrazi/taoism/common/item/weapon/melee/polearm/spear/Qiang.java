@@ -36,7 +36,7 @@ public class Qiang extends TaoWeapon {
     };
 
     public Qiang() {
-        super(2, 1.2, 5.5d, 1f);
+        super(2, 1.2, 6.5d, 1f);
     }
 
     @Override

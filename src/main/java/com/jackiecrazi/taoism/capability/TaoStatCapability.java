@@ -64,6 +64,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
+        if(getDownTimer()>0)return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
         posture -= amount;
         if (posture <= 0f) {
@@ -91,7 +92,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private void beatDown(EntityLivingBase attacker, float overflow) {
         e.dismountRidingEntity();
         if (attacker != null)
-            NeedyLittleThings.knockBack(e, attacker, overflow * 0.2F);
+            NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, 100);
         TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
         //do this first to prevent hurtbox curiosities
@@ -101,7 +102,7 @@ public class TaoStatCapability implements ITaoStatCapability {
             el.targetTasks.addTask(0, new AIDowned(el));
         }
         //babe! it's 4pm, time for your flattening!
-        TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
+        //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
         TaoCasterData.forceUpdateTrackingClients(e);
         float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
         //NeedyLittleThings.setSize(e, max, min);

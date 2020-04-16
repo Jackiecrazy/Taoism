@@ -39,7 +39,7 @@ public class GouLianQiang extends TaoWeapon {
      */
 
     public GouLianQiang() {
-        super(2, 1.2, 5d, 1f);
+        super(2, 1.2, 6d, 1f);
     }
 
     @Override
@@ -111,15 +111,15 @@ public class GouLianQiang extends TaoWeapon {
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, 0.1f);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.1f);
+        if (getHand(is) == EnumHand.OFF_HAND&&TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND)<0.5f)//
+            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f);
     }
 
     @Override
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
             //ignore half armor when downed
-            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, target.getTotalArmorValue()/2f);
+            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, target.getTotalArmorValue() / 2f);
         }
         return super.damageStart(ds, attacker, target, stack, orig);
     }
