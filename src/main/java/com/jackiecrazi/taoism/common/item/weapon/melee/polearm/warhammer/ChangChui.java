@@ -59,7 +59,8 @@ public class ChangChui extends TaoWeapon {
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float ground = attacker.onGround ? 1f : 2f;
         float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 1.5f : 1f;
-        return ground * breach;
+        float off = getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1f;
+        return ground * breach * off;
     }
 
     @Override
@@ -115,7 +116,8 @@ public class ChangChui extends TaoWeapon {
         if (isCharged(attacker, item)) {
             if (getHand(item) == EnumHand.OFF_HAND)
                 TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
-            else TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
+            else
+                TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
         }
     }
 

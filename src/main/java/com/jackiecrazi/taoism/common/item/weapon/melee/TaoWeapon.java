@@ -122,14 +122,14 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         });
     }
 
-    public TaoWeapon setQiAccumulationRate(float amount) {
+    protected TaoWeapon setQiAccumulationRate(float amount) {
         qiRate = amount;
         return this;
     }
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return base + (getDamDist(item) * amount);
+        return base * (getDamDist(item) * amount);
     }
 
     protected float getQiAccumulationRate(ItemStack is) {

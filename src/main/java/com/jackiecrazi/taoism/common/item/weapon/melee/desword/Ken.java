@@ -16,8 +16,9 @@ import java.util.List;
 public class Ken extends TaoWeapon {
     //relentless.
     //normal attack chains up to 3 times before requiring cooldown (sword flowers). Small AoE
+    //has low starting damage, chain up to do more damage
     public Ken() {
-        super(1, 1.6, 6.5, 1f);
+        super(1, 1.6, 5, 1f);
         this.setQiAccumulationRate(0.3f);//slight nerf to account for extremely high attack speed
     }
 
@@ -35,7 +36,8 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) { }
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+    }
 
     private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
         if (!attacker.onGround) return false;
@@ -48,7 +50,8 @@ public class Ken extends TaoWeapon {
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float air = attacker.onGround ? 1f : 1.5f;
         float aoe = isAoE(attacker, target) ? 1f : 1.2f;
-        return air * aoe;
+        float qiMult = 1 + (getQiFromStack(item) / 27f);
+        return air * aoe * qiMult;
     }
 
     @Override

@@ -61,7 +61,10 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return attacker.onGround ? 1f : 1.5f;
+        //nerf offhand damage
+        float leap=attacker.onGround?1f:2f;
+        float off=getHand(item)==EnumHand.OFF_HAND?0.4f:1f;
+        return leap*off;
     }
 
     @Override
