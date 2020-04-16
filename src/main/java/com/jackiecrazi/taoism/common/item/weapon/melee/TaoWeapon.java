@@ -115,7 +115,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
             @Override
             public float apply(ItemStack stack, @Nullable World w, @Nullable EntityLivingBase elb) {
                 if (elb != null) {
-                    if (elb.getHeldItemOffhand() == stack&&(!isTwoHanded(stack)||isDummy(stack))) return 1;
+                    if (elb.getHeldItemOffhand() == stack && (!isTwoHanded(stack) || isDummy(stack))) return 1;
                 }
                 return 0;
             }
@@ -289,12 +289,12 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
                     p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
                 }
-                if(isTwoHanded(offhand)&&!isDummy(offhand)){
-                    return new ActionResult<>(EnumActionResult.FAIL,offhand);//no swinging 2-handed weapons on the offhand!
+                if (isTwoHanded(offhand) && !isDummy(offhand)) {
+                    return new ActionResult<>(EnumActionResult.FAIL, offhand);//no swinging 2-handed weapons on the offhand!
                 }
                 //System.out.println("nonnull");
                 else if (worldIn.isRemote) {
-                    EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
+                    Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
                     if (elb != null) {
                         Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
                     }
@@ -427,7 +427,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             boolean onOffhand = elb.getHeldItemOffhand() == stack;
-            boolean onMainHand= elb.getHeldItemMainhand()==stack;
+            boolean onMainHand = elb.getHeldItemMainhand() == stack;
             //discharge weapon
             if (onMainHand || onOffhand) {
                 if (stack.isItemDamaged()) stack.damageItem(-1, elb);
@@ -439,7 +439,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //two handed shenanigans
             if (isTwoHanded(stack)) {
                 //main hand, update offhand dummy
-                if (onMainHand&&!onOffhand) {
+                if (onMainHand && !onOffhand) {
                     if (!dummyMatchMain(elb.getHeldItemOffhand(), stack)) {
                         elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(elb.getHeldItemMainhand(), elb.getHeldItemOffhand()));
                     }
@@ -571,16 +571,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
         boolean[] h = harvestable(stack);
-        if (pickList.contains(state.getMaterial()) && h[0]) {
+        if (h[0] && pickList.contains(state.getMaterial())) {
             return true;
         }
-        if (shovelList.contains(state.getMaterial()) && h[1]) {
+        if (h[1] && shovelList.contains(state.getMaterial())) {
             return true;
         }
-        if (axeList.contains(state.getMaterial()) && h[2]) {
+        if (h[2] && axeList.contains(state.getMaterial())) {
             return true;
         }
-        if (scytheList.contains(state.getMaterial()) && h[3]) {
+        if (h[3] && scytheList.contains(state.getMaterial())) {
             return true;
         }
         //System.out.println(ret);

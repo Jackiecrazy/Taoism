@@ -72,7 +72,7 @@ public class TaoisticEventHandler {
                 //System.out.println("range!");
                 IRange icr = (IRange) i.getItem();
 
-                EntityLivingBase elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
+                Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
                 if (elb != null) {
                     //System.out.println("sending packet!");
                     Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
@@ -130,7 +130,9 @@ public class TaoisticEventHandler {
             //if you cannot parry, posture damage will always be applied.
             //suck it, wither.
             boolean smart = uke instanceof IAmVerySmart || uke instanceof EntityPlayer;
-            if (!TaoCombatUtils.isEntityBlocking(uke) && !TaoCombatUtils.isEntityParrying(uke) && smart)
+            boolean blocking = TaoCombatUtils.isEntityBlocking(uke);
+            boolean parrying = TaoCombatUtils.isEntityParrying(uke);
+            if (!blocking && !parrying && smart)
                 return;
             ItemStack weapon = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
@@ -144,7 +146,7 @@ public class TaoisticEventHandler {
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
             float postureUse2 = TaoCombatUtils.requiredPostureDef(uke, seme, weapon, e.getAmount());
-            if (ukeCap.consumePosture(postureUse1*postureUse2, !TaoCombatUtils.isEntityParrying(uke), seme, ds)>0) {
+            if (ukeCap.consumePosture(postureUse1*postureUse2, !parrying, seme, ds)>0) {
                 downingHit = true;
                 return;
             }
@@ -155,7 +157,7 @@ public class TaoisticEventHandler {
             4. consume posture
              */
             ItemStack hero=TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
-            if (TaoCombatUtils.isEntityParrying(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
+            if (parrying && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
                 //System.out.println("target has parried!");
@@ -175,7 +177,7 @@ public class TaoisticEventHandler {
                 }
                 return;
             }
-            if (TaoCombatUtils.isEntityBlocking(uke) && NeedyLittleThings.isFacingEntity(uke, seme)) {
+            if (blocking && NeedyLittleThings.isFacingEntity(uke, seme)) {
                 e.setCanceled(true);
                 //block code, reflect posture damage
                 semeCap.consumePosture(postureUse1 * 0.4f, false);
