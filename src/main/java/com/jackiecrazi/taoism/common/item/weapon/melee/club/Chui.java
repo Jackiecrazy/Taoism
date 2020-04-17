@@ -61,6 +61,7 @@ public class Chui extends TaoWeapon {
         if (isCharged(attacker, item)) {
             TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true, attacker, ds);
         }
+        //TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture()+11, true, attacker, ds);
         dischargeWeapon(attacker,item);
     }
 

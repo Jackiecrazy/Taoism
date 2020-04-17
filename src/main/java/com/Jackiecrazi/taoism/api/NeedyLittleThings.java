@@ -7,6 +7,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -185,6 +186,14 @@ public class NeedyLittleThings {
                 toUse.applyModifier(am);
         }
         return toUse.getAttributeValue();
+    }
+
+    public static void swapItemInHands(EntityLivingBase elb){
+        ItemStack main=elb.getHeldItemMainhand(), off=elb.getHeldItemOffhand();
+        elb.setHeldItem(EnumHand.OFF_HAND, main);
+        elb.setHeldItem(EnumHand.MAIN_HAND,off);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND));
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND));
     }
 
     public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
@@ -482,23 +491,23 @@ public class NeedyLittleThings {
         }
     }
 
-    public static EntityLivingBase raytraceEntity(World world, EntityLivingBase attacker, double range) {
+    public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
         Vec3d look = attacker.getLookVec().scale(range);
         Vec3d end = start.add(look);
-        EntityLivingBase entity = null;
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), ARROW_TARGETS::test);
+        Entity entity = null;
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
         double d0 = 0.0D;
 
         for (Entity entity1 : list) {
-            if (entity1 != attacker && entity1 instanceof EntityLivingBase) {
+            if (entity1 != attacker) {
                 AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
                 RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
                 if (raytraceresult != null) {
                     double d1 = getDistSqCompensated(entity1, attacker);
 
                     if (d1 < d0 || d0 == 0.0D) {
-                        entity = (EntityLivingBase) entity1;
+                        entity = entity1;
                         d0 = d1;
                     }
                 }

@@ -17,11 +17,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.IItemPropertyGetter;
@@ -173,6 +176,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return false;
     }
 
+    public int getItemEnchantability(ItemStack stack)
+    {
+        return 14;
+    }
+
     public double getDamage() {
         return dmg;
     }
@@ -206,6 +214,22 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return dmg;
     }
 
+    /**
+     * Checks whether an item can be enchanted with a certain enchantment. This applies specifically to enchanting an item in the enchanting table and is called when retrieving the list of possible enchantments for an item.
+     * Enchantments may additionally (or exclusively) be doing their own checks in {@link net.minecraft.enchantment.Enchantment#canApplyAtEnchantingTable(ItemStack)}; check the individual implementation for reference.
+     * By default this will check if the enchantment type is valid for this item type.
+     *
+     * @param stack       the item stack to be enchanted
+     * @param enchantment the enchantment to be applied
+     * @return true if the enchantment can be applied to this item
+     */
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
+        if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))
+            return false;
+        return enchantment.type.canEnchantItem(Items.IRON_SWORD);
+    }
+
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
         updateWielderDataStart(stack, attacker, target);
         int chi = 0;
@@ -216,7 +240,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
         }
         if (swing) {
-            target.hurtResistantTime = 1;
+            //target.hurtResistantTime = 2;
             if (aoe) {
                 aoe = false;
                 aoe(stack, target, attacker, chi);
@@ -292,8 +316,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (isTwoHanded(offhand) && !isDummy(offhand)) {
                     return new ActionResult<>(EnumActionResult.FAIL, offhand);//no swinging 2-handed weapons on the offhand!
                 }
-                //System.out.println("nonnull");
-                else if (worldIn.isRemote) {
+                if (worldIn.isRemote) {
                     Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
                     if (elb != null) {
                         Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
@@ -301,6 +324,21 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     p.swingArm(handIn);
                     TaoCasterData.getTaoCap(p).setOffhandCool(0);
                 }
+                else{
+                    EntityPlayerMP mp=(EntityPlayerMP)p;
+                    mp.getServerWorld().addScheduledTask(() -> {
+                        mp.swingArm(handIn);
+                        TaoCasterData.getTaoCap(mp).setOffhandCool(0);
+                    });
+                }
+//                Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
+//                if(e!=null) {
+//                    NeedyLittleThings.swapItemInHands(p);
+//                    //NeedyLittleThings.taoWeaponAttack(e, p, offhand, true, false);
+//                    p.attackTargetEntityWithCurrentItem(e);
+//                    NeedyLittleThings.swapItemInHands(p);
+//
+//                }
             }
 
         }
@@ -634,8 +672,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
         tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttBase", postureDealtBase(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.GREEN + I18n.format("taoism.weaponAttMult", getDamDist(stack)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
     }
 
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {

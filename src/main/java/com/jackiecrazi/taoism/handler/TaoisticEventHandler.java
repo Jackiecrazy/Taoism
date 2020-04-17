@@ -35,7 +35,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 public class TaoisticEventHandler {
 
     public static boolean modCall;
-    private static boolean critted = false;
+    private static boolean abort = false;
     private static boolean posBreak = false;
     private static boolean downingHit = false;
     private static ITaoStatCapability cap;
@@ -109,6 +109,11 @@ public class TaoisticEventHandler {
     //parry code, TODO make all entities capable of parry
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void parryAndBlock(LivingAttackEvent e) {
+        abort=false;
+        if(e.getAmount()==0){
+            abort=true;
+            return;
+        }
         downingHit = false;
         EntityLivingBase uke = e.getEntityLiving();
         TaoCasterData.updateCasterData(uke);
@@ -198,6 +203,7 @@ public class TaoisticEventHandler {
     //critical hit modifier
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void critModifier(CriticalHitEvent e) {
+        if(abort)return;
         ItemStack is = TaoWeapon.off ? e.getEntityPlayer().getHeldItemOffhand() : e.getEntityPlayer().getHeldItemMainhand();
         if (!(e.getTarget() instanceof EntityLivingBase)) return;
 
@@ -215,7 +221,7 @@ public class TaoisticEventHandler {
     //critical hit check
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void vibeCheck(CriticalHitEvent e) {
-        critted = e.getDamageModifier() > 1f && (e.getResult() == Event.Result.ALLOW || (e.isVanillaCritical() && e.getResult() == Event.Result.DEFAULT));
+        //critted = e.getDamageModifier() > 1f && (e.getResult() == Event.Result.ALLOW || (e.isVanillaCritical() && e.getResult() == Event.Result.DEFAULT));
     }
 
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
@@ -246,6 +252,7 @@ public class TaoisticEventHandler {
     //absorbs, pierces and deflects are calculated before armor
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void biteMe(LivingHurtEvent e) {
+        if(abort)return;
         EntityLivingBase uke = e.getEntityLiving();
         DamageSource ds = e.getSource();
         float amnt = e.getAmount();
@@ -309,6 +316,7 @@ public class TaoisticEventHandler {
     //♂ boy ♂ next ♂ door ♂
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void wail(LivingDamageEvent e) {
+        if(abort)return;
         EntityLivingBase uke=e.getEntityLiving();
         float amnt=e.getAmount();
         DamageSource ds = e.getSource();
@@ -330,6 +338,7 @@ public class TaoisticEventHandler {
     //resets posture regen if dealt damage, and gives the attacker 1 chi
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void hahaNope(LivingDamageEvent e) {
+        if(abort)return;
         if (!e.isCanceled() && !posBreak) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows
             if (isSpecialDamage(e.getSource()) || e.getSource().isProjectile()) return;
@@ -388,6 +397,7 @@ public class TaoisticEventHandler {
                 if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND)
                     cap.setSwitchIn(true);
             }
+            if(p.world.isRemote)return;
             if (Taoism.getAtk(p) == 1) {
                 if (!cap.isSwitchIn()) {
                     cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));

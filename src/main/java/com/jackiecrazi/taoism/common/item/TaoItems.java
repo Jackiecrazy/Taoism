@@ -3,20 +3,20 @@ package com.jackiecrazi.taoism.common.item;
 import com.jackiecrazi.taoism.common.item.arrows.TaoArrow;
 import com.jackiecrazi.taoism.common.item.weapon.melee.ItemBlueprint;
 import com.jackiecrazi.taoism.common.item.weapon.melee.axe.BanFu;
+import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Balisong;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
-import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
+import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
-import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
-import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.stick.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
 import net.minecraft.init.SoundEvents;
@@ -30,23 +30,23 @@ public class TaoItems {
     public static final ItemArmor.ArmorMaterial TAO = EnumHelper.addArmorMaterial("tao", "tao", 15, new int[]{1, 4, 5, 2}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0F);
     public static final Item.ToolMaterial TAOW = EnumHelper.addToolMaterial("tao", 0, 1, 1f, 0f, 1);
     public static Item
-            kampilan = new Kampilan(),
-            cestus = new Cestus(),
-            banfu = new BanFu(),
-            balisong = new Balisong(),
-            karambit = new Karambit(),
-            chui = new Chui(),
-            geom = new Ken(),
-            qiang = new Qiang(),
-            tonfa = new Tonfa(),
-            chickensickle = new ChickenSickle(),
-            ninetail = new CatNineTails(),
-            pollaxe = new Pollaxe(),
-            changchui = new ChangChui(),
-            goulianqiang = new GouLianQiang(),
-            qinglongji = new QingLongJi(),
-            gun = new Staff(),
-            yyd = new GuanDao();
+            kampilan,
+            cestus,
+            banfu,
+            balisong,
+            karambit,
+            chui,
+            geom,
+            qiang,
+            tonfa,
+            chickensickle,
+            ninetail,
+            pollaxe,
+            changchui,
+            goulianqiang,
+            qinglongji,
+            gun,
+            yyd;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -63,6 +63,23 @@ public class TaoItems {
         //base
         //e.getRegistry().register(part);
         //e.getRegistry().register(blueprint);
+        kampilan = new Kampilan();
+        cestus = new Cestus();
+        banfu = new BanFu();
+        balisong = new Balisong();
+        karambit = new Karambit();
+        chui = new Chui();
+        geom = new Ken();
+        qiang = new Qiang();
+        tonfa = new Tonfa();
+        chickensickle = new ChickenSickle();
+        ninetail = new CatNineTails();
+        pollaxe = new Pollaxe();
+        changchui = new ChangChui();
+        goulianqiang = new GouLianQiang();
+        qinglongji = new QingLongJi();
+        gun = new Staff();
+        yyd = new GuanDao();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);

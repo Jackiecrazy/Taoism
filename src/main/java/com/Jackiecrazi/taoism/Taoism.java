@@ -12,7 +12,6 @@ import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,11 +38,10 @@ public class Taoism {
     public static final String VERSION = "2.0";
     public static final Random unirand = new Random();
     public static final CreativeTabs tabWea = new CreativeTabs("taoWea") {
-        ItemStack icon = new ItemStack(Items.IRON_SWORD);
 
         @Override
         public ItemStack getTabIconItem() {
-            return icon;
+            return new ItemStack(TaoItems.geom);
         }
 
     };

@@ -46,14 +46,14 @@ public class PacketExtendThyReach implements IMessage {
             //System.out.println("packet acquired!");
             final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
                     .getPlayerEntityFromContext(ctx);
-            thePlayer.getServerWorld().addScheduledTask(() -> {
+            //thePlayer.getServerWorld().addScheduledTask(() -> {
                 Entity theEntity = thePlayer.world
                         .getEntityByID(message.entityId);
                 ItemStack heldItem = thePlayer.getHeldItem(message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
                 if (theEntity != null) {
                     //System.out.println("nonnull again!");
-                    if (heldItem.getItem() instanceof IRange
-                            && theEntity.isEntityAlive()) {
+                    if (heldItem.getItem() instanceof IRange){
+                            //&& theEntity.isEntityAlive()) {
                         IRange ir = (IRange) heldItem.getItem();
                         double distanceSq = NeedyLittleThings.getDistSqCompensated(thePlayer,theEntity);
                         double reachSq = ir.getReach(thePlayer,
@@ -66,7 +66,7 @@ public class PacketExtendThyReach implements IMessage {
 
                     }
                 }
-            });
+            //});
             return null;
         }
     }

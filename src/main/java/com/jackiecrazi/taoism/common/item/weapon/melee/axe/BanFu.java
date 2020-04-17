@@ -25,6 +25,7 @@ public class BanFu extends TaoWeapon {
 
     public BanFu() {
         super(3, 1.2, 7f, 1.7f);
+        this.setHarvestLevel("axe",2);
     }
 
     @Override

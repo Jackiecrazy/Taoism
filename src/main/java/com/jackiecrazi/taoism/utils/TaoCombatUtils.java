@@ -17,6 +17,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
 
 public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase entity, byte moveCode) {
@@ -86,7 +87,7 @@ public class TaoCombatUtils {
     }
 
     public static float requiredPostureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * 0.15f;
+        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * 0.05f;
     }
 
     public static float requiredPostureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
@@ -197,6 +198,12 @@ public class TaoCombatUtils {
                 return damage;
             }
         }
+    }
+
+    private static float undoCalc(float damage, float armor, float tough){
+        float f = 2.0F + tough / 4.0F;
+        float f1 = MathHelper.clamp(armor - damage / f, armor * 0.2F, 20.0F);
+        return damage * (1.0F - f1 / 25.0F);
     }
 
     private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {

@@ -66,7 +66,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      * @return the entity's width (minimum 1) squared multiplied by the ceiling of its height, multiplied by 5 and added armor%, and finally rounded
      */
     private static float getMaxPosture(EntityLivingBase elb) {
-        float width = Math.min(elb.width, 1f);
+        float width = Math.max(elb.width, 1f);
         float height = (float) Math.ceil(elb.height);
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
         return Math.round(width * width * height * 5 * armor);
@@ -90,6 +90,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         //downed ticking
         if (itsc.getDownTimer() > 0) {
             itsc.setDownTimer(itsc.getDownTimer() - ticks);
+            //elb.addVelocity(0,-0.08,0);
+            //elb.velocityChanged=true;
             if (itsc.getDownTimer() <= 0) {
                 //yes honey
                 Tuple<Float, Float> thing = itsc.getPrevSizes();
