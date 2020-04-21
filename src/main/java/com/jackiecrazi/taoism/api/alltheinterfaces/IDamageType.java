@@ -12,13 +12,13 @@ public interface IDamageType {
         int type=getDamageType(is);
         switch(type){
             case 0://blunt
-                return 0.20f;
+                return 0.30f;
             case 1://cutting
-                return 0.10f;
-            case 2://piercing
-                return 0.05f;
-            case 3://chopping
                 return 0.15f;
+            case 2://piercing
+                return 0.07f;
+            case 3://chopping
+                return 0.20f;
         }
 
         return 0;

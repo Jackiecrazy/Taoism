@@ -228,7 +228,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         //if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
         if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))
             return false;
-        return enchantment.type.canEnchantItem(Items.IRON_SWORD);
+        return enchantment.type!=null&&enchantment.type.canEnchantItem(Items.IRON_SWORD);
     }
 
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {

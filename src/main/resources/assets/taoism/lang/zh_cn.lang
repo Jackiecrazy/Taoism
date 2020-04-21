@@ -23,7 +23,6 @@ weapon.disshield=腾空攻击可禁用敌方盾牌
 taoism.weaponReach=攻击范围: %s
 taoism.weaponDefMult=防御架势倍率: %s
 taoism.weaponAttMult=攻击架势倍率: %s
-taoism.weaponAttBase=基础架势伤害: %s
 
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却期
@@ -124,6 +123,7 @@ pollaxe.riposte=反击：五秒内的下一次攻击将会打出重劈，造成�
 
 item.changchui.name=立瓜锤
 changchui.leap=腾空攻击造成双倍伤害
+changchui.armpen=被动无视三点护甲
 changchui.downed=对被击倒的敌人造成双倍伤害，总共四倍
 changchui.swipe=右击可横扫，击退半径2.5方块的敌人，此攻击拥有平常1.5倍的冷却时间。腾空时为单体高击退攻击
 changchui.riposte=反击：五秒内敌人必定受到全额架势伤害且无法回复架势
@@ -218,3 +218,4 @@ earth8.inscription=黄沙百战
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
 earth11.inscription=大花棉袄
+taoism.weaponAttBase=基础架势伤害: %s

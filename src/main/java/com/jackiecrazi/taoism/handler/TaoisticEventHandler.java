@@ -13,8 +13,11 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -389,6 +392,12 @@ public class TaoisticEventHandler {
             EntityLivingBase elb = (EntityLivingBase) e;
             TaoCasterData.updateCasterData(elb);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
+            if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
+                if (elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(200) == 0) {
+                    Item add= TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
+                    elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
+                }
+            }
         }
     }
 
@@ -435,7 +444,7 @@ public class TaoisticEventHandler {
                         float cd = tw.newCooldown(p, mainhand);
                         TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd);
                         tw.setCombo(p, mainhand, tw.getCombo(p, mainhand) + 1);
-                        TaoWeapon.off=false;
+                        TaoWeapon.off = false;
                     }
                 } else {
                     if (mainhand.getItem() instanceof ISpecialSwitchIn && p.swingingHand != EnumHand.OFF_HAND) {
@@ -460,7 +469,7 @@ public class TaoisticEventHandler {
                     float cd = tw.newCooldown(p, offhand);
                     TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd);
                     tw.setCombo(p, offhand, tw.getCombo(p, offhand) + 1);
-                    TaoWeapon.off=false;
+                    TaoWeapon.off = false;
                 }
             }
             if (cap.getOffHand().getItem() != offhand.getItem()) {

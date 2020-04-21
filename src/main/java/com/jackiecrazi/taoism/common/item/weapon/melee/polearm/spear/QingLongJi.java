@@ -67,7 +67,7 @@ public class QingLongJi extends TaoWeapon {
         MoveCode mc = getLastMove(is);
         if (!mc.isValid()) return 1f;
         boolean lastIsNormalAtk = mc.isLeftClick();
-        boolean offhand=getHand(is) == EnumHand.OFF_HAND;
+        boolean offhand=getHand(is) == EnumHand.MAIN_HAND;
         if (lastIsNormalAtk ^ offhand) {
             return 1f;
         }
