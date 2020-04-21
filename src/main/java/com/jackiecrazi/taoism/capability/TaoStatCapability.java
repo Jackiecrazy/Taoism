@@ -6,12 +6,10 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
 
 public class TaoStatCapability implements ITaoStatCapability {
     private static final float MAXQI = 9.99f;
@@ -123,14 +121,14 @@ public class TaoStatCapability implements ITaoStatCapability {
         TaoCasterData.forceUpdateTrackingClients(e);
         //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
         //NeedyLittleThings.setSize(e, max, min);
-        if (e instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) e;
-            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
-        if (e.getRevengeTarget() instanceof EntityPlayer) {
-            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
-            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
-        }
+//        if (e instanceof EntityPlayer) {
+//            EntityPlayer p = (EntityPlayer) e;
+//            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
+//        }
+//        if (e.getRevengeTarget() instanceof EntityPlayer) {
+//            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
+//            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
+//        }
         //trip horse, trip person!
         if (e.isBeingRidden()) {
             for (Entity ent : e.getPassengers())
