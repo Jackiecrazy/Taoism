@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="com.jac-Taoism_api" target="1.8" />
+      <module name="com.jackiecrazi.taoi-Taoism_api" target="1.8" />
+      <module name="com.yourname.modid-Taoism_api" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
