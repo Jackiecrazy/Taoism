@@ -16,7 +16,7 @@ public class PacketUpdateClientPainful implements IMessage {
     private float qi, ling, posture;
     private int combo, swing, ohcool;
     private float maxLing, maxPosture;
-    private int lcd, pcd, scd, down;
+    private int lcd, pcd, scd, qcd, down;
     private long timey;
     private boolean swi, protecc;
     private int parry, dodge, protec;
@@ -39,6 +39,7 @@ public class PacketUpdateClientPainful implements IMessage {
         lcd = itsc.getLingRechargeCD();
         pcd = itsc.getPostureRechargeCD();
         scd = itsc.getStaminaRechargeCD();
+        qcd= itsc.getQiGracePeriod();
         down = itsc.getDownTimer();
         timey = itsc.getLastUpdatedTime();
         swi = itsc.isSwitchIn();
@@ -62,6 +63,7 @@ public class PacketUpdateClientPainful implements IMessage {
         lcd = buf.readInt();
         pcd = buf.readInt();
         scd = buf.readInt();
+        qcd= buf.readInt();
         down = buf.readInt();
         timey = buf.readLong();
         swi = buf.readBoolean();
@@ -87,6 +89,7 @@ public class PacketUpdateClientPainful implements IMessage {
         buf.writeInt(lcd);
         buf.writeInt(pcd);
         buf.writeInt(scd);
+        buf.writeInt(qcd);
         buf.writeInt(down);
         buf.writeLong(timey);
         buf.writeBoolean(swi);
@@ -117,6 +120,7 @@ public class PacketUpdateClientPainful implements IMessage {
                 i.setSwing(m.swing);
                 i.setRollCounter(m.dodge);
                 i.setPostureRechargeCD(m.pcd);
+                i.setQiGracePeriod(m.qcd);
                 i.setDownTimer(m.down);
                 i.setProtected(m.protecc);
                 i.setParryCounter(m.parry);

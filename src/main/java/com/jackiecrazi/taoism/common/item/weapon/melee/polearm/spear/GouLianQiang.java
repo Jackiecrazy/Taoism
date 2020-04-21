@@ -116,11 +116,11 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
             //ignore half armor when downed
-            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, target.getTotalArmorValue() / 2f);
+            return target.getTotalArmorValue()/2;
         }
-        return super.damageStart(ds, attacker, target, stack, orig);
+        return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 }

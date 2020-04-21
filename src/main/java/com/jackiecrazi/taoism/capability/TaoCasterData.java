@@ -50,8 +50,16 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
-        return ticks * armorMod * 0.1f * posMult * elb.getHealth() / elb.getMaxHealth();
+        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 30f);
+        return ticks * armorMod * 0.05f * posMult * elb.getHealth() / elb.getMaxHealth();
+    }
+
+    /**
+     * unified to prevent discrepancy and allow easy tweaking in the future
+     */
+    private static float getQiDecayTo(EntityLivingBase elb, int ticks) {
+        ITaoStatCapability itsc = getTaoCap(elb);
+        return Math.max(itsc.getQi() - 0.05f * ticks, 0);
     }
 
     public static void updateCasterData(EntityLivingBase elb) {
@@ -121,10 +129,14 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 //        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
 //            Tuple<Float, Float> thing = itsc.getPrevSizes();
 //            elb.width = thing.getFirst();
-//            elb.height = thing.getSecond();//FIXME!
+//            elb.height = thing.getSecond();
 //        }
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
-        itsc.setQi(Math.max(itsc.getQi() - 0.05f * ticks, 0));
+        diff=ticks-itsc.getQiGracePeriod();
+        //qi decay
+        if(diff>0)
+        itsc.setQi(getQiDecayTo(elb, diff));
+        else itsc.setQiGracePeriod(-diff);
 
         if (!(elb instanceof EntityPlayer))
             itsc.setSwing(itsc.getSwing() + ticks);

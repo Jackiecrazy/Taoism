@@ -47,25 +47,26 @@ public class PacketExtendThyReach implements IMessage {
             final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
                     .getPlayerEntityFromContext(ctx);
             //thePlayer.getServerWorld().addScheduledTask(() -> {
-                Entity theEntity = thePlayer.world
-                        .getEntityByID(message.entityId);
-                ItemStack heldItem = thePlayer.getHeldItem(message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
-                if (theEntity != null) {
-                    //System.out.println("nonnull again!");
-                    if (heldItem.getItem() instanceof IRange){
-                            //&& theEntity.isEntityAlive()) {
-                        IRange ir = (IRange) heldItem.getItem();
-                        double distanceSq = NeedyLittleThings.getDistSqCompensated(thePlayer,theEntity);
-                        double reachSq = ir.getReach(thePlayer,
-                                heldItem)
-                                * ir.getReach(thePlayer,
-                                heldItem);
-                        if (reachSq >= distanceSq) {
-                            NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, heldItem, message.off, true);
-                        }
-
-                    }
+            Entity theEntity = thePlayer.world
+                    .getEntityByID(message.entityId);
+            ItemStack heldItem = thePlayer.getHeldItem(message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+            if (heldItem.getItem() instanceof IRange) {
+                //&& theEntity.isEntityAlive()) {
+                IRange ir = (IRange) heldItem.getItem();
+                float range = ir.getReach(thePlayer, heldItem);
+                if (theEntity == null) {
+                    //null entity... run again
+                    theEntity = NeedyLittleThings.raytraceEntity(thePlayer.world, thePlayer, range);
+                    if(theEntity==null)return null;
+                    //still null? I guess it's null then...
                 }
+                double distanceSq = NeedyLittleThings.getDistSqCompensated(thePlayer, theEntity);
+                double reachSq = range * range;
+                if (reachSq >= distanceSq) {
+                    NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, heldItem, message.off, true);
+                }
+
+            }
             //});
             return null;
         }

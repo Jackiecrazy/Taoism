@@ -5,7 +5,6 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -23,7 +22,7 @@ public class Balisong extends TaoWeapon {
     //A stabbing dagger that is fast and relentless, but short in reach. Can be flicked open and closed.
     //has no switch in cooldown, and can be switched from hand to hand without cooldown as well.
     //backstabs deal double damage.
-    //has 2 stances: hammer and reverse. TODO Offhand balisong will become reversed.
+    //has 2 stances: hammer and reverse.
     //combos up to 6 times, increasing every other chi level, if in hammer grip
     //pierces 1 point of armor every chi level in reverse grip
 
@@ -102,11 +101,11 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //ignore 1 point of armor every chi level
-            return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, getQiFromStack(stack));
+            return getQiFromStack(stack);
         }
-        return super.damageStart(ds, attacker, target, stack, orig);
+        return super.armorIgnoreAmount(ds,attacker,target,stack,orig);
     }
 }

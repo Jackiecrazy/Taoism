@@ -113,6 +113,7 @@ public class ChangChui extends TaoWeapon {
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker,target,item, orig);
         if (isCharged(attacker, item)) {
             if (getHand(item) == EnumHand.OFF_HAND)
                 TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
@@ -143,7 +144,7 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return TaoCombatUtils.recalculateIgnoreArmor(target, ds, orig, 3);
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return 3;
     }
 }

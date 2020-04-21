@@ -225,6 +225,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
+        if (enchantment.equals(Enchantment.getEnchantmentByLocation("bane_of_arthropods"))) return false;
+        if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
         if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))
             return false;
         return enchantment.type.canEnchantItem(Items.IRON_SWORD);
@@ -240,7 +242,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
         }
         if (swing) {
-            //target.hurtResistantTime = 2;
             if (aoe) {
                 aoe = false;
                 aoe(stack, target, attacker, chi);
@@ -691,7 +692,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-
+        target.hurtResistantTime = 0;
     }
 
     @Override
@@ -701,7 +702,12 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
-    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return 0;
+    }
+
+    @Override
+    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return orig;
     }
 

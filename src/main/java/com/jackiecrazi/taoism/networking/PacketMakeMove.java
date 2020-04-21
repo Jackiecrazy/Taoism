@@ -38,10 +38,10 @@ public class PacketMakeMove implements IMessage {
             //System.out.println("packet acquired!");
             final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
                     .getPlayerEntityFromContext(ctx);
-            thePlayer.getServer().addScheduledTask(() -> {
+            //thePlayer.getServer().addScheduledTask(() -> {
                         TaoCombatUtils.executeMove(thePlayer, message.code);
-                    }
-            );
+                    //}
+            //);
             return null;
         }
     }

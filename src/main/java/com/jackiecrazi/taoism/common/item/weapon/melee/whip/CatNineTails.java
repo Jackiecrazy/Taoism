@@ -100,6 +100,7 @@ public class CatNineTails extends TaoWeapon {
 
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker,target,item, orig);
         ds.setDamageBypassesArmor();
     }
 

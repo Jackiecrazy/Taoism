@@ -111,6 +111,7 @@ public class Cestus extends TaoWeapon {
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker,target,item, orig);
         if (isCharged(attacker, item)) {
             TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker, null);
             ds.setDamageIsAbsolute();

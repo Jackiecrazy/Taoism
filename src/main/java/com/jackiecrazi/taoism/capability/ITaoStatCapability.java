@@ -49,6 +49,8 @@ public interface ITaoStatCapability {
      void setPostureRechargeCD(int amount);
      int getStaminaRechargeCD();
      void setStaminaRechargeCD(int amount);
+     int getQiGracePeriod();
+     void setQiGracePeriod(int amount);
      int getPosInvulTime();
      void setPosInvulTime(int time);
      long getLastUpdatedTime();

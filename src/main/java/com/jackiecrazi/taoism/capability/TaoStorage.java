@@ -24,6 +24,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         nbt.setInteger("lcd", instance.getLingRechargeCD());
         nbt.setInteger("pcd", instance.getPostureRechargeCD());
         nbt.setInteger("scd", instance.getStaminaRechargeCD());
+        nbt.setInteger("qcd", instance.getQiGracePeriod());
         nbt.setLong("lastupdate", instance.getLastUpdatedTime());
         nbt.setBoolean("switch", instance.isSwitchIn());
         nbt.setInteger("ohcool", instance.getOffhandCool());
@@ -51,6 +52,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         instance.setLingRechargeCD(n.getInteger("lcd"));
         instance.setPostureRechargeCD(n.getInteger("pcd"));
         instance.setStaminaRechargeCD(n.getInteger("scd"));
+        instance.setQiGracePeriod(n.getInteger("qcd"));
         instance.setLastUpdatedTime(n.getLong("lastupdate"));
         instance.setSwitchIn(n.getBoolean("switch"));
         instance.setOffhandCool(n.getInteger("ohcool"));

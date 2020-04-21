@@ -17,15 +17,20 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.MathHelper;
 
 public class TaoCombatUtils {
-    public static void executeMove(EntityLivingBase entity, byte moveCode) {
-        ItemStack is = getAttackingItemStackSensitive(entity);
+    public static void executeMove(EntityLivingBase elb, byte moveCode) {
+        ItemStack is = getAttackingItemStackSensitive(elb);
         if (is.getMaxStackSize() == 1 && is.getItem() instanceof TaoWeapon) {
             if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
             is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
             is.setTagInfo("currentMove", new NBTTagByte(moveCode));
+            if (elb.getHeldItemMainhand().getItem() instanceof ITwoHanded && ((ITwoHanded) elb.getHeldItemMainhand().getItem()).isTwoHanded(elb.getHeldItemMainhand())){
+                is=elb.getHeldItemOffhand();
+                if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
+                is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
+                is.setTagInfo("currentMove", new NBTTagByte(moveCode));
+            }
         }
     }
 
@@ -200,19 +205,15 @@ public class TaoCombatUtils {
         }
     }
 
-    private static float undoCalc(float damage, float armor, float tough){
-        float f = 2.0F + tough / 4.0F;
-        float f1 = MathHelper.clamp(armor - damage / f, armor * 0.2F, 20.0F);
-        return damage * (1.0F - f1 / 25.0F);
-    }
-
     private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
-        damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
-        damage = applyPotionDamageCalculations(target, ds, damage);
+        if (!ds.isUnblockable())
+            damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
+        if (!ds.isDamageAbsolute())
+            damage = applyPotionDamageCalculations(target, ds, damage);
         return damage;
     }
 
-    public static float recalculateIgnoreArmor(EntityLivingBase target, DamageSource ds, float damage, float pointsToIgnore) {
-        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, damage);
+    public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
+        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
     }
 }

@@ -4,7 +4,9 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
+import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
@@ -24,10 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHandSide;
-import net.minecraft.util.MovementInput;
-import net.minecraft.util.Tuple;
+import net.minecraft.util.*;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -36,6 +35,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
@@ -45,6 +45,16 @@ public class ClientEvents {
     public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
     public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
     private static final int ALLOWANCE = 7;
+    private static final Color[] GRADIENT = {
+            new Color(200, 37, 56),
+            new Color(177, 52, 51),
+            new Color(141, 71, 43),
+            new Color(103, 94, 36),
+            new Color(69, 115, 30),
+            new Color(46, 127, 24),
+
+    };
+    private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
     /**
      * left, back, right
      */
@@ -78,14 +88,14 @@ public class ClientEvents {
                 GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
             }
             //cube bois become side bois
-            //flat bois become inverted bois
+            //flat bois become flatter bois
             if (sizes.getFirst() > sizes.getSecond()) {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
                 GlStateManager.translate(event.getX(), event.getY(), event.getZ());
-                GlStateManager.rotate(180f, 0, 0, 0);
-                GlStateManager.rotate(180f, 0, 1, 0);
+                //GlStateManager.rotate(180f, 0, 0, 0);
+                //GlStateManager.rotate(180f, 0, 1, 0);
                 //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
                 //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
-                GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height, -event.getZ());
+                GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
             }
             //multi bois do nothing
         }
@@ -177,36 +187,37 @@ public class ClientEvents {
     @SubscribeEvent
     public static void displayCoolie(RenderGameOverlayEvent.Post event) {
         ScaledResolution sr = event.getResolution();
+        final Minecraft mc = Minecraft.getMinecraft();
         if (event.getType().equals(RenderGameOverlayEvent.ElementType.CROSSHAIRS)) {
             //draw offhand cooldown, crosshair type
             {
-                GameSettings gamesettings = Minecraft.getMinecraft().gameSettings;
+                GameSettings gamesettings = mc.gameSettings;
 
                 if (gamesettings.thirdPersonView == 0) {
                     int width = sr.getScaledWidth();
                     int height = sr.getScaledHeight();
 
-                    EntityPlayerSP player = Minecraft.getMinecraft().player;
+                    EntityPlayerSP player = mc.player;
                     if (!gamesettings.showDebugInfo || gamesettings.hideGUI || player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
-                        if (Minecraft.getMinecraft().gameSettings.attackIndicator == 1) {
+                        if (mc.gameSettings.attackIndicator == 1) {
                             GlStateManager.enableAlpha();
                             float cooldown = NeedyLittleThings.getCooledAttackStrengthOff(player, 0f);
                             boolean hyperspeed = false;
 
-                            if (Minecraft.getMinecraft().pointedEntity != null && Minecraft.getMinecraft().pointedEntity instanceof EntityLivingBase && cooldown >= 1.0F) {
+                            if (mc.pointedEntity instanceof EntityLivingBase && cooldown >= 1.0F) {
                                 hyperspeed = NeedyLittleThings.getCooldownPeriodOff(player) > 5.0F;
-                                hyperspeed = hyperspeed & (Minecraft.getMinecraft().pointedEntity).isEntityAlive();
+                                hyperspeed = hyperspeed & (mc.pointedEntity).isEntityAlive();
                             }
 
                             int y = height / 2 - 7 - 7;
                             int x = width / 2 - 8;
 
                             if (hyperspeed) {
-                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 68, 94, 16, 16);
+                                mc.ingameGUI.drawTexturedModalRect(x, y, 68, 94, 16, 16);
                             } else if (cooldown < 1.0F) {
                                 int k = (int) (cooldown * 17.0F);
-                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 36, 94, 16, 4);
-                                Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 52, 94, k, 4);
+                                mc.ingameGUI.drawTexturedModalRect(x, y, 36, 94, 16, 4);
+                                mc.ingameGUI.drawTexturedModalRect(x, y, 52, 94, k, 4);
                             }
                         }
                     }
@@ -215,9 +226,9 @@ public class ClientEvents {
         }
         if (event.getType().equals(RenderGameOverlayEvent.ElementType.HOTBAR)) {
             //draw offhand cooldown, hotbar type
-            if (Minecraft.getMinecraft().getRenderViewEntity() instanceof EntityPlayer) {
+            if (mc.getRenderViewEntity() instanceof EntityPlayer) {
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                EntityPlayer p = (EntityPlayer) Minecraft.getMinecraft().getRenderViewEntity();
+                EntityPlayer p = (EntityPlayer) mc.getRenderViewEntity();
                 ItemStack itemstack = p.getHeldItemOffhand();
                 EnumHandSide oppositeHand = p.getPrimaryHand().opposite();
                 int halfOfScreen = sr.getScaledWidth() / 2;
@@ -227,7 +238,7 @@ public class ClientEvents {
                 GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                 RenderHelper.enableGUIStandardItemLighting();
 
-                if (Minecraft.getMinecraft().gameSettings.attackIndicator == 2) {
+                if (mc.gameSettings.attackIndicator == 2) {
                     float strength = NeedyLittleThings.getCooledAttackStrengthOff(p, 0);
 
                     if (strength < 1.0F) {
@@ -238,11 +249,11 @@ public class ClientEvents {
                             x = halfOfScreen - 91 - 22;
                         }
 
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+                        mc.getTextureManager().bindTexture(Gui.ICONS);
                         int modStrength = (int) (strength * 19.0F);
                         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y, 0, 94, 18, 18);
-                        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(x, y + 18 - modStrength, 18, 112 - modStrength, 18, modStrength);
+                        mc.ingameGUI.drawTexturedModalRect(x, y, 0, 94, 18, 18);
+                        mc.ingameGUI.drawTexturedModalRect(x, y + 18 - modStrength, 18, 112 - modStrength, 18, modStrength);
                     }
                 }
 
@@ -251,56 +262,130 @@ public class ClientEvents {
                 GlStateManager.disableBlend();
             }
         }
+
+
+        if (event.getType().equals(RenderGameOverlayEvent.ElementType.ALL))
+            if (mc.getRenderViewEntity() instanceof EntityPlayer) {
+                GameSettings gamesettings = mc.gameSettings;
+                EntityPlayerSP player = mc.player;
+                ITaoStatCapability cap = TaoCasterData.getTaoCap(player);
+                int width = sr.getScaledWidth();
+                int height = sr.getScaledHeight();
+                if (gamesettings.thirdPersonView == 0) {
+                    mc.getTextureManager().bindTexture(hud);
+                    int qi = cap.getQiFloored();
+                    float qiExtra = cap.getQi() - cap.getQiFloored();
+                    if (qi != 0 || qiExtra != 0f) {
+                        //render qi bar
+                        GlStateManager.pushMatrix();
+                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qibar).getGlTextureId());
+                        //bar
+                        GlStateManager.pushMatrix();
+                        GlStateManager.enableAlpha();
+                        Color c = GRADIENT[(int) (qiExtra * (GRADIENT.length))];
+                        GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 - 64 + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
+                        GlStateManager.popMatrix();
+
+                        //overlay
+                        GlStateManager.pushMatrix();
+                        GlStateManager.color(1f, 1f, 1f);
+                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 - 64, (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                        //GlStateManager.resetColor();
+                        //mc.renderEngine.bindTexture();
+                        GlStateManager.disableAlpha();
+                        GlStateManager.popMatrix();
+                        GlStateManager.popMatrix();
+                    }
+
+                    //render posture bar
+                    GlStateManager.pushMatrix();
+                    float posPerc = cap.getPosture() / cap.getMaxPosture();
+                    int down = cap.getDownTimer();
+                    if (down <= 0) {
+                        //bar, not rendered if down because that don't make sense
+                        GlStateManager.pushMatrix();
+                        GlStateManager.enableAlpha();
+                        Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+                        GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
+                        GlStateManager.popMatrix();
+                        //base shield layer
+                        GlStateManager.pushMatrix();
+                        GlStateManager.color(1f, 1f, 1f);
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 0, 192, 64, 64);
+                        GlStateManager.popMatrix();
+                        //ssp
+                        if (cap.isProtected()) {
+                            GlStateManager.pushMatrix();
+                            mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 192, 128, 64, 64);
+                            GlStateManager.popMatrix();
+                        }
+                        //cracks (four variations)
+                        GlStateManager.pushMatrix();
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 64, 192, 64, (int) Math.ceil((1 - posPerc) * 4) * 16);
+                        GlStateManager.popMatrix();
+                        //resolution
+                        if (cap.getPosInvulTime() > 0) {
+                            GlStateManager.pushMatrix();
+                            mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 192, 192, 64, 64);
+                            GlStateManager.popMatrix();
+                        }
+                    } else {
+                        //broken shield base
+                        GlStateManager.pushMatrix();
+                        GlStateManager.color(1f, 1f, 1f);
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 128, 192, 64, 64);
+                        GlStateManager.popMatrix();
+                        //percentage to restore
+                        float downPercent = (float) down / (float) TaoStatCapability.MAXDOWNTIME;
+                        GlStateManager.pushMatrix();
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((downPercent) * 64), 0, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
+                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((downPercent) * 64), 64, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
+                        GlStateManager.popMatrix();
+                    }
+                    GlStateManager.disableAlpha();
+                    GlStateManager.popMatrix();
+                    mc.getTextureManager().bindTexture(Gui.ICONS);
+                }
+            }
     }
 
 	/*@SubscribeEvent
 	public static void colorize(ColorHandlerEvent event){
 		Taoism.logger.debug("this is being called");
 	}*/
+
+    /*public static void drawDrawFullscreenImage(int width, int height) {
+        Tessellator tessellator = Tessellator.getInstance();
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(0.0D, (double)height, -90.0D, 0.0D, 1.0D);
+        tessellator.addVertexWithUV((double)width, (double)height, -90.0D, 1.0D, 1.0D);
+        tessellator.addVertexWithUV((double)width, 0.0D, -90.0D, 1.0D, 0.0D);
+        tessellator.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);
+        tessellator.draw();
+    }*/
 }
 
 /*
-0 = sabre blade
-64 = sword blade
-128 = macuahuitl blade
-192 = broad sabre blade
-256 = broadsword blade
-320 = double headed hook blade
-384 = flamberge blade
-448 = single headed hook blade
-512 = long sabre blade
-576 = wide sabre blade
-640 = long sword blade
-704 = large sabre blade
-768 = large sword blade
-832 = sawtooth spear head
-896 = spear head
-960 = trident head
-1024 = crown spear head
-1 = handle
-65 = convex handle
-129 = shaft
-193 = long shaft
-2 = claws
-66 = side blade
-130 = deer horn blade
-194 = skull guard
-258 = wide guard
-322 = normal guard
-386 = tai chi guard
-450 = large skull guard
-514 = large guard
-578 = flaming guard
-642 = single sided axe head
-706 = double sided axe head
-770 = single bladed ge head
-834 = double bladed ge head
-898 = scythe head
-962 = hammer head
-1026 = single sided ji head
-1090 = double sided ji head
-3 = chain
-67 = pommel
-131 = butt spike
-195 = crescent
+一元
+两仪
+三才
+四象
+五行
+六合
+七星
+八卦
+九宫
+
+一闪
+双煞
+三皇
+四相
+五行
+六道
+七星
+八卦
+九鼎
  */

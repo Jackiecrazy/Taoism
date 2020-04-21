@@ -56,7 +56,6 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //TODO circles to the back of the attacker and resets combo, the next strike in 3 seconds adds 2 layers of bleed regardless of armor for 3 seconds
         defender.rotationYaw = attacker.rotationYaw;
         defender.rotationPitch = attacker.rotationPitch;
         Vec3d look = attacker.getLookVec();

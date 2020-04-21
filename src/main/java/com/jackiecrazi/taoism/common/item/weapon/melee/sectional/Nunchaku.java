@@ -26,6 +26,7 @@ public class Nunchaku extends TaoWeapon {
      * after a given attack, your nunchaku will end up on a certain side:
      * high (h) or low (l), same (s) or different (d) side
      * high is fast, low is powerful
+     * same side does extra posture damage, different side applies short effects
      * From a given stance it's possible to launch a high attack by default or a low attack by pressing back
      *
      * Available moves (same side): hl smash, hh flick, ll sweep, lh 8-spin, ?? jab
@@ -36,7 +37,7 @@ public class Nunchaku extends TaoWeapon {
      * jab is a close range high posture move
      *
      * Extra moves when two-handed: dhl backflip (default guard), dlh updraft
-     * When two-handed, you can chain with rapidly switching hands, causing independent cooldown as always
+     * When two-handed, you can chain with rapidly switching hands, resetting one hand if the other is used.
      * backflip interrupts enemy attacks, switches sides and knocks them back very slightly, by back-alt
      * updraft switches sides, AoEs, hits through blocks and knocks back, done by normal alt
      *
@@ -161,30 +162,10 @@ public class Nunchaku extends TaoWeapon {
             h = height;
         }
 
-        @Nullable
-        private static Stance getStartStance(MoveCode mc, EnumHand hand) {
-//            HEIGHT h = HEIGHT.MID;
-//            if (mc.isValid()) {
-//                boolean opposite =
-//                if (mc.isLeftClick()) {
-//
-//                    //tops
-//                    if (mc.isForwardPressed() && !mc.isBackPressed() && !mc.isLeftPressed() && !mc.isRightPressed())//smash
-//                        h = HEIGHT.TOP;
-//                    //mids
-//                    //bots
-//                    //no jg or sup!
-//                } else {//alt moves
-//
-//                }
-//            }
-            return null;
-        }
+    }
 
-        @Nullable
-        private static Stance getEndStance(MoveCode mc) {
-            return null;
-        }
+    private void setStance(ItemStack is, Stance s){
+
     }
 
     private class Move {

@@ -271,6 +271,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public int getQiGracePeriod() {
+        return 0;
+    }
+
+    @Override
+    public void setQiGracePeriod(int amount) {
+
+    }
+
+    @Override
     public int getPosInvulTime() {
         return protec;
     }

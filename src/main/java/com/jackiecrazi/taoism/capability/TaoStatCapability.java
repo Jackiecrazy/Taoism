@@ -15,11 +15,27 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 public class TaoStatCapability implements ITaoStatCapability {
     private static final float MAXQI = 9.99f;
+    public static final int MAXDOWNTIME=100;
     private EntityLivingBase e;
     private float qi, ling, posture;
     private int combo, swing, ohcool;
     private float maxLing, maxPosture, maxStamina;
-    private int lcd, pcd, scd, down;
+    private int lcd;
+    private int pcd;
+    private int scd;
+    private int qcd;
+
+    @Override
+    public int getQiGracePeriod() {
+        return qcd;
+    }
+
+    @Override
+    public void setQiGracePeriod(int amount) {
+        qcd=amount;
+    }
+
+    private int down;
     private long timey;
     private boolean swi, protecc;
     private int parry, dodge, protec;
@@ -93,7 +109,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         e.dismountRidingEntity();
         if (attacker != null)
             NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
-        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, 100);
+        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
         TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
         //do this first to prevent hurtbox curiosities
         if (e instanceof EntityLiving) {
@@ -104,7 +120,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         //babe! it's 4pm, time for your flattening!
         //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
         TaoCasterData.forceUpdateTrackingClients(e);
-        float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
+        //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
         //NeedyLittleThings.setSize(e, max, min);
         if (e instanceof EntityPlayer) {
             EntityPlayer p = (EntityPlayer) e;
@@ -200,6 +216,7 @@ public class TaoStatCapability implements ITaoStatCapability {
             amount = qi - MAXQI;
             qi = MAXQI;
         }
+        setQiGracePeriod(CombatConfig.qiGrace);
         return amount;
     }
 

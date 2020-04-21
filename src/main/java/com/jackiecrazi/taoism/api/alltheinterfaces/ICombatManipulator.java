@@ -28,8 +28,14 @@ public interface ICombatManipulator {
     float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
-     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions
+     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions, and after armorIgnoreAmount
      * @return a new damage if necessary
      */
-    float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+    float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
+     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions, but before damageStart
+     * @return a new damage if necessary
+     */
+    int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 }

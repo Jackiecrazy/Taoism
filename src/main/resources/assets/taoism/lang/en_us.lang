@@ -123,6 +123,7 @@ pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additio
 
 item.changchui.name=Great Hammer
 changchui.leap=leap attacks deal double damage
+changchui.armpen=its massive weight allows it to passively ignore 3 points of armor
 changchui.downed=deals double damage against a downed target, for a total of quadruple damage
 changchui.swipe=right click to swipe in a 2.5 block radius with range 5, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
 changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
