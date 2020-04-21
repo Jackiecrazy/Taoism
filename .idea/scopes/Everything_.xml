@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="Everything!" pattern="lib:net.minecraft..*||lib:net.minecraftforge..*||src[Taoism_main]:*..*" />
-</component>
