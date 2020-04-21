@@ -84,8 +84,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         float cache = posture;
         posture -= amount;
         if (posture <= 0f) {
+            boolean protect=isProtected();
             setProtected(false);//cancels ssp so you can regen posture without delay
-            if ((cache >= getMaxPosture() / 4 && isProtected() && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
+            if ((cache >= getMaxPosture() / 4 && protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
                 //sudden stagger prevention
                 posture = 0.01f;
                 if (canStagger && getPosInvulTime() <= 0) setPosInvulTime(CombatConfig.ssptime);

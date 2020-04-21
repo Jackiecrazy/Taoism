@@ -79,6 +79,7 @@ public class TaoisticEventHandler {
                     Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
                 }
             }
+            //todo reset cooldown here and sent packet
         }
     }
 
@@ -419,7 +420,8 @@ public class TaoisticEventHandler {
             //if (p.world.isRemote) return;
             if (Taoism.getAtk(p) == 1) {
                 if (!cap.isSwitchIn()) {
-                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));
+//                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriod(p))
+//                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));
                     //System.out.println("update combo main");
                     if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND) {
 
@@ -433,6 +435,7 @@ public class TaoisticEventHandler {
                         float cd = tw.newCooldown(p, mainhand);
                         TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd);
                         tw.setCombo(p, mainhand, tw.getCombo(p, mainhand) + 1);
+                        TaoWeapon.off=false;
                     }
                 } else {
                     if (mainhand.getItem() instanceof ISpecialSwitchIn && p.swingingHand != EnumHand.OFF_HAND) {
@@ -444,7 +447,8 @@ public class TaoisticEventHandler {
             }
             if (offhand.getItem() instanceof ICombo) {
                 if (cap.getOffhandCool() == 1) {
-                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.OFF_HAND));
+//                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriodOff(p))
+//                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.OFF_HAND));
                     //System.out.println("update combo off");
                     ICombo tw = (ICombo) offhand.getItem();
                     long cache = tw.lastAttackTime(p, offhand);
@@ -456,6 +460,7 @@ public class TaoisticEventHandler {
                     float cd = tw.newCooldown(p, offhand);
                     TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd);
                     tw.setCombo(p, offhand, tw.getCombo(p, offhand) + 1);
+                    TaoWeapon.off=false;
                 }
             }
             if (cap.getOffHand().getItem() != offhand.getItem()) {

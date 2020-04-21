@@ -176,8 +176,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return false;
     }
 
-    public int getItemEnchantability(ItemStack stack)
-    {
+    public int getItemEnchantability(ItemStack stack) {
         return 14;
     }
 
@@ -236,13 +235,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         updateWielderDataStart(stack, attacker, target);
         int chi = 0;
         boolean swing = true;
-        if (attacker.hasCapability(TaoCasterData.CAP, null)) {
-            ITaoStatCapability itsc = attacker.getCapability(TaoCasterData.CAP, null);
-            chi = itsc.getQiFloored();
-            swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
-        }
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(attacker);
+        chi = itsc.getQiFloored();
+        swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
         if (swing) {
             if (aoe) {
+                if (getHand(stack) != null) {
+                    itsc.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
+                    TaoCasterData.forceUpdateTrackingClients(attacker);
+                }
                 aoe = false;
                 aoe(stack, target, attacker, chi);
                 aoe = true;
@@ -324,9 +325,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     }
                     p.swingArm(handIn);
                     TaoCasterData.getTaoCap(p).setOffhandCool(0);
-                }
-                else{
-                    EntityPlayerMP mp=(EntityPlayerMP)p;
+                } else {
+                    EntityPlayerMP mp = (EntityPlayerMP) p;
                     mp.getServerWorld().addScheduledTask(() -> {
                         mp.swingArm(handIn);
                         TaoCasterData.getTaoCap(mp).setOffhandCool(0);

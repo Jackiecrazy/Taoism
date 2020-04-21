@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
@@ -22,11 +23,16 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -37,6 +43,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.awt.*;
 import java.lang.reflect.Field;
+import java.util.List;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
@@ -284,14 +291,14 @@ public class ClientEvents {
                         GlStateManager.enableAlpha();
                         Color c = GRADIENT[(int) (qiExtra * (GRADIENT.length))];
                         GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 - 64 + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
+                        mc.ingameGUI.drawTexturedModalRect(width-96, height / 2 - 64 + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();
 
                         //overlay
                         GlStateManager.pushMatrix();
                         GlStateManager.color(1f, 1f, 1f);
                         //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 - 64, (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                        mc.ingameGUI.drawTexturedModalRect(width-96, height / 2 - 64, (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
                         //GlStateManager.resetColor();
                         //mc.renderEngine.bindTexture();
                         GlStateManager.disableAlpha();
@@ -300,56 +307,68 @@ public class ClientEvents {
                     }
 
                     //render posture bar
-                    GlStateManager.pushMatrix();
-                    float posPerc = cap.getPosture() / cap.getMaxPosture();
-                    int down = cap.getDownTimer();
-                    if (down <= 0) {
-                        //bar, not rendered if down because that don't make sense
-                        GlStateManager.pushMatrix();
-                        GlStateManager.enableAlpha();
-                        Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
-                        GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
-                        GlStateManager.popMatrix();
-                        //base shield layer
-                        GlStateManager.pushMatrix();
-                        GlStateManager.color(1f, 1f, 1f);
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 0, 192, 64, 64);
-                        GlStateManager.popMatrix();
-                        //ssp
-                        if (cap.isProtected()) {
-                            GlStateManager.pushMatrix();
-                            mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 192, 128, 64, 64);
-                            GlStateManager.popMatrix();
-                        }
-                        //cracks (four variations)
-                        GlStateManager.pushMatrix();
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 64, 192, 64, (int) Math.ceil((1 - posPerc) * 4) * 16);
-                        GlStateManager.popMatrix();
-                        //resolution
-                        if (cap.getPosInvulTime() > 0) {
-                            GlStateManager.pushMatrix();
-                            mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 192, 192, 64, 64);
-                            GlStateManager.popMatrix();
-                        }
-                    } else {
-                        //broken shield base
-                        GlStateManager.pushMatrix();
-                        GlStateManager.color(1f, 1f, 1f);
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2, 128, 192, 64, 64);
-                        GlStateManager.popMatrix();
-                        //percentage to restore
-                        float downPercent = (float) down / (float) TaoStatCapability.MAXDOWNTIME;
-                        GlStateManager.pushMatrix();
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((downPercent) * 64), 0, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
-                        mc.ingameGUI.drawTexturedModalRect(width - 96, height / 2 + (int) ((downPercent) * 64), 64, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
-                        GlStateManager.popMatrix();
+                    drawPostureBarAt(player, width-96, height/2);
+                    Entity look=getEntityLookedAt(player);
+                    if(look instanceof EntityLivingBase){
+                        drawPostureBarAt((EntityLivingBase)look, 32, height/2);
                     }
-                    GlStateManager.disableAlpha();
-                    GlStateManager.popMatrix();
-                    mc.getTextureManager().bindTexture(Gui.ICONS);
                 }
             }
+    }
+
+    private static void drawPostureBarAt(EntityLivingBase elb, int x, int y){
+        Minecraft mc=Minecraft.getMinecraft();
+        mc.getTextureManager().bindTexture(hud);
+        ITaoStatCapability cap=TaoCasterData.getTaoCap(elb);
+        GlStateManager.pushMatrix();
+        float posPerc = cap.getPosture() / cap.getMaxPosture();
+        int down = cap.getDownTimer();
+        if (down <= 0) {
+            //bar, not rendered if down because that don't make sense
+            GlStateManager.pushMatrix();
+            GlStateManager.enableAlpha();
+            Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+            GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+            mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
+            GlStateManager.popMatrix();
+            //base shield layer
+            GlStateManager.pushMatrix();
+            GlStateManager.color(1f, 1f, 1f);
+            mc.ingameGUI.drawTexturedModalRect(x, y, 0, 192, 64, 64);
+            GlStateManager.popMatrix();
+            //ssp
+            if (cap.isProtected()) {
+                GlStateManager.pushMatrix();
+                mc.ingameGUI.drawTexturedModalRect(x, y, 192, 128, 64, 64);
+                GlStateManager.popMatrix();
+            }
+            //cracks (four variations)
+            GlStateManager.pushMatrix();
+            mc.ingameGUI.drawTexturedModalRect(x, y, 64, 192, 64, (int) Math.ceil((1 - posPerc) * 4) * 16);
+            GlStateManager.popMatrix();
+            //resolution
+            if (cap.getPosInvulTime() > 0) {
+                GlStateManager.pushMatrix();
+                GlStateManager.color(1f, 1f, 1f, ((float)cap.getPosInvulTime())/ (float)CombatConfig.ssptime);
+                mc.ingameGUI.drawTexturedModalRect(x, y, 192, 192, 64, 64);
+                GlStateManager.popMatrix();
+            }
+        } else {
+            //broken shield base
+            GlStateManager.pushMatrix();
+            GlStateManager.color(1f, 1f, 1f);
+            mc.ingameGUI.drawTexturedModalRect(x, y, 128, 192, 64, 64);
+            GlStateManager.popMatrix();
+            //percentage to restore
+            float downPercent = (float) down / (float) TaoStatCapability.MAXDOWNTIME;
+            GlStateManager.pushMatrix();
+            mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((downPercent) * 64), 0, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
+            mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((downPercent) * 64), 64, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
+            GlStateManager.popMatrix();
+        }
+        GlStateManager.disableAlpha();
+        GlStateManager.popMatrix();
+        mc.getTextureManager().bindTexture(Gui.ICONS);
     }
 
 	/*@SubscribeEvent
@@ -357,15 +376,83 @@ public class ClientEvents {
 		Taoism.logger.debug("this is being called");
 	}*/
 
-    /*public static void drawDrawFullscreenImage(int width, int height) {
+    /*public static void draw(int x, int y, int textureX, int textureY, int width, int height) {
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(0.0D, (double)height, -90.0D, 0.0D, 1.0D);
-        tessellator.addVertexWithUV((double)width, (double)height, -90.0D, 1.0D, 1.0D);
-        tessellator.addVertexWithUV((double)width, 0.0D, -90.0D, 1.0D, 0.0D);
-        tessellator.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y + height, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y + 0, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x, y + 0, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
         tessellator.draw();
     }*/
+
+    public static Entity getEntityLookedAt(Entity e) {
+        Entity foundEntity = null;
+
+        final double finalDistance = 32;
+        double distance = finalDistance;
+        RayTraceResult pos = raycast(e, finalDistance);
+
+        Vec3d positionVector = e.getPositionVector();
+        if(e instanceof EntityPlayer)
+            positionVector = positionVector.addVector(0, e.getEyeHeight(), 0);
+
+        if(pos != null)
+            distance = pos.hitVec.distanceTo(positionVector);
+
+        Vec3d lookVector = e.getLookVec();
+        Vec3d reachVector = positionVector.addVector(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance);
+
+        Entity lookedEntity = null;
+        List<Entity> entitiesInBoundingBox = e.getEntityWorld().getEntitiesWithinAABBExcludingEntity(e, e.getEntityBoundingBox().grow(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance).expand(1F, 1F, 1F));
+        double minDistance = distance;
+
+        for(Entity entity : entitiesInBoundingBox) {
+            if(entity.canBeCollidedWith()) {
+                float collisionBorderSize = entity.getCollisionBorderSize();
+                AxisAlignedBB hitbox = entity.getEntityBoundingBox().expand(collisionBorderSize, collisionBorderSize, collisionBorderSize);
+                RayTraceResult interceptPosition = hitbox.calculateIntercept(positionVector, reachVector);
+
+                if(hitbox.contains(positionVector)) {
+                    if(0.0D < minDistance || minDistance == 0.0D) {
+                        lookedEntity = entity;
+                        minDistance = 0.0D;
+                    }
+                } else if(interceptPosition != null) {
+                    double distanceToEntity = positionVector.distanceTo(interceptPosition.hitVec);
+
+                    if(distanceToEntity < minDistance || minDistance == 0.0D) {
+                        lookedEntity = entity;
+                        minDistance = distanceToEntity;
+                    }
+                }
+            }
+
+            if(lookedEntity != null && (minDistance < distance || pos == null))
+                foundEntity = lookedEntity;
+        }
+
+        return foundEntity;
+    }
+
+    public static RayTraceResult raycast(Entity e, double len) {
+        Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);
+        if(e instanceof EntityPlayer)
+            vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
+
+        Vec3d look = e.getLookVec();
+        if(look == null)
+            return null;
+
+        return raycast(e.getEntityWorld(), vec, look, len);
+    }
+
+    public static RayTraceResult raycast(World world, Vec3d origin, Vec3d ray, double len) {
+        Vec3d end = origin.add(ray.normalize().scale(len));
+        RayTraceResult pos = world.rayTraceBlocks(origin, end);
+        return pos;
+    }
 }
 
 /*

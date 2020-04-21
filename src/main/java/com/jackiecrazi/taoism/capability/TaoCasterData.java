@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
@@ -41,7 +42,11 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 
     public static void forceUpdateTrackingClients(EntityLivingBase entity) {
         if (!entity.world.isRemote) {
-            Taoism.net.sendToAllTracking(new PacketUpdateClientPainful(entity), entity);
+            PacketUpdateClientPainful pucp=new PacketUpdateClientPainful(entity);
+            Taoism.net.sendToAllTracking(pucp, entity);
+            if(entity instanceof EntityPlayerMP){
+                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
+            }
         }
     }
 
