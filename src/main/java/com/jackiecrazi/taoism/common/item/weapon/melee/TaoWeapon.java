@@ -224,8 +224,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
-        if (enchantment.equals(Enchantment.getEnchantmentByLocation("bane_of_arthropods"))) return false;
-        if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
+        //if (enchantment.equals(Enchantment.getEnchantmentByLocation("bane_of_arthropods"))) return false;
+        //if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
         if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))
             return false;
         return enchantment.type.canEnchantItem(Items.IRON_SWORD);
