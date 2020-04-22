@@ -1,0 +1,21 @@
+[
+  {
+    "modid": "taoism",
+    "name": "Taoism",
+    "description": "Immortality! Mostly adds some semi-realistic and complex weapons for now.",
+    "version": "",
+    "mcversion": "",
+    "url": "https://discord.gg/wZTrp53",
+    "updateUrl": "",
+    "authorList": [
+      "Jackiecrazy",
+      "Shousi",
+      "QianRenXi",
+      "DianJiangTiaoZao"
+    ],
+    "credits": "Forge guys, Vazkii, and the open source projects that helped me learn.",
+    "logoFile": "logo.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

@@ -1,0 +1,220 @@
+<Attributes>=
+attribute.name.generic.armorDeflect=Deflection
+attribute.name.generic.armorAbsorption=Hard Reduction
+attribute.name.generic.affWood=Wood Affinity
+attribute.name.generic.affEarth=Earth Affinity
+attribute.name.generic.affWater=Water Affinity
+attribute.name.generic.affFire=Fire Affinity
+attribute.name.generic.affMetal=Metal Affinity
+attribute.name.generic.qiGen=Chi Per Strike
+
+
+item.weapon.name=Weapon
+
+<Weapons>=
+
+weapon.shift=SHIFT for stats...
+weapon.ctrl=CTRL for abilities...
+weapon.dummy=this item is only a dummy for cleaner code. It will revert back to whatever item it used to be once the two-handed weapon is unequipped
+weapon.hands=this weapon is two-handed and will disable offhand item use
+weapon.parry=this weapon cannot block or parry
+weapon.ignore=this weapon ignores blocks, parries, and shields
+weapon.disshield=this weapon disables shields when launching a leaping strike
+taoism.weaponReach=attack range: %s
+taoism.weaponDefMult=defense posture multiplier: %s
+taoism.weaponAttMult=attack posture multiplier: %s
+
+item.ken.name=Jian
+ken.combo=normal attack chains up to 3 times before needing recharge
+ken.aoe=attacks all enemies in a 1.5 block radius
+ken.stab=if an attack would only strike one target, deal 1.2x damage
+ken.leap=if airborne, deal 1.8x damage without sweep
+ken.riposte=riposte: combo lengthened to 9 hits for 9 seconds
+
+item.banfu.name=Sapper's Axe
+banfu.leap=leap attacks deal double damage
+banfu.cleave=reduces defense by 2 per chi level
+banfu.riposte=riposte: resets opponent attack time. The next attack in 5 seconds causes 0.35*damage posture loss regardless of block
+
+item.balisong.name=Balisong
+balisong.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+balisong.backstab=backstabs deal double damage
+balisong.stance=has two forms, hammer stance and reverse stance; offhand balisong are held in reverse stance
+balisong.hammer=in hammer stance, combo limit extends by 1 per chi level, up to 6 at level 10
+balisong.reverse=in reverse stance, pierces 1 armor for every level of chi
+balisong.riposte=riposte: launches defender behind the attacker and resets combo, the next backstab in 3 seconds deals triple damage
+
+item.karambit.name=Karambit
+karambit.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+karambit.backstab=backstabs deal 1.5x damage
+karambit.bleed=inflicts a layer of bleed if target is unarmored, bleed infliction ignores 6 points of armor per chi level
+karambit.riposte=riposte: launches defender behind the attacker and resets combo, the next hit in 3 seconds adds 2 layers of bleed for 3 seconds
+karambit.harvest=can also be used to harvest shear-applicable blocks
+
+item.chui.name=Spherical Mace
+chui.leap=leap attacks deal double damage
+chui.stagger=damage against a staggered target is multiplied by 1.5
+chui.riposte=riposte: the next attack in 5 seconds causes 0.5*damage posture loss regardless of block
+
+item.cestus.name=Cestus
+cestus.armor=naturally adds 3 armor points
+cestus.leap=leap attacks deal 1.5x damage
+cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 9 chi
+cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
+cestus.riposte=riposte: grapples the enemy for 2 seconds, the next attack while grappled cannot be parried, deals 1.3x damage, and pulls them into the ground for 3.5 posture damage
+
+item.kampilan.name=Kampilan
+kampilan.aoe=attacks all enemies in a 2.5 block radius
+kampilan.leap=leap attacks deal 1.5x single target damage
+kampilan.combo=chains 3 times at 3 chi, and 5 times at 9 chi
+kampilan.knockback=converts knockback to extra damage at 6 chi
+kampilan.riposte=riposte: successful hits in the next combo within 5 seconds will additionally convert knockback to posture damage
+
+item.qiang.name=Tasseled Spear
+qiang.stab=stabs enemies, piercing them to the max range
+qiang.stab.riposte=when charged, normal attack will cut 3 times with a 1-tick interval
+qiang.bash=right click to bash an enemy back, dealing half the attack power as blunt damage
+qiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
+qiang.oscillate=the two attacks have separate cooldowns, and doing one will halve the cooldown of the other
+qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
+
+item.goulianqiang.name=Hooked Spear
+goulianqiang.trip=right click on a target to ensnare them, right click again on the same target to trip them, removing 33% of their max posture
+goulianqiang.trip.riposte=when charged or if the target is not facing the attacker, only one attack is needed.
+goulianqiang.bash=normal attack will ignore half of the target's armor if they are downed
+goulianqiang.bash.riposte=when charged, this does not require the target to be downed
+goulianqiang.riposte=riposte: charges the weapon for 4 seconds
+
+item.qinglongji.name=Qinglong Ji
+qinglongji.stab=normal attack is a stab that deals (1.5+chi/10)x damage
+qinglongji.alt=right click attacks all enemies in a 3+(chi/2) diameter
+qinglongji.alt.bash=in normal grip this inflicts chi/10 seconds of slowness and reverses grip for 5 seconds
+qinglongji.alt.cut=when in reverse grip, switches back to normal grip, inflicting bleed for chi/2 seconds
+qinglongji.atkspd=attack speed scales with chi, up to a maximum of 1.9
+qinglongji.oscillate=the two attacks have separate cooldowns, and doing one will halve the cooldown of the other
+qinglongji.qi=only alternating attacks will accumulate chi
+qinglongji.riposte=riposte: instantly gain 2 layers of chi
+
+item.tonfa.name=Tonfa
+tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
+tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
+tonfa.parry=chi will increase by 1 per parry, both hands will briefly activate riposte after a parry
+tonfa.reset=at 3 chi and above, blocks and parries reset attack cooldown
+tonfa.defbreak=at 7 chi and above, blocks inflict defense break and parries additionally add fatigue
+tonfa.riposte=riposte: next attack in 1 second will add resistance to self lasting for the remainder of that second; cannot be staggered for 2 seconds
+
+item.chickensickle.name=Chicken Sickle
+chickensickle.normal=attacks hook enemies in and stack hemorrhage II for 5 seconds
+chickensickle.riposte1=riposte: next attack in 5 seconds stacks hemorrhage III for 5 seconds and detonates hemorrhage,
+chickensickle.riposte2=dealing (layer)% of max hp and inflicting 5 seconds of bleed, potency being a third of hemorrhage's
+
+item.catninetails.name=Cat of Nine Tails
+catninetails.lacerate=inflicts laceration III and stacks bleed III for 5 seconds on hit targets
+catninetails.armord=duration decreases for each point of armor
+catninetails.armorp=potency decreases for every 5 points of armor, rounding down
+
+item.pollaxe.name=Pole Axe
+pollaxe.leap=leap attacks deal double damage
+pollaxe.cleave=chops through enemy armor, stacking armor break II for 3 seconds
+pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double the potency of armor break
+pollaxe.swipe=right click to swipe in a 2 block radius with range 5, knocking enemies back slightly. When leaping, this is a single target knockback move
+pollaxe.swipe.riposte=when charged, swipe will add armor break III for 5 seconds; its damage is multiplied by 1+(cleave potency/10)
+pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additionally inflicting 0.35*damage posture loss regardless of block
+
+item.changchui.name=Great Hammer
+changchui.leap=leap attacks deal double damage
+changchui.armpen=its massive weight allows it to passively ignore 3 points of armor
+changchui.downed=deals double damage against a downed target, for a total of quadruple damage
+changchui.swipe=right click to swipe in a 2.5 block radius with range 5, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
+changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
+changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove a third of their max posture
+
+item.staff.name=Quarterstaff
+staff.leap=leap attacks deal 1.5x damage
+staff.flick=a normal strike on a grounded target will flick them into the air
+staff.smash=attacking an airborne target will pummel them into the ground, dealing extra fall damage
+staff.swipe=right click to swipe in a 2 block radius with range 4, knocking enemies back slightly
+staff.oscillate=the two attacks have separate cooldowns, allowing continuous alternating attacks
+staff.block=while blocking, a whirling flurry deflects projectiles with velocity less than current chi
+staff.riposte=riposte: for the next 10 seconds, combo limit is increased to 2
+staff.block.riposte=additionally, staff whirl automatically attacks once per second and deflects all projectiles; any projectile that would normally be deflected is now reflected towards its launcher
+
+item.guandao.name=Guan Dao
+guandao.alt=right click to switch between guard and strike forms, resetting normal attack cooldown
+guandao.alt.attack=this switch counts as a frontal attack when switching to strike and a backwards stab when switching to guard
+guandao.guard=in guard form, range 4, sweep radius 1.5, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
+guandao.strike=in strike form, range 7, sweep radius 3, deals base damage and has no riposte
+
+<Resources>=
+
+<Blocks>=
+tile.TaoisticAnvil.name=
+
+
+<GUI>=
+itemGroup.taoWea=Taoism Weapons
+
+<Damage sources>=
+death.attack.bleed=%1$s bled to death
+death.attack.bleed.player=%1$s bled to death from %2$s
+
+<Weapon inscriptions>=
+metal1.inscription=Ore
+metal2.inscription=Knife
+metal3.inscription=Dagger
+metal4.inscription=Mace
+metal5.inscription=Axe
+metal6.inscription=Longsword
+metal7.inscription=Spear
+metal8.inscription=Halberd
+metal9.inscription=War Scythe
+metal10.inscription=Executioner
+metal11.inscription=Coldplay
+
+wood1.inscription=Sprout
+wood2.inscription=Flourish
+wood3.inscription=Mulberry
+wood4.inscription=Sakura
+wood5.inscription=Eucalyptus
+wood6.inscription=Apricot
+wood7.inscription=Willow
+wood8.inscription=Jubokko
+wood9.inscription=Fusou
+wood10.inscription=Yggdrasil
+wood11.inscription=Snakes in my Boots
+
+water1.inscription=Raindrop
+water2.inscription=Spring
+water3.inscription=River
+water4.inscription=Torrent
+water5.inscription=Endless Stream
+water6.inscription=Flood
+water7.inscription=Yellow River
+water8.inscription=Poseidon
+water9.inscription=Antediluvian
+water10.inscription=The Cosmic River
+water11.inscription=Davy Jones
+
+fire1.inscription=Embers
+fire2.inscription=Will-o-wisp
+fire3.inscription=Pharaoh's Snake
+fire4.inscription=Blaze
+fire5.inscription=Sougenbi
+fire6.inscription=Inferno
+fire7.inscription=Pompeii
+fire8.inscription=Hephaestus
+fire9.inscription=Divine Lightning
+fire10.inscription=Rain of Brimstone
+fire11.inscription=This Girl
+
+earth1.inscription=Dust
+earth2.inscription=Pebble
+earth3.inscription=Rolling Stone
+earth4.inscription=Boulder
+earth5.inscription=Earthquake
+earth6.inscription=Fissure
+earth7.inscription=Olympus
+earth8.inscription=Mantle
+earth9.inscription=Core
+earth10.inscription=Terra
+earth11.inscription=Dirt
