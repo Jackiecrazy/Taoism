@@ -11,6 +11,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,8 +48,8 @@ public class TaoCombatUtils {
         return
                 main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(entity, main)
                         || off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(entity, off)
-                        || contains(CombatConfig.parryCapableItems, main.getUnlocalizedName())
-                        || contains(CombatConfig.parryCapableItems, off.getUnlocalizedName());
+                        || contains(main.getItem())
+                        || contains(off.getItem());
     }
 
     public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
@@ -56,11 +57,11 @@ public class TaoCombatUtils {
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shield and sword block
-        if (main.getItem().isShield(main, elb) || contains(CombatConfig.parryCapableItems, main.getItem().getUnlocalizedName())) {
+        if (main.getItem().isShield(main, elb) || contains(main.getItem())) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (off.getItem().isShield(off, elb) || contains(CombatConfig.parryCapableItems, off.getItem().getUnlocalizedName())) {
+        if (off.getItem().isShield(off, elb) || contains(off.getItem())) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
@@ -117,7 +118,7 @@ public class TaoCombatUtils {
             if (off.getItem() instanceof IStaminaPostureManipulable)
                 defMult = Math.min(((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, defender, off, amount), defMult);
             //default parry
-            if (contains(CombatConfig.parryCapableItems, off.getItem().getUnlocalizedName()) || contains(CombatConfig.parryCapableItems, main.getItem().getUnlocalizedName()))
+            if (contains(off.getItem()) || contains(main.getItem()))
                 defMult = Math.min(CombatConfig.defaultMultiplierPostureDefend, defMult);
         }
         return defMult;
@@ -217,9 +218,10 @@ public class TaoCombatUtils {
         return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
     }
 
-    private static boolean contains(String[] list, String entry) {
-        for (String s : list) {
-            if (s.equals(entry)) return true;
+    private static boolean contains(Item i) {
+        if (i.getRegistryName() == null) return false;
+        for (String s : CombatConfig.parryCapableItems) {
+            if (s.equals(i.getRegistryName().toString())) return true;
         }
         return false;
     }

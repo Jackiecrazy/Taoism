@@ -2,21 +2,15 @@ package com.jackiecrazi.taoism.config;
 
 import com.jackiecrazi.taoism.Taoism;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.LogManager;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 
 @Config(modid = Taoism.MODID, name = Taoism.MODID + "/combat")
 @Config.LangKey("taoism.config.combat.title")
@@ -45,7 +39,7 @@ public class CombatConfig {
     public static int mobForcedCooldown = 10;
     @Config.Comment("Number of ticks after a qi add attempt for which your qi will not decrease.")
     public static int qiGrace = 20;
-    @Config.Comment("Items eligible for parrying.")
+    @Config.Comment("Additional items eligible for parrying. See printParryList for easy registration.")
     public static String[] parryCapableItems = {"example:thing1", "example:thing2"};
     @Config.Comment("Changes chance based knockback resist to percentage based knockback resist, which I think makes more sense.")
     public static boolean modifyKnockBackCode = true;
@@ -55,8 +49,19 @@ public class CombatConfig {
     public static boolean taoWeaponHitEntity = true;
     @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disable if there is some issue.")
     public static boolean weaponHitEntity = true;
-    @Config.Comment("Toggling this option will wipe and reload the list of parry eligible items based on items registered as swords and axes. Remember to turn it off again!")
-    public static boolean wipeParryList = false;
+    @Config.Comment("Toggling this option will print the list of parry eligible items based on items registered as swords and axes into the console, ready to copy-paste. It's a little expensive, so remember to turn it off again!")
+    public static boolean printParryList = true;
+
+    public static void printParryList() {
+        Taoism.logger.info("beginning generation of the parry list:");
+        Iterator<Item> i = Item.REGISTRY.iterator();
+        while (i.hasNext()) {
+            Item item = i.next();
+            if (item instanceof ItemSword || item instanceof ItemAxe) {
+                System.out.print("," + item.getRegistryName());
+            }
+        }
+    }
 
     @Mod.EventBusSubscriber(modid = Taoism.MODID)
     private static class EventHandler {
@@ -72,18 +77,5 @@ public class CombatConfig {
                 ConfigManager.sync(Taoism.MODID, Config.Type.INSTANCE);
             }
         }
-
-//        @SubscribeEvent(priority = EventPriority.LOWEST)
-//        public static void updateList(final RegistryEvent.Register<Item> e){
-//            if(wipeParryList){
-//                ArrayList<String> put=new ArrayList<>();
-//                for(Item i:e.getRegistry().getValuesCollection()){
-//                    if(i instanceof ItemSword){
-//                        put.add(i.getUnlocalizedName());
-//                    }
-//                }
-//                parryCapableItems= (String[]) put.toArray();
-//            }
-//        }
     }
 }

@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.block.TaoBlocks;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
 import com.jackiecrazi.taoism.crafting.TaoCrafting;
 import com.jackiecrazi.taoism.handler.TaoCapabilityHandler;
@@ -121,6 +122,9 @@ public class Taoism {
 
     @EventHandler
     public void postinit(FMLPostInitializationEvent event) {
+        if(CombatConfig.printParryList){
+            CombatConfig.printParryList();
+        }
         proxy.postinit(event);
     }
 
