@@ -25,8 +25,8 @@ public class TaoCombatUtils {
             if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
             is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
             is.setTagInfo("currentMove", new NBTTagByte(moveCode));
-            if (elb.getHeldItemMainhand().getItem() instanceof ITwoHanded && ((ITwoHanded) elb.getHeldItemMainhand().getItem()).isTwoHanded(elb.getHeldItemMainhand())){
-                is=elb.getHeldItemOffhand();
+            if (elb.getHeldItemMainhand().getItem() instanceof ITwoHanded && ((ITwoHanded) elb.getHeldItemMainhand().getItem()).isTwoHanded(elb.getHeldItemMainhand())) {
+                is = elb.getHeldItemOffhand();
                 if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
                 is.getTagCompound().setByte("lastMove", is.getTagCompound().getByte("currentMove"));
                 is.setTagInfo("currentMove", new NBTTagByte(moveCode));
@@ -47,8 +47,8 @@ public class TaoCombatUtils {
         return
                 main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(entity, main)
                         || off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(entity, off)
-                        || CombatConfig.parryCapableItems.contains(main.getUnlocalizedName())
-                        || CombatConfig.parryCapableItems.contains(off.getUnlocalizedName());
+                        || contains(CombatConfig.parryCapableItems, main.getUnlocalizedName())
+                        || contains(CombatConfig.parryCapableItems, off.getUnlocalizedName());
     }
 
     public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
@@ -56,11 +56,11 @@ public class TaoCombatUtils {
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shield and sword block
-        if (main.getItem().isShield(main, elb) || CombatConfig.parryCapableItems.contains(main.getItem().getUnlocalizedName())) {
+        if (main.getItem().isShield(main, elb) || contains(CombatConfig.parryCapableItems, main.getItem().getUnlocalizedName())) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (off.getItem().isShield(off, elb) || CombatConfig.parryCapableItems.contains(off.getItem().getUnlocalizedName())) {
+        if (off.getItem().isShield(off, elb) || contains(CombatConfig.parryCapableItems, off.getItem().getUnlocalizedName())) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
@@ -117,7 +117,7 @@ public class TaoCombatUtils {
             if (off.getItem() instanceof IStaminaPostureManipulable)
                 defMult = Math.min(((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, defender, off, amount), defMult);
             //default parry
-            if (CombatConfig.parryCapableItems.contains(off.getItem().getUnlocalizedName()) || CombatConfig.parryCapableItems.contains(main.getItem().getUnlocalizedName()))
+            if (contains(CombatConfig.parryCapableItems, off.getItem().getUnlocalizedName()) || contains(CombatConfig.parryCapableItems, main.getItem().getUnlocalizedName()))
                 defMult = Math.min(CombatConfig.defaultMultiplierPostureDefend, defMult);
         }
         return defMult;
@@ -215,5 +215,12 @@ public class TaoCombatUtils {
 
     public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
         return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
+    }
+
+    private static boolean contains(String[] list, String entry) {
+        for (String s : list) {
+            if (s.equals(entry)) return true;
+        }
+        return false;
     }
 }

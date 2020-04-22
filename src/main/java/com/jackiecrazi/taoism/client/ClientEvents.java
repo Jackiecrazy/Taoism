@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.config.HudConfig;
 import com.jackiecrazi.taoism.networking.PacketBeginParry;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
@@ -291,14 +292,14 @@ public class ClientEvents {
                         GlStateManager.enableAlpha();
                         Color c = GRADIENT[(int) (qiExtra * (GRADIENT.length))];
                         GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
-                        mc.ingameGUI.drawTexturedModalRect(width-96, height / 2 - 64 + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
+                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64) + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();
 
                         //overlay
                         GlStateManager.pushMatrix();
                         GlStateManager.color(1f, 1f, 1f);
                         //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                        mc.ingameGUI.drawTexturedModalRect(width-96, height / 2 - 64, (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
                         //GlStateManager.resetColor();
                         //mc.renderEngine.bindTexture();
                         GlStateManager.disableAlpha();
@@ -306,20 +307,21 @@ public class ClientEvents {
                         GlStateManager.popMatrix();
                     }
 
-                    //render posture bar
-                    drawPostureBarAt(player, width-96, height/2);
-                    Entity look=getEntityLookedAt(player);
-                    if(look instanceof EntityLivingBase){
-                        drawPostureBarAt((EntityLivingBase)look, 32, height/2);
+                    //render posture bar if not full
+                    if (cap.getPosture() < cap.getMaxPosture())
+                        drawPostureBarAt(player, Math.min(HudConfig.client.posture.x, width - 64), Math.min(HudConfig.client.posture.y, height - 64));
+                    Entity look = getEntityLookedAt(player);
+                    if (look instanceof EntityLivingBase && TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() && HudConfig.client.displayEnemyPosture) {
+                        drawPostureBarAt((EntityLivingBase) look, Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                     }
                 }
             }
     }
 
-    private static void drawPostureBarAt(EntityLivingBase elb, int x, int y){
-        Minecraft mc=Minecraft.getMinecraft();
+    private static void drawPostureBarAt(EntityLivingBase elb, int x, int y) {
+        Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager().bindTexture(hud);
-        ITaoStatCapability cap=TaoCasterData.getTaoCap(elb);
+        ITaoStatCapability cap = TaoCasterData.getTaoCap(elb);
         GlStateManager.pushMatrix();
         float posPerc = cap.getPosture() / cap.getMaxPosture();
         int down = cap.getDownTimer();
@@ -349,13 +351,14 @@ public class ClientEvents {
             //resolution
             if (cap.getPosInvulTime() > 0) {
                 GlStateManager.pushMatrix();
-                GlStateManager.color(1f, 1f, 1f, ((float)cap.getPosInvulTime())/ (float)CombatConfig.ssptime);
+                GlStateManager.color(1f, 1f, 1f, ((float) cap.getPosInvulTime()) / (float) CombatConfig.ssptime);
                 mc.ingameGUI.drawTexturedModalRect(x, y, 192, 192, 64, 64);
                 GlStateManager.popMatrix();
             }
         } else {
             //broken shield base
             GlStateManager.pushMatrix();
+            GlStateManager.enableAlpha();
             GlStateManager.color(1f, 1f, 1f);
             mc.ingameGUI.drawTexturedModalRect(x, y, 128, 192, 64, 64);
             GlStateManager.popMatrix();
@@ -364,6 +367,7 @@ public class ClientEvents {
             GlStateManager.pushMatrix();
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((downPercent) * 64), 0, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((downPercent) * 64), 64, 192 + ((int) (downPercent * 64)), 64, (int) ((1 - downPercent) * 64));
+            GlStateManager.disableAlpha();
             GlStateManager.popMatrix();
         }
         GlStateManager.disableAlpha();
@@ -395,10 +399,10 @@ public class ClientEvents {
         RayTraceResult pos = raycast(e, finalDistance);
 
         Vec3d positionVector = e.getPositionVector();
-        if(e instanceof EntityPlayer)
+        if (e instanceof EntityPlayer)
             positionVector = positionVector.addVector(0, e.getEyeHeight(), 0);
 
-        if(pos != null)
+        if (pos != null)
             distance = pos.hitVec.distanceTo(positionVector);
 
         Vec3d lookVector = e.getLookVec();
@@ -408,28 +412,28 @@ public class ClientEvents {
         List<Entity> entitiesInBoundingBox = e.getEntityWorld().getEntitiesWithinAABBExcludingEntity(e, e.getEntityBoundingBox().grow(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance).expand(1F, 1F, 1F));
         double minDistance = distance;
 
-        for(Entity entity : entitiesInBoundingBox) {
-            if(entity.canBeCollidedWith()) {
+        for (Entity entity : entitiesInBoundingBox) {
+            if (entity.canBeCollidedWith()) {
                 float collisionBorderSize = entity.getCollisionBorderSize();
                 AxisAlignedBB hitbox = entity.getEntityBoundingBox().expand(collisionBorderSize, collisionBorderSize, collisionBorderSize);
                 RayTraceResult interceptPosition = hitbox.calculateIntercept(positionVector, reachVector);
 
-                if(hitbox.contains(positionVector)) {
-                    if(0.0D < minDistance || minDistance == 0.0D) {
+                if (hitbox.contains(positionVector)) {
+                    if (0.0D < minDistance || minDistance == 0.0D) {
                         lookedEntity = entity;
                         minDistance = 0.0D;
                     }
-                } else if(interceptPosition != null) {
+                } else if (interceptPosition != null) {
                     double distanceToEntity = positionVector.distanceTo(interceptPosition.hitVec);
 
-                    if(distanceToEntity < minDistance || minDistance == 0.0D) {
+                    if (distanceToEntity < minDistance || minDistance == 0.0D) {
                         lookedEntity = entity;
                         minDistance = distanceToEntity;
                     }
                 }
             }
 
-            if(lookedEntity != null && (minDistance < distance || pos == null))
+            if (lookedEntity != null && (minDistance < distance || pos == null))
                 foundEntity = lookedEntity;
         }
 
@@ -438,11 +442,11 @@ public class ClientEvents {
 
     public static RayTraceResult raycast(Entity e, double len) {
         Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);
-        if(e instanceof EntityPlayer)
+        if (e instanceof EntityPlayer)
             vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
 
         Vec3d look = e.getLookVec();
-        if(look == null)
+        if (look == null)
             return null;
 
         return raycast(e.getEntityWorld(), vec, look, len);
