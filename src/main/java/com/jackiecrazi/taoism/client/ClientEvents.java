@@ -127,27 +127,35 @@ public class ClientEvents {
     public static void doju(InputUpdateEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         MovementInput mi = e.getMovementInput();
-        if (mi.leftKeyDown && !tapped[0]) {
-            if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
-                Taoism.net.sendToServer(new PacketDodge(0));
+        if(TaoCasterData.getTaoCap(mc.player).getQi()>0) {
+            if (mi.leftKeyDown && !tapped[0]) {
+                if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
+                    Taoism.net.sendToServer(new PacketDodge(0));
+                }
+                lastTap[0] = mc.world.getTotalWorldTime();
             }
-            lastTap[0] = mc.world.getTotalWorldTime();
-        }
-        tapped[0] = mi.leftKeyDown;
-        if (mi.backKeyDown && !tapped[1]) {
-            if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE) {
-                Taoism.net.sendToServer(new PacketDodge(1));
+            tapped[0] = mi.leftKeyDown;
+            if (mi.backKeyDown && !tapped[1]) {
+                if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE) {
+                    Taoism.net.sendToServer(new PacketDodge(1));
+                }
+                lastTap[1] = mc.world.getTotalWorldTime();
             }
-            lastTap[1] = mc.world.getTotalWorldTime();
-        }
-        tapped[1] = mi.backKeyDown;
-        if (mi.rightKeyDown && !tapped[2]) {
-            if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE) {
-                Taoism.net.sendToServer(new PacketDodge(2));
+            tapped[1] = mi.backKeyDown;
+            if (mi.rightKeyDown && !tapped[2]) {
+                if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE) {
+                    Taoism.net.sendToServer(new PacketDodge(2));
+                }
+                lastTap[2] = mc.world.getTotalWorldTime();
             }
-            lastTap[2] = mc.world.getTotalWorldTime();
+            tapped[2] = mi.rightKeyDown;
         }
-        tapped[2] = mi.rightKeyDown;
+
+        if (TaoCasterData.getTaoCap(mc.player).getDownTimer() > 0) {
+            //no moving while you're down! (except for a safety roll)
+            KeyBinding.unPressAllKeys();
+        }
+
         if (mi.sneak && !sneak) {
             //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
             Taoism.net.sendToServer(new PacketBeginParry());
@@ -155,10 +163,7 @@ public class ClientEvents {
         }
         sneak = mi.sneak;
 
-        if (TaoCasterData.getTaoCap(mc.player).getDownTimer() > 0) {
-            //no moving while you're down! (except for a safety roll)
-            KeyBinding.unPressAllKeys();
-        }
+
     }
 
     @SubscribeEvent
