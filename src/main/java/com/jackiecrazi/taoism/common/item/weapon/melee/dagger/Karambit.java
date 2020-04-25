@@ -56,6 +56,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        defender.hurtResistantTime=getMaxChargeTime();
         defender.rotationYaw = attacker.rotationYaw;
         defender.rotationPitch = attacker.rotationPitch;
         Vec3d look = attacker.getLookVec();

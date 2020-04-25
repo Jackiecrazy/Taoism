@@ -59,7 +59,7 @@ public class Balisong extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         setCombo(defender, item, 0);
-        defender.setPositionAndRotation(defender.posX, defender.posY, defender.posZ, attacker.rotationYaw, attacker.rotationPitch);
+        defender.hurtResistantTime=getMaxChargeTime();
         Vec3d look = attacker.getLookVec();
         defender.addVelocity(-look.x, -look.y, -look.z);
         defender.velocityChanged = true;
