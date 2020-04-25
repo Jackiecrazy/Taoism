@@ -324,7 +324,7 @@ public class TaoisticEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void spite(LivingHurtEvent e) {
-
+        TaoCasterData.forceUpdateTrackingClients(e.getEntityLiving());
     }
 
     //modifies damage after armor, since some items naturally ignore some armor.

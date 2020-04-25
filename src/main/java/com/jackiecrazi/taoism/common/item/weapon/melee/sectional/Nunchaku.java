@@ -4,14 +4,10 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -22,24 +18,23 @@ public class Nunchaku extends TaoWeapon {
      * A flexible blunt weapon that still hurts. High speed and defense, medium power and combo, low range
      * I'm gonna be using this to test the move system.
      * Can be either one or two handed, with different movesets for both.
-     * Nunchaku will become two-handed if in main hand and offhand is not another set of nunchaku
+     * Nunchaku will become two-handed if in main hand and offhand is empty
      * after a given attack, your nunchaku will end up on a certain side:
      * high (h) or low (l), same (s) or different (d) side
      * high is fast, low is powerful
-     * same side does extra posture damage, different side applies short effects
+     * right side does extra posture damage, left side applies short effects
      * From a given stance it's possible to launch a high attack by default or a low attack by pressing back
      *
-     * Available moves (same side): hl smash, hh flick, ll sweep, lh 8-spin, ?? jab
+     * Available moves: hl smash, hh flick, ll sweep, lh 8-spin, ?? jab
      * flick is very fast
-     * smash inflicts slowness and deals extra damage
+     * smash inflicts slowness and deals 1.3x damage
      * sweep hits in radius 1 and knocks back slightly
      * 8-spin hits chip damage 3 times with no knockback
-     * jab is a close range high posture move
      *
      * Extra moves when two-handed: dhl backflip (default guard), dlh updraft
      * When two-handed, you can chain with rapidly switching hands, resetting one hand if the other is used.
-     * backflip interrupts enemy attacks, switches sides and knocks them back very slightly, by back-alt
-     * updraft switches sides, AoEs, hits through blocks and knocks back, done by normal alt
+     * backflip interrupts enemy attacks and knocks them back very slightly, by back-alt
+     * updraft AoEs, hits through blocks and knocks back, done by normal alt
      *
      * Riposte(one handed): automatically perform a flick, canceling the incoming attack and disorienting the enemy slightly
      * Riposte(two handed): catch the opponent's weapon in your chain, binding 3.
@@ -50,14 +45,6 @@ public class Nunchaku extends TaoWeapon {
      * Alternatively, by dealing enough damage to you (threshold scales with higher chi) will end this state as well
      *
      */
-    private final Move[] moves = {
-            //smash
-            new Move(new MoveCode.MoveCriteria(1, -1, 0, 0, 0, 0, 1), new Stance(SIDE.SAME, HEIGHT.TOP), new Stance(SIDE.OPPOSITE, HEIGHT.LOW)),
-            //mid smash
-            new Move(new MoveCode.MoveCriteria(1, -1, -1, -1, 0, 0, 1), new Stance(SIDE.SAME, HEIGHT.TOP), new Stance(SIDE.OPPOSITE, HEIGHT.LOW)),
-            //smash
-            new Move(new MoveCode.MoveCriteria(1, -1, -1, -1, 0, 0, 1), new Stance(SIDE.SAME, HEIGHT.TOP), new Stance(SIDE.OPPOSITE, HEIGHT.LOW)),
-    };
     private final PartDefinition[] parts = {
             StaticRefs.HANDLE,
             StaticRefs.CHAIN
@@ -84,6 +71,14 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (getCurrentMove(item).isSneakPressed() && !getLastMove(item).isSneakPressed()) {//high low
+            //smash!
+            return 1.5f;
+        }
+        if (!getCurrentMove(item).isSneakPressed() && getLastMove(item).isSneakPressed()) {//low high
+            //8-spin! reduce damage
+            return 0.4f;
+        }
         return 1;
     }
 
@@ -94,6 +89,10 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
+            //flick!
+            return 0.8f;
+        }
         return 0f;
     }
 
@@ -118,64 +117,40 @@ public class Nunchaku extends TaoWeapon {
     }
 
     public boolean isTwoHanded(ItemStack is) {
-        return false;
-    }//FIXME
+        return isOffhandEmpty(is);
+    }
+
+    @Override
+    protected void aoe(ItemStack is, EntityLivingBase target, EntityLivingBase attacker, int chi){
+        if (getCurrentMove(is).isSneakPressed() && getLastMove(is).isSneakPressed()) {//low low
+            //sweep!
+            splash(attacker, target, 1);
+        }
+    }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20));
-            target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 20));
-        }
-        if (isCharged(attacker, stack)) {
-            attacker.addPotionEffect(new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)));
-            attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 40));
 
-        }
     }
 
     @Override
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.MAIN_HAND)
-            multiHit(attacker, target, 1, 1);
-    }
-
-    private enum SIDE {
-        //relative to wielding hand
-        SAME,
-        OPPOSITE
-    }
-
-    private enum HEIGHT {
-        TOP,// above shoulder
-        MID,// under armpit
-        LOW // nowhere
-    }
-
-    private static class Stance {
-
-        private SIDE s;
-        private HEIGHT h;
-
-        private Stance(SIDE side, HEIGHT height) {
-            s = side;
-            h = height;
+        if (!getCurrentMove(stack).isSneakPressed() && getLastMove(stack).isSneakPressed()) {//low high
+            //8-spin!
+            multiHit(attacker, target, 1, 3);
         }
-
     }
 
-    private void setStance(ItemStack is, Stance s){
-
+    protected void beforeSwing(EntityLivingBase elb, ItemStack is) {
+        updateStanceSide(is);
     }
 
-    private class Move {
-        Stance s, f;
-        MoveCode.MoveCriteria mcr;
+    private void updateStanceSide(ItemStack is) {
+        MoveCode mc = getCurrentMove(is);
+        gettagfast(is).setBoolean("onOtherSide", mc.isValid() && !gettagfast(is).getBoolean("onOtherSide"));
+    }
 
-        private Move(MoveCode.MoveCriteria criteria, Stance start, Stance finish) {
-            mcr = criteria;
-            s = start;
-            f = finish;
-        }
+    private boolean lastOnOtherSide(ItemStack is) {
+        return gettagfast(is).getBoolean("onOtherSide");
     }
 }

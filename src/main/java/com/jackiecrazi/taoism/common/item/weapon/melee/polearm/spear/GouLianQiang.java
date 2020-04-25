@@ -39,7 +39,7 @@ public class GouLianQiang extends TaoWeapon {
      */
 
     public GouLianQiang() {
-        super(2, 1.2, 6d, 1f);
+        super(2, 1.3, 6d, 1f);
     }
 
     @Override

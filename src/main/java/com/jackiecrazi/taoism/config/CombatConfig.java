@@ -58,7 +58,7 @@ public class CombatConfig {
         while (i.hasNext()) {
             Item item = i.next();
             if (item instanceof ItemSword || item instanceof ItemAxe) {
-                System.out.print("," + item.getRegistryName());
+                System.out.println(item.getRegistryName().toString());
             }
         }
     }

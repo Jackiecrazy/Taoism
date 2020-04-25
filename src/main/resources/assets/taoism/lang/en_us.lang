@@ -1,3 +1,4 @@
+#PARSE_ESCAPES
 <Attributes>=
 attribute.name.generic.armorDeflect=Deflection
 attribute.name.generic.armorAbsorption=Hard Reduction
@@ -79,7 +80,7 @@ qiang.oscillate=the two attacks have separate cooldowns, and doing one will halv
 qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
 
 item.goulianqiang.name=Hooked Spear
-goulianqiang.trip=right click on a target to ensnare them, right click again on the same target to trip them, removing 33% of their max posture
+goulianqiang.trip=right click on a target to ensnare them, right click again on the same target to trip them, removing half of their max posture
 goulianqiang.trip.riposte=when charged or if the target is not facing the attacker, only one attack is needed.
 goulianqiang.bash=normal attack will ignore half of the target's armor if they are downed
 goulianqiang.bash.riposte=when charged, this does not require the target to be downed
@@ -106,7 +107,7 @@ tonfa.riposte=riposte: next attack in 1 second will add resistance to self lasti
 item.chickensickle.name=Chicken Sickle
 chickensickle.normal=attacks hook enemies in and stack hemorrhage II for 5 seconds
 chickensickle.riposte1=riposte: next attack in 5 seconds stacks hemorrhage III for 5 seconds and detonates hemorrhage,
-chickensickle.riposte2=dealing (layer)% of max hp and inflicting 5 seconds of bleed, potency being a third of hemorrhage's
+chickensickle.riposte2=dealing (layer) percent of max hp and inflicting 5 seconds of bleed, potency being a third of hemorrhage's
 
 item.catninetails.name=Cat of Nine Tails
 catninetails.lacerate=inflicts laceration III and stacks bleed III for 5 seconds on hit targets
@@ -124,7 +125,7 @@ pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additio
 item.changchui.name=Great Hammer
 changchui.leap=leap attacks deal double damage
 changchui.armpen=its massive weight allows it to passively ignore 3 points of armor
-changchui.downed=deals double damage against a downed target, for a total of quadruple damage
+changchui.downed=deals double damage against a downed target
 changchui.swipe=right click to swipe in a 2.5 block radius with range 5, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
 changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
 changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove a third of their max posture

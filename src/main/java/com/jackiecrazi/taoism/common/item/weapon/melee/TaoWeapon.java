@@ -24,6 +24,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
@@ -202,6 +203,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
         stack.setTagInfo("startCD", new NBTTagFloat(Taoism.getAtk(entityLiving)));
         stack.setTagInfo("startTick", new NBTTagInt(entityLiving.ticksExisted));
+        beforeSwing(entityLiving, stack);
         return super.onEntitySwing(entityLiving, stack);
     }
 
@@ -228,7 +230,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         //if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
         if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))
             return false;
-        return enchantment.type!=null&&enchantment.type.canEnchantItem(Items.IRON_SWORD);
+        return enchantment.type != null && enchantment.type.canEnchantItem(Items.IRON_SWORD);
     }
 
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
@@ -295,6 +297,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return new MoveCode(gettagfast(stack).getByte("currentMove"));
     }
 
+    protected boolean isOffhandEmpty(ItemStack stack) {
+        return gettagfast(stack).getBoolean("dual");
+    }
+
     protected int getQiFromStack(ItemStack stack) {
         return gettagfast(stack).getInteger("qifloor");
     }
@@ -311,7 +317,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
         if (handIn == EnumHand.OFF_HAND) {
             ItemStack offhand = p.getHeldItemOffhand();
-            if (!offhand.isEmpty()) {
+            if (!offhand.isEmpty()&&NeedyLittleThings.getCooledAttackStrengthOff(p, 0.5f)==1f) {
                 if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
                     p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
                 }
@@ -467,9 +473,20 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             EntityLivingBase elb = (EntityLivingBase) e;
             boolean onOffhand = elb.getHeldItemOffhand() == stack;
             boolean onMainHand = elb.getHeldItemMainhand() == stack;
+            if (onMainHand) {
+                setHandState(stack, EnumHand.MAIN_HAND);
+                boolean single = elb.getHeldItemOffhand().isEmpty() || isDummy(elb.getHeldItemOffhand());
+                gettagfast(stack).setBoolean("dual", single);
+            } else if (onOffhand) {
+                setHandState(stack, EnumHand.OFF_HAND);
+                gettagfast(stack).removeTag("dual");
+            } else {
+                setHandState(stack, null);
+                gettagfast(stack).removeTag("dual");
+            }
             //discharge weapon
             if (onMainHand || onOffhand) {
-                if (stack.isItemDamaged()) stack.damageItem(-1, elb);
+                if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage()-1);
             } else {
                 stack.setItemDamage(0);
                 gettagfast(stack).removeTag("lastMove");
@@ -503,13 +520,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     }
                 }
 
-            }
-            if (onMainHand) {
-                setHandState(stack, EnumHand.MAIN_HAND);
-            } else if (onOffhand) {
-                setHandState(stack, EnumHand.OFF_HAND);
-            } else {
-                setHandState(stack, null);
             }
         }
     }
@@ -609,6 +619,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
+        if(state.getBlock() == Blocks.WEB) return true;
         boolean[] h = harvestable(stack);
         if (h[0] && pickList.contains(state.getMaterial())) {
             return true;
@@ -685,6 +696,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (getHand(stack) == EnumHand.OFF_HAND) {
             TaoCasterData.getTaoCap(elb).setOffhandCool(2);
         }
+    }
+
+    protected void beforeSwing(EntityLivingBase elb, ItemStack is) {
+
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {

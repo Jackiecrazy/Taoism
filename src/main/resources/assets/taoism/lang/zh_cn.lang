@@ -1,3 +1,4 @@
+#PARSE_ESCAPES
 <Attributes>=
 attribute.name.generic.armorDeflect=擦弹
 attribute.name.generic.armorAbsorption=伤害吸收
@@ -79,14 +80,14 @@ qiang.oscillate=两种攻击冷却独立，且成功攻击会使另一种攻击�
 qiang.riposte=反击：四秒内的下一次攻击将会舞出枪花
 
 item.goulianqiang.name=钩镰枪
-goulianqiang.trip=右击目标两次后会将其拉倒，造成最大架势33%的架势伤害
+goulianqiang.trip=右击目标两次后会将其拉倒，造成最大架势一半的架势伤害
 goulianqiang.trip.riposte=若敌方没有正对自己或自身处于"梁山"状态下，一次攻击即可触发此效果
 goulianqiang.bash=普攻无视被击倒的敌人的一半护甲
 goulianqiang.bash.riposte="梁山"状态下被动无视一半护甲
 goulianqiang.riposte=反击：进入"梁山"状态，持续四秒
 
 item.qinglongji.name=青龙戟
-qinglongji.stab=普攻造成1.5倍伤害，每有一层气额外提升10%
+qinglongji.stab=普攻造成1.5倍伤害，每有一层气额外提升0.1
 qinglongji.alt=右击可伤害并击退直径3+(气/2)方块内的生物
 qinglongji.alt.bash=备战势下此攻击造成短暂缓慢并翻转为逆鳞势五秒
 qinglongji.alt.cut=逆鳞势下此攻击造成短暂流血并翻转回备战势
@@ -106,7 +107,7 @@ tonfa.riposte=反击：一秒内的攻击会为自己增加一秒抗性，并在
 item.chickensickle.name=鸡刀镰
 chickensickle.normal=攻击拉入敌人并叠加五秒的内伤II
 chickensickle.riposte1=反击：五秒内下一次攻击叠加五秒的内伤III，然后引爆内伤
-chickensickle.riposte2=每层内伤造成1%的最大生命伤害，随后叠加五秒强度等同于内伤三分之一的流血
+chickensickle.riposte2=每层内伤造成最大生命0.01的伤害，随后叠加五秒强度等同于内伤三分之一的流血
 
 item.catninetails.name=九尾鞭
 catninetails.lacerate=攻击附加五秒撕裂III并叠加一秒流血III
@@ -118,13 +119,13 @@ pollaxe.leap=腾空攻击造成双倍伤害
 pollaxe.cleave=普攻叠加三秒破甲II
 pollaxe.cleave.riposte=重劈状态下，普攻造成穿刺伤害并引爆破甲，每层破甲造成2点穿刺伤害
 pollaxe.swipe=右击可横砍并击退半径2方块的敌人，腾空时为单体击退攻击
-pollaxe.swipe.riposte=重劈状态下，横砍叠加五秒破甲III，每层破甲使该次伤害增加10%
+pollaxe.swipe.riposte=重劈状态下，横砍叠加五秒破甲III，每层破甲使该次伤害增加0.1倍
 pollaxe.riposte=反击：五秒内的下一次攻击将会打出重劈，造成相当于伤害乘以0.35的架势伤害，不论是否被抵挡
 
 item.changchui.name=立瓜锤
 changchui.leap=腾空攻击造成双倍伤害
 changchui.armpen=被动无视三点护甲
-changchui.downed=对被击倒的敌人造成双倍伤害，总共四倍
+changchui.downed=对被击倒的敌人造成双倍伤害
 changchui.swipe=右击可横扫，击退半径2.5方块的敌人，此攻击拥有平常1.5倍的冷却时间。腾空时为单体高击退攻击
 changchui.riposte=反击：五秒内敌人必定受到全额架势伤害且无法回复架势
 changchui.swipe.riposte=横扫会立刻消耗此强化，大幅度击退敌人并造成其最大架势三分之一的架势伤害
@@ -142,7 +143,7 @@ staff.block.riposte=花棍每秒自动攻击一次且可抵挡所有抛射物，
 item.guandao.name=偃月刀
 guandao.alt=右击切换新月与血月模式，并立即重置普攻
 guandao.alt.attack=切换至血月模式时攻击身前的敌人，切换回新月模式时攻击身后的敌人
-guandao.guard=新月模式：范围4，顺劈半径1.5，造成130%(每层气提高5%)伤害。招架后获得一层气
+guandao.guard=新月模式：范围4，顺劈半径1.5，造成1.3倍(每层气提高0.05)伤害。招架后获得一层气
 guandao.strike=血月模式：范围7，顺劈半径3，无招架特效
 
 <Resources>=
