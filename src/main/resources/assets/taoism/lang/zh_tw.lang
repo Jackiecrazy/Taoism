@@ -1,4 +1,4 @@
-#PARSE_ESCAPES
+# PARSE_ESCAPES
 <Attributes>=
 attribute.name.generic.armorDeflect=擦彈
 attribute.name.generic.armorAbsorption=傷害吸收
@@ -40,6 +40,8 @@ banfu.riposte=反擊：重置敵人的攻擊時間，五秒內的下一次攻擊
 item.balisong.name=蝴蝶刀
 balisong.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
 balisong.backstab=背刺造成雙倍傷害
+balisong.darkness=在黑暗中提升傷害，最多雙倍
+balisong.initiative=第一次攻擊無視所有護甲
 balisong.stance=主手的蝴蝶刀為正握，副手的蝴蝶刀為反握
 balisong.hammer=正握時連擊上限每兩層氣增加一，最多連擊五次
 balisong.reverse=反握時每層氣使本次攻擊無視一點護甲
@@ -48,6 +50,8 @@ balisong.riposte=反擊：跳到敵人身後並重置連擊次數，三秒內的
 item.karambit.name=爪刀
 karambit.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
 karambit.backstab=背刺造成1.5倍傷害
+karambit.darkness=在黑暗中提升傷害，最多雙倍
+karambit.initiative=第一次攻擊無視所有護甲
 karambit.bleed=若目標沒有護甲則造成一層持續一秒的流血效果，每層氣使本效果無視6點護甲
 karambit.riposte=反擊：跳到敵人身後，三秒內的下一次攻擊額外附加兩層持續三秒的流血
 karambit.harvest=可以采集任何剪刀可以采集的方塊
@@ -146,6 +150,12 @@ guandao.alt.attack=切換至血月模式時攻擊身前的敵人，切換回新�
 guandao.guard=新月模式：範圍4，順劈半徑1.5，造成1.3倍(每層氣額外提高0.05)傷害。招架後獲得一層氣
 guandao.strike=血月模式：範圍7，順劈半徑3，無招架特效
 
+item.bohemianearspoon.name=狩獵槍
+bohear.dist=攻擊傷害和冷卻隨著本次攻擊的距離和上次攻擊的距離而波動
+bohear.buff=在兩次距離一樣時達到雙倍傷害和減半冷卻
+bohear.bash=右擊消耗此增益擊退範圍內所有敵人
+bohear.riposte=反擊：五秒內刺穿上一個攻擊目標，使其無法靠近你
+
 <Resources>=
 
 <Blocks>=
@@ -219,4 +229,3 @@ earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
 earth11.inscription=大花棉襖
-taoism.weaponAttBase=基礎架勢傷害: %s

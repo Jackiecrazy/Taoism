@@ -10,12 +10,14 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.BohemianEarspoon;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
+import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
 import com.jackiecrazi.taoism.common.item.weapon.melee.stick.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
@@ -46,7 +48,9 @@ public class TaoItems {
             goulianqiang,
             qinglongji,
             gun,
-            yyd;
+            yyd,
+    bohear,
+    nunchaku;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -80,6 +84,8 @@ public class TaoItems {
         qinglongji = new QingLongJi();
         gun = new Staff();
         yyd = new GuanDao();
+        bohear=new BohemianEarspoon();
+        nunchaku=new Nunchaku();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);
@@ -97,6 +103,8 @@ public class TaoItems {
         e.getRegistry().register(qinglongji);
         e.getRegistry().register(gun);
         e.getRegistry().register(yyd);
+        e.getRegistry().register(bohear);
+        //e.getRegistry().register(nunchaku);
         //weapon
         //e.getRegistry().register(weap);
         //armor

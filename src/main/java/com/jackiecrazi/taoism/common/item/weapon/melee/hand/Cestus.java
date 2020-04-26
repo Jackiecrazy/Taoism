@@ -47,7 +47,7 @@ public class Cestus extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2.5f;
     }
 
     /**

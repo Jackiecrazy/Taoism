@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -26,7 +27,8 @@ public class Karambit extends TaoWeapon {
     //Can be used to harvest plant blocks, for what that's worth.
 
     public Karambit() {
-        super(1, 2, 4.5f, 0);
+        super(1, 2, 5f, 0);
+        setQiAccumulationRate(0.75f);
     }
 
     @Override
@@ -41,12 +43,14 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1;
+        float light=1+(15f-attacker.world.getLight(attacker.getPosition()))/15f;//light bonus
+        float backstab=NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
+        return light*backstab;
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2.5f;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        defender.hurtResistantTime=getMaxChargeTime();
+        defender.hurtResistantTime = getMaxChargeTime();
         defender.rotationYaw = attacker.rotationYaw;
         defender.rotationPitch = attacker.rotationPitch;
         Vec3d look = attacker.getLookVec();
@@ -77,7 +81,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (target.getTotalArmorValue() - chi * 6d <= 0)
+        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() != null && target.getLastDamageSource().getTrueSource() != attacker))
             target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
         if (isCharged(attacker, stack)) {
             target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 60, 2), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
@@ -103,8 +107,18 @@ public class Karambit extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("karambit.switch"));
         tooltip.add(I18n.format("karambit.backstab"));
+        //tooltip.add(I18n.format("karambit.initiative"));
+        tooltip.add(I18n.format("karambit.darkness"));
         tooltip.add(I18n.format("karambit.bleed"));
         tooltip.add(I18n.format("karambit.riposte"));
         tooltip.add(I18n.format("karambit.harvest"));
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (getLastAttackedEntity(attacker.world, stack)!=target) {
+            return target.getTotalArmorValue();
+        }
+        return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 }

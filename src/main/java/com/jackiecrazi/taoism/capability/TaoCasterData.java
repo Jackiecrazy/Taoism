@@ -64,7 +64,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      */
     private static float getQiDecayTo(EntityLivingBase elb, int ticks) {
         ITaoStatCapability itsc = getTaoCap(elb);
-        return Math.max(itsc.getQi() - 0.05f * ticks, 0);
+        return Math.max(itsc.getQi() - 0.0125f * ticks, 0);
     }
 
     public static void updateCasterData(EntityLivingBase elb) {

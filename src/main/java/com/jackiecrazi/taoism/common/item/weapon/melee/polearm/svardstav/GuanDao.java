@@ -59,7 +59,7 @@ public class GuanDao extends TaoWeapon {
     }
 
     protected float getQiAccumulationRate(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : 1;
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : super.getQiAccumulationRate(is);
     }
 
     @Override

@@ -28,7 +28,8 @@ public class Balisong extends TaoWeapon {
 
 
     public Balisong() {
-        super(2, 2, 4.5f, 0);
+        super(2, 2, 5f, 0);
+        setQiAccumulationRate(0.75f);
     }
 
     @Override
@@ -43,12 +44,14 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
+        float light=1+(15-attacker.world.getLight(attacker.getPosition()))/15;//light bonus
+        float backstab=NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
+        return light*backstab;
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2.5f;
     }
 
     @Override
@@ -94,6 +97,8 @@ public class Balisong extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("balisong.switch"));
         tooltip.add(I18n.format("balisong.backstab"));
+        tooltip.add(I18n.format("balisong.initiative"));
+        tooltip.add(I18n.format("balisong.darkness"));
         tooltip.add(I18n.format("balisong.stance"));
         tooltip.add(I18n.format("balisong.hammer"));
         tooltip.add(I18n.format("balisong.reverse"));
@@ -106,6 +111,13 @@ public class Balisong extends TaoWeapon {
             //ignore 1 point of armor every chi level
             return getQiFromStack(stack);
         }
+        if (getLastAttackedEntity(attacker.world, stack)!=target) {
+            return target.getTotalArmorValue();
+        }
         return super.armorIgnoreAmount(ds,attacker,target,stack,orig);
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+
     }
 }

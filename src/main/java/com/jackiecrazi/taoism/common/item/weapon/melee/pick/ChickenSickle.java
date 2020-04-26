@@ -50,7 +50,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4;
+        return 3;
     }
 
     @Override

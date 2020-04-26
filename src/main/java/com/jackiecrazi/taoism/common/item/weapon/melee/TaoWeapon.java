@@ -67,7 +67,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final double dmg;
     private final float base;
     protected float buffer = 0f;
-    private float qiRate = 1f;
+    private float qiRate = 0.5f;
     //0
     private List<Material> pickList = Arrays.asList(
             Material.ANVIL,
@@ -243,7 +243,12 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (swing) {
             if (aoe) {
                 if (getHand(stack) != null) {
-                    itsc.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
+                    float baseQi=((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
+                    if(itsc.getQiFloored()<4){
+                        itsc.addQi(baseQi*2);
+                    }else if( itsc.getQiFloored()<7){
+                        itsc.addQi(baseQi);
+                    }else itsc.addQi(baseQi/2f);
                     TaoCasterData.forceUpdateTrackingClients(attacker);
                 }
                 aoe = false;
@@ -317,7 +322,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
         if (handIn == EnumHand.OFF_HAND) {
             ItemStack offhand = p.getHeldItemOffhand();
-            if (!offhand.isEmpty()&&NeedyLittleThings.getCooledAttackStrengthOff(p, 0.5f)==1f) {
+            if (!offhand.isEmpty() && NeedyLittleThings.getCooledAttackStrengthOff(p, 0.5f) == 1f) {
                 if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
                     p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
                 }
@@ -462,7 +467,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     private boolean dummyMatchMain(ItemStack is, ItemStack compare) {
-        return isDummy(is) && ItemStack.areItemStacksEqual(new ItemStack(gettagfast(is).getCompoundTag("linked")), compare);
+        NBTTagCompound tagCompare = gettagfast(compare), tagCache = gettagfast(new ItemStack(gettagfast(is).getCompoundTag("linked")));
+        return isDummy(is) && tagCache.equals(tagCompare);
     }
 
     /**
@@ -486,7 +492,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
             //discharge weapon
             if (onMainHand || onOffhand) {
-                if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage()-1);
+                if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage() - 1);
             } else {
                 stack.setItemDamage(0);
                 gettagfast(stack).removeTag("lastMove");
@@ -496,31 +502,32 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             if (isTwoHanded(stack)) {
                 //main hand, update offhand dummy
                 if (onMainHand && !onOffhand) {
+                    elb.getHeldItemOffhand().setItemDamage(stack.getItemDamage());
                     if (!dummyMatchMain(elb.getHeldItemOffhand(), stack)) {
                         elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(elb.getHeldItemMainhand(), elb.getHeldItemOffhand()));
+                        //TODO obnoxious equip sounds
                     }
-                    elb.getHeldItemOffhand().setItemDamage(stack.getItemDamage());
                 }
-                if (isDummy(stack)) {
-                    boolean diffItem = elb.getHeldItemMainhand().getItem() != stack.getItem();
-                    if (diffItem || !onOffhand) {//FIXME last slot overflow to first slot bug
-                        //check where to unwrap the stack to
-                        ItemStack unwrap = unwrapDummy(stack);
-                        if (onOffhand) {
-                            elb.setHeldItem(EnumHand.OFF_HAND, unwrap);
-                        } else {
-                            // Get the entity's main inventory
-                            final IItemHandler mainInventory = e.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
-                            // If this item is in their main inventory and it can be extracted.
-                            if (mainInventory != null && mainInventory.getStackInSlot(slot) == stack && mainInventory.extractItem(slot, stack.getCount(), true) != null) {
-                                mainInventory.extractItem(slot, stack.getCount(), false);
-                                mainInventory.insertItem(slot, unwrap, false);
-                            }
+            }
+            if (isDummy(stack)) {
+                boolean diffItem = elb.getHeldItemMainhand().getItem() != stack.getItem();
+                if (diffItem || !onOffhand) {//FIXME last slot overflow to first slot bug
+                    //check where to unwrap the stack to
+                    ItemStack unwrap = unwrapDummy(stack);
+                    if (onOffhand) {
+                        elb.setHeldItem(EnumHand.OFF_HAND, unwrap);
+                    } else {
+                        // Get the entity's main inventory
+                        final IItemHandler mainInventory = e.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
+                        // If this item is in their main inventory and it can be extracted.
+                        if (mainInventory != null && mainInventory.getStackInSlot(slot) == stack && mainInventory.extractItem(slot, stack.getCount(), true) != null) {
+                            mainInventory.extractItem(slot, stack.getCount(), false);
+                            mainInventory.insertItem(slot, unwrap, false);
                         }
                     }
                 }
-
             }
+
         }
     }
 
@@ -619,7 +626,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
-        if(state.getBlock() == Blocks.WEB) return true;
+        if (state.getBlock() == Blocks.WEB) return true;
         boolean[] h = harvestable(stack);
         if (h[0] && pickList.contains(state.getMaterial())) {
             return true;

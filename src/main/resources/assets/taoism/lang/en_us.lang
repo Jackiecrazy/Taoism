@@ -40,6 +40,8 @@ banfu.riposte=riposte: resets opponent attack time. The next attack in 5 seconds
 item.balisong.name=Balisong
 balisong.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
 balisong.backstab=backstabs deal double damage
+balisong.darkness=being in darkness will increase your damage according to how dark it is
+balisong.initiative=the first strike on a target ignores all armor
 balisong.stance=has two forms, hammer stance and reverse stance; offhand balisong are held in reverse stance
 balisong.hammer=in hammer stance, combo limit extends by 1 per chi level, up to 6 at level 10
 balisong.reverse=in reverse stance, pierces 1 armor for every level of chi
@@ -48,9 +50,11 @@ balisong.riposte=riposte: launches defender behind the attacker and resets combo
 item.karambit.name=Karambit
 karambit.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
 karambit.backstab=backstabs deal 1.5x damage
+karambit.darkness=being in darkness will increase your damage according to how dark it is
+karambit.initiative=the first strike on a target ignores all armor
 karambit.bleed=inflicts a layer of bleed if target is unarmored, bleed infliction ignores 6 points of armor per chi level
 karambit.riposte=riposte: launches defender behind the attacker and resets combo, the next hit in 3 seconds adds 2 layers of bleed for 3 seconds
-karambit.harvest=can also be used to harvest shear-applicable blocks
+karambit.harvest=can also be used to harvest shearable blocks
 
 item.chui.name=Spherical Mace
 chui.leap=leap attacks deal double damage
@@ -145,6 +149,12 @@ guandao.alt=right click to switch between guard and strike forms, resetting norm
 guandao.alt.attack=this switch counts as a frontal attack when switching to strike and a backwards stab when switching to guard
 guandao.guard=in guard form, range 4, sweep radius 1.5, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
 guandao.strike=in strike form, range 7, sweep radius 3, deals base damage and has no riposte
+
+item.bohemianearspoon.name=Bohemian Earspoon
+bohear.dist=if the currently struck target is a similar distance away from the attacker as the last struck target:
+bohear.buff=deal extra damage up to a maximum of double and reduce cooldown down to a minimum of half
+bohear.bash=right click to consume this buff to bash all enemies back slightly
+bohear.riposte=riposte: impale targets in the next 5 seconds, causing them to be unable to approach you until you change targets
 
 <Resources>=
 

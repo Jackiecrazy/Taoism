@@ -65,11 +65,11 @@ public class QingLongJi extends TaoWeapon {
 
     protected float getQiAccumulationRate(ItemStack is) {
         MoveCode mc = getLastMove(is);
-        if (!mc.isValid()) return 1f;
+        if (!mc.isValid()) return super.getQiAccumulationRate(is);
         boolean lastIsNormalAtk = mc.isLeftClick();
         boolean offhand=getHand(is) == EnumHand.MAIN_HAND;
         if (lastIsNormalAtk ^ offhand) {
-            return 1f;
+            return super.getQiAccumulationRate(is);
         }
         else return 0f;
     }

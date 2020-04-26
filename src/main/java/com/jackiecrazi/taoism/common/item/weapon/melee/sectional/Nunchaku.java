@@ -52,6 +52,7 @@ public class Nunchaku extends TaoWeapon {
 
     public Nunchaku() {
         super(0, 1.5, 5f, 0.6f);
+        //this.addPropertyOverride();
     }
 
     @Override
@@ -98,7 +99,7 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2.5f;
     }
 
     @Override

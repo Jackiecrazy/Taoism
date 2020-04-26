@@ -8,8 +8,7 @@ public class RopeDart {
      * Normal attack, notably, throws out a projectile instead of actually attacking, damage and velocity determined by charge.
      * This means it naturally ignores non-shield blocks.
      * Alt attack is an arcing overhead smash. This ignores all forms of blocking, and bind 1/4 on first hit entity.
-     * The alt attack is capable of snatching projectiles from midair, which can then be fired in any direction.
-     * If the grabbed object is not a projectile, it will instead draw them in.
+     * The alt attack is capable of drawing bound enemies in on another click.
      * Escape velocity for bound entity and catch threshold for projectile are both based on charge.
      */
 }

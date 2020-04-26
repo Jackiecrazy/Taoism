@@ -45,7 +45,7 @@ public class BanFu extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
+        return 3f;
     }
 
     @Override
