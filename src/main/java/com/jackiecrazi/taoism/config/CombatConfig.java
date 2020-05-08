@@ -10,8 +10,6 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.Iterator;
-
 @Config(modid = Taoism.MODID, name = Taoism.MODID + "/combat")
 @Config.LangKey("taoism.config.combat.title")
 public class CombatConfig {
@@ -47,16 +45,14 @@ public class CombatConfig {
     public static boolean ssp = true;
     @Config.Comment("Whether mobs can use Taoism's weapons with all added effects (bleed, splash, etc). Disabling this will disable weaponHitEntity as well.")
     public static boolean taoWeaponHitEntity = true;
-    @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disable if there is some issue.")
-    public static boolean weaponHitEntity = true;
+    @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disabled by default because some mods expect the hitter to be a player.")
+    public static boolean weaponHitEntity = false;
     @Config.Comment("Toggling this option will print the list of parry eligible items based on items registered as swords and axes into the console, ready to copy-paste. It's a little expensive, so remember to turn it off again!")
     public static boolean printParryList = true;
 
     public static void printParryList() {
         Taoism.logger.info("beginning generation of the parry list:");
-        Iterator<Item> i = Item.REGISTRY.iterator();
-        while (i.hasNext()) {
-            Item item = i.next();
+        for (Item item : Item.REGISTRY) {
             if (item instanceof ItemSword || item instanceof ItemAxe) {
                 System.out.println(item.getRegistryName().toString());
             }

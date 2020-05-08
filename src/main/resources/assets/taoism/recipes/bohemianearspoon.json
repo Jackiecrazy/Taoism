@@ -3,7 +3,7 @@
   "pattern":
   [
     "  n",
-    " st",
+    " s ",
     "s  "
   ],
   "key":
@@ -17,15 +17,10 @@
     {
       "type": "forge:ore_dict",
       "ore": "stickWood"
-    },
-    "t":
-    {
-      "type": "forge:ore_dict",
-      "ore": "string"
     }
   },
   "result":
   {
-    "item": "taoism:qiang"
+    "item": "taoism:bohemianearspoon"
   }
 }

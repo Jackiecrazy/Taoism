@@ -19,8 +19,9 @@ import java.util.List;
 public class ChickenSickle extends TaoWeapon {
     /*
      * An unassuming weapon until you fight back. High power and speed, medium combo and defense, low range
-     * Attacks hook enemy in and stack hemorrhage 2/5
-     * Riposte: for 3 seconds, next attack stacks hemorrhage 4/5 and detonates hemorrhage into layer% of hp and stacks bleed layer/10
+     *
+     * Redesign: stack hemorrhage, detonate automatically when hemorrhage>armor
+     * while hemorrhage is active, receiving a negative buff will add hemorrhage's duration and potency to it, consuming hemorrhage in the process
      */
     public ChickenSickle() {
         super(2, 1.6, 7, 1f);
@@ -50,7 +51,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -65,13 +66,10 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-        NeedyLittleThings.knockBack(target,attacker,-0.5f);
-        if(isCharged(attacker,stack)){
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-            PotionEffect pe=target.removeActivePotionEffect(TaoPotion.HEMORRHAGE);
-            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*pe.getAmplifier());
-            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 100, pe.getAmplifier()/3), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
-        }
+        PotionEffect hemorrhage=NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION);
+        if(hemorrhage.getAmplifier()*4>=target.getTotalArmorValue()){//isCharged(attacker,stack)
+            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*hemorrhage.getAmplifier()*hemorrhage.getAmplifier());
+            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 100, hemorrhage.getAmplifier()), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+        }else target.addPotionEffect(hemorrhage);
     }
 }

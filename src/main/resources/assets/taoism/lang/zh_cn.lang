@@ -75,7 +75,7 @@ kampilan.combo=三层气以上连击3次，九层气以上连击5次
 kampilan.knockback=六层气时将击退效果转化为伤害
 kampilan.riposte=反击：五秒内，下一套连击的击退效果将会额外转化为架势伤害
 
-item.qiang.name=环子枪
+item.qiang.name=红缨枪
 qiang.stab=贯穿攻击范围内所有准星上的生物
 qiang.stab.riposte=枪花效果下，普攻将会在6刻内攻击三次并造成切割伤害
 qiang.bash=右击使用枪杆击退敌人，造成0.5倍的钝伤害

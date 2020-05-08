@@ -49,7 +49,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 4f;
     }
 
     @Override

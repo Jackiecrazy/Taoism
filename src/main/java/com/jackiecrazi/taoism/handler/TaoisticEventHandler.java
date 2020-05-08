@@ -21,11 +21,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -86,29 +87,31 @@ public class TaoisticEventHandler {
         }
     }
 
-    //cancels attack if too far
-    @SubscribeEvent
-    public static void pleasedontkillme(AttackEntityEvent e) {
-        EntityPlayer p = e.getEntityPlayer();
-        //store swing
+    //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void pleasedontkillme(LivingAttackEvent e) {
+        if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
+            EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
+            //store swing
 
-        //cancel attack
-        ItemStack i = p.getHeldItem(TaoWeapon.off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
-        if (i.getItem() instanceof IRange) {
-            IRange icr = (IRange) i.getItem();
-            if (icr.getReach(p, i) * icr.getReach(p, i) < NeedyLittleThings.getDistSqCompensated(p, e.getTarget()))
-                e.setCanceled(true);
-        }
+            //cancel attack
+            ItemStack i = p.getHeldItem(TaoWeapon.off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
+            if (i.getItem() instanceof IRange) {
+                IRange icr = (IRange) i.getItem();
+                if (isMeleeDamage(e.getSource()) && icr.getReach(p, i) * icr.getReach(p, i) < NeedyLittleThings.getDistSqCompensated(p, e.getEntityLiving()))
+                    e.setCanceled(true);
+            }
 
-        if (TaoWeapon.aoe) {
-            //misc code for updating capability
-            int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
-            p.getCapability(TaoCasterData.CAP, null).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
+            if (TaoWeapon.aoe) {
+                //misc code for updating capability
+                int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
+                TaoCasterData.getTaoCap(p).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
+            }
         }
     }
 
-    private static boolean isSpecialDamage(DamageSource ds) {
-        return ds.isFireDamage() || ds.isMagicDamage() || ds.isUnblockable() || ds.isExplosion() || ds.isDamageAbsolute();
+    private static boolean isMeleeDamage(DamageSource ds) {
+        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute() && !ds.isProjectile();
     }
 
     //parry code, TODO make all entities capable of parry
@@ -156,7 +159,7 @@ public class TaoisticEventHandler {
                 ICombatManipulator icm = (ICombatManipulator) weapon.getItem();
                 icm.attackStart(ds, seme, uke, weapon, e.getAmount());
             }
-            if (ds.isProjectile() || isSpecialDamage(ds))
+            if (!isMeleeDamage(ds))
                 return;//cannot parry/block these
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
@@ -302,7 +305,7 @@ public class TaoisticEventHandler {
         }
         if (ds.isUnblockable()) return;//to prevent loops
         //deflect projectile damage
-        if (ds.isProjectile() && ds.getImmediateSource() != null && !isSpecialDamage(ds) && !posBreak) {
+        if (ds.isProjectile() && ds.getImmediateSource() != null && isMeleeDamage(ds) && !posBreak) {
             double dp = ds.getImmediateSource().getLookVec().dotProduct(uke.getLookVec());
             double dist = ds.getImmediateSource().getLookVec().lengthVector() * uke.getLookVec().lengthVector();
             double cos = dp / dist;
@@ -345,6 +348,7 @@ public class TaoisticEventHandler {
             if (stack.getItem() instanceof ICombatManipulator) {
                 ignoreAmnt += ((ICombatManipulator) stack.getItem()).armorIgnoreAmount(e.getSource(), seme, uke, stack, e.getAmount());
             }
+            uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);//just in case...
             uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(noArmor, "ouches", -ignoreAmnt, 0));
         }
     }
@@ -360,9 +364,9 @@ public class TaoisticEventHandler {
         if (abort) return;
         EntityLivingBase uke = e.getEntityLiving();
         uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
-        if (!e.isCanceled() && TaoCasterData.getTaoCap(uke).getDownTimer()<=0) {//do not reset when a person's downed, otherwise it gets out of hand fast
+        if (!e.isCanceled() && TaoCasterData.getTaoCap(uke).getDownTimer() <= 0) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows
-            if (isSpecialDamage(e.getSource()) || e.getSource().isProjectile()) return;
+            if (!isMeleeDamage(e.getSource())) return;
             TaoCasterData.getTaoCap(uke).setPostureRechargeCD(CombatConfig.postureCD);
         }
     }

@@ -31,6 +31,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -335,7 +336,7 @@ public class ClientEvents {
             //bar, not rendered if down because that don't make sense
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
-            Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+            Color c = GRADIENT[MathHelper.clamp((int) posPerc * (GRADIENT.length - 1), 0, GRADIENT.length - 1)];
             GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
             GlStateManager.popMatrix();

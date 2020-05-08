@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.potions;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
@@ -12,6 +13,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -27,12 +29,12 @@ public class TaoPotion extends Potion {
     /**
      * prevents posture regeneration
      */
-    public static Potion ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).procInterval(1).setRegistryName("enfeeble").setPotionName("enfeeble")
+    public static Potion ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
             .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -1, 2);
     /**
      * prevents stagger
      */
-    public static Potion RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).procInterval(1).setRegistryName("resolution").setPotionName("resolution");
+    public static Potion RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
     /**
      * reduces armor by 2 per level
      */
@@ -62,8 +64,20 @@ public class TaoPotion extends Potion {
         event.getRegistry().register(ENFEEBLE);
     }
 
-    private static boolean isSpecialDamage(DamageSource ds) {
-        return ds.isMagicDamage() || ds.isUnblockable() || ds.isDamageAbsolute();
+    @SubscribeEvent
+    public static void apply(PotionEvent.PotionAddedEvent e) {
+        PotionEffect old = e.getOldPotionEffect();
+        PotionEffect current = e.getPotionEffect();
+        EntityLivingBase elb = e.getEntityLiving();
+        if (current.getPotion() == RESOLUTION) {
+            //DETERMINATION!
+            TaoCasterData.getTaoCap(elb).setPosInvulTime(e.getPotionEffect().getDuration());
+        }
+        if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
+            PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
+            elb.removeActivePotionEffect(HEMORRHAGE);
+            elb.addPotionEffect(NeedyLittleThings.stackPot(elb, new PotionEffect(current.getPotion(), pe.getDuration(), pe.getAmplifier()), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+        }
     }
 
     @SubscribeEvent
@@ -72,6 +86,10 @@ public class TaoPotion extends Potion {
         if (e.getEntityLiving().getActivePotionEffect(LACERATION) != null && !isSpecialDamage(ds)) {
             e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(LACERATION).getAmplifier() + 1) * 0.2f));
         }
+    }
+
+    private static boolean isSpecialDamage(DamageSource ds) {
+        return !ds.damageType.equals("bleed") && (ds.isMagicDamage() || ds.isUnblockable() || ds.isDamageAbsolute());
     }
 
     @SubscribeEvent
@@ -88,6 +106,29 @@ public class TaoPotion extends Potion {
         return this;
     }
 
+    @Override
+    public void performEffect(EntityLivingBase l, int amplifier) {
+        int duration = l.getActivePotionEffect(this).getDuration();
+        if (this == BLEED) {
+            l.hurtResistantTime = 0;
+            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 1 + (amplifier / 2f));
+            l.hurtResistantTime = 0;
+//			if (amplifier >= 5) {
+//				l.attackEntityFrom(DamageSource.GENERIC, l.getMaxHealth() / 10);
+//				l.removePotionEffect(TaoPotions.Bleed);
+//			}//essentially useless so archived for now
+        }
+    }
+
+    @Override
+    public boolean isReady(int duration, int amplifier) {
+        return interval != 0 && (duration % interval) + 1 == 1;
+    }
+
+    public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {
+        super.applyAttributesModifiersToEntity(elb, am, amp);
+    }
+
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(PotionEffect effect) {
         return true;
@@ -101,32 +142,5 @@ public class TaoPotion extends Potion {
     @SideOnly(Side.CLIENT)
     public boolean shouldRenderHUD(PotionEffect effect) {
         return true;
-    }
-
-    @Override
-    public boolean isReady(int duration, int amplifier) {
-        return interval != 0 && (duration % interval) + 1 == 1;
-    }
-
-    public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {
-        super.applyAttributesModifiersToEntity(elb, am, amp);
-    }
-
-    @Override
-    public void performEffect(EntityLivingBase l, int amplifier) {
-        int duration = l.getActivePotionEffect(this).getDuration();
-        if (this == BLEED) {
-            l.hurtResistantTime = 0;
-            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 1 + (amplifier / 2f));
-            l.hurtResistantTime = 0;
-//			if (amplifier >= 5) {
-//				l.attackEntityFrom(DamageSource.GENERIC, l.getMaxHealth() / 10);
-//				l.removePotionEffect(TaoPotions.Bleed);
-//			}//essentially useless so archived for now
-        }
-        if (this == RESOLUTION) {
-            //DETERMINATION!
-            TaoCasterData.getTaoCap(l).setPosInvulTime(duration);
-        }
     }
 }

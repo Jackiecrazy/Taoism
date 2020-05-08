@@ -99,7 +99,7 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2.5f;
+        return 3f;
     }
 
     @Override
@@ -142,8 +142,10 @@ public class Nunchaku extends TaoWeapon {
         }
     }
 
-    protected void beforeSwing(EntityLivingBase elb, ItemStack is) {
+    @Override
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
         updateStanceSide(is);
+        return super.onEntitySwing(elb,is);
     }
 
     private void updateStanceSide(ItemStack is) {

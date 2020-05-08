@@ -247,6 +247,13 @@ public class NeedyLittleThings {
      * copy-pasted from EntityPlayer, as-is.
      */
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff) {
+        taoWeaponAttack(targetEntity,player,stack,main,updateOff,DamageSource.causePlayerDamage(player));
+    }
+
+    /**
+     * copy-pasted from EntityPlayer, as-is.
+     */
+    public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
         {
             if (updateOff) {
                 TaoWeapon.off = !main;
@@ -331,7 +338,7 @@ public class NeedyLittleThings {
                         double motionX = targetEntity.motionX;
                         double motionY = targetEntity.motionY;
                         double motionZ = targetEntity.motionZ;
-                        boolean dealDamage = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage);
+                        boolean dealDamage = targetEntity.attackEntityFrom(ds, damage);
 
                         if (dealDamage) {
                             if (kbamnt > 0) {
@@ -353,7 +360,7 @@ public class NeedyLittleThings {
                                 for (EntityLivingBase entitylivingbase : player.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
                                     if (entitylivingbase != player && entitylivingbase != targetEntity && !player.isOnSameTeam(entitylivingbase) && NeedyLittleThings.getDistSqCompensated(player, entitylivingbase) < 9.0D) {
                                         entitylivingbase.knockBack(player, 0.4F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)));
-                                        entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(player), sweepratio);
+                                        entitylivingbase.attackEntityFrom(ds, sweepratio);
                                     }
                                 }
 
