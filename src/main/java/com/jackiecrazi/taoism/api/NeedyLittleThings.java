@@ -54,7 +54,7 @@ public class NeedyLittleThings {
     });
 
     public static void setSize(Entity e, float width, float height) {
-        if (e instanceof IEntityMultiPart||e instanceof MultiPartEntityPart){
+        if (e instanceof IEntityMultiPart || e instanceof MultiPartEntityPart) {
             return; //let the sleeping dragons lie
         }
         if (width != e.width || height != e.height) {
@@ -65,7 +65,7 @@ public class NeedyLittleThings {
             if (e.width < f) {
                 double d0 = (double) width / 2.0D;
                 e.setEntityBoundingBox(new AxisAlignedBB(e.posX - d0, e.posY, e.posZ - d0, e.posX + d0, e.posY + (double) e.height, e.posZ + d0));
-                if(!e.world.isRemote){
+                if (!e.world.isRemote) {
 //                    if(e instanceof EntityPlayerMP){
 //                        Taoism.net.sendTo(new PacketUpdateSize(e.getEntityId(), e.width, e.height), (EntityPlayerMP) e);
 //                    }
@@ -78,7 +78,7 @@ public class NeedyLittleThings {
             e.setEntityBoundingBox(new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double) e.width, axisalignedbb.minY + (double) e.height, axisalignedbb.minZ + (double) e.width));
 
             if (!e.world.isRemote) {
-                if(e.width > f) {
+                if (e.width > f) {
                     e.move(MoverType.SELF, (f - e.width), 0.0D, (f - e.width));
                 }
 //                if(e instanceof EntityPlayerMP){
@@ -159,17 +159,24 @@ public class NeedyLittleThings {
         }
     }
 
-    /**
-     * modified getdistancesq to account for thicc mobs
-     */
-    public static double getDistSqCompensated(Entity from, Entity to) {
-        double x = from.posX - to.posX;
-        x = Math.abs(x) - from.width / 2 - to.width / 2;
-        double y = from.posY - to.posY;
-        y = Math.abs(y) - from.height / 2 - to.height / 2;
-        double z = from.posZ - to.posZ;
-        z = Math.abs(z) - from.width / 2 - to.width / 2;
-        return x * x + y * y + z * z;
+    public static float rad(float angle) {
+        return angle * (float) Math.PI / 180;
+    }
+
+    public static void swapItemInHands(EntityLivingBase elb) {
+        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        elb.setHeldItem(EnumHand.OFF_HAND, main);
+        elb.setHeldItem(EnumHand.MAIN_HAND, off);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND));
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND));
+    }
+
+    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+    }
+
+    public static float getCooldownPeriod(EntityLivingBase elb) {
+        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND) * 20.0D);
     }
 
     public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
@@ -186,30 +193,6 @@ public class NeedyLittleThings {
                 toUse.applyModifier(am);
         }
         return toUse.getAttributeValue();
-    }
-
-    public static void swapItemInHands(EntityLivingBase elb){
-        ItemStack main=elb.getHeldItemMainhand(), off=elb.getHeldItemOffhand();
-        elb.setHeldItem(EnumHand.OFF_HAND, main);
-        elb.setHeldItem(EnumHand.MAIN_HAND,off);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND));
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND));
-    }
-
-    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
-        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
-    }
-
-    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
-        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
-    }
-
-    public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
-    }
-
-    public static float getCooldownPeriod(EntityLivingBase elb) {
-        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND) * 20.0D);
     }
 
     /**
@@ -247,7 +230,7 @@ public class NeedyLittleThings {
      * copy-pasted from EntityPlayer, as-is.
      */
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff) {
-        taoWeaponAttack(targetEntity,player,stack,main,updateOff,DamageSource.causePlayerDamage(player));
+        taoWeaponAttack(targetEntity, player, stack, main, updateOff, DamageSource.causePlayerDamage(player));
     }
 
     /**
@@ -451,6 +434,28 @@ public class NeedyLittleThings {
         }
     }
 
+    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
+    }
+
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, Entity to) {
+        double x = from.posX - to.posX;
+        x = Math.max(Math.abs(x) - from.width / 2 - to.width / 2, 0);
+        //stupid inconsistent game
+        double y = (from.posY) - (to.posY);
+        y = Math.max(Math.abs(y) - from.height / 2 - to.height / 2, 0);
+        double z = from.posZ - to.posZ;
+        z = Math.max(Math.abs(z) - from.width / 2 - to.width / 2, 0);
+        return x * x + y * y + z * z;
+    }
+
+    public static float getCooldownPeriodOff(EntityLivingBase elb) {
+        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
+    }
+
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {
 
         double p_x = x1;
@@ -540,10 +545,6 @@ public class NeedyLittleThings {
             }
         }
         return ret;
-    }
-
-    public static float rad(float angle) {
-        return angle * (float) Math.PI / 180;
     }
 
     public enum POTSTACKINGMETHOD {

@@ -215,6 +215,7 @@ public class TaoStatCapability implements ITaoStatCapability {
             amount = qi - MAXQI;
             qi = MAXQI;
         }
+        if(amount>0)
         setQiGracePeriod(CombatConfig.qiGrace);
         return amount;
     }

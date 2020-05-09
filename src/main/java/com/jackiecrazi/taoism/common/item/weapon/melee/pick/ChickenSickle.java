@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ChickenSickle extends TaoWeapon {
     /*
-     * An unassuming weapon until you fight back. High power and speed, medium combo and defense, low range
+     * A weapon that amplifies effects to the point of debilitation. High power and speed, medium combo and defense, low range
      *
      * Redesign: stack hemorrhage, detonate automatically when hemorrhage>armor
      * while hemorrhage is active, receiving a negative buff will add hemorrhage's duration and potency to it, consuming hemorrhage in the process
@@ -30,8 +30,8 @@ public class ChickenSickle extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("chickensickle.normal"));
-        tooltip.add(I18n.format("chickensickle.riposte1"));
-        tooltip.add(I18n.format("chickensickle.riposte2"));
+        tooltip.add(I18n.format("chickensickle.detonate"));
+        tooltip.add(I18n.format("chickensickle.debuff"));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ChickenSickle extends TaoWeapon {
         PotionEffect hemorrhage=NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION);
         if(hemorrhage.getAmplifier()*4>=target.getTotalArmorValue()){//isCharged(attacker,stack)
             target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*hemorrhage.getAmplifier()*hemorrhage.getAmplifier());
-            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 100, hemorrhage.getAmplifier()), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 1, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
         }else target.addPotionEffect(hemorrhage);
     }
 }
