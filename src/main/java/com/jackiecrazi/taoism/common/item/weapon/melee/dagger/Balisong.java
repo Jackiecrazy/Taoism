@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -14,6 +15,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -50,8 +52,13 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return NeedyLittleThings.isBehindEntity(attacker,target) ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2f;
     }
 
     @Override
@@ -61,19 +68,14 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        TaoCasterData.getTaoCap(defender).setRollCounter(0);
+        defender.rotationYaw = attacker.rotationYaw;
+        defender.rotationPitch = attacker.rotationPitch;
         setCombo(defender, item, 0);
-        defender.hurtResistantTime=getMaxChargeTime();
         Vec3d look = attacker.getLookVec();
         defender.addVelocity(-look.x, -look.y, -look.z);
         defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (isCharged(attacker, stack)) {
-            dischargeWeapon(attacker, stack);
-        }
     }
 
     @Override

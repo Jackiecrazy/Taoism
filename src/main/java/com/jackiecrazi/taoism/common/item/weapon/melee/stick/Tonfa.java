@@ -48,28 +48,8 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public PartDefinition[] getPartNames(ItemStack is) {
-        return parts;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         return 0f;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
     }
 
     @Override
@@ -94,11 +74,6 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 20;
-    }
-
-    @Override
     public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         int qi = TaoCasterData.getTaoCap(defender).getQiFloored();
         if (qi >= 3) {//reset cooldown
@@ -110,13 +85,8 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.7f;
-    }
-
-    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack)== EnumHand.OFF_HAND) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20));
             target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 20));
         }
@@ -129,7 +99,37 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack)==EnumHand.MAIN_HAND)
+        if (getHand(stack) == EnumHand.MAIN_HAND)
             multiHit(attacker, target, 3, 3);
+    }
+
+    @Override
+    public PartDefinition[] getPartNames(ItemStack is) {
+        return parts;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1;
+    }
+
+    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 20;
+    }
+
+    @Override
+    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 0.7f;
     }
 }

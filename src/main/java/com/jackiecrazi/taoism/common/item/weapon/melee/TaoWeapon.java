@@ -39,6 +39,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -55,6 +56,39 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     protected static final UUID QI_MODIFIER = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130003");
     //booleans only used when attacking to determine what type of attack it is
+    //0
+    private static final List<Material> pickList = Arrays.asList(
+            Material.ANVIL,
+            Material.IRON,
+            Material.PISTON,
+            Material.REDSTONE_LIGHT,
+            Material.CIRCUITS,
+            Material.PACKED_ICE,
+            Material.ROCK,
+            Material.ICE,
+            Material.GLASS);
+    //1
+    private static final List<Material> shovelList = Arrays.asList(
+            Material.CAKE,
+            Material.CLAY,
+            Material.CRAFTED_SNOW,
+            Material.GRASS,
+            Material.GROUND,
+            Material.CARPET,
+            Material.SAND,
+            Material.SNOW);
+    //2
+    private static final List<Material> axeList = Arrays.asList(
+            Material.CACTUS,
+            Material.CLOTH,
+            Material.CORAL,
+            Material.GOURD,
+            Material.WOOD);
+    //3
+    private static final List<Material> scytheList = Arrays.asList(
+            Material.LEAVES,
+            Material.PLANTS,
+            Material.VINE);
     /**
      * THIS IS ONLY USED FOR UTILS. DO NOT USE FOR ATTACK DETERMINATION!
      */
@@ -66,39 +100,6 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final double dmg;
     private final float base;
     private float qiRate = 0.5f;
-    //0
-    private List<Material> pickList = Arrays.asList(
-            Material.ANVIL,
-            Material.IRON,
-            Material.PISTON,
-            Material.REDSTONE_LIGHT,
-            Material.CIRCUITS,
-            Material.PACKED_ICE,
-            Material.ROCK,
-            Material.ICE,
-            Material.GLASS);
-    //1
-    private List<Material> shovelList = Arrays.asList(
-            Material.CAKE,
-            Material.CLAY,
-            Material.CRAFTED_SNOW,
-            Material.GRASS,
-            Material.GROUND,
-            Material.CARPET,
-            Material.SAND,
-            Material.SNOW);
-    //2
-    private List<Material> axeList = Arrays.asList(
-            Material.CACTUS,
-            Material.CLOTH,
-            Material.CORAL,
-            Material.GOURD,
-            Material.WOOD);
-    //3
-    private List<Material> scytheList = Arrays.asList(
-            Material.LEAVES,
-            Material.PLANTS,
-            Material.VINE);
 
     public TaoWeapon(int damageType, double swingSpeed, double damage, float BasePostureConsumption) {
         super();
@@ -329,19 +330,21 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             if (isTwoHanded(stack)) {
                 //main hand, update offhand dummy
                 if (onMainHand && !onOffhand) {
-                    if(!isDummy(offhand)||offhand.getItem()!=mainhand.getItem()){
+                    if (!isDummy(offhand) || offhand.getItem() != mainhand.getItem()) {
                         elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(mainhand, offhand));
                     }
                     offhand.setItemDamage(stack.getItemDamage());
                     if (!dummyMatchMain(offhand, stack)) {
-                        offhand.setTagCompound(gettagfast(mainhand).copy());
-                        //TODO obnoxious equip sounds
+                        NBTTagCompound cop = gettagfast(mainhand).copy();
+                        cop.setBoolean("taodummy", gettagfast(offhand).getBoolean("taodummy"));
+                        cop.setTag("sub", gettagfast(offhand).getCompoundTag("sub"));
+                        offhand.setTagCompound(cop);
                     }
                 }
             }
             if (isDummy(stack)) {
                 boolean diffItem = mainhand.getItem() != stack.getItem();
-                if (diffItem || !onOffhand) {//FIXME last slot overflow to first slot bug
+                if (diffItem || !onOffhand) {//FIXME last slot overflow to first slot bug, switching to another weapon does not clear tag
                     //check where to unwrap the stack to
                     ItemStack unwrap = unwrapDummy(stack);
                     if (onOffhand) {
@@ -546,20 +549,22 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         ret.setTagCompound(gettagfast(main).copy());
         gettagfast(ret).setTag("sub", wrapping.writeToNBT(new NBTTagCompound()));
         gettagfast(ret).setBoolean("taodummy", true);
-        gettagfast(ret).setTag("linked", main.writeToNBT(new NBTTagCompound()));
         //ret.addEnchantment(Enchantment.getEnchantmentByID(10),1);
         return ret;
     }
 
     private boolean dummyMatchMain(ItemStack is, ItemStack compare) {
-        return gettagfast(is).equals(gettagfast(compare));
+        NBTTagCompound nbt = gettagfast(is).copy();
+        nbt.removeTag("taodummy");
+        nbt.removeTag("sub");
+        return nbt.equals(compare.getTagCompound());
     }
 
     private ItemStack unwrapDummy(ItemStack from) {
         NBTTagCompound sub = from.getSubCompound("sub");
         if (sub != null) {
-            ItemStack is= new ItemStack(sub);
-            if(is.hasTagCompound()&&gettagfast(is).hasNoTags())is.setTagCompound(null);
+            ItemStack is = new ItemStack(sub);
+            if (!is.hasTagCompound() || is.getTagCompound().hasNoTags()) is.setTagCompound(null);
             return is;
         }
         return ItemStack.EMPTY;
@@ -700,6 +705,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         chargeWeapon(attacker, defender, item, getMaxChargeTime());
     }
 
+    @Override
     public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //because tonfas.
     }
@@ -727,6 +733,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         dischargeWeapon(elb, is);
+    }
+
+    @Override
+    public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target);
+    }
+
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return crit > 1f ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {

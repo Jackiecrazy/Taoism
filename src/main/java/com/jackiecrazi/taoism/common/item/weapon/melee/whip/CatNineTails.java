@@ -33,15 +33,6 @@ public class CatNineTails extends TaoWeapon {
     }
 
     @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.ignore") + TextFormatting.RESET);
-        tooltip.add(I18n.format("catninetails.lacerate"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armord") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armorp") + TextFormatting.RESET);
-    }
-
-    @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return parts;
     }
@@ -54,16 +45,6 @@ public class CatNineTails extends TaoWeapon {
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5f;
     }
 
     @Override
@@ -81,8 +62,34 @@ public class CatNineTails extends TaoWeapon {
         tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
     }
 
+    @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.ignore") + TextFormatting.RESET);
+        tooltip.add(I18n.format("catninetails.lacerate"));
+        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armord") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armorp") + TextFormatting.RESET);
+    }
+
+    @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        return 0;
+    }
+
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {
         return false;
+    }
+
+    @Override
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker, target, item, orig);
+        ds.setDamageBypassesArmor();
+    }
+
+    @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        Taoism.setBypassArmor(ds, false);
+        return super.hurtStart(ds, attacker, target, item, orig);
     }
 
     @Override
@@ -99,14 +106,7 @@ public class CatNineTails extends TaoWeapon {
     }
 
     @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker,target,item, orig);
-        ds.setDamageBypassesArmor();
-    }
-
-    @Override
-    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        Taoism.setBypassArmor(ds,false);
-        return super.hurtStart(ds, attacker, target, item, orig);
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 3.5f;
     }
 }

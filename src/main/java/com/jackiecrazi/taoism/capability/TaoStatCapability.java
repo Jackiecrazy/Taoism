@@ -51,18 +51,14 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosture(float amount) {
-        posture = MathHelper.clamp(amount, 0f, getMaxPosture());
-        if (posture == getMaxPosture()) setProtected(true);
+        posture = Math.min(amount, 0f);
+        if (posture >= getMaxPosture()) setProtected(true);
         //if (posture == 0) beatDown(null, 0);
     }
 
     @Override
     public float addPosture(float amount) {
-        posture += amount;
-        if (posture >= getMaxPosture()) {
-            posture = getMaxPosture();
-            setProtected(true);
-        }
+        setPosture(posture+amount);
         return posture;
     }
 
@@ -210,13 +206,13 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public float addQi(float amount) {
         qi += amount;
+        if(amount>0)
+            setQiGracePeriod(CombatConfig.qiGrace);
         amount = 0;
         if (qi > MAXQI) {
             amount = qi - MAXQI;
             qi = MAXQI;
         }
-        if(amount>0)
-        setQiGracePeriod(CombatConfig.qiGrace);
         return amount;
     }
 

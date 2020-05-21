@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,13 +46,19 @@ public class ChickenSickle extends TaoWeapon {
     }
 
     @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
+        return hemorrhage !=null&& hemorrhage.getAmplifier()*4>=target.getTotalArmorValue() ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4;
+        return 3;
     }
 
     @Override

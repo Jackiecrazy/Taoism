@@ -27,6 +27,8 @@ public class Qiang extends TaoWeapon {
     riposte:
     //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
     //the next stab in 4 seconds deals cutting damage 3 times with an interval of 1 tick
+
+    TODO buff me
      */
 
     private final PartDefinition[] parts = {

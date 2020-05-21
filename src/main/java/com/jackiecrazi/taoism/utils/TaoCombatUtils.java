@@ -151,7 +151,6 @@ public class TaoCombatUtils {
             //NeedyLittleThings.setSize(elb, min, min);
 
             elb.addVelocity(x, y, z);
-            elb.hurtResistantTime=CombatConfig.rollThreshold;
             elb.velocityChanged = true;
             return true;
         }

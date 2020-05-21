@@ -18,6 +18,7 @@ weapon.shift=SHIFT for stats...
 weapon.ctrl=CTRL for abilities...
 weapon.dummy=this item is only a dummy for cleaner code. It will revert back to whatever item it used to be once the two-handed weapon is unequipped
 weapon.hands=this weapon is two-handed and will disable offhand item use
+weapon.half=this weapon can be wielded in one hand, but will use two if possible
 weapon.parry=this weapon cannot block or parry
 weapon.ignore=this weapon ignores blocks, parries, and shields
 weapon.disshield=this weapon disables shields when launching a leaping strike
@@ -27,8 +28,9 @@ taoism.weaponAttMult=attack posture multiplier: %s
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge
+ken.qi=qi level can amplify base damage up to 1.3x
 ken.aoe=attacks all enemies in a 1.5 block radius
-ken.stab=if an attack would only strike one target, deal 1.2x damage
+ken.stab=if an attack would only strike one target, additionally deal 1.2x damage
 ken.leap=if airborne, deal 1.8x damage without sweep
 ken.riposte=riposte: combo lengthened to 9 hits for 9 seconds
 
@@ -155,6 +157,15 @@ bohear.dist=if the currently struck target is a similar distance away from the a
 bohear.buff=deal extra damage up to a maximum of double and reduce cooldown down to a minimum of half
 bohear.bash=right click to consume this buff to bash all enemies back slightly
 bohear.riposte=riposte: impale targets in the next 5 seconds, causing them to be unable to approach you until you change targets
+
+item.nunchaku.name=Nunchaku
+nunchaku.dual=When held in two hands, attack cooldown on one side is reset when attacking from the other
+nunchaku.stance=After a given move the nunchaku will land on either the high (H) or low (L) side
+nunchaku.moves=A high attack can then be issued by normal attack, or a low one executed by back-attack
+nunchaku.flick=H-H: flick, very low cooldown
+nunchaku.smash=H-L: smash, deals 1.5x damage and slightly slows enemies
+nunchaku.sweep=L-L: sweep, radius 0.5
+nunchaku.spin=L-H: 8-spin, hits 3 times for 0.4x damage each
 
 <Resources>=
 

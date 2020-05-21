@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -50,9 +51,8 @@ public class BohemianEarspoon extends TaoWeapon {
         return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
     }
 
-    @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
+    private float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
     }
 
     @Override
@@ -88,16 +88,15 @@ public class BohemianEarspoon extends TaoWeapon {
                 EntityLivingBase target = elb.getLastAttackedEntity();
                 if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
                     if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
-                        //too close! Do something.
+                        //too close! Rip out innards for 10% max hp damage
+                        target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), target.getMaxHealth() / 10f);
                     }
                     //a new challenger is approaching!
                     Vec3d pos = elb.getPositionVector();
-                    Vec3d angleOfAttack = new Vec3d(target.posX - (pos.x + 0.5D), target.posY - pos.y, target.posZ - (pos.z + 0.5D));
-
-                    // we use the resultant vector to determine the force to apply.
-                    double xForce = angleOfAttack.x * 0.02;
-                    double yForce = angleOfAttack.y * 0.02;
-                    double zForce = angleOfAttack.z * 0.02;
+                    Vec3d angle = new Vec3d(target.posX - (pos.x + 0.5D), target.posY - pos.y, target.posZ - (pos.z + 0.5D));
+                    double xForce = angle.x * 0.02;
+                    double yForce = angle.y * 0.02;
+                    double zForce = angle.z * 0.02;
                     target.motionX += xForce;
                     target.motionY += yForce;
                     target.motionZ += zForce;
@@ -108,29 +107,9 @@ public class BohemianEarspoon extends TaoWeapon {
         }
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
-            splash(attacker, target, 4);
-    }
-
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 1f);
-            setLastAttackedRangeSq(stack, 0);
-        }
-        else {
-            setLastLastAttackedRangeSq(stack, getLastAttackedRangeSq(stack));
-            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
-        }
-    }
-
-    public float newCooldown(EntityLivingBase elb, ItemStack item) {
-        if(getHand(item)==EnumHand.MAIN_HAND) {
-            float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
-            float min = Math.min(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
-            return (min / max) * 0.5f;
-        }
-        return 0f;
+    @Override
+    public int getDamageType(ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
     }
 
     @Override
@@ -142,16 +121,36 @@ public class BohemianEarspoon extends TaoWeapon {
         tooltip.add(I18n.format("bohear.riposte"));
     }
 
+    public float newCooldown(EntityLivingBase elb, ItemStack item) {
+        if (getHand(item) == EnumHand.MAIN_HAND) {
+            float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
+            float min = Math.min(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
+            return (min / max) * 0.5f;
+        }
+        return 0f;
+    }
+
+    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND)
+            splash(attacker, target, 4);
+    }
+
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            NeedyLittleThings.knockBack(target, attacker, 1f);
+            setLastAttackedRangeSq(stack, 0);
+        } else {
+            setLastLastAttackedRangeSq(stack, getLastAttackedRangeSq(stack));
+            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
+        }
+    }
+
     private void setLastAttackedRangeSq(ItemStack item, float range) {
         if (range != 0f) {
             gettagfast(item).setFloat("lastAttackedRange", range);
         } else {
             gettagfast(item).removeTag("lastAttackedRange");
         }
-    }
-
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
     }
 
     private void setLastLastAttackedRangeSq(ItemStack item, float range) {

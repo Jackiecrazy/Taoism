@@ -53,6 +53,10 @@ public class NeedyLittleThings {
         }
     });
 
+    public static boolean isMeleeDamage(DamageSource ds) {
+        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute() && !ds.isProjectile();
+    }
+
     public static void setSize(Entity e, float width, float height) {
         if (e instanceof IEntityMultiPart || e instanceof MultiPartEntityPart) {
             return; //let the sleeping dragons lie

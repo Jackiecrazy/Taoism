@@ -297,7 +297,7 @@ public class ClientEvents {
                         //bar
                         GlStateManager.pushMatrix();
                         GlStateManager.enableAlpha();
-                        Color c = GRADIENT[(int) (qiExtra * (GRADIENT.length))];
+                        Color c = GRADIENT[MathHelper.clamp((int) (qiExtra * (GRADIENT.length)), 0, GRADIENT.length - 1)];
                         GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
                         mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64) + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();

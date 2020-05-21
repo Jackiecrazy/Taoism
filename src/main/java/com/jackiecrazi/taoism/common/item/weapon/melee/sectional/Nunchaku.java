@@ -7,7 +7,9 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -36,10 +38,7 @@ public class Nunchaku extends TaoWeapon {
      * backflip interrupts enemy attacks and knocks them back very slightly, by back-alt
      * updraft AoEs, hits through blocks and knocks back, done by normal alt
      *
-     * Riposte(one handed): automatically perform a flick, canceling the incoming attack and disorienting the enemy slightly
-     * Riposte(two handed): catch the opponent's weapon in your chain, binding 3.
-     * your attacks instantly refill each other's gauges halfway and cannot be blocked for 6 seconds (so your attack speed is quadrupled).
-     * if you are behind your opponent and in jab range, consume this buff to inflict slow 2/infinite, gain rooted 1/infinite (no knockback),
+     * Execution: if you are behind your opponent and in jab range (1), inflict slow 2/infinite, gain rooted 1/infinite (no knockback),
      * and causes the opponent to lose 5 bars of oxygen per second in a choke hold.
      * Lasts until distance > 3, at which point the opponent is tripped for 50% max posture damage
      * Alternatively, by dealing enough damage to you (threshold scales with higher chi) will end this state as well
@@ -57,12 +56,14 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(I18n.format("tonfa.main"));
-        tooltip.add(I18n.format("tonfa.off"));
-        tooltip.add(I18n.format("tonfa.parry"));
-        tooltip.add(I18n.format("tonfa.reset"));
-        tooltip.add(I18n.format("tonfa.defbreak"));
-        tooltip.add(I18n.format("tonfa.riposte"));
+        tooltip.add(I18n.format("weapon.half"));
+        tooltip.add(I18n.format("nunchaku.dual"));
+        tooltip.add(I18n.format("nunchaku.stance"));
+        tooltip.add(I18n.format("nunchaku.moves"));
+        tooltip.add(I18n.format("nunchaku.flick"));
+        tooltip.add(I18n.format("nunchaku.smash"));
+        tooltip.add(I18n.format("nunchaku.sweep"));
+        tooltip.add(I18n.format("nunchaku.spin"));
     }
 
     @Override
@@ -99,7 +100,7 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
+        return 2f;
     }
 
     @Override
@@ -131,7 +132,10 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-
+        if (getCurrentMove(stack).isSneakPressed() && !getLastMove(stack).isSneakPressed()) {//high low
+            //smash!
+            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS,10,0));
+        }
     }
 
     @Override

@@ -1,10 +1,11 @@
 package com.jackiecrazi.taoism.common.entity;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrow;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -25,11 +26,15 @@ public class TaoEntities {
 //        e.getRegistry().register(factoryMove(MoveSanMiguel.class));
 //        e.getRegistry().register(factoryMove(MoveCleave.class));
         e.getRegistry().register(factoryMove(MoveMultiStrike.class));
+        e.getRegistry().register(factoryProjectile(EntityRopeDart.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
-        return EntityEntryBuilder.create().entity(move).name(move.getName()).tracker(64,20,false).id(Taoism.MODID,id++).build();
+        return EntityEntryBuilder.create().entity(move).name(move.getName()).tracker(64,20,false).id(move.getName(),id++).build();
     }
     private static EntityEntry factoryArrow(Class<?extends EntityTaoArrow> arr){
-        return EntityEntryBuilder.create().entity(arr).name(arr.getName()).tracker(64,20,false).id(Taoism.MODID,id++).build();
+        return EntityEntryBuilder.create().entity(arr).name(arr.getName()).tracker(64,20,false).id(arr.getName(),id++).build();
+    }
+    private static EntityEntry factoryProjectile(Class<?extends EntityThrowable> projectile){
+        return EntityEntryBuilder.create().entity(projectile).name(projectile.getName()).tracker(64,5,true).id(projectile.getName(),id++).build();
     }
 }

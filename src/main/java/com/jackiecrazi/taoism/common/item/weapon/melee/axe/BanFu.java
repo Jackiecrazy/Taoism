@@ -45,7 +45,7 @@ public class BanFu extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
+        return 3f;
     }
 
     @Override
@@ -92,4 +92,13 @@ public class BanFu extends TaoWeapon {
         return !attacker.onGround;
     }
 
+    private static final boolean[] harvestList={false,false,true,false};
+
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    @Override
+    protected boolean[] harvestable(ItemStack is) {
+        return harvestList;
+    }
 }

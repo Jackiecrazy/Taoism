@@ -27,9 +27,9 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -42,7 +42,6 @@ public class TaoisticEventHandler {
     public static boolean modCall;
     private static boolean abort = false;
     private static boolean downingHit = false;
-    private static ITaoStatCapability cap;
     //	@SubscribeEvent
 //	public static void pleasekillmeoff(PlayerInteractEvent.RightClickItem e) {
 //		//System.out.println("hi");
@@ -87,6 +86,16 @@ public class TaoisticEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void updateCaps(AttackEntityEvent e) {
+        if (TaoWeapon.aoe) {
+            EntityPlayer p = e.getEntityPlayer();
+            //misc code for updating capability
+            int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
+            TaoCasterData.getTaoCap(p).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
+        }
+    }
+
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void pleasedontkillme(LivingAttackEvent e) {
@@ -96,22 +105,15 @@ public class TaoisticEventHandler {
 
             //cancel attack
             ItemStack i = p.getHeldItem(TaoWeapon.off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
-            if (i.getItem() instanceof IRange) {
-                IRange icr = (IRange) i.getItem();
-                if (isMeleeDamage(e.getSource()) && icr.getReach(p, i) * icr.getReach(p, i) < NeedyLittleThings.getDistSqCompensated(p, e.getEntityLiving()))
+            if (i.getItem() instanceof ICombatManipulator) {
+                ICombatManipulator icm = (ICombatManipulator) i.getItem();
+                if (!icm.canAttack(e.getSource(), p, e.getEntityLiving(), i, e.getAmount()))
                     e.setCanceled(true);
             }
-
-            if (TaoWeapon.aoe) {
-                //misc code for updating capability
-                int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
-                TaoCasterData.getTaoCap(p).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
-            }
         }
-    }
-
-    private static boolean isMeleeDamage(DamageSource ds) {
-        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute() && !ds.isProjectile();
+        //rolling inv frames for projectiles and melee damage
+        if ((e.getSource().isProjectile() || NeedyLittleThings.isMeleeDamage(e.getSource())) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
+            e.setCanceled(true);
     }
 
     //parry code, TODO make all entities capable of parry
@@ -159,7 +161,7 @@ public class TaoisticEventHandler {
                 ICombatManipulator icm = (ICombatManipulator) weapon.getItem();
                 icm.attackStart(ds, seme, uke, weapon, e.getAmount());
             }
-            if (!isMeleeDamage(ds))
+            if (!NeedyLittleThings.isMeleeDamage(ds))
                 return;//cannot parry/block these
 
             float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
@@ -226,9 +228,8 @@ public class TaoisticEventHandler {
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
             e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
+            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
         }
-        if (e.getDamageModifier() > 1)
-            e.setResult(Event.Result.ALLOW);
     }
 
     //critical hit check
@@ -305,7 +306,7 @@ public class TaoisticEventHandler {
         }
         if (ds.isUnblockable()) return;//to prevent loops
         //deflect projectile damage
-        if (ds.isProjectile() && ds.getImmediateSource() != null && isMeleeDamage(ds) && !posBreak) {
+        if ((ds.isProjectile() || NeedyLittleThings.isMeleeDamage(ds)) && ds.getImmediateSource() != null && !posBreak) {
             double dp = ds.getImmediateSource().getLookVec().dotProduct(uke.getLookVec());
             double dist = ds.getImmediateSource().getLookVec().lengthVector() * uke.getLookVec().lengthVector();
             double cos = dp / dist;
@@ -366,7 +367,7 @@ public class TaoisticEventHandler {
         uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
         if (!e.isCanceled() && TaoCasterData.getTaoCap(uke).getDownTimer() <= 0) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows
-            if (!isMeleeDamage(e.getSource())) return;
+            if (!NeedyLittleThings.isMeleeDamage(e.getSource())) return;
             TaoCasterData.getTaoCap(uke).setPostureRechargeCD(CombatConfig.postureCD);
         }
     }
@@ -418,13 +419,19 @@ public class TaoisticEventHandler {
     public static void tickStuff(TickEvent.PlayerTickEvent e) {
         EntityPlayer p = e.player;
         if (e.phase.equals(TickEvent.Phase.END)) {
+            ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
+            //qi 1+ gives slow fall
+            if (p.motionY < 0 && cap.getDownTimer() <= 0) {
+                p.motionY /= (cap.getQiFloored() + 1);
+                p.fallDistance = 0f;
+            }
+
             TaoCasterData.updateCasterData(p);
             //recharge weapon
             //hacky, but well...
             ItemStack mainhand = p.getHeldItemMainhand();
             ItemStack offhand = p.getHeldItemOffhand();
-            cap = TaoCasterData.getTaoCap(p);
             if (Taoism.getAtk(p) == 0) {//fresh switch in, do not execute following code
                 if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND)
                     cap.setSwitchIn(true);

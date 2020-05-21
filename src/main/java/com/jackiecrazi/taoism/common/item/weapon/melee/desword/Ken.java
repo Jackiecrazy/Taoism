@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -28,15 +29,11 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround) {
-            splash(attacker, target, 3);
-        }
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float air = attacker.onGround ? 1f : 1.5f;
+        float aoe = isAoE(attacker, target) ? 1f : 1.2f;
+        float qiMult = 1 + (getQiFromStack(item) / 27f);
+        return air * aoe * qiMult;
     }
 
     private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
@@ -47,29 +44,14 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = attacker.onGround ? 1f : 1.5f;
-        float aoe = isAoE(attacker, target) ? 1f : 1.2f;
-        float qiMult = 1 + (getQiFromStack(item) / 27f);
-        return air * aoe * qiMult;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4;
+        return 3;
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         if (isCharged(wielder, is)) return 9;
         return 3;
-    }
-
-    @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //combo limit is raised to 9 for the next 9 seconds
-        setCombo(defender, item, 0);
-        super.parrySkill(attacker, defender, item);
     }
 
     @Override
@@ -85,9 +67,34 @@ public class Ken extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("ken.combo"));
+        tooltip.add(I18n.format("ken.qi"));
         tooltip.add(I18n.format("ken.aoe"));
         tooltip.add(I18n.format("ken.stab"));
         tooltip.add(I18n.format("ken.leap"));
         tooltip.add(I18n.format("ken.riposte"));
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        //combo limit is raised to 9 for the next 9 seconds
+        setCombo(defender, item, 0);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return isAoE(attacker, target) ? Event.Result.DENY : Event.Result.ALLOW;
+    }
+
+    @Override
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (attacker.onGround) {
+            splash(attacker, target, 3);
+        }
     }
 }

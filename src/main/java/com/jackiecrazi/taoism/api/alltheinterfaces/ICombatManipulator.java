@@ -3,8 +3,19 @@ package com.jackiecrazi.taoism.api.alltheinterfaces;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 public interface ICombatManipulator {
+    /**
+     * called on LivingAttackEvent to determine whether the hit is valid
+     */
+    boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
+     * called on CriticalHitEvent to determine whether the hit is critical
+     */
+    Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit);
+
     /**
      * this is called on CriticalHitEvent to determine crit multiplier
      */

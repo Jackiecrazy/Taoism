@@ -32,41 +32,13 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4;
-    }
-
-    @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround) {
-            splash(attacker, target, 5);
-        }
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        boolean thingy = getCombo(elb, is) != getComboLength(elb, is) - 1;
-        if (thingy) dischargeWeapon(elb, is);
+        return 3;
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         if (!attacker.onGround) return 1.5f;
         else return 1f;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        if (wielder.getCapability(TaoCasterData.CAP, null).getQi() >= 9)
-            return 5;
-        return 3;
-    }
-
-    @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //resets combo, the next combo sequence in 5 seconds additionally has its knockback converted to true posture damage
-        setCombo(defender, item, 0);
-        super.parrySkill(attacker, defender, item);
     }
 
     @Override
@@ -77,6 +49,35 @@ public class Kampilan extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
+    }
+
+    @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(I18n.format("kampilan.aoe"));
+        tooltip.add(I18n.format("kampilan.leap"));
+        tooltip.add(I18n.format("kampilan.combo"));
+        tooltip.add(I18n.format("kampilan.knockback"));
+        tooltip.add(I18n.format("kampilan.riposte"));
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        //resets combo, the next combo sequence in 5 seconds additionally has its knockback converted to true posture damage
+        setCombo(defender, item, 0);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        boolean thingy = getCombo(elb, is) != getComboLength(elb, is) - 1;
+        if (thingy) dischargeWeapon(elb, is);
+    }
+
+    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        if (wielder.getCapability(TaoCasterData.CAP, null).getQi() >= 9)
+            return 5;
+        return 3;
     }
 
     @Override
@@ -96,11 +97,10 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(I18n.format("kampilan.aoe"));
-        tooltip.add(I18n.format("kampilan.leap"));
-        tooltip.add(I18n.format("kampilan.combo"));
-        tooltip.add(I18n.format("kampilan.knockback"));
-        tooltip.add(I18n.format("kampilan.riposte"));
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (attacker.onGround) {
+            splash(attacker, target, 5);
+        }
     }
 }
