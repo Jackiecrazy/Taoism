@@ -141,10 +141,11 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         return is.getTagCompound();
     }
 
-//    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-//        //Taoism.net.sendToServer(new PacketMakeMove(entityLiving));
-//        return true;
-//    }
+    protected TaoWeapon setQiAccumulationRate(float amount) {
+        qiRate = amount;
+        return this;
+    }
+
     /*
     First and foremost, attacks and defences can be "hard" or "soft".
 An attack has a windup, wound and recovery phase. These phases preclude all other phases on that hand:
@@ -163,11 +164,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 //    public boolean onLeftClickEntity(final ItemStack stack, final EntityPlayer player, final Entity entity) {
 //        return notSpecialing;
 //    }
-
-    protected TaoWeapon setQiAccumulationRate(float amount) {
-        qiRate = amount;
-        return this;
-    }
 
     public double getDamage() {
         return dmg;
@@ -571,7 +567,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, EntityLivingBase target, double diameter) {
-        splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(diameter / 2d, 1.5d, diameter / 2d), null));
+        splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(diameter / 2d, 1.5d, diameter / 2d), EntitySelectors.IS_ALIVE));
     }
 
     protected void splash(EntityLivingBase attacker, List<Entity> targets) {
@@ -579,6 +575,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, List<Entity> targets, boolean enforceInFront) {
+        if (attacker instanceof EntityPlayer) {
+            ((EntityPlayer) attacker).spawnSweepParticles();
+        }
         for (Entity target : targets) {
 
             if (target == attacker) continue;

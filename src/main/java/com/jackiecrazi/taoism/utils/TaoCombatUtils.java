@@ -77,6 +77,14 @@ public class TaoCombatUtils {
         return ret;
     }
 
+    private static boolean contains(Item i) {
+        if (i.getRegistryName() == null) return false;
+        for (String s : CombatConfig.parryCapableItems) {
+            if (s.equals(i.getRegistryName().toString())) return true;
+        }
+        return false;
+    }
+
     public static boolean isEntityBlocking(EntityLivingBase entity) {
         return ((entity.isSneaking() && isHoldingEligibleItem(entity)) || entity.isActiveItemStackBlocking()) && !isEntityParrying(entity);
     }
@@ -125,7 +133,7 @@ public class TaoCombatUtils {
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
-        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && elb.onGround && !elb.isSneaking()) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && (elb.onGround || TaoCasterData.getTaoCap(elb).getQi() > 2) && !elb.isSneaking()) {
             //System.out.println("execute roll to side " + side);
             TaoCasterData.getTaoCap(elb).setRollCounter(0);
             TaoCasterData.getTaoCap(elb).setPrevSizes(elb.width, elb.height);
@@ -157,7 +165,6 @@ public class TaoCombatUtils {
         return false;
     }
 
-
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
         if (percent != 0f)//this is because this is called in tickStuff on the first tick after cooldown starts, so constant resetting would just make the weapon dysfunctional
@@ -179,6 +186,18 @@ public class TaoCombatUtils {
                 return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
         }
         return 0;
+    }
+
+    public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
+        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
+    }
+
+    private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
+        if (!ds.isUnblockable())
+            damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
+        if (!ds.isDamageAbsolute())
+            damage = applyPotionDamageCalculations(target, ds, damage);
+        return damage;
     }
 
     private static float applyPotionDamageCalculations(EntityLivingBase elb, DamageSource source, float damage) {
@@ -204,25 +223,5 @@ public class TaoCombatUtils {
                 return damage;
             }
         }
-    }
-
-    private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
-        if (!ds.isUnblockable())
-            damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
-        if (!ds.isDamageAbsolute())
-            damage = applyPotionDamageCalculations(target, ds, damage);
-        return damage;
-    }
-
-    public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
-        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
-    }
-
-    private static boolean contains(Item i) {
-        if (i.getRegistryName() == null) return false;
-        for (String s : CombatConfig.parryCapableItems) {
-            if (s.equals(i.getRegistryName().toString())) return true;
-        }
-        return false;
     }
 }

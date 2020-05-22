@@ -62,7 +62,6 @@ public class TaoisticEventHandler {
 //			}
 //		}
 //	} //stop stealing other people's jobs!
-    private static float damageCache;
 
     //attacks when out of range
     @SubscribeEvent
@@ -70,19 +69,15 @@ public class TaoisticEventHandler {
         //System.out.println("hi");
         EntityPlayer p = e.getEntityPlayer();
         ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
-        if (!i.isEmpty()) {
-            //System.out.println("nonnull");
-            if (i.getItem() instanceof IRange) {
-                //System.out.println("range!");
-                IRange icr = (IRange) i.getItem();
+        if (i.getItem() instanceof IRange) {
+            //System.out.println("range!");
+            IRange icr = (IRange) i.getItem();
 
-                Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
-                if (elb != null) {
-                    //System.out.println("sending packet!");
-                    Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
-                }
+            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
+            if (elb != null) {
+                //System.out.println("sending packet!");
+                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
             }
-            //todo reset cooldown here and sent packet
         }
     }
 

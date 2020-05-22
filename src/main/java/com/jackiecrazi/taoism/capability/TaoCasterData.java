@@ -31,40 +31,6 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         inst = new TaoStatCapability(target);
     }
 
-    @Nonnull
-    public static ITaoStatCapability getTaoCap(EntityLivingBase entity) {
-        ITaoStatCapability cap = entity.getCapability(CAP, null);
-        assert cap != null;
-        return cap;
-    }
-
-    public static void forceUpdateTrackingClients(EntityLivingBase entity) {
-        if (!entity.world.isRemote) {
-            PacketUpdateClientPainful pucp=new PacketUpdateClientPainful(entity);
-            Taoism.net.sendToAllTracking(pucp, entity);
-            if(entity instanceof EntityPlayerMP){
-                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
-            }
-        }
-    }
-
-    /**
-     * unified to prevent discrepancy and allow easy tweaking in the future
-     */
-    private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
-        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 30f);
-        return ticks * armorMod * 0.05f * posMult * elb.getHealth() / elb.getMaxHealth();
-    }
-
-    /**
-     * unified to prevent discrepancy and allow easy tweaking in the future
-     */
-    private static float getQiDecayTo(EntityLivingBase elb, int ticks) {
-        ITaoStatCapability itsc = getTaoCap(elb);
-        return Math.max(itsc.getQi() - 0.0125f * ticks, 0);
-    }
-
     public static void updateCasterData(EntityLivingBase elb) {
         ITaoStatCapability itsc = elb.getCapability(CAP, null);
         itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
@@ -80,7 +46,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         float width = Math.max(elb.width, 1f);
         float height = (float) Math.ceil(elb.height);
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
-        return Math.round(width * width * height * 5 * armor);
+        float stateModifier = elb.onGround ? elb.isSneaking() ? 1.5f : 1f : 0.5f;
+        return Math.round(width * width * height * 5 * armor * stateModifier);
     }
 
     /**
@@ -135,16 +102,50 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 //            elb.height = thing.getSecond();
 //        }
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
-        diff=ticks-itsc.getQiGracePeriod();
+        diff = ticks - itsc.getQiGracePeriod();
         //qi decay
-        if(diff>0)
-        itsc.setQi(getQiDecayTo(elb, diff));
+        if (diff > 0)
+            itsc.setQi(getQiDecayTo(elb, diff));
         else itsc.setQiGracePeriod(-diff);
 
         if (!(elb instanceof EntityPlayer))
             itsc.setSwing(itsc.getSwing() + ticks);
         itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
 
+    }
+
+    public static void forceUpdateTrackingClients(EntityLivingBase entity) {
+        if (!entity.world.isRemote) {
+            PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(entity);
+            Taoism.net.sendToAllTracking(pucp, entity);
+            if (entity instanceof EntityPlayerMP) {
+                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
+            }
+        }
+    }
+
+    /**
+     * unified to prevent discrepancy and allow easy tweaking in the future
+     */
+    private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
+        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
+        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 30f);
+        return ticks * armorMod * 0.05f * posMult * elb.getHealth() / elb.getMaxHealth();
+    }
+
+    /**
+     * unified to prevent discrepancy and allow easy tweaking in the future
+     */
+    private static float getQiDecayTo(EntityLivingBase elb, int ticks) {
+        ITaoStatCapability itsc = getTaoCap(elb);
+        return Math.max(itsc.getQi() - 0.0125f * ticks, 0);
+    }
+
+    @Nonnull
+    public static ITaoStatCapability getTaoCap(EntityLivingBase entity) {
+        ITaoStatCapability cap = entity.getCapability(CAP, null);
+        assert cap != null;
+        return cap;
     }
 
     /**
