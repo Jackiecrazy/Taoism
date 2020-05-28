@@ -13,7 +13,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.BohemianEarspoon;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
-import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.QingLongJi;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;

@@ -46,14 +46,9 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float light=1+(15-attacker.world.getLight(attacker.getPosition()))/15;//light bonus
-        float backstab=NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
-        return light*backstab;
-    }
-
-    @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker,target) ? Event.Result.ALLOW : Event.Result.DENY;
+        float light = 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;//light bonus
+        float backstab = NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
+        return light * backstab;
     }
 
     @Override
@@ -67,18 +62,6 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(defender).setRollCounter(0);
-        defender.rotationYaw = attacker.rotationYaw;
-        defender.rotationPitch = attacker.rotationPitch;
-        setCombo(defender, item, 0);
-        Vec3d look = attacker.getLookVec();
-        defender.addVelocity(-look.x, -look.y, -look.z);
-        defender.velocityChanged = true;
-        super.parrySkill(attacker, defender, item);
-    }
-
-    @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;
     }
@@ -86,13 +69,6 @@ public class Balisong extends TaoWeapon {
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
         return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-    }
-
-    @Override
-    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
-        if (elb instanceof EntityPlayer) {
-            Taoism.setAtk(elb, 5);
-        }
     }
 
     @Override
@@ -108,18 +84,42 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        TaoCasterData.getTaoCap(defender).setRollCounter(0);
+        defender.rotationYaw = attacker.rotationYaw;
+        defender.rotationPitch = attacker.rotationPitch;
+        setCombo(defender, item, 0);
+        Vec3d look = attacker.getLookVec();
+        defender.addVelocity(-look.x, -look.y, -look.z);
+        defender.velocityChanged = true;
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
+        if (elb instanceof EntityPlayer) {
+            Taoism.setAtk(elb, 5);
+        }
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //ignore 1 point of armor every chi level
             return getQiFromStack(stack);
         }
-        if (getLastAttackedEntity(attacker.world, stack)!=target) {
+        if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker)) {
             return target.getTotalArmorValue();
         }
-        return super.armorIgnoreAmount(ds,attacker,target,stack,orig);
-    }
-
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-
+        return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 }

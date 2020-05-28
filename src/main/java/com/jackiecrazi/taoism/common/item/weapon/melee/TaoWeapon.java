@@ -12,6 +12,7 @@ import com.jackiecrazi.taoism.client.KeyOverlord;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -32,8 +33,6 @@ import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -94,7 +93,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
      */
     public static boolean off = false;
     //booleans only used when attacking to determine the specific phase of attack
-    public static boolean effect = true, aoe = true, spawn = true;
+    private static boolean effect = true;
     private final double speed;
     private final int damageType;
     private final double dmg;
@@ -214,6 +213,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return w.getEntityByID(gettagfast(stack).getInteger("lastAttackedID"));
     }
 
+    @Override
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
+        if (canHarvestBlock(state, stack)) {
+            return 15.0F;
+        } else {
+            return 1.5f;
+        }
+    }
+
     /**
      * Called when the equipped item is right clicked.
      */
@@ -262,9 +270,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         boolean swing = true;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(attacker);
         chi = itsc.getQiFloored();
-        swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f * NeedyLittleThings.getCooldownPeriod(attacker);
+        swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f;
         if (swing) {
-            if (aoe) {
+            if (!gettagfast(stack).getBoolean("connect")) {
+                gettagfast(stack).setBoolean("connect", true);
+                //might as well convert everything into aoe and return true...
                 if (getHand(stack) != null) {
                     float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
                     if (itsc.getQiFloored() < 4) {
@@ -274,19 +284,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     } else itsc.addQi(baseQi / 2f);
                     TaoCasterData.forceUpdateTrackingClients(attacker);
                 }
-                aoe = false;
-                aoe(stack, target, attacker, chi);
-                aoe = true;
             }
-            if (effect) {
-                effect = false;
+            if (!gettagfast(stack).getBoolean("effect")) {
+                gettagfast(stack).setBoolean("effect", true);
                 applyEffects(stack, target, attacker, chi);
-                effect = true;
+                gettagfast(stack).setBoolean("effect", false);
             }
-            if (spawn) {
-                spawn = false;
+            if (!gettagfast(stack).getBoolean("spawning")) {
+                gettagfast(stack).setBoolean("spawning", true);
                 spawnExtraMoves(stack, target, attacker, chi);
-                spawn = true;
+                gettagfast(stack).setBoolean("spawning", false);
             }
         }
         updateWielderDataEnd(stack, attacker, target);
@@ -422,9 +429,48 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return multimap;
     }
 
+    public double attackDamage(ItemStack stack) {
+        return dmg;
+    }
+
+    protected double speed(ItemStack stack) {
+        return speed - 4d;
+    }
+
+    protected float getQiAccumulationRate(ItemStack is) {
+        return qiRate;
+    }
+
+    @Override
+    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+        EnumHand hand = getHand(stack);
+        if (hand == null) {
+            hand = player.swingingHand;
+        }
+        if (hand == null && player.isSwingInProgress) {
+            //expensive? perhaps.
+            hand = player.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : player.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : null;
+        }
+        if (hand != null)
+            TaoCasterData.getTaoCap(player).setSwing(TaoCombatUtils.getHandCoolDown(player, hand));
+        return super.onLeftClickEntity(stack, player, entity);
+    }
+
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-        stack.setTagInfo("startCD", new NBTTagFloat(Taoism.getAtk(entityLiving)));
-        stack.setTagInfo("startTick", new NBTTagInt(entityLiving.ticksExisted));
+        EnumHand hand = getHand(stack);
+        if (hand == null) {
+            hand = entityLiving.swingingHand;
+        }
+        if (hand == null && entityLiving.isSwingInProgress) {
+            //expensive? perhaps.
+            hand = entityLiving.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : entityLiving.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : null;
+        }
+        if (hand != null) {
+            //Well, ya got me. By all accounts, it doesn't make sense.
+            //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));
+            aoe(stack, entityLiving, TaoCasterData.getTaoCap(entityLiving).getQiFloored());
+            gettagfast(stack).setBoolean("connect", false);
+        }
         return super.onEntitySwing(entityLiving, stack);
     }
 
@@ -434,7 +480,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
-        return false;
+        return !player.isCreative();
     }
 
     public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
@@ -499,23 +545,20 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return changed;
     }
 
+    @Nullable
+    protected EnumHand getHand(ItemStack item) {
+        if (isDummy(item)) return EnumHand.OFF_HAND;
+        if (gettagfast(item).hasKey("off")) {
+            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        }
+        return null;
+    }
+
     /**
-     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     * AoE
      */
-    protected boolean[] harvestable(ItemStack is) {
-        return new boolean[]{false, false, false, false};
-    }
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
 
-    public double attackDamage(ItemStack stack) {
-        return dmg;
-    }
-
-    protected double speed(ItemStack stack) {
-        return speed - 4d;
-    }
-
-    protected float getQiAccumulationRate(ItemStack is) {
-        return qiRate;
     }
 
     /**
@@ -566,36 +609,37 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return ItemStack.EMPTY;
     }
 
-    protected void splash(EntityLivingBase attacker, EntityLivingBase target, double diameter) {
-        splash(attacker, attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(diameter / 2d, 1.5d, diameter / 2d), EntitySelectors.IS_ALIVE));
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    protected boolean[] harvestable(ItemStack is) {
+        return new boolean[]{false, false, false, false};
     }
 
-    protected void splash(EntityLivingBase attacker, List<Entity> targets) {
-        splash(attacker, targets, true);
+    protected void splash(EntityLivingBase attacker, ItemStack is, int angleAllowance) {
+        splash(attacker, is, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test), angleAllowance);
     }
 
-    protected void splash(EntityLivingBase attacker, List<Entity> targets, boolean enforceInFront) {
+    protected void splash(EntityLivingBase attacker, ItemStack is, List<Entity> targets, int degrees) {
         if (attacker instanceof EntityPlayer) {
             ((EntityPlayer) attacker).spawnSweepParticles();
         }
         for (Entity target : targets) {
 
             if (target == attacker) continue;
-            ItemStack is = off ? attacker.getHeldItemOffhand() : attacker.getHeldItemMainhand();
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if ((!NeedyLittleThings.isFacingEntity(attacker, target) && enforceInFront) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
+            if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;
-            try {
-                if (off)
-                    TaoCasterData.getTaoCap(attacker).setOffhandCool(TaoCasterData.getTaoCap(attacker).getSwing());
-                else Taoism.setAtk(attacker, TaoCasterData.getTaoCap(attacker).getSwing());
-            } catch (Exception ignored) {
-            }
+            TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;
                 NeedyLittleThings.taoWeaponAttack(target, p, attacker.getHeldItem(off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND), !off, false);
             } else attacker.attackEntityAsMob(target);
         }
+    }
+
+    protected void splash(EntityLivingBase attacker, ItemStack stack, List<Entity> targets) {
+        splash(attacker, stack, targets, 90);
     }
 
     @Override
@@ -613,7 +657,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (isDummy(item) && elb.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             dischargeWeapon(elb, elb.getHeldItemMainhand());
-            return;
         }
         item.setItemDamage(0);
     }
@@ -654,6 +697,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return gettagfast(is).getInteger("combo");
     }
 
+//    public EnumPhase getPhase(final ItemStack stack){
+//
+//    }
+
     public void setCombo(EntityLivingBase wielder, ItemStack stack, int to) {
         if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
@@ -665,13 +712,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         afterSwing(elb, is);
-
         return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
     }
-
-//    public EnumPhase getPhase(final ItemStack stack){
-//
-//    }
 
     public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
         return gettagfast(is).getLong("lastAttack");
@@ -721,15 +763,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
-    @Nullable
-    protected EnumHand getHand(ItemStack item) {
-        if (isDummy(item)) return EnumHand.OFF_HAND;
-        if (gettagfast(item).hasKey("off")) {
-            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-        }
-        return null;
-    }
-
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         dischargeWeapon(elb, is);
     }
@@ -765,13 +798,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         return 0;
-    }
-
-    /**
-     * AoE
-     */
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-
     }
 
     /**

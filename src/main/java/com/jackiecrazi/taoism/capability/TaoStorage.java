@@ -15,7 +15,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setFloat("qi", instance.getQi());
         nbt.setFloat("ling", instance.getLing());
-        nbt.setInteger("swing", instance.getSwing());
+        nbt.setFloat("swing", instance.getSwing());
         nbt.setFloat("posture", instance.getPosture());
         nbt.setInteger("parry", instance.getParryCounter());
         nbt.setInteger("combo", instance.getComboSequence());
@@ -43,7 +43,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         NBTTagCompound n = (NBTTagCompound) nbt;
         instance.setQi(n.getFloat("qi"));
         instance.setLing(n.getFloat("ling"));
-        instance.setSwing(n.getInteger("swing"));
+        instance.setSwing(n.getFloat("swing"));
         instance.setPosture(n.getFloat("posture"));
         instance.setParryCounter(n.getInteger("parry"));
         instance.setComboSequence((n.getInteger("combo")));

@@ -130,9 +130,9 @@ public class BohemianEarspoon extends TaoWeapon {
         return 0f;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND)
-            splash(attacker, target, 4);
+            splash(attacker, stack, 120);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

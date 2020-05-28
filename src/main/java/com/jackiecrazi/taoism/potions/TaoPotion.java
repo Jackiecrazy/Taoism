@@ -7,6 +7,7 @@ import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TaoPotion extends Potion {
     public static Potion HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
@@ -127,6 +130,11 @@ public class TaoPotion extends Potion {
 
     public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {
         super.applyAttributesModifiersToEntity(elb, am, amp);
+    }
+
+    public List<ItemStack> getCurativeItems()
+    {
+        return new ArrayList<>();
     }
 
     @SideOnly(Side.CLIENT)

@@ -23,10 +23,6 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     public static final Capability<ITaoStatCapability> CAP = null;
     private ITaoStatCapability inst = CAP.getDefaultInstance();
 
-    public TaoCasterData() {
-
-    }
-
     public TaoCasterData(EntityLivingBase target) {
         inst = new TaoStatCapability(target);
     }
@@ -104,9 +100,10 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
         diff = ticks - itsc.getQiGracePeriod();
         //qi decay
-        if (diff > 0)
-            itsc.setQi(getQiDecayTo(elb, diff));
-        else itsc.setQiGracePeriod(-diff);
+        if (diff > 0) {
+            if (!itsc.consumeQi(getQiDecayAmount(itsc.getQi(), diff)))
+                itsc.setQi(0);
+        } else itsc.setQiGracePeriod(-diff);
 
         if (!(elb instanceof EntityPlayer))
             itsc.setSwing(itsc.getSwing() + ticks);
@@ -136,9 +133,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     /**
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
-    private static float getQiDecayTo(EntityLivingBase elb, int ticks) {
-        ITaoStatCapability itsc = getTaoCap(elb);
-        return Math.max(itsc.getQi() - 0.0125f * ticks, 0);
+    private static float getQiDecayAmount(float currentQi, int ticks) {
+        return 0.0125f * ticks * currentQi/8;
     }
 
     @Nonnull

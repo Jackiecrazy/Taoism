@@ -8,8 +8,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
 public class TaoStatCapabilityDefault implements ITaoStatCapability {
-    private float qi, ling, posture;
-    private int combo, swing, ohcool;
+    private float qi, ling, posture, swing;
+    private int combo, ohcool;
     private float maxLing, maxPosture, maxStamina;
     private int lcd, pcd, scd, down;
     private long timey;
@@ -189,12 +189,12 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
-    public int getSwing() {
+    public float getSwing() {
         return swing;
     }
 
     @Override
-    public void setSwing(int amount) {
+    public void setSwing(float amount) {
         swing = amount;
     }
 

@@ -28,6 +28,8 @@ public class Karambit extends TaoWeapon {
     //Each chi level allows you to ignore 6 points of armor when inflicting bleed.
     //Can be used to harvest plant blocks, for what that's worth.
 
+    private static final boolean[] harvestList = {false, false, false, true};
+
     public Karambit() {
         super(1, 2, 5f, 0);
         setQiAccumulationRate(0.75f);
@@ -45,14 +47,9 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float light=1+(15f-attacker.world.getLight(attacker.getPosition()))/15f;//light bonus
-        float backstab=NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
-        return light*backstab;
-    }
-
-    @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker,target) ? Event.Result.ALLOW : Event.Result.DENY;
+        float light = 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
+        float backstab = NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
+        return light * backstab;
     }
 
     @Override
@@ -66,17 +63,6 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(defender).setRollCounter(0);
-        defender.rotationYaw = attacker.rotationYaw;
-        defender.rotationPitch = attacker.rotationPitch;
-        Vec3d look = attacker.getLookVec();
-        defender.addVelocity(-look.x, -look.y, -look.z);
-        defender.velocityChanged = true;
-        super.parrySkill(attacker, defender, item);
-    }
-
-    @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;//not all that good at defense now is it...
     }
@@ -84,32 +70,6 @@ public class Karambit extends TaoWeapon {
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
         return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() != null && target.getLastDamageSource().getTrueSource() != attacker))
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-        if (isCharged(attacker, stack)) {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 60, 2), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
-            dischargeWeapon(attacker, stack);
-        }
-    }
-
-    private static final boolean[] harvestList={false,false,false,true};
-
-    /**
-     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
-     */
-    @Override
-    protected boolean[] harvestable(ItemStack is) {
-        return harvestList;
-    }
-
-    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
-        if (elb instanceof EntityPlayer) {
-            Taoism.setAtk(elb, 5);
-        }
     }
 
     @Override
@@ -123,11 +83,51 @@ public class Karambit extends TaoWeapon {
         tooltip.add(I18n.format("karambit.harvest"));
     }
 
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    @Override
+    protected boolean[] harvestable(ItemStack is) {
+        return harvestList;
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        TaoCasterData.getTaoCap(defender).setRollCounter(0);
+        defender.rotationYaw = attacker.rotationYaw;
+        defender.rotationPitch = attacker.rotationPitch;
+        Vec3d look = attacker.getLookVec();
+        defender.addVelocity(-look.x, -look.y, -look.z);
+        defender.velocityChanged = true;
+        super.parrySkill(attacker, defender, item);
+    }
+
+    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
+        if (elb instanceof EntityPlayer) {
+            Taoism.setAtk(elb, 5);
+        }
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (getLastAttackedEntity(attacker.world, stack)!=target) {
+        if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker)) {
             return target.getTotalArmorValue();
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() != null && target.getLastDamageSource().getTrueSource() != attacker))
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
+        if (isCharged(attacker, stack)) {
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 60, 2), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+            dischargeWeapon(attacker, stack);
+        }
     }
 }

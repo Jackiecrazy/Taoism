@@ -47,11 +47,7 @@ public class NeedyLittleThings {
     /**
      * Copied from EntityArrow, because kek.
      */
-    private static final Predicate<Entity> ARROW_TARGETS = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate<Entity>() {
-        public boolean apply(@Nullable Entity p_apply_1_) {
-            return p_apply_1_.canBeCollidedWith();
-        }
-    });
+    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e!=null&&e.canBeCollidedWith());
 
     public static boolean isMeleeDamage(DamageSource ds) {
         return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute() && !ds.isProjectile();
@@ -200,16 +196,17 @@ public class NeedyLittleThings {
     }
 
     /**
-     * returns true if entity2 is within a 90 degree sector in front of entity1
+     * returns true if entity2 is within a (angle) degree sector in front of entity1
      */
-    public static boolean isFacingEntity(Entity entity1, Entity entity2) {
+    public static boolean isFacingEntity(Entity entity1, Entity entity2, int angle) {
         Vec3d posVec = entity2.getPositionVector();
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector()).normalize();
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
 
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
-        return dotsq < -0.5D;
+        double cos=Math.cos(rad(angle/2));
+        return dotsq < -(cos*cos);
     }
 
     /**
@@ -532,15 +529,15 @@ public class NeedyLittleThings {
         return entity;
     }
 
-    public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, EntityLivingBase target, double range) {
+    public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
         Vec3d look = attacker.getLookVec().scale(range);
         Vec3d end = start.add(look);
         ArrayList<Entity> ret = new ArrayList<>();
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), ARROW_TARGETS::test);
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), VALID_TARGETS::test);
 
         for (Entity entity1 : list) {
-            if (entity1 != attacker && entity1 != target) {
+            if (entity1 != attacker) {
                 AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
                 RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
                 if (raytraceresult != null) {

@@ -71,11 +71,6 @@ public class CatNineTails extends TaoWeapon {
         tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armorp") + TextFormatting.RESET);
     }
 
-    @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
-    }
-
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {
         return false;
     }

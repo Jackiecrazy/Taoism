@@ -8,9 +8,7 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -20,15 +18,14 @@ import java.util.List;
 
 public class Qiang extends TaoWeapon {
     /*
-    First two handed weapon! High reach and combo, medium power and speed, low defense
-    left click for a normal stab, piercing enemies up to the max range.
-    right click to do a bash that knocks the target a fair distance away and inflicts blunt damage, at cost of lower damage
-    These two attacks have independent cooldowns, and doing one will instantly halve the other's, so you can continuously chain them.
-    riposte:
-    //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
-    //the next stab in 4 seconds deals cutting damage 3 times with an interval of 1 tick
-
-    TODO buff me
+    First two handed weapon!
+    using 游场枪 tactics.
+    A spear used for dueling, short enough to use staff moves. High reach and speed, medium power and combo, low defense
+    left click for a narrow, but long normal stab. Damage scales based on distance, up to double at front 1/3
+    right click for a swipe on the ground, or a top-down bonk when airborne, at 30% damage.
+    highly dependent on footwork and facing your opponent.
+    Primary method of avoidance is side dodge/jump/slide, then close in distance
+    TODO holding some type of spear upward allows you to throw it like a javelin. Prepare sidearm.
      */
 
     private final PartDefinition[] parts = {
@@ -38,7 +35,7 @@ public class Qiang extends TaoWeapon {
     };
 
     public Qiang() {
-        super(2, 1.2, 6.5d, 1f);
+        super(2, 1.2, 7.5d, 1f);
     }
 
     @Override
@@ -48,24 +45,12 @@ public class Qiang extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float aerial = !attacker.onGround ? 1.5f : 1f;
-        float bash = getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1f;
-        return aerial * bash;
-    }
-
-    @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : isCharged(null, is) ? 1 : 2;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 6f;
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
     }
 
     @Override
@@ -83,32 +68,23 @@ public class Qiang extends TaoWeapon {
         return true;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND && isCharged(attacker, stack))
-            splash(attacker, target, 4);
-        else if (getHand(stack) == EnumHand.MAIN_HAND)
-            splash(attacker, NeedyLittleThings.raytraceEntities(target.world, attacker, target, getReach(attacker, stack)));
+    @Override
+    public int getDamageType(ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 1f);
-            if (isCharged(attacker, stack)) {
-                target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20, 0));
-            }
-        }
+            if (attacker.onGround)
+                splash(attacker, stack, 120);
+            else splash(attacker, stack, 10);
+        } else if (getHand(stack) == EnumHand.MAIN_HAND)
+            splash(attacker, stack, NeedyLittleThings.raytraceEntities(attacker.world, attacker, getReach(attacker, stack)), 10);
     }
 
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        super.afterSwing(elb, is);
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, TaoCombatUtils.getHandCoolDown(elb, other) * 0.5f);
-    }
-
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (isCharged(attacker, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
-            multiHit(attacker, target, 4, 8);
-        }
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 6f;
     }
 
     @Override
@@ -120,5 +96,17 @@ public class Qiang extends TaoWeapon {
         tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.bash.riposte") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.oscillate"));
         tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        super.afterSwing(elb, is);
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+    }
+
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            NeedyLittleThings.knockBack(target, attacker, 1f);
+        }
     }
 }

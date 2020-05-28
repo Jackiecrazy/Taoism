@@ -7,14 +7,15 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketUpdateClientPainful implements IMessage {
     private int entityID;
-    private float qi, ling, posture;
-    private int combo, swing, ohcool;
+    private float qi, ling, posture, swing;
+    private int combo, ohcool;
     private float maxLing, maxPosture;
     private int lcd, pcd, scd, qcd, down;
     private long timey;
@@ -56,7 +57,7 @@ public class PacketUpdateClientPainful implements IMessage {
         ling = buf.readFloat();
         posture = buf.readFloat();
         combo = buf.readInt();
-        swing = buf.readInt();
+        swing = buf.readFloat();
         ohcool = buf.readInt();
         maxLing = buf.readFloat();
         maxPosture = buf.readFloat();
@@ -82,7 +83,7 @@ public class PacketUpdateClientPainful implements IMessage {
         buf.writeFloat(ling);
         buf.writeFloat(posture);
         buf.writeInt(combo);
-        buf.writeInt(swing);
+        buf.writeFloat(swing);
         buf.writeInt(ohcool);
         buf.writeFloat(maxLing);
         buf.writeFloat(maxPosture);
@@ -106,33 +107,35 @@ public class PacketUpdateClientPainful implements IMessage {
         @Override
         public IMessage onMessage(final PacketUpdateClientPainful m,
                                   MessageContext ctx) {
-            final EntityPlayer thePlayer = Taoism.proxy
-                    .getPlayerEntityFromContext(ctx);
-            Entity e = thePlayer.world
-                    .getEntityByID(m.entityID);
-            if (e instanceof EntityLivingBase) {
-                ITaoStatCapability i = TaoCasterData.getTaoCap((EntityLivingBase) e);
-                i.setQi(m.qi);
-                i.setLing(m.ling);
-                i.setPosture(m.posture);
-                i.setPosInvulTime(m.protec);
-                i.setOffhandCool(m.ohcool);
-                i.setSwing(m.swing);
-                i.setRollCounter(m.dodge);
-                i.setPostureRechargeCD(m.pcd);
-                i.setQiGracePeriod(m.qcd);
-                i.setDownTimer(m.down);
-                i.setProtected(m.protecc);
-                i.setParryCounter(m.parry);
-                i.setLingRechargeCD(m.lcd);
-                i.setSwitchIn(m.swi);
-                i.setLastUpdatedTime(m.timey);
-                i.setStaminaRechargeCD(m.scd);
-                i.setMaxLing(m.maxLing);
-                i.setMaxPosture(m.maxPosture);
-                i.setComboSequence(m.combo);
-                i.setPrevSizes(m.width, m.height);
-            }
+            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+                final EntityPlayer thePlayer = Taoism.proxy
+                        .getPlayerEntityFromContext(ctx);
+                Entity e = thePlayer.world
+                        .getEntityByID(m.entityID);
+                if (e instanceof EntityLivingBase) {
+                    ITaoStatCapability i = TaoCasterData.getTaoCap((EntityLivingBase) e);
+                    i.setQi(m.qi);
+                    i.setLing(m.ling);
+                    i.setPosture(m.posture);
+                    i.setPosInvulTime(m.protec);
+                    i.setOffhandCool(m.ohcool);
+                    i.setSwing(m.swing);
+                    i.setRollCounter(m.dodge);
+                    i.setPostureRechargeCD(m.pcd);
+                    i.setQiGracePeriod(m.qcd);
+                    i.setDownTimer(m.down);
+                    i.setProtected(m.protecc);
+                    i.setParryCounter(m.parry);
+                    i.setLingRechargeCD(m.lcd);
+                    i.setSwitchIn(m.swi);
+                    i.setLastUpdatedTime(m.timey);
+                    i.setStaminaRechargeCD(m.scd);
+                    i.setMaxLing(m.maxLing);
+                    i.setMaxPosture(m.maxPosture);
+                    i.setComboSequence(m.combo);
+                    i.setPrevSizes(m.width, m.height);
+                }
+            });
             return null;
         }
     }

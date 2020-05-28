@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -43,16 +44,18 @@ public class PacketUpdateSize implements IMessage {
         @Override
         public IMessage onMessage(final PacketUpdateSize m,
                                   MessageContext ctx) {
-            //System.out.println("packet acquired!");
-            final EntityPlayer thePlayer = Taoism.proxy
-                    .getPlayerEntityFromContext(ctx);
-            Entity e = thePlayer.world
-                    .getEntityByID(m.entityID);
-            if(e==null)return null;
-            if (e instanceof EntityLivingBase) {
-                TaoCasterData.getTaoCap((EntityLivingBase) e).setPrevSizes(e.width, e.height);
-            }
-            NeedyLittleThings.setSize(e, m.w, m.h);
+            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+                //System.out.println("packet acquired!");
+                final EntityPlayer thePlayer = Taoism.proxy
+                        .getPlayerEntityFromContext(ctx);
+                Entity e = thePlayer.world
+                        .getEntityByID(m.entityID);
+                if (e == null) return;
+                if (e instanceof EntityLivingBase) {
+                    TaoCasterData.getTaoCap((EntityLivingBase) e).setPrevSizes(e.width, e.height);
+                }
+                NeedyLittleThings.setSize(e, m.w, m.h);
+            });
             return null;
         }
     }

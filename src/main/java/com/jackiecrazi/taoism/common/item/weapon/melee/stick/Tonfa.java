@@ -48,11 +48,6 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0f;
-    }
-
-    @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         TaoCasterData.getTaoCap(defender).addQi(1f);
         if (defender.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {

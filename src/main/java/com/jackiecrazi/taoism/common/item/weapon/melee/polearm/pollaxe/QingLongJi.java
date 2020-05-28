@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
+package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe;
 
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
@@ -25,7 +25,6 @@ import java.util.List;
 public class QingLongJi extends TaoWeapon {
     /*
      * A polearm capable of continuous attack. High range and combo, medium defense and power, low speed
-     * I have to admit, this is technically a pollaxe, but it handles much more like a spear with a cutting edge, and pollaxes are getting crowded.
      * Two-handed, range 6, attack speed 1.4(+chi/2)
      * Normal attack is a simple stab that inflicts (1.5+chi/10)x damage.
      * Alt will switch sides, dealing splash 3 (+chi/5) in the process,
@@ -57,7 +56,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
+        return 5f;
     }
 
     @Override
@@ -128,8 +127,8 @@ public class QingLongJi extends TaoWeapon {
         return isCharged(attacker, item) ^ getHand(item)==EnumHand.MAIN_HAND ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, target, 3f + chi / 5f);
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60+chi*6);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

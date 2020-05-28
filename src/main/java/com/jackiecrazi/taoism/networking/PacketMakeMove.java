@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -36,12 +37,11 @@ public class PacketMakeMove implements IMessage {
         public IMessage onMessage(final PacketMakeMove message,
                                   MessageContext ctx) {
             //System.out.println("packet acquired!");
-            final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
-                    .getPlayerEntityFromContext(ctx);
-            //thePlayer.getServer().addScheduledTask(() -> {
-                        TaoCombatUtils.executeMove(thePlayer, message.code);
-                    //}
-            //);
+            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+                final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
+                        .getPlayerEntityFromContext(ctx);
+                TaoCombatUtils.executeMove(thePlayer, message.code);
+            });
             return null;
         }
     }

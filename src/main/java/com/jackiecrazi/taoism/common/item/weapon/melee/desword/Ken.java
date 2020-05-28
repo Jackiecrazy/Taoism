@@ -1,11 +1,11 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.desword;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -31,16 +31,13 @@ public class Ken extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float air = attacker.onGround ? 1f : 1.5f;
-        float aoe = isAoE(attacker, target) ? 1f : 1.2f;
+        float aoe = isAoE(attacker, item) ? 1f : 1.5f;
         float qiMult = 1 + (getQiFromStack(item) / 27f);
         return air * aoe * qiMult;
     }
 
-    private boolean isAoE(EntityLivingBase attacker, EntityLivingBase target) {
-        if (!attacker.onGround) return false;
-        List<Entity> list = attacker.world.getEntitiesInAABBexcluding(target, target.getEntityBoundingBox().grow(1.5d, 1.5d, 1.5d), null);
-        list.remove(attacker);
-        return !list.isEmpty();
+    private boolean isAoE(EntityLivingBase attacker, ItemStack is) {
+        return NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)) == null;
     }
 
     @Override
@@ -65,12 +62,23 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (!isAoE(attacker, stack))
+            if (attacker.onGround) {
+                splash(attacker, stack, 90);
+            } else {
+                splash(attacker, stack, 10);
+            }
+    }
+
+    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("ken.combo"));
         tooltip.add(I18n.format("ken.qi"));
         tooltip.add(I18n.format("ken.aoe"));
-        tooltip.add(I18n.format("ken.stab"));
         tooltip.add(I18n.format("ken.leap"));
+        tooltip.add(I18n.format("ken.stab"));
         tooltip.add(I18n.format("ken.riposte"));
     }
 
@@ -87,14 +95,6 @@ public class Ken extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isAoE(attacker, target) ? Event.Result.DENY : Event.Result.ALLOW;
-    }
-
-    @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround) {
-            splash(attacker, target, 3);
-        }
+        return isAoE(attacker, item) ? Event.Result.DENY : Event.Result.ALLOW;
     }
 }

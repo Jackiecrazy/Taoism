@@ -1,9 +1,9 @@
 package com.jackiecrazi.taoism.common.entity;
 
-import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
@@ -44,12 +44,14 @@ public abstract class EntityMove extends Entity {
     public void onUpdate() {
         super.onUpdate();
         if (!world.isRemote) {
-            if (attacker.getHeldItem(EnumHand.MAIN_HAND) != stack && attacker.getHeldItem(EnumHand.OFF_HAND) != stack)
+            if (stack==null||(attacker.getHeldItem(EnumHand.MAIN_HAND) != stack && attacker.getHeldItem(EnumHand.OFF_HAND) != stack)) {
                 this.setDead();
+                return;
+            }
             try {
                 if (attacker != null) this.setLocationAndAngles(attacker.posX, attacker.posY, attacker.posZ, 0f, 0f);
                 this.attackPre(attacker, stack, ticksExisted);
-                TaoWeapon.spawn = false;
+                stack.setTagInfo("spawn", new NBTTagByte((byte)1));
                 for (Entity e : this.compileList(attacker, stack, ticksExisted)) {
                     if (e instanceof EntityLivingBase && !attacked.contains(e)) {
                         EntityLivingBase en = (EntityLivingBase) e;
@@ -58,7 +60,7 @@ public abstract class EntityMove extends Entity {
                     }
                     //System.out.println("bye");
                 }
-                TaoWeapon.spawn = true;
+                stack.setTagInfo("spawn", new NBTTagByte((byte)0));
                 this.attackPost(attacker, stack, ticksExisted);
                 if (ticksExisted >= this.duration(attacker, attacker, stack)) this.setDead();
             } catch (Exception e) {

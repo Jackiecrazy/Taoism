@@ -83,12 +83,13 @@ public class TaoisticEventHandler {
 
     @SubscribeEvent
     public static void updateCaps(AttackEntityEvent e) {
-        if (TaoWeapon.aoe) {
+        /*if (TaoWeapon.aoe) {
             EntityPlayer p = e.getEntityPlayer();
             //misc code for updating capability
             int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
             TaoCasterData.getTaoCap(p).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
-        }
+        }*/
+        //moved to TaoWeapon#onEntitySwing, kept here for posterity
     }
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
@@ -135,7 +136,7 @@ public class TaoisticEventHandler {
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
-                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {//
+                if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {//nein nein nein nein nein nein nein
                     //take that, slimes, you ain't staggerin' me no more!
                     e.setCanceled(true);
                     return;
@@ -165,50 +166,21 @@ public class TaoisticEventHandler {
                 downingHit = true;
                 return;
             }
-            /*TODO clean up this crap
-            1. check if blocking or parrying
-            2. cancel event
-            3. proc effects
-            4. consume posture
+            /*
+            TODO idle parry
              */
             ItemStack hero = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
-            if (parrying && NeedyLittleThings.isFacingEntity(uke, seme)) {
+            if (parrying && NeedyLittleThings.isFacingEntity(uke, seme, 120)) {
                 e.setCanceled(true);
                 //uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
                 uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
-                //System.out.println("target has parried!");
                 //parry code, execute parry special
                 semeCap.consumePosture(postureUse1, false);
 
                 if (hero.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) hero.getItem()).parrySkill(seme, uke, hero);
                 }
-//                if (uke instanceof EntityPlayer) {
-//                    EntityPlayer p = (EntityPlayer) uke;
-//                    p.sendStatusMessage(new TextComponentTranslation("you have parried! You have " + ukeCap.getPosture() + " posture left"), true);
-//                }
-//                if (seme instanceof EntityPlayer) {
-//                    EntityPlayer p = (EntityPlayer) seme;
-//                    p.sendStatusMessage(new TextComponentTranslation("the target has parried! You have " + semeCap.getPosture() + " posture left"), true);
-//                }
                 return;
-            }
-            if (blocking && NeedyLittleThings.isFacingEntity(uke, seme)) {
-                e.setCanceled(true);
-                //uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_WOOD_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
-                uke.playSound(SoundEvents.BLOCK_WOOD_PLACE, 1f, 1f);
-                //block code, reflect posture damage
-                semeCap.consumePosture(postureUse1 * 0.4f, false);
-                if (hero.getItem() instanceof IStaminaPostureManipulable)
-                    ((IStaminaPostureManipulable) hero.getItem()).onBlock(seme, uke, hero);
-//                if (uke instanceof EntityPlayer) {
-//                    EntityPlayer p = (EntityPlayer) uke;
-//                    p.sendStatusMessage(new TextComponentTranslation("you have blocked! You have " + ukeCap.getPosture() + " posture left"), true);
-//                }
-//                if (seme instanceof EntityPlayer) {
-//                    EntityPlayer p = (EntityPlayer) seme;
-//                    p.sendStatusMessage(new TextComponentTranslation("the target has blocked! They have " + ukeCap.getPosture() + " posture left"), true);
-//                }
             }
         }
     }
@@ -417,11 +389,11 @@ public class TaoisticEventHandler {
             ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (p.motionY < 0 && cap.getDownTimer() <= 0) {
-                p.motionY /= (cap.getQiFloored() + 1);
+            if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi()>0) {
+                if (!p.isSneaking() && cap.getQi() > 5)
+                    p.motionY /= ((cap.getQiFloored() - 5) / 4f + 1);
                 p.fallDistance = 0f;
             }
-
             TaoCasterData.updateCasterData(p);
             //recharge weapon
             //hacky, but well...

@@ -25,7 +25,9 @@ public class Staff extends TaoWeapon {
      * Leap attacks deal 1.5x damage
      * Left click is a downward smash that knocks back airborne targets and a flick up that sends standing targets flying
      * Right click is a standard sweep, range 4, with small knockback
-     * Block (not parry) is a continuous whirl, deflecting projectiles with speed less than qi*2
+     * Block (not parry) is a continuous whirl, deflecting projectiles with speed less than qi*2 TODO integrate with idle parry
+     * After ground-ground, gain small jump boost. Hitting grounded enemy while airborne will launch you further, while air-air will hit them up and away.
+     * ^^^aerial duel test.
      * Riposte: combo extended to 2,
      *  block will deal 1/4 of attack damage all around and deflect any projectile, reflecting those it used to deflect for next 10s
      */
@@ -69,9 +71,9 @@ public class Staff extends TaoWeapon {
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, target, 4);
+            splash(attacker, stack, 120);
         }
     }
 
@@ -100,7 +102,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 4f : 5f;
+        return 5f;
     }
 
     @Override
@@ -138,7 +140,7 @@ public class Staff extends TaoWeapon {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (TaoCombatUtils.isEntityBlocking(elb)) {
                 if (e.ticksExisted % 20 == 1)
-                    splash(elb, elb, 4);
+                    splash(elb, stack, 120);
                 for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
                     if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
                         IProjectile ip = (IProjectile) ent;

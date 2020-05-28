@@ -65,9 +65,9 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (attacker.onGround && getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, target, 5);
+            splash(attacker, stack, 120);
         }
     }
 
@@ -99,7 +99,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 5f : 6f;
+        return 5f;
     }
 
     @Override

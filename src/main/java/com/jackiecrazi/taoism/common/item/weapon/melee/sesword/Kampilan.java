@@ -69,8 +69,8 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        boolean thingy = getCombo(elb, is) != getComboLength(elb, is) - 1;
-        if (thingy) dischargeWeapon(elb, is);
+        boolean comboEnded = getCombo(elb, is) == getComboLength(elb, is) - 1;
+        if (comboEnded) dischargeWeapon(elb, is);
     }
 
     @Override
@@ -98,9 +98,9 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (attacker.onGround) {
-            splash(attacker, target, 5);
+            splash(attacker, stack, 120);
         }
     }
 }

@@ -15,8 +15,8 @@ public class TaoStatCapability implements ITaoStatCapability {
     private static final float MAXQI = 9.99f;
     public static final int MAXDOWNTIME=100;
     private EntityLivingBase e;
-    private float qi, ling, posture;
-    private int combo, swing, ohcool;
+    private float qi, ling, posture, swing;
+    private int combo, ohcool;
     private float maxLing, maxPosture, maxStamina;
     private int lcd;
     private int pcd;
@@ -51,7 +51,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosture(float amount) {
-        posture = Math.min(amount, 0f);
+        posture = Math.max(amount, 0f);
         if (posture >= getMaxPosture()) setProtected(true);
         //if (posture == 0) beatDown(null, 0);
     }
@@ -248,12 +248,12 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public int getSwing() {
+    public float getSwing() {
         return swing;
     }
 
     @Override
-    public void setSwing(int amount) {
+    public void setSwing(float amount) {
         swing = amount;
     }
 
