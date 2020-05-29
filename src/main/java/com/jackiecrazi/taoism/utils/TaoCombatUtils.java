@@ -11,6 +11,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
@@ -39,17 +40,6 @@ public class TaoCombatUtils {
         if (elb.getHeldItemMainhand().getItem() instanceof ITwoHanded && ((ITwoHanded) elb.getHeldItemMainhand().getItem()).isTwoHanded(elb.getHeldItemMainhand()))
             return elb.getHeldItemMainhand();
         return TaoWeapon.off ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
-    }
-
-    private static boolean isHoldingEligibleItem(EntityLivingBase entity) {
-        ItemStack main = entity.getHeldItemMainhand(), off = entity.getHeldItemOffhand();
-        if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main) && !(main.getItem() instanceof IStaminaPostureManipulable))
-            return false;
-        return
-                main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(entity, main)
-                        || off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(entity, off)
-                        || contains(main.getItem())
-                        || contains(off.getItem());
     }
 
     public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
@@ -85,14 +75,6 @@ public class TaoCombatUtils {
         return false;
     }
 
-    public static boolean isEntityBlocking(EntityLivingBase entity) {
-        return ((entity.isSneaking() && isHoldingEligibleItem(entity)) || entity.isActiveItemStackBlocking()) && !isEntityParrying(entity);
-    }
-
-    public static boolean isEntityParrying(EntityLivingBase entity) {
-        return TaoCasterData.getTaoCap(entity).getParryCounter() <= CombatConfig.parryThreshold && isHoldingEligibleItem(entity);
-    }
-
     /**
      * I just split them because base posture damage is reflected onto attacker at a 40% rate.
      */
@@ -108,7 +90,7 @@ public class TaoCombatUtils {
         ItemStack main = defender.getHeldItem(EnumHand.MAIN_HAND);
         ItemStack off = defender.getHeldItem(EnumHand.OFF_HAND);
         float defMult = CombatConfig.defaultMultiplierPostureDefend;
-        if (isEntityParrying(defender) || isEntityBlocking(defender)) {
+        if (isEntityParrying(defender)) {
 //            if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main)) {
 //                if (main.getItem() instanceof IStaminaPostureManipulable) {
 //                    return ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, defender, main, amount);
@@ -130,6 +112,25 @@ public class TaoCombatUtils {
                 defMult = Math.min(CombatConfig.defaultMultiplierPostureDefend, defMult);
         }
         return defMult;
+    }
+
+    public static boolean isEntityParrying(EntityLivingBase entity) {
+        return isHoldingEligibleItem(entity);
+    }
+
+    private static boolean isHoldingEligibleItem(EntityLivingBase entity) {
+        ItemStack main = entity.getHeldItemMainhand(), off = entity.getHeldItemOffhand();
+        if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main) && !(main.getItem() instanceof IStaminaPostureManipulable))
+            return false;
+        return
+                main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(entity, main)
+                        || off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(entity, off)
+                        || contains(main.getItem())
+                        || contains(off.getItem())
+                        || main.getItemUseAction() == EnumAction.BLOCK
+                        || off.getItemUseAction() == EnumAction.BLOCK
+                        || main.getItem().isShield(main, entity)
+                        || off.getItem().isShield(main, entity);
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {

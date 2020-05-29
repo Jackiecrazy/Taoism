@@ -1,10 +1,8 @@
 package com.jackiecrazi.taoism.capability;
 
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -106,12 +104,6 @@ public class TaoStatCapability implements ITaoStatCapability {
             NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
         TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
-        //do this first to prevent hurtbox curiosities
-        if (e instanceof EntityLiving) {
-            EntityLiving el = (EntityLiving) e;
-            el.tasks.addTask(0, new AIDowned(el));
-            el.targetTasks.addTask(0, new AIDowned(el));
-        }
         //babe! it's 4pm, time for your flattening!
         //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
         TaoCasterData.forceUpdateTrackingClients(e);

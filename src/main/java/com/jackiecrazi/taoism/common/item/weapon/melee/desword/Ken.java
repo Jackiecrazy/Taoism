@@ -67,9 +67,10 @@ public class Ken extends TaoWeapon {
         if (!isAoE(attacker, stack))
             if (attacker.onGround) {
                 splash(attacker, stack, 90);
-            } else {
-                splash(attacker, stack, 10);
             }
+//            else {
+//                splash(attacker, stack, 10);
+//            }
     }
 
     @Override

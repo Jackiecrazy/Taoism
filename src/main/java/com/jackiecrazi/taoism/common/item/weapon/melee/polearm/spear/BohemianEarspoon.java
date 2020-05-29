@@ -9,11 +9,13 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -35,7 +37,7 @@ public class BohemianEarspoon extends TaoWeapon {
     };
 
     public BohemianEarspoon() {
-        super(2, 1.4, 6.5d, 1f);
+        super(2, 1.3, 6d, 1f);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class BohemianEarspoon extends TaoWeapon {
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
         float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
-        float lastAttackRange = 1 + min / max;
+        float lastAttackRange = 1 + min / (max * 2);
         return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
     }
 
@@ -82,14 +84,14 @@ public class BohemianEarspoon extends TaoWeapon {
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (e instanceof EntityLivingBase) {
+        if (e instanceof EntityLivingBase && w.isRemote) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (isCharged(elb, stack) && getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null) {
                 EntityLivingBase target = elb.getLastAttackedEntity();
                 if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
                     if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
-                        //too close! Rip out innards for 10% max hp damage
-                        target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), target.getMaxHealth() / 10f);
+                        //too close! Rip out innards for double damage
+                        target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
                     }
                     //a new challenger is approaching!
                     Vec3d pos = elb.getPositionVector();
@@ -112,6 +114,11 @@ public class BohemianEarspoon extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
     }
 
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND)
+            splash(attacker, stack, 120);
+    }
+
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
@@ -125,14 +132,14 @@ public class BohemianEarspoon extends TaoWeapon {
         if (getHand(item) == EnumHand.MAIN_HAND) {
             float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
             float min = Math.min(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
-            return (min / max) * 0.5f;
+            if (max != 0)
+                return (min / max) * 0.5f;
         }
         return 0f;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
-            splash(attacker, stack, 120);
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return Event.Result.DENY;
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

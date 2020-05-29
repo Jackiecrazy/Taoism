@@ -31,7 +31,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         ITaoStatCapability itsc = elb.getCapability(CAP, null);
         itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
-        itsc.setMaxLing(10f);//TODO ???
+        itsc.setMaxLing(10f);
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
     }
 

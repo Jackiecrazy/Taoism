@@ -126,7 +126,7 @@ public class Nunchaku extends TaoWeapon {
     protected void aoe(ItemStack is, EntityLivingBase attacker, int chi){
         if (getCurrentMove(is).isSneakPressed() && getLastMove(is).isSneakPressed()) {//low low
             //sweep!
-            splash(attacker, is, 1);
+            splash(attacker, is, 90);
         }
     }
 

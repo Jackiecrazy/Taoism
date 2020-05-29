@@ -538,7 +538,7 @@ public class EntityTaoArrow extends EntityArrow implements IDamageType {
             if (entity.attackEntityFrom(damagesource, (float) i)) {
                 if (entity instanceof EntityLivingBase) {
                     EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-                    this.startRiding(entity, true);//TODO cleaner implementation with capability
+                    this.startRiding(entity, true);//TODO cleaner implementation of arrow embedding with capability
 
                     if (!this.world.isRemote) {
                         entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);

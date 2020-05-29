@@ -50,7 +50,10 @@ public class NeedyLittleThings {
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e!=null&&e.canBeCollidedWith());
 
     public static boolean isMeleeDamage(DamageSource ds) {
-        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute() && !ds.isProjectile();
+        return isPhysicalDamage(ds) && !ds.isProjectile();
+    }
+    public static boolean isPhysicalDamage(DamageSource ds){
+        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
     }
 
     public static void setSize(Entity e, float width, float height) {

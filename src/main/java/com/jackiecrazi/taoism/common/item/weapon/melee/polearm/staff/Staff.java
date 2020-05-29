@@ -37,21 +37,6 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0f;
-    }
-
-    @Override
-    protected double speed(ItemStack stack) {
-        double ret = super.speed(stack) + 4f;
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            ret /= 1.2d;
-        }
-        ret -= 4d;
-        return ret;
-    }
-
-    @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
     }
@@ -64,40 +49,9 @@ public class Staff extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         //nerf offhand damage
-        float leap=attacker.onGround?1f:2f;
-        float off=getHand(item)==EnumHand.OFF_HAND?0.4f:1f;
-        return leap*off;
-    }
-
-    @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, stack, 120);
-        }
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            float groundKB = attacker.onGround ? 1f : 1.3f;
-            NeedyLittleThings.knockBack(target, attacker, groundKB);
-        } else {
-            if (target.onGround) {
-                target.addVelocity(0, 0.4, 0);
-            } else {
-                NeedyLittleThings.knockBack(target, attacker, 1f);
-                target.addVelocity(0, -1, 0);
-                target.fallDistance += 3f;
-            }
-            target.velocityChanged = true;
-        }
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        float leap = attacker.onGround ? 1f : 2f;
+        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
+        return leap * off;
     }
 
     @Override
@@ -116,6 +70,59 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
+    public boolean isTwoHanded(ItemStack is) {
+        return true;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (onHand && e instanceof EntityLivingBase) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            if (e.ticksExisted % 20 == 1)
+                splash(elb, stack, 120);
+            for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
+                if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
+                    IProjectile ip = (IProjectile) ent;
+                    Vec3d velocity = new Vec3d(ent.motionX, ent.motionY, ent.motionZ);
+                    boolean isCharged = isCharged(elb, stack);
+                    if (velocity.lengthSquared() < getQiFromStack(stack) * getQiFromStack(stack)) {
+                        //reflect. I suppose just reversing its velocity will do...
+                        if (isCharged) {
+                            ip.shoot(-ent.motionX, -ent.motionY, -ent.motionZ, 1.6f, 0);
+                        } else {
+                            ent.motionX = 0;
+                            ent.motionZ = 0;
+                        }
+                    } else if (isCharged) {
+                        ent.motionX = 0;
+                        ent.motionZ = 0;
+                    }
+                    ent.velocityChanged = true;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected double speed(ItemStack stack) {
+        double ret = super.speed(stack) + 4f;
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            ret /= 1.2d;
+        }
+        ret -= 4d;
+        return ret;
+    }
+
+    @Override
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            splash(attacker, stack, 120);
+        }
+    }
+
+    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("staff.leap"));
@@ -129,39 +136,25 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public boolean isTwoHanded(ItemStack is) {
-        return true;
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
-        if (onHand && e instanceof EntityLivingBase) {
-            EntityLivingBase elb = (EntityLivingBase) e;
-            if (TaoCombatUtils.isEntityBlocking(elb)) {
-                if (e.ticksExisted % 20 == 1)
-                    splash(elb, stack, 120);
-                for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
-                    if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
-                        IProjectile ip = (IProjectile) ent;
-                        Vec3d velocity = new Vec3d(ent.motionX, ent.motionY, ent.motionZ);
-                        boolean isCharged = isCharged(elb, stack);
-                        if (velocity.lengthSquared() < getQiFromStack(stack) * getQiFromStack(stack)) {
-                            //reflect. I suppose just reversing its velocity will do...
-                            if (isCharged) {
-                                ip.shoot(-ent.motionX, -ent.motionY, -ent.motionZ, 1.6f, 0);
-                            } else {
-                                ent.motionX = 0;
-                                ent.motionZ = 0;
-                            }
-                        } else if (isCharged) {
-                            ent.motionX = 0;
-                            ent.motionZ = 0;
-                        }
-                        ent.velocityChanged=true;
-                    }
-                }
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            float groundKB = attacker.onGround ? 1f : 1.3f;
+            NeedyLittleThings.knockBack(target, attacker, groundKB);
+        } else {
+            if (target.onGround) {
+                target.addVelocity(0, 0.4, 0);
+            } else {
+                NeedyLittleThings.knockBack(target, attacker, 1f);
+                target.addVelocity(0, -1, 0);
+                target.fallDistance += 3f;
             }
+            target.velocityChanged = true;
         }
     }
 }

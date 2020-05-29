@@ -35,7 +35,7 @@ public class Qiang extends TaoWeapon {
     };
 
     public Qiang() {
-        super(2, 1.2, 7.5d, 1f);
+        super(2, 1.7, 6d, 1f);
     }
 
     @Override
@@ -77,9 +77,8 @@ public class Qiang extends TaoWeapon {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             if (attacker.onGround)
                 splash(attacker, stack, 120);
-            else splash(attacker, stack, 10);
-        } else if (getHand(stack) == EnumHand.MAIN_HAND)
-            splash(attacker, stack, NeedyLittleThings.raytraceEntities(attacker.world, attacker, getReach(attacker, stack)), 10);
+            //else splash(attacker, stack, 10);
+        }
     }
 
     @Override
@@ -94,7 +93,6 @@ public class Qiang extends TaoWeapon {
         tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.stab.riposte") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.bash"));
         tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.bash.riposte") + TextFormatting.RESET);
-        tooltip.add(I18n.format("qiang.oscillate"));
         tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
     }
 

@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.*;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
+import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
@@ -26,6 +27,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -97,8 +99,6 @@ public class TaoisticEventHandler {
     public static void pleasedontkillme(LivingAttackEvent e) {
         if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
-            //store swing
-
             //cancel attack
             ItemStack i = p.getHeldItem(TaoWeapon.off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
             if (i.getItem() instanceof ICombatManipulator) {
@@ -108,13 +108,18 @@ public class TaoisticEventHandler {
             }
         }
         //rolling inv frames for projectiles and melee damage
-        if ((e.getSource().isProjectile() || NeedyLittleThings.isMeleeDamage(e.getSource())) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
+        if (NeedyLittleThings.isPhysicalDamage(e.getSource()) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
             e.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void projectileParry(ProjectileImpactEvent e) {
+
     }
 
     //parry code, TODO make all entities capable of parry
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void parryAndBlock(LivingAttackEvent e) {
+    public static void parry(LivingAttackEvent e) {
         abort = false;
         if (e.getAmount() == 0) {
             abort = true;
@@ -126,7 +131,8 @@ public class TaoisticEventHandler {
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase) {
-            if (ds.getImmediateSource() != ds.getTrueSource()) return;//only melee attacks can be parried
+            if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isPhysicalDamage(ds))
+                return;//only melee attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
             if (seme.getLastAttackedEntity() == uke && seme.getLastAttackedEntityTime() == seme.ticksExisted) {
                 //attacking the same entity repeatedly in a single tick! Abort! Abort!
@@ -134,6 +140,8 @@ public class TaoisticEventHandler {
                 return;
             }
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
+            ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
+            if (ukeCap.getDownTimer() > 0) return;//downed players are defenseless
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
                 if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {//nein nein nein nein nein nein nein
@@ -143,44 +151,28 @@ public class TaoisticEventHandler {
                 } else
                     semeCap.setSwing(0);
             }
-            //if you cannot parry, posture damage will always be applied.
-            //suck it, wither.
-            boolean smart = uke instanceof IAmVerySmart || uke instanceof EntityPlayer;
-            boolean blocking = TaoCombatUtils.isEntityBlocking(uke);
-            boolean parrying = TaoCombatUtils.isEntityParrying(uke);
-            if (!blocking && !parrying && smart)
-                return;
             ItemStack weapon = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
-            ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
-            if (ukeCap.getDownTimer() > 0) return;//downed players are defenseless
             if (weapon.getItem() instanceof ICombatManipulator) {
                 ICombatManipulator icm = (ICombatManipulator) weapon.getItem();
                 icm.attackStart(ds, seme, uke, weapon, e.getAmount());
             }
-            if (!NeedyLittleThings.isMeleeDamage(ds))
-                return;//cannot parry/block these
-
-            float postureUse1 = TaoCombatUtils.requiredPostureAtk(uke, seme, weapon, e.getAmount());
-            float postureUse2 = TaoCombatUtils.requiredPostureDef(uke, seme, weapon, e.getAmount());
-            if (ukeCap.consumePosture(postureUse1 * postureUse2, !parrying, seme, ds) > 0) {
-                downingHit = true;
-                return;
-            }
+            //if you cannot parry, posture damage will always be applied.
+            //suck it, wither.
             /*
             TODO idle parry
+            knockback distributed between both units depending on their max posture
+            you still take posture damage for being attacked, to incentivize attacking, as per the usual block formula
+            the knockback dealt is greater max-lesser max, modified by weapon
+            so big posture=less knockback=standing tank
+            while this sounds bad for low pos modifier weapons, it means they can bounce around. Hyper-mobile combat!
+            balance so that full iron guy parrying naked zombie=no kb for figuy
              */
             ItemStack hero = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
-            if (parrying && NeedyLittleThings.isFacingEntity(uke, seme, 120)) {
+            if (!hero.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 30)) {
                 e.setCanceled(true);
                 //uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
                 uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry code, execute parry special
-                semeCap.consumePosture(postureUse1, false);
-
-                if (hero.getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) hero.getItem()).parrySkill(seme, uke, hero);
-                }
-                return;
             }
         }
     }
@@ -273,7 +265,7 @@ public class TaoisticEventHandler {
         }
         if (ds.isUnblockable()) return;//to prevent loops
         //deflect projectile damage
-        if ((ds.isProjectile() || NeedyLittleThings.isMeleeDamage(ds)) && ds.getImmediateSource() != null && !posBreak) {
+        if (NeedyLittleThings.isPhysicalDamage(ds) && ds.getImmediateSource() != null && !posBreak) {
             double dp = ds.getImmediateSource().getLookVec().dotProduct(uke.getLookVec());
             double dist = ds.getImmediateSource().getLookVec().lengthVector() * uke.getLookVec().lengthVector();
             double cos = dp / dist;
@@ -369,6 +361,11 @@ public class TaoisticEventHandler {
                     elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
                 }
             }
+            if (elb instanceof EntityLiving && !((EntityLiving) elb).isAIDisabled()) {
+                EntityLiving el = (EntityLiving) e;
+                el.tasks.addTask(-1, new AIDowned(el));
+                el.targetTasks.addTask(-1, new AIDowned(el));
+            }
         }
     }
 
@@ -389,7 +386,7 @@ public class TaoisticEventHandler {
             ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi()>0) {
+            if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi() > 0) {
                 if (!p.isSneaking() && cap.getQi() > 5)
                     p.motionY /= ((cap.getQiFloored() - 5) / 4f + 1);
                 p.fallDistance = 0f;

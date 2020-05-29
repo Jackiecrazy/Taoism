@@ -8,7 +8,7 @@ public class DamageSourceBleed extends DamageSource {
         super("bleed");
         this.setDamageBypassesArmor();
         this.setDamageIsAbsolute();
-        this.setMagicDamage();
+        //this.setMagicDamage();//why did I do this?
     }
 
     public static DamageSource causeBleedingDamage(){

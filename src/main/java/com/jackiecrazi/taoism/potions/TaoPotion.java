@@ -24,33 +24,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaoPotion extends Potion {
-    public static Potion HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
+    public static Potion HIDE = null;
     /**
      * deals 1 damage per second, +0.5 per additional layer, and prevents healing
      */
-    public static Potion BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed");
+    public static Potion BLEED = null;
     /**
      * prevents posture regeneration
      */
-    public static Potion ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
-            .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -1, 2);
+    public static Potion ENFEEBLE = null;
     /**
      * prevents stagger
      */
-    public static Potion RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
+    public static Potion RESOLUTION = null;
     /**
      * reduces armor by 2 per level
      */
-    public static Potion ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("armorBreak")
-            .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11727", -2, 0);
+    public static Potion ARMORBREAK = null;
     /**
      * does nothing until detonated
      */
-    public static Potion HEMORRHAGE = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
+    public static Potion HEMORRHAGE = null;
     /**
      * increases incoming posture and non-magical damage, generally paired with bleed
      */
-    public static Potion LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
+    public static Potion LACERATION = null;
     private int interval = 0;
 
     private TaoPotion(boolean isBad, int colour) {
@@ -59,12 +57,27 @@ public class TaoPotion extends Potion {
 
     @SubscribeEvent
     public static void init(RegistryEvent.Register<Potion> event) {
+        HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
+        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed");
+        ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
+                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -1, 2);
+        RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
+        ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("armorBreak")
+                .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0);
+        HEMORRHAGE = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
+        LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
         event.getRegistry().register(BLEED);
         event.getRegistry().register(HIDE);
         event.getRegistry().register(ARMORBREAK);
+        event.getRegistry().register(RESOLUTION);
         event.getRegistry().register(HEMORRHAGE);
         event.getRegistry().register(LACERATION);
         event.getRegistry().register(ENFEEBLE);
+    }
+
+    private TaoPotion procInterval(int interval) {
+        this.interval = interval;
+        return this;
     }
 
     @SubscribeEvent
@@ -104,11 +117,6 @@ public class TaoPotion extends Potion {
         }
     }
 
-    private TaoPotion procInterval(int interval) {
-        this.interval = interval;
-        return this;
-    }
-
     @Override
     public void performEffect(EntityLivingBase l, int amplifier) {
         int duration = l.getActivePotionEffect(this).getDuration();
@@ -132,11 +140,6 @@ public class TaoPotion extends Potion {
         super.applyAttributesModifiersToEntity(elb, am, amp);
     }
 
-    public List<ItemStack> getCurativeItems()
-    {
-        return new ArrayList<>();
-    }
-
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(PotionEffect effect) {
         return true;
@@ -150,5 +153,9 @@ public class TaoPotion extends Potion {
     @SideOnly(Side.CLIENT)
     public boolean shouldRenderHUD(PotionEffect effect) {
         return true;
+    }
+
+    public List<ItemStack> getCurativeItems() {
+        return new ArrayList<>();
     }
 }

@@ -19,6 +19,7 @@ public class Chui extends TaoWeapon {
     //a powerful crushing weapon. Brutal, somewhat defensive, with decent reach but low trickery potential
     //leap attacks deal double instead of 1.5x damage. Attacks always decrease posture,
     // and will additionally deal 1.5x damage against staggered targets for a total of triple damage
+    //FIXME posture mult too high, hammers are crap at defending
 
     public Chui() {
         super(0, 1.2f, 7f, 1.7f);
