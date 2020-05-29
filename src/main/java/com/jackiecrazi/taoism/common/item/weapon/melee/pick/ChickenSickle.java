@@ -25,7 +25,7 @@ public class ChickenSickle extends TaoWeapon {
      * while hemorrhage is active, receiving a negative buff will add hemorrhage's duration and potency to it, consuming hemorrhage in the process
      */
     public ChickenSickle() {
-        super(2, 1.6, 7, 1f);
+        super(2, 1.6, 6, 1f);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 2;
     }
 
     @Override
@@ -73,10 +73,11 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        PotionEffect hemorrhage=NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION);
+        PotionEffect hemorrhage=NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.ADD);
         if(hemorrhage.getAmplifier()*4>=target.getTotalArmorValue()){//isCharged(attacker,stack)
-            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*hemorrhage.getAmplifier()*hemorrhage.getAmplifier());
-            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 1, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+            target.hurtResistantTime=0;
+            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*hemorrhage.getAmplifier());
+            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 10, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
         }else target.addPotionEffect(hemorrhage);
     }
 }

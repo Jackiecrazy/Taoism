@@ -11,6 +11,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
@@ -33,7 +35,7 @@ public class Staff extends TaoWeapon {
      */
 
     public Staff() {
-        super(0, 1.4f, 6f, 1f);
+        super(0, 1.4f, 5f, 1f);
     }
 
     @Override
@@ -56,7 +58,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5f;
+        return 4f;
     }
 
     @Override
@@ -79,8 +81,8 @@ public class Staff extends TaoWeapon {
         super.onUpdate(stack, w, e, slot, onHand);
         if (onHand && e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (e.ticksExisted % 20 == 1)
-                splash(elb, stack, 120);
+//            if (e.ticksExisted % 20 == 1)
+//                splash(elb, stack, 120);
             for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
                 if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
                     IProjectile ip = (IProjectile) ent;
@@ -128,11 +130,11 @@ public class Staff extends TaoWeapon {
         tooltip.add(I18n.format("staff.leap"));
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
+        tooltip.add(I18n.format("staff.throw"));
+        tooltip.add(I18n.format("staff.doink"));
         tooltip.add(I18n.format("staff.swipe"));
         tooltip.add(I18n.format("staff.oscillate"));
         tooltip.add(I18n.format("staff.block"));
-        tooltip.add(I18n.format("staff.riposte"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("staff.block.riposte") + TextFormatting.RESET);
     }
 
     @Override
@@ -147,14 +149,25 @@ public class Staff extends TaoWeapon {
             float groundKB = attacker.onGround ? 1f : 1.3f;
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
-            if (target.onGround) {
-                target.addVelocity(0, 0.4, 0);
-            } else {
-                NeedyLittleThings.knockBack(target, attacker, 1f);
-                target.addVelocity(0, -1, 0);
-                target.fallDistance += 3f;
+            if(attacker.onGround) {
+                if (target.onGround) {
+                    target.addVelocity(0, 0.4*chi/10f, 0);
+                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"),20, chi/3));
+                } else {
+                    NeedyLittleThings.knockBack(target, attacker, 1f);
+                    target.addVelocity(0, -1-chi/10f, 0);
+                    target.fallDistance += 3f;
+                }
+                target.velocityChanged = true;
+            }else{
+                if (target.onGround) {
+                    attacker.addVelocity(0, 0.4*chi/10f, 0);
+                    attacker.velocityChanged = true;
+                } else {
+                    target.addVelocity(0, 0.4*chi/10f, 0);
+                    target.velocityChanged = true;
+                }
             }
-            target.velocityChanged = true;
         }
     }
 }

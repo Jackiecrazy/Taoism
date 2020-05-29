@@ -42,7 +42,7 @@ public class Ken extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 2;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Ken extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (!isAoE(attacker, stack))
+        if (isAoE(attacker, stack))
             if (attacker.onGround) {
                 splash(attacker, stack, 90);
             }

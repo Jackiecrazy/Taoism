@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -300,6 +299,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.hitEntity(stack, target, attacker);
     }
 
+    @SideOnly(Side.CLIENT)
+    public boolean isFull3D() {
+        return true;
+    }
+
     /**
      * gradually discharges the weapon
      */
@@ -365,11 +369,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
 
         }
-    }
-
-    @Override
-    public EnumAction getItemUseAction(final ItemStack stack) {
-        return EnumAction.NONE;
     }
 
     @SideOnly(Side.CLIENT)
@@ -465,7 +464,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //expensive? perhaps.
             hand = entityLiving.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : entityLiving.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : null;
         }
-        if (hand != null) {
+        if (hand != null && (TaoCombatUtils.getHandCoolDown(entityLiving, hand) > 0.9f || NeedyLittleThings.raytraceEntity(entityLiving.world, entityLiving, getReach(entityLiving, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
             //Well, ya got me. By all accounts, it doesn't make sense.
             //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));
             aoe(stack, entityLiving, TaoCasterData.getTaoCap(entityLiving).getQiFloored());
@@ -480,7 +479,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
-        return !player.isCreative();
+        return false;
     }
 
     public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
@@ -524,10 +523,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return enchantment.type != null && enchantment.type.canEnchantItem(Items.IRON_SWORD);
     }
 
-    public int getDamageType(ItemStack is) {
-        return damageType;
-    }
-
     /**
      * Here's a little lesson in trickery!
      */
@@ -545,6 +540,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return changed;
     }
 
+    /**
+     * AoE
+     */
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+
+    }
+
     @Nullable
     protected EnumHand getHand(ItemStack item) {
         if (isDummy(item)) return EnumHand.OFF_HAND;
@@ -552,13 +554,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
         }
         return null;
-    }
-
-    /**
-     * AoE
-     */
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-
     }
 
     /**
@@ -614,6 +609,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     protected boolean[] harvestable(ItemStack is) {
         return new boolean[]{false, false, false, false};
+    }
+
+    public int getDamageType(ItemStack is) {
+        return damageType;
     }
 
     protected void splash(EntityLivingBase attacker, ItemStack is, int angleAllowance) {

@@ -11,7 +11,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.init.MobEffects;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
@@ -75,62 +74,12 @@ public class TaoCombatUtils {
         return false;
     }
 
-    /**
-     * I just split them because base posture damage is reflected onto attacker at a 40% rate.
-     */
-    public static float requiredPosture(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        return requiredPostureAtk(defender, attacker, attack, amount) * requiredPostureDef(defender, attacker, attack, amount);
-    }
-
-    public static float requiredPostureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
+    public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
         return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * 0.1f;
     }
 
-    public static float requiredPostureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        ItemStack main = defender.getHeldItem(EnumHand.MAIN_HAND);
-        ItemStack off = defender.getHeldItem(EnumHand.OFF_HAND);
-        float defMult = CombatConfig.defaultMultiplierPostureDefend;
-        if (isEntityParrying(defender)) {
-//            if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main)) {
-//                if (main.getItem() instanceof IStaminaPostureManipulable) {
-//                    return ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, defender, main, amount);
-//                } else if (CombatConfig.parryCapableItems.contains(main.getItem().getUnlocalizedName())) {
-//                    return CombatConfig.defaultMultiplierPostureDefend;
-//                } else ;//sorry, no parry for you!
-//            }
-            //is shield, highest priority
-            if (off.getItem().isShield(off, defender) || main.getItem().isShield(main, defender))
-                defMult = CombatConfig.defaultMultiplierPostureDefend;
-            //mainhand
-            if (main.getItem() instanceof IStaminaPostureManipulable)
-                defMult = Math.min(((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, defender, main, amount), defMult);
-            //offhand
-            if (off.getItem() instanceof IStaminaPostureManipulable)
-                defMult = Math.min(((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, defender, off, amount), defMult);
-            //default parry
-            if (contains(off.getItem()) || contains(main.getItem()))
-                defMult = Math.min(CombatConfig.defaultMultiplierPostureDefend, defMult);
-        }
-        return defMult;
-    }
-
-    public static boolean isEntityParrying(EntityLivingBase entity) {
-        return isHoldingEligibleItem(entity);
-    }
-
-    private static boolean isHoldingEligibleItem(EntityLivingBase entity) {
-        ItemStack main = entity.getHeldItemMainhand(), off = entity.getHeldItemOffhand();
-        if (main.getItem() instanceof ITwoHanded && ((ITwoHanded) main.getItem()).isTwoHanded(main) && !(main.getItem() instanceof IStaminaPostureManipulable))
-            return false;
-        return
-                main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(entity, main)
-                        || off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(entity, off)
-                        || contains(main.getItem())
-                        || contains(off.getItem())
-                        || main.getItemUseAction() == EnumAction.BLOCK
-                        || off.getItemUseAction() == EnumAction.BLOCK
-                        || main.getItem().isShield(main, entity)
-                        || off.getItem().isShield(main, entity);
+    public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
+        return defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureDealtBase(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend;
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {

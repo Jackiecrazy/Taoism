@@ -53,7 +53,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
+        return 1f;
     }
 
     @Override

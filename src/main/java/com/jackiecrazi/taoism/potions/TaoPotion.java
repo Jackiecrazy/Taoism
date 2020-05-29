@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.potions;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
@@ -92,7 +91,7 @@ public class TaoPotion extends Potion {
         if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
             PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
             elb.removeActivePotionEffect(HEMORRHAGE);
-            elb.addPotionEffect(NeedyLittleThings.stackPot(elb, new PotionEffect(current.getPotion(), pe.getDuration(), pe.getAmplifier()), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+            current.combine(new PotionEffect(current.getPotion(), current.getDuration() + pe.getDuration(), current.getAmplifier() + 1 + pe.getAmplifier()));
         }
     }
 
@@ -133,7 +132,7 @@ public class TaoPotion extends Potion {
 
     @Override
     public boolean isReady(int duration, int amplifier) {
-        return interval != 0 && (duration % interval) + 1 == 1;
+        return interval != 0 && duration % interval == 1;
     }
 
     public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {

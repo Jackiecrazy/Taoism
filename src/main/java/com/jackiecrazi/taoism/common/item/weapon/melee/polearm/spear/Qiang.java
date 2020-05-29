@@ -45,7 +45,7 @@ public class Qiang extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 6f;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 12f;
     }
 
     @Override

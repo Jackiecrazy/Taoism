@@ -25,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -32,6 +33,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -134,6 +136,7 @@ public class TaoisticEventHandler {
             if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isPhysicalDamage(ds))
                 return;//only melee attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
+            TaoCasterData.updateCasterData(seme);
             if (seme.getLastAttackedEntity() == uke && seme.getLastAttackedEntityTime() == seme.ticksExisted) {
                 //attacking the same entity repeatedly in a single tick! Abort! Abort!
                 abort = true;
@@ -151,28 +154,39 @@ public class TaoisticEventHandler {
                 } else
                     semeCap.setSwing(0);
             }
-            ItemStack weapon = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
-            if (weapon.getItem() instanceof ICombatManipulator) {
-                ICombatManipulator icm = (ICombatManipulator) weapon.getItem();
-                icm.attackStart(ds, seme, uke, weapon, e.getAmount());
+            ItemStack attack = TaoWeapon.off ? seme.getHeldItemOffhand() : seme.getHeldItemMainhand();
+            if (attack.getItem() instanceof ICombatManipulator) {
+                ICombatManipulator icm = (ICombatManipulator) attack.getItem();
+                icm.attackStart(ds, seme, uke, attack, e.getAmount());
             }
-            //if you cannot parry, posture damage will always be applied.
+            //some entities just can't parry.
             //suck it, wither.
+            boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
+            if (!smart) return;
             /*
             TODO idle parry
             knockback distributed between both units depending on their max posture
             you still take posture damage for being attacked, to incentivize attacking, as per the usual block formula
-            the knockback dealt is greater max-lesser max, modified by weapon
+            knockback taken is equal to base damage divided by defense posture multiplier divided by max posture
             so big posture=less knockback=standing tank
             while this sounds bad for low pos modifier weapons, it means they can bounce around. Hyper-mobile combat!
-            balance so that full iron guy parrying naked zombie=no kb for figuy
              */
-            ItemStack hero = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
-            if (!hero.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 30)) {
-                e.setCanceled(true);
-                //uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
-                uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
-                //parry code, execute parry special
+            ItemStack defend = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
+            if (!defend.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 90)) {
+                float atk = TaoCombatUtils.postureAtk(uke, seme, attack, e.getAmount());
+                float def = TaoCombatUtils.postureDef(uke, seme, defend, e.getAmount());
+                if (ukeCap.consumePosture(atk * def, true, seme, ds) == 0f) {
+                    e.setCanceled(true);
+                    uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f+Taoism.unirand.nextFloat()*0.5f, 0.75f+Taoism.unirand.nextFloat()*0.5f);
+//                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
+//                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
+                    //parry, both parties are knocked back slightly
+                    float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
+                    NeedyLittleThings.knockBack(seme, uke, e.getAmount() / semeCap.getMaxPosture());
+                    NeedyLittleThings.knockBack(uke, seme, e.getAmount() / ukeCap.getMaxPosture());
+                    //reset cooldown
+                    TaoCombatUtils.rechargeHand(uke, uke.getHeldItemMainhand() == defend ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, 0f);
+                }
             }
         }
     }
@@ -187,7 +201,8 @@ public class TaoisticEventHandler {
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
             e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
-            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
+            //TODO this does not work the way you think it does. Oh boy...
+            e.setResult(Event.Result.ALLOW);//icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
         }
     }
 
@@ -214,7 +229,7 @@ public class TaoisticEventHandler {
                 e.setStrength(((ICombatManipulator) stack.getItem()).knockback(seme, uke, stack, e.getOriginalStrength()));
             }
         }
-        if (e.getStrength() == 0) e.setCanceled(true);
+        //if (e.getStrength() == 0) e.setCanceled(true);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -387,8 +402,8 @@ public class TaoisticEventHandler {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
             //qi 1+ gives slow fall
             if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi() > 0) {
-                if (!p.isSneaking() && cap.getQi() > 5)
-                    p.motionY /= ((cap.getQiFloored() - 5) / 4f + 1);
+                if (!p.isSneaking() && cap.getQi() > 1)
+                    p.motionY /= (cap.getQiFloored() / 20f + 1);
                 p.fallDistance = 0f;
             }
             TaoCasterData.updateCasterData(p);

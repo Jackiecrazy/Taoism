@@ -64,7 +64,7 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return (getHand(is) == EnumHand.MAIN_HAND) == isCharged(p, is) ? 6 : 3;
+        return (getHand(is) == EnumHand.MAIN_HAND) == isCharged(p, is) ? 5 : 2;
     }
 
     @Override

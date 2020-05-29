@@ -32,7 +32,7 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 2;
     }
 
     @Override

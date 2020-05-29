@@ -49,7 +49,7 @@ public class BohemianEarspoon extends TaoWeapon {
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
         float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
-        float lastAttackRange = 1 + min / (max * 2);
+        float lastAttackRange = 1 + min / (max * 1.5f);
         return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
     }
 

@@ -143,7 +143,7 @@ public class NeedyLittleThings {
         strength = event.getStrength();
         xRatio = event.getRatioX();
         zRatio = event.getRatioZ();
-        if (strength != 0) {
+        if (strength != 0f) {
             to.isAirBorne = true;
             float pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
             to.motionX /= 2.0D;
@@ -159,6 +159,7 @@ public class NeedyLittleThings {
                     to.motionY = 0.4000000059604645D;
                 }
             }
+            to.velocityChanged=true;
         }
     }
 

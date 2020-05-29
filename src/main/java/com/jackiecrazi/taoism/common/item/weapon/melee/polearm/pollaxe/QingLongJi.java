@@ -56,7 +56,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5f;
+        return 4f;
     }
 
     @Override
