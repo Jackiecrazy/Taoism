@@ -56,11 +56,27 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float ground = attacker.onGround ? 1f : 2f;
-        float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 1.5f : 1f;
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1f;
-        return ground * breach * off;
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 4f;
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 100;
+    }
+
+    @Override
+    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 0.5f;
+    }
+
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return !attacker.onGround;
+    }
+
+    @Override
+    public boolean isTwoHanded(ItemStack is) {
+        return true;
     }
 
     @Override
@@ -69,6 +85,52 @@ public class ChangChui extends TaoWeapon {
         if (attacker.onGround && getHand(stack) == EnumHand.OFF_HAND) {
             splash(attacker, stack, 120);
         }
+    }
+
+    @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
+        tooltip.add(I18n.format("changchui.leap"));
+        tooltip.add(I18n.format("changchui.armpen"));
+        tooltip.add(I18n.format("changchui.downed"));
+        tooltip.add(I18n.format("changchui.swipe"));
+        tooltip.add(I18n.format("changchui.riposte"));
+        tooltip.add(TextFormatting.ITALIC + I18n.format("changchui.swipe.riposte") + TextFormatting.RESET);
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
+        if (getHand(stack) == EnumHand.OFF_HAND)
+            dischargeWeapon(elb, stack);
+        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return (TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 2f : 1f) * attacker.motionY < 0 ? 2f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float off = getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1f;
+        return off;
+    }
+
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker, target, item, orig);
+        if (isCharged(attacker, item)) {
+            if (getHand(item) == EnumHand.OFF_HAND)
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
+            else
+                TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
+        }
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return 3;
     }
 
     @Override
@@ -87,64 +149,5 @@ public class ChangChui extends TaoWeapon {
 //            }
         }
         //dent armor of downed targets, restricting movement
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
-            dischargeWeapon(elb, stack);
-        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 100;
-    }
-
-    @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.5f;
-    }
-
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker,target,item, orig);
-        if (isCharged(attacker, item)) {
-            if (getHand(item) == EnumHand.OFF_HAND)
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
-            else
-                TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
-        }
-    }
-
-    @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
-        tooltip.add(I18n.format("changchui.leap"));
-        tooltip.add(I18n.format("changchui.armpen"));
-        tooltip.add(I18n.format("changchui.downed"));
-        tooltip.add(I18n.format("changchui.swipe"));
-        tooltip.add(I18n.format("changchui.riposte"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("changchui.swipe.riposte") + TextFormatting.RESET);
-    }
-
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return !attacker.onGround;
-    }
-
-    @Override
-    public boolean isTwoHanded(ItemStack is) {
-        return true;
-    }
-
-    @Override
-    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return 3;
     }
 }

@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketUpdateClientPainful implements IMessage {
-    private int entityID;
+    private int entityID, taoAtk;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
     private float maxLing, maxPosture;
@@ -40,7 +40,7 @@ public class PacketUpdateClientPainful implements IMessage {
         lcd = itsc.getLingRechargeCD();
         pcd = itsc.getPostureRechargeCD();
         scd = itsc.getStaminaRechargeCD();
-        qcd= itsc.getQiGracePeriod();
+        qcd = itsc.getQiGracePeriod();
         down = itsc.getDownTimer();
         timey = itsc.getLastUpdatedTime();
         swi = itsc.isSwitchIn();
@@ -48,6 +48,7 @@ public class PacketUpdateClientPainful implements IMessage {
         parry = itsc.getParryCounter();
         dodge = itsc.getRollCounter();
         protec = itsc.getPosInvulTime();
+        taoAtk = Taoism.getAtk(elb);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class PacketUpdateClientPainful implements IMessage {
         lcd = buf.readInt();
         pcd = buf.readInt();
         scd = buf.readInt();
-        qcd= buf.readInt();
+        qcd = buf.readInt();
         down = buf.readInt();
         timey = buf.readLong();
         swi = buf.readBoolean();
@@ -74,6 +75,7 @@ public class PacketUpdateClientPainful implements IMessage {
         protec = buf.readInt();
         width = buf.readFloat();
         height = buf.readFloat();
+        taoAtk = buf.readInt();
     }
 
     @Override
@@ -100,6 +102,7 @@ public class PacketUpdateClientPainful implements IMessage {
         buf.writeInt(protec);
         buf.writeFloat(width);
         buf.writeFloat(height);
+        buf.writeInt(taoAtk);
     }
 
     public static class UpdateClientHandler implements
@@ -110,6 +113,7 @@ public class PacketUpdateClientPainful implements IMessage {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
                 final EntityPlayer thePlayer = Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
+                if (thePlayer == null || thePlayer.world == null) return;
                 Entity e = thePlayer.world
                         .getEntityByID(m.entityID);
                 if (e instanceof EntityLivingBase) {
@@ -134,6 +138,7 @@ public class PacketUpdateClientPainful implements IMessage {
                     i.setMaxPosture(m.maxPosture);
                     i.setComboSequence(m.combo);
                     i.setPrevSizes(m.width, m.height);
+                    Taoism.setAtk(e, m.taoAtk);
                 }
             });
             return null;

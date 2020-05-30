@@ -39,15 +39,16 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float grounded = attacker.onGround ? 1f : 1.5f;
-        float grapple = isCharged(attacker, item) ? 1.3f : 1f;
-        return grounded * grapple;
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
+    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
+        Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot, stack);
+        if (equipmentSlot == EntityEquipmentSlot.MAINHAND || equipmentSlot == EntityEquipmentSlot.OFFHAND)
+            multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", 2, 0));
+        return multimap;
     }
 
     /**
@@ -68,6 +69,38 @@ public class Cestus extends TaoWeapon {
         return ret;
     }
 
+    @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(I18n.format("cestus.armor"));
+        tooltip.add(I18n.format("cestus.leap"));
+        tooltip.add(I18n.format("cestus.debuff"));
+        tooltip.add(I18n.format("cestus.damage"));
+        tooltip.add(I18n.format("cestus.riposte"));
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        //TODO buff me
+        TaoCasterData.getTaoCap(defender).addQi(2f);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float grounded = attacker.motionY < 0 ? 1f : 1.5f;
+        float grapple = isCharged(attacker, item) ? 1.3f : 1f;
+        return grounded * grapple;
+    }
+
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker, target, item, orig);
+        if (isCharged(attacker, item)) {
+            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker, null);
+            ds.setDamageIsAbsolute();
+        }
+        dischargeWeapon(attacker, item);
+    }
+
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int qi) {
         if (qi >= 3) {
             target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1));
@@ -81,23 +114,8 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
-    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
-        Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot, stack);
-        if (equipmentSlot == EntityEquipmentSlot.MAINHAND || equipmentSlot == EntityEquipmentSlot.OFFHAND)
-            multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", 2, 0));
-        return multimap;
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //TODO grapples the enemy. The next attack pulls them into the ground for 5 posture damage and increases the damage they take by 1.3x
-        TaoCasterData.getTaoCap(defender).addQi(2f);
-        super.parrySkill(attacker, defender, item);
     }
 
     @Override
@@ -108,23 +126,5 @@ public class Cestus extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.8f;
-    }
-
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker,target,item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker, null);
-            ds.setDamageIsAbsolute();
-        }
-        dischargeWeapon(attacker, item);
-    }
-
-    @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(I18n.format("cestus.armor"));
-        tooltip.add(I18n.format("cestus.leap"));
-        tooltip.add(I18n.format("cestus.debuff"));
-        tooltip.add(I18n.format("cestus.damage"));
-        tooltip.add(I18n.format("cestus.riposte"));
     }
 }

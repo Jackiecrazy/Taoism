@@ -55,33 +55,8 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(I18n.format("weapon.half"));
-        tooltip.add(I18n.format("nunchaku.dual"));
-        tooltip.add(I18n.format("nunchaku.stance"));
-        tooltip.add(I18n.format("nunchaku.moves"));
-        tooltip.add(I18n.format("nunchaku.flick"));
-        tooltip.add(I18n.format("nunchaku.smash"));
-        tooltip.add(I18n.format("nunchaku.sweep"));
-        tooltip.add(I18n.format("nunchaku.spin"));
-    }
-
-    @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return parts;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if (getCurrentMove(item).isSneakPressed() && !getLastMove(item).isSneakPressed()) {//high low
-            //smash!
-            return 1.5f;
-        }
-        if (!getCurrentMove(item).isSneakPressed() && getLastMove(item).isSneakPressed()) {//low high
-            //8-spin! reduce damage
-            return 0.4f;
-        }
-        return 1;
     }
 
     @Override
@@ -90,22 +65,8 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
-            //flick!
-            return 0.8f;
-        }
-        return 0f;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 2f;
-    }
-
-    @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-
     }
 
     @Override
@@ -123,7 +84,13 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    protected void aoe(ItemStack is, EntityLivingBase attacker, int chi){
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
+        updateStanceSide(is);
+        return super.onEntitySwing(elb, is);
+    }
+
+    @Override
+    protected void aoe(ItemStack is, EntityLivingBase attacker, int chi) {
         if (getCurrentMove(is).isSneakPressed() && getLastMove(is).isSneakPressed()) {//low low
             //sweep!
             splash(attacker, is, 90);
@@ -131,10 +98,54 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(I18n.format("weapon.half"));
+        tooltip.add(I18n.format("nunchaku.dual"));
+        tooltip.add(I18n.format("nunchaku.stance"));
+        tooltip.add(I18n.format("nunchaku.moves"));
+        tooltip.add(I18n.format("nunchaku.flick"));
+        tooltip.add(I18n.format("nunchaku.smash"));
+        tooltip.add(I18n.format("nunchaku.sweep"));
+        tooltip.add(I18n.format("nunchaku.spin"));
+    }
+
+    @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
+            //flick!
+            return 0.8f;
+        }
+        return 0f;
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (getCurrentMove(item).isSneakPressed() && !getLastMove(item).isSneakPressed()) {//high low
+            //smash!
+            return 1.5f;
+        }
+        return 1;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (!getCurrentMove(item).isSneakPressed() && getLastMove(item).isSneakPressed()) {//low high
+            //8-spin! reduce damage
+            return 0.4f;
+        }
+        return 1;
+    }
+
+    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getCurrentMove(stack).isSneakPressed() && !getLastMove(stack).isSneakPressed()) {//high low
             //smash!
-            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS,10,0));
+            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 10, 0));
         }
     }
 
@@ -144,12 +155,6 @@ public class Nunchaku extends TaoWeapon {
             //8-spin!
             multiHit(attacker, target, 1, 3);
         }
-    }
-
-    @Override
-    public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
-        updateStanceSide(is);
-        return super.onEntitySwing(elb,is);
     }
 
     private void updateStanceSide(ItemStack is) {

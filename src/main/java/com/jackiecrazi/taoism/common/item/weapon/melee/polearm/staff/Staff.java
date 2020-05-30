@@ -48,10 +48,14 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return attacker.motionY<0 ? 2f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         //nerf offhand damage
-        float leap = attacker.onGround ? 1f : 2f;
         float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return leap * off;
+        return off;
     }
 
     @Override
@@ -127,25 +131,25 @@ public class Staff extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            float groundKB = attacker.onGround ? 1f : 1.3f;
+            float groundKB = attacker.onGround ? 0.4f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
             if(attacker.onGround) {
                 if (target.onGround) {
-                    target.addVelocity(0, 0.4*chi/10f, 0);
-                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"),20, chi/3));
+                    target.addVelocity(0, chi/15f, 0);
+                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"),20, chi/4));
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f);
-                    target.addVelocity(0, -1-chi/10f, 0);
-                    target.fallDistance += 3f;
+                    target.addVelocity(0, -1-chi/5f, 0);
+                    target.fallDistance += chi;
                 }
                 target.velocityChanged = true;
             }else{
                 if (target.onGround) {
-                    attacker.addVelocity(0, 0.4*chi/10f, 0);
+                    attacker.motionY= chi/15f;
                     attacker.velocityChanged = true;
                 } else {
-                    target.addVelocity(0, 0.4*chi/10f, 0);
+                    target.motionY= chi/15f;
                     target.velocityChanged = true;
                 }
             }

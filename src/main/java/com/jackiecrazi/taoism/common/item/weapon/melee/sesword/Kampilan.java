@@ -32,13 +32,7 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if (!attacker.onGround) return 1.5f;
-        else return 1f;
+        return 3f;
     }
 
     @Override
@@ -49,6 +43,14 @@ public class Kampilan extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
+    }
+
+    @Override
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (attacker.onGround) {
+            splash(attacker, stack, 120);
+        }
     }
 
     @Override
@@ -74,10 +76,9 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        if (wielder.getCapability(TaoCasterData.CAP, null).getQi() >= 9)
-            return 5;
-        return 3;
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (attacker.motionY < 0) return 1.5f;
+        else return 1f;
     }
 
     @Override
@@ -97,10 +98,9 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround) {
-            splash(attacker, stack, 120);
-        }
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        if (wielder.getCapability(TaoCasterData.CAP, null).getQi() >= 9)
+            return 5;
+        return 3;
     }
 }

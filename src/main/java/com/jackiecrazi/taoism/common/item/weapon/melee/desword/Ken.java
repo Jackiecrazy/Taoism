@@ -30,10 +30,14 @@ public class Ken extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = attacker.onGround ? 1f : 1.5f;
+        float air = attacker.motionY<0 ? 1.5f : 1f;
         float aoe = isAoE(attacker, item) ? 1f : 1.5f;
-        float qiMult = 1 + (getQiFromStack(item) / 27f);
-        return air * aoe * qiMult;
+        return air*aoe;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1 + (getQiFromStack(item) / 27f);
     }
 
     private boolean isAoE(EntityLivingBase attacker, ItemStack is) {
@@ -42,7 +46,7 @@ public class Ken extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2;
+        return 3;
     }
 
     @Override

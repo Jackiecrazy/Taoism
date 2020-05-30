@@ -41,11 +41,6 @@ public class ChickenSickle extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1;
-    }
-
-    @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
         return hemorrhage !=null&& hemorrhage.getAmplifier()*4>=target.getTotalArmorValue() ? Event.Result.ALLOW : Event.Result.DENY;
@@ -58,7 +53,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2;
+        return 3;
     }
 
     @Override

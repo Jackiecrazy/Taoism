@@ -46,9 +46,12 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float light = 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;//light bonus
-        float backstab = NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
-        return light * backstab;
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;
     }
 
     @Override

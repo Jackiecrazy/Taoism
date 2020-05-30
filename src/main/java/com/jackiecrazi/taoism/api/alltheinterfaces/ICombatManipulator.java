@@ -22,6 +22,11 @@ public interface ICombatManipulator {
     float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item);
 
     /**
+     * this is called on LivingHurt to determine damage multiplier
+     */
+    float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item);
+
+    /**
      * this is called on LivingAttackEvent, before parries
      */
     void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);

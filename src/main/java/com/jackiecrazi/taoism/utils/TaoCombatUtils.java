@@ -37,31 +37,30 @@ public class TaoCombatUtils {
     }
 
     public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
-        if (elb.getHeldItemMainhand().getItem() instanceof ITwoHanded && ((ITwoHanded) elb.getHeldItemMainhand().getItem()).isTwoHanded(elb.getHeldItemMainhand()))
-            return elb.getHeldItemMainhand();
-        return TaoWeapon.off ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
+        return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
     }
 
     public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        boolean mainRec = NeedyLittleThings.getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shield and sword block
-        if (main.getItem().isShield(main, elb) || contains(main.getItem())) {
+        if ((main.getItem().isShield(main, elb) || contains(main.getItem())) && mainRec) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (off.getItem().isShield(off, elb) || contains(off.getItem())) {
+        if ((off.getItem().isShield(off, elb) || contains(off.getItem())) && offRec) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
         //offhand
-        if (off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
             defMult = ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount);
             ret = off;
         }
         //mainhand
-        if (main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
             ret = main;
         }
         return ret;
@@ -80,7 +79,7 @@ public class TaoCombatUtils {
     }
 
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
-        return defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureDealtBase(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend;
+        return defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend;
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
@@ -117,26 +116,27 @@ public class TaoCombatUtils {
     }
 
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
+        if (!(elb instanceof EntityPlayer)) return;
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
-        if (percent != 0f)//this is because this is called in tickStuff on the first tick after cooldown starts, so constant resetting would just make the weapon dysfunctional
-            switch (hand) {
-                case OFF_HAND:
-                    TaoCasterData.getTaoCap(elb).setOffhandCool((int) (percent * totalSec));
-                    break;
-                case MAIN_HAND:
-                    Taoism.setAtk(elb, (int) (percent * totalSec));
-                    break;
-            }
+        //if (percent != 0f)//this is because this is called in tickStuff on the first tick after cooldown starts, so constant resetting would just make the weapon dysfunctional
+        switch (hand) {
+            case OFF_HAND:
+                TaoCasterData.getTaoCap(elb).setOffhandCool((int) (percent * totalSec));
+                break;
+            case MAIN_HAND:
+                Taoism.setAtk(elb, (int) (percent * totalSec));
+                break;
+        }
     }
 
     public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
-        if(elb instanceof EntityPlayer)
+        if (elb instanceof EntityPlayer)
             switch (hand) {
-            case OFF_HAND:
-                return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
-            case MAIN_HAND:
-                return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
-        }
+                case OFF_HAND:
+                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
+                case MAIN_HAND:
+                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
+            }
         return 1f;
     }
 

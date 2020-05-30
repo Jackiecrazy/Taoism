@@ -48,8 +48,8 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float aerial = !attacker.onGround ? 1.5f : 1f;
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float aerial = attacker.motionY<0 ? 1.5f : 1f;
         float hook = getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
         return aerial * hook;
     }

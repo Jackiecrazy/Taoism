@@ -60,6 +60,8 @@ public interface ITaoStatCapability {
      void setSwitchIn(boolean suichi);
      int getOffhandCool();
      void setOffhandCool(int oc);
+     boolean isOffhandAttack();
+     void setOffhandAttack(boolean off);
      ItemStack getOffHand();
      void setOffHand(ItemStack is);
      boolean isProtected();

@@ -33,7 +33,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     private int down;
     private long timey;
-    private boolean swi, protecc;
+    private boolean swi, protecc, off;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
@@ -49,7 +49,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosture(float amount) {
-        posture = Math.max(amount, 0f);
+        posture = MathHelper.clamp(amount, 0f, maxPosture);
         if (posture >= getMaxPosture()) setProtected(true);
         //if (posture == 0) beatDown(null, 0);
     }
@@ -268,7 +268,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         setStaminaRechargeCD(from.getStaminaRechargeCD());
         setPosInvulTime(from.getPosInvulTime());
         setLastUpdatedTime(from.getLastUpdatedTime());
-        setOffHand(getOffHand());
+        setOffHand(from.getOffHand());
+        setOffhandAttack(from.isOffhandAttack());
     }
 
     @Override
@@ -359,6 +360,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setOffhandCool(int oc) {
         ohcool = oc;
+    }
+
+    @Override
+    public boolean isOffhandAttack() {
+        return off;
+    }
+
+    @Override
+    public void setOffhandAttack(boolean off) {
+        this.off=off;
     }
 
     @Override

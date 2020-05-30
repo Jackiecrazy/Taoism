@@ -25,6 +25,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public boolean isOffhandAttack() {
+        return false;
+    }
+
+    @Override
+    public void setOffhandAttack(boolean off) {
+
+    }
+
+    @Override
     public void setPosture(float amount) {
         posture = MathHelper.clamp(amount, 0f, getMaxPosture());
         if (posture == getMaxPosture()) setProtected(true);

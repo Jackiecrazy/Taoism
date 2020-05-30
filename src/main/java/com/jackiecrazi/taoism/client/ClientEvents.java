@@ -171,6 +171,11 @@ public class ClientEvents {
     @SubscribeEvent
     public static void updateMove(MouseEvent e) {
         if (!e.isButtonstate()) return;
+        if (TaoCasterData.getTaoCap(Minecraft.getMinecraft().player).getDownTimer() > 0) {
+            //no moving while you're down! (except for a safety roll)
+            KeyBinding.unPressAllKeys();
+            return;
+        }
         GameSettings gs = Minecraft.getMinecraft().gameSettings;
         MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
         Taoism.net.sendToServer(new PacketMakeMove(move));
@@ -336,7 +341,7 @@ public class ClientEvents {
             //bar, not rendered if down because that don't make sense
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
-            Color c = GRADIENT[MathHelper.clamp((int) posPerc * (GRADIENT.length - 1), 0, GRADIENT.length - 1)];
+            Color c = GRADIENT[MathHelper.clamp((int) (posPerc * (GRADIENT.length - 1)), 0, GRADIENT.length - 1)];
             GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
             GlStateManager.popMatrix();

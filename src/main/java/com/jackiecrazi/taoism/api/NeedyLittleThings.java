@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -47,12 +46,13 @@ public class NeedyLittleThings {
     /**
      * Copied from EntityArrow, because kek.
      */
-    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e!=null&&e.canBeCollidedWith());
+    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && e.canBeCollidedWith());
 
     public static boolean isMeleeDamage(DamageSource ds) {
         return isPhysicalDamage(ds) && !ds.isProjectile();
     }
-    public static boolean isPhysicalDamage(DamageSource ds){
+
+    public static boolean isPhysicalDamage(DamageSource ds) {
         return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
     }
 
@@ -127,16 +127,26 @@ public class NeedyLittleThings {
     }
 
     /**
-     * knocks the target back, simplified call of the other knockback function because I'm too lazy to type.
+     * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
-    public static void knockBack(EntityLivingBase to, Entity from, float strength) {
-        knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
+    public static void knockBack(Entity to, Entity from, float strength) {
+        Vec3d distVec = to.getPositionVector().subtractReverse(from.getPositionVector()).normalize();
+        if (to instanceof EntityLivingBase) {
+            knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
+        } else {
+            //eh
+            to.motionX = distVec.x * strength;
+            to.motionY = distVec.y * strength;
+            to.motionZ = distVec.z * strength;
+            to.velocityChanged = true;
+        }
+        //knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
     }
 
     /**
      * knockback in EntityLivingBase except it makes sense and the resist is factored into the event
      */
-    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double zRatio) {
+    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double yRatio, double zRatio) {
         TaoisticEventHandler.modCall = true;
         net.minecraftforge.event.entity.living.LivingKnockBackEvent event = net.minecraftforge.common.ForgeHooks.onLivingKnockBack(to, from, strength * (float) (1 - to.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue()), xRatio, zRatio);
         if (event.isCanceled()) return;
@@ -158,13 +168,12 @@ public class NeedyLittleThings {
                 if (to.motionY > 0.4000000059604645D) {
                     to.motionY = 0.4000000059604645D;
                 }
+            } else if (yRatio != 0) {
+                to.motionY /= 2.0D;
+                to.motionY -= yRatio / (double) pythagora * (double) strength;
             }
-            to.velocityChanged=true;
+            to.velocityChanged = true;
         }
-    }
-
-    public static float rad(float angle) {
-        return angle * (float) Math.PI / 180;
     }
 
     public static void swapItemInHands(EntityLivingBase elb) {
@@ -176,6 +185,7 @@ public class NeedyLittleThings {
     }
 
     public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
         return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
     }
 
@@ -185,6 +195,7 @@ public class NeedyLittleThings {
 
     public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
         IAttributeInstance a = elb.getEntityAttribute(ia);
+        if (a == null) return 1;
         IAttributeInstance toUse = new AttributeMap().registerAttribute(ia);
         toUse.setBaseValue(a.getBaseValue());
         for (AttributeModifier am : a.getModifiers()) {
@@ -206,11 +217,15 @@ public class NeedyLittleThings {
         Vec3d posVec = entity2.getPositionVector();
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector()).normalize();
-        relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
+        //relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
 
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
-        double cos=Math.cos(rad(angle/2));
-        return dotsq < -(cos*cos);
+        double cos = Math.cos(rad(angle / 2));
+        return dotsq < -(cos * cos);
+    }
+
+    public static float rad(float angle) {
+        return angle * (float) Math.PI / 180;
     }
 
     /**
@@ -244,7 +259,7 @@ public class NeedyLittleThings {
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
         {
             if (updateOff) {
-                TaoWeapon.off = !main;
+                TaoCasterData.getTaoCap(player).setOffhandAttack(!main);
             }
             if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
             if (targetEntity.canBeAttackedWithItem()) {
@@ -431,9 +446,9 @@ public class NeedyLittleThings {
                             }
                         }
                     }
-                    if (updateOff) {
-                        TaoWeapon.off = false;
-                    }
+//                    if (updateOff) {
+//                        TaoWeapon.off = false;
+//                    }
                 }
             }
         }
@@ -441,6 +456,13 @@ public class NeedyLittleThings {
 
     public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
         return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
+    }
+
+    /**
+     * knockback in EntityLivingBase except it makes sense and the resist is factored into the event
+     */
+    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double zRatio) {
+        knockBack(to, from, strength, xRatio, 0, zRatio);
     }
 
     /**

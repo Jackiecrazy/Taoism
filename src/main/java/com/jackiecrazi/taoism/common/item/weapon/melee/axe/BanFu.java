@@ -23,9 +23,11 @@ public class BanFu extends TaoWeapon {
     //Leap attacks deal double damage, attacks always decrease posture,
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
 
+    private static final boolean[] harvestList = {false, false, true, false};
+
     public BanFu() {
         super(3, 1.2, 7f, 1.7f);
-        this.setHarvestLevel("axe",2);
+        this.setHarvestLevel("axe", 2);
     }
 
     @Override
@@ -39,21 +41,8 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return !attacker.onGround ? 2f : 1f;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
-    }
-
-    @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //trap the opponent's weapon, resetting attack timer.
-        //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
-        Taoism.setAtk(defender, 0);
-        super.parrySkill(attacker, defender, item);
+        return 3f;
     }
 
     public int getMaxChargeTime() {
@@ -66,21 +55,6 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (chi > 0)
-            target.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
-    }
-
-    @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker,target,item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
-        }
-        dischargeWeapon(attacker, item);
-    }
-
-    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("banfu.leap"));
@@ -88,17 +62,43 @@ public class BanFu extends TaoWeapon {
         tooltip.add(I18n.format("banfu.riposte"));
     }
 
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return !attacker.onGround;
-    }
-
-    private static final boolean[] harvestList={false,false,true,false};
-
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
      */
     @Override
     protected boolean[] harvestable(ItemStack is) {
         return harvestList;
+    }
+
+    @Override
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        //trap the opponent's weapon, resetting attack timer.
+        //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
+        Taoism.setAtk(defender, 0);
+        super.parrySkill(attacker, defender, item);
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return attacker.motionY < 0 ? 2f : 1f;
+    }
+
+    @Override
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker, target, item, orig);
+        if (isCharged(attacker, item)) {
+            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
+        }
+        dischargeWeapon(attacker, item);
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (chi > 0)
+            target.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
+    }
+
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return !attacker.onGround;
     }
 }

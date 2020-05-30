@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.networking;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -69,6 +70,7 @@ public class PacketExtendThyReach implements IMessage {
                         NeedyLittleThings.taoWeaponAttack(theEntity, thePlayer, heldItem, message.off, true);
                     }
                 }
+                TaoCombatUtils.rechargeHand(thePlayer, message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, 0f);
             });
             return null;
         }

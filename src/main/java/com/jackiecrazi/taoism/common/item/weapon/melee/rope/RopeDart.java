@@ -40,7 +40,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         return (getMaxChargeTime() - getChargeTimeLeft(attacker, item)) / 10f;
     }
 

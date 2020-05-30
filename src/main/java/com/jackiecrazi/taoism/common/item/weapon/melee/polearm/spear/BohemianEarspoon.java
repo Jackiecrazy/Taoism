@@ -46,18 +46,6 @@ public class BohemianEarspoon extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
-        float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
-        float lastAttackRange = 1 + min / (max * 1.5f);
-        return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
-    }
-
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
     }
@@ -109,11 +97,6 @@ public class BohemianEarspoon extends TaoWeapon {
         }
     }
 
-    @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
-    }
-
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND)
             splash(attacker, stack, 120);
@@ -128,6 +111,11 @@ public class BohemianEarspoon extends TaoWeapon {
         tooltip.add(I18n.format("bohear.riposte"));
     }
 
+    @Override
+    public int getDamageType(ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
+    }
+
     public float newCooldown(EntityLivingBase elb, ItemStack item) {
         if (getHand(item) == EnumHand.MAIN_HAND) {
             float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
@@ -140,6 +128,18 @@ public class BohemianEarspoon extends TaoWeapon {
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return Event.Result.DENY;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
+        float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
+        float lastAttackRange = 1 + min / (max * 1.5f);
+        return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
+    }
+
+    private float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

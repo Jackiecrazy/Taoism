@@ -38,11 +38,6 @@ public class CatNineTails extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1;
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
     }

@@ -11,7 +11,6 @@ import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.client.KeyOverlord;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
-import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +24,6 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -89,12 +87,6 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
             Material.LEAVES,
             Material.PLANTS,
             Material.VINE);
-    /**
-     * THIS IS ONLY USED FOR UTILS. DO NOT USE FOR ATTACK DETERMINATION!
-     */
-    public static boolean off = false;
-    //booleans only used when attacking to determine the specific phase of attack
-    private static boolean effect = true;
     private final double speed;
     private final int damageType;
     private final double dmg;
@@ -205,10 +197,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return gettagfast(stack).getBoolean("dual");
     }
 
-    protected int getQiFromStack(ItemStack stack) {
-        return gettagfast(stack).getInteger("qifloor");
-    }
-
     protected Entity getLastAttackedEntity(World w, ItemStack stack) {
         if (!gettagfast(stack).hasKey("lastAttackedID")) return null;
         return w.getEntityByID(gettagfast(stack).getInteger("lastAttackedID"));
@@ -237,28 +225,30 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (isTwoHanded(offhand) && !isDummy(offhand)) {
                     return new ActionResult<>(EnumActionResult.FAIL, offhand);//no swinging 2-handed weapons on the offhand!
                 }
-                if (worldIn.isRemote) {
-                    Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
-                    if (elb != null) {
-                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
-                    }
-                    p.swingArm(handIn);
-                    TaoCasterData.getTaoCap(p).setOffhandCool(0);
-                } else {
-                    EntityPlayerMP mp = (EntityPlayerMP) p;
-                    mp.getServerWorld().addScheduledTask(() -> {
-                        mp.swingArm(handIn);
-                        TaoCasterData.getTaoCap(mp).setOffhandCool(0);
-                    });
-                }
-//                Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
-//                if(e!=null) {
-//                    NeedyLittleThings.swapItemInHands(p);
-//                    //NeedyLittleThings.taoWeaponAttack(e, p, offhand, true, false);
-//                    p.attackTargetEntityWithCurrentItem(e);
-//                    NeedyLittleThings.swapItemInHands(p);
-//
+//                if (worldIn.isRemote) {
+//                    Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
+//                    if (elb != null) {
+//                        Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
+//                    }
+//                    else {
+//                        p.swingArm(handIn);
+//                        TaoCasterData.getTaoCap(p).setOffhandCool(0);
+//                    }
+//                } else {
+//                    EntityPlayerMP mp = (EntityPlayerMP) p;
+//                    mp.getServerWorld().addScheduledTask(() -> {
+//                        mp.swingArm(handIn);
+//                        TaoCasterData.getTaoCap(mp).setOffhandCool(0);
+//                    });
 //                }
+                Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
+                if (e != null) {
+                    NeedyLittleThings.taoWeaponAttack(e, p, offhand, false, true);
+                }
+                if(!worldIn.isRemote) {//worldIn.isRemote||e==null
+                    p.swingArm(handIn);
+                }
+                TaoCasterData.getTaoCap(p).setOffhandCool(0);
             }
 
         }
@@ -275,8 +265,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (swing) {
             if (!gettagfast(stack).getBoolean("connect")) {
                 gettagfast(stack).setBoolean("connect", true);
-                //might as well convert everything into aoe and return true...
-                if (getHand(stack) != null) {
+                if (getHand(stack) != null && !attacker.world.isRemote) {
                     float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
                     if (itsc.getQiFloored() < 4) {
                         itsc.addQi(baseQi * 2);
@@ -468,7 +457,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         if (hand != null && (TaoCombatUtils.getHandCoolDown(entityLiving, hand) > 0.9f || NeedyLittleThings.raytraceEntity(entityLiving.world, entityLiving, getReach(entityLiving, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
             //Well, ya got me. By all accounts, it doesn't make sense.
-            //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));
+            TaoCasterData.getTaoCap(entityLiving).setOffhandAttack(hand==EnumHand.OFF_HAND);
+            //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
             aoe(stack, entityLiving, TaoCasterData.getTaoCap(entityLiving).getQiFloored());
             gettagfast(stack).setBoolean("connect", false);
         }
@@ -618,26 +608,24 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, ItemStack is, int angleAllowance) {
-        splash(attacker, is, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test), angleAllowance);
+        splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, angleAllowance, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test));
     }
 
-    protected void splash(EntityLivingBase attacker, ItemStack is, List<Entity> targets, int degrees) {
+    protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int degrees, List<Entity> targets) {
         if (attacker instanceof EntityPlayer) {
             ((EntityPlayer) attacker).spawnSweepParticles();
         }
         for (Entity target : targets) {
 
-            if (target == attacker) continue;
+            if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
+            if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
                 continue;
             if (target instanceof IProjectile) {
                 IProjectile ip = (IProjectile) target;
                 Vec3d velocity = new Vec3d(target.motionX, target.motionY, target.motionZ);
                 if (velocity.lengthSquared() < getQiFromStack(is) * getQiFromStack(is)) {
-                    //reflect. I suppose just reversing its velocity will do...
-                    ip.shoot(-target.motionX, -target.motionY, -target.motionZ, 1.6f, 0);
-
+                    NeedyLittleThings.knockBack(target, attacker, 1.6f);
                 } else {
                     target.motionX = 0;
                     target.motionZ = 0;
@@ -648,13 +636,17 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;
-                NeedyLittleThings.taoWeaponAttack(target, p, attacker.getHeldItem(off ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND), !off, false);
+                NeedyLittleThings.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
             } else attacker.attackEntityAsMob(target);
         }
     }
 
+    protected int getQiFromStack(ItemStack stack) {
+        return gettagfast(stack).getInteger("qifloor");
+    }
+
     protected void splash(EntityLivingBase attacker, ItemStack stack, List<Entity> targets) {
-        splash(attacker, stack, targets, 90);
+        splash(attacker, null, stack, 90, targets);
     }
 
     @Override
@@ -788,7 +780,18 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return crit > 1f ? Event.Result.ALLOW : Event.Result.DENY;
+        return Event.Result.DEFAULT;
+        //recharged, fallen more than 0 blocks, not on ground, not on ladder, not in water, not blind, not riding, target is ELB
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1f;
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {

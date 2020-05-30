@@ -29,7 +29,9 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 
     public static void updateCasterData(EntityLivingBase elb) {
         ITaoStatCapability itsc = elb.getCapability(CAP, null);
+        float percentage=itsc.getPosture()/itsc.getMaxPosture();
         itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
+        itsc.setPosture(itsc.getMaxPosture()*percentage);
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
@@ -68,12 +70,6 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
             //elb.velocityChanged=true;
             if (itsc.getDownTimer() <= 0) {
                 //yes honey
-                Tuple<Float, Float> thing = itsc.getPrevSizes();
-                if (!elb.world.isRemote) {
-                    forceUpdateTrackingClients(elb);
-                    //NeedyLittleThings.setSize(elb, thing.getFirst(), thing.getSecond());
-                }
-
                 int overflow = -itsc.getDownTimer();
                 itsc.setDownTimer(0);
                 itsc.addPosture(getPostureRegenAmount(elb, overflow));
@@ -108,7 +104,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         if (!(elb instanceof EntityPlayer))
             itsc.setSwing(itsc.getSwing() + ticks);
         itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
-
+        forceUpdateTrackingClients(elb);
     }
 
     public static void forceUpdateTrackingClients(EntityLivingBase entity) {

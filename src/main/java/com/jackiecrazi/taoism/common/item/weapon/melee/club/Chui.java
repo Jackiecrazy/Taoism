@@ -42,7 +42,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float ground=attacker.onGround?1f:2f;
+        float ground=attacker.motionY<0?2f:1f;
         float breach= TaoCasterData.getTaoCap(target).getDownTimer()>0?1.5f:1f;
         return ground*breach;
 
@@ -50,7 +50,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
+        return 3f;
     }
 
     @Override

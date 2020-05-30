@@ -46,13 +46,6 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float light = 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
-        float backstab = NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
-        return light * backstab;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 1f;
     }
@@ -111,6 +104,16 @@ public class Karambit extends TaoWeapon {
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return NeedyLittleThings.isBehindEntity(attacker, target) ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
     }
 
     @Override

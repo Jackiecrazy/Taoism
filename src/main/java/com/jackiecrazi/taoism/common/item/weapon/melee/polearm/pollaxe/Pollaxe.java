@@ -52,10 +52,14 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return attacker.motionY<0 ? 2f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         //nerf offhand damage
-        float leap = attacker.onGround ? 1f : 2f;
         float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return leap * off;
+        return off;
     }
 
     @Override
@@ -83,16 +87,11 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public int getDamageType(ItemStack is) {
-        return isCharged(null, is) ? 2 : 3;
-    }
-
-    /**
-     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
-     */
-    @Override
-    protected boolean[] harvestable(ItemStack is) {
-        return harvestList;
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            splash(attacker, stack, 120);
+        }
     }
 
     @Override
@@ -105,6 +104,19 @@ public class Pollaxe extends TaoWeapon {
         tooltip.add(I18n.format("pollaxe.swipe"));
         tooltip.add(TextFormatting.ITALIC + I18n.format("pollaxe.swipe.riposte") + TextFormatting.RESET);
         tooltip.add(I18n.format("pollaxe.riposte"));
+    }
+
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    @Override
+    protected boolean[] harvestable(ItemStack is) {
+        return harvestList;
+    }
+
+    @Override
+    public int getDamageType(ItemStack is) {
+        return isCharged(null, is) ? 2 : 3;
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
@@ -142,22 +154,12 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, stack, 120);
-        }
-    }
-
-    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, attacker.onGround ? 1f : 1.3f);
-            if (isCharged(attacker, stack)) {
-                target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 100, 2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-            }
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 50, 0), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
         } else {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 100, 2), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
         }
     }
 }
