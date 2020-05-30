@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.config.GeneralConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
@@ -116,7 +117,11 @@ public class TaoisticEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void projectileParry(ProjectileImpactEvent e) {
-
+        if(e.getRayTraceResult().entityHit instanceof EntityLivingBase){
+            EntityLivingBase elb= (EntityLivingBase) e.getRayTraceResult().entityHit;
+            if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold)
+                e.setCanceled(true);
+        }
     }
 
     //parry code, TODO make all entities capable of parry
@@ -177,15 +182,15 @@ public class TaoisticEventHandler {
                 float def = TaoCombatUtils.postureDef(uke, seme, defend, e.getAmount());
                 if (ukeCap.consumePosture(atk * def, true, seme, ds) == 0f) {
                     e.setCanceled(true);
-                    uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f+Taoism.unirand.nextFloat()*0.5f, 0.75f+Taoism.unirand.nextFloat()*0.5f);
+                    uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                     //parry, both parties are knocked back slightly
                     float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                    NeedyLittleThings.knockBack(seme, uke, e.getAmount() / semeCap.getMaxPosture());
-                    NeedyLittleThings.knockBack(uke, seme, e.getAmount() / ukeCap.getMaxPosture());
+                    NeedyLittleThings.knockBack(seme, uke, (e.getAmount() * atkDef) / semeCap.getMaxPosture());
+                    NeedyLittleThings.knockBack(uke, seme, (e.getAmount() * def) / ukeCap.getMaxPosture());
                     //reset cooldown
-                    TaoCombatUtils.rechargeHand(uke, uke.getHeldItemMainhand() == defend ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, 0f);
+                    TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0f);
                 }
             }
         }
@@ -371,7 +376,7 @@ public class TaoisticEventHandler {
             TaoCasterData.updateCasterData(elb);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
             if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
-                if (elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(200) == 0) {
+                if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
                     Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
                     elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
                 }
@@ -382,6 +387,13 @@ public class TaoisticEventHandler {
                 el.targetTasks.addTask(-1, new AIDowned(el));
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
+        EntityLivingBase elb = e.getEntityLiving();
+        elb.motionY *= 1 + (TaoCasterData.getTaoCap(elb).getQi() / 2);
+        elb.velocityChanged = true;
     }
 
     @SubscribeEvent

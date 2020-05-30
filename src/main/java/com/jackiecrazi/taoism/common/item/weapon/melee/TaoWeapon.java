@@ -21,6 +21,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,6 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -629,6 +631,20 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
             if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;
+            if (target instanceof IProjectile) {
+                IProjectile ip = (IProjectile) target;
+                Vec3d velocity = new Vec3d(target.motionX, target.motionY, target.motionZ);
+                if (velocity.lengthSquared() < getQiFromStack(is) * getQiFromStack(is)) {
+                    //reflect. I suppose just reversing its velocity will do...
+                    ip.shoot(-target.motionX, -target.motionY, -target.motionZ, 1.6f, 0);
+
+                } else {
+                    target.motionX = 0;
+                    target.motionZ = 0;
+                }
+                target.velocityChanged = true;
+                continue;
+            }
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;

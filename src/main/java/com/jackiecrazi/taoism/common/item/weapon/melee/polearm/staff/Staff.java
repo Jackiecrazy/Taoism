@@ -9,12 +9,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -79,31 +77,14 @@ public class Staff extends TaoWeapon {
     @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (onHand && e instanceof EntityLivingBase) {
-            EntityLivingBase elb = (EntityLivingBase) e;
-//            if (e.ticksExisted % 20 == 1)
-//                splash(elb, stack, 120);
-            for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
-                if (ent instanceof IProjectile && !NeedyLittleThings.isBehindEntity(ent, elb)) {
-                    IProjectile ip = (IProjectile) ent;
-                    Vec3d velocity = new Vec3d(ent.motionX, ent.motionY, ent.motionZ);
-                    boolean isCharged = isCharged(elb, stack);
-                    if (velocity.lengthSquared() < getQiFromStack(stack) * getQiFromStack(stack)) {
-                        //reflect. I suppose just reversing its velocity will do...
-                        if (isCharged) {
-                            ip.shoot(-ent.motionX, -ent.motionY, -ent.motionZ, 1.6f, 0);
-                        } else {
-                            ent.motionX = 0;
-                            ent.motionZ = 0;
-                        }
-                    } else if (isCharged) {
-                        ent.motionX = 0;
-                        ent.motionZ = 0;
-                    }
-                    ent.velocityChanged = true;
-                }
-            }
-        }
+//        if (onHand && e instanceof EntityLivingBase) {
+//            EntityLivingBase elb = (EntityLivingBase) e;
+////            if (e.ticksExisted % 20 == 1)
+////                splash(elb, stack, 120);
+//            for (Entity ent : w.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(3, 3d, 3), null)) {
+//
+//            }
+//        }
     }
 
     @Override

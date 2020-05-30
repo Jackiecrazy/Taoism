@@ -24,7 +24,7 @@ public class CombatConfig {
     @Config.Comment("Number of ticks after a parry attempt for which a player cannot parry again.")
     public static int parryCooldown = 20;
     @Config.Comment("Number of ticks after a roll for which the player is considered to be rolling.")
-    public static int rollThreshold = 10;
+    public static int rollThreshold = 15;
     @Config.Comment("Number of ticks after a roll for which the player cannot roll again.")
     public static int rollCooldown = 20;
     @Config.Comment("Number of ticks one should be protected for after sudden stagger prevention activates.")

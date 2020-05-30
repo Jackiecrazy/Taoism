@@ -128,7 +128,7 @@ public class ClientEvents {
     public static void doju(InputUpdateEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         MovementInput mi = e.getMovementInput();
-        if (TaoCasterData.getTaoCap(mc.player).getQi() > 0 && !mi.forwardKeyDown) {
+        if (TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
             if (mi.leftKeyDown && (!tapped[0] || mc.gameSettings.keyBindSprint.isPressed())) {
                 if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
                     Taoism.net.sendToServer(new PacketDodge(0));

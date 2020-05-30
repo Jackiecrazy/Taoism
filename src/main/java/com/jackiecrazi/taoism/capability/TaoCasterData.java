@@ -134,7 +134,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
     private static float getQiDecayAmount(float currentQi, int ticks) {
-        return 0.005f * ticks * currentQi/8;
+        return 0.005f * ticks * (currentQi+1)/8;
     }
 
     @Nonnull

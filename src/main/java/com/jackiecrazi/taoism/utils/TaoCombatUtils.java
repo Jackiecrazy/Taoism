@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -129,13 +130,14 @@ public class TaoCombatUtils {
     }
 
     public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
-        switch (hand) {
+        if(elb instanceof EntityPlayer)
+            switch (hand) {
             case OFF_HAND:
                 return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
             case MAIN_HAND:
                 return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
         }
-        return 0;
+        return 1f;
     }
 
     public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
