@@ -32,8 +32,9 @@ public class Pollaxe extends TaoWeapon {
      * either side being parried means you can hit with other side
      * 4 blocks of reach, 1.5 handed
      * Leap attacks deal double posture damage
-     * Right click is a cue stab
-     * Left click is a heavy overhead swing
+     * Right click is a cue stab, if after a parry, double posture damage
+     * Left click is a heavy overhead swing, inflicting cleave (no stack), if after a parry, double posture damage
+     *      if sprinting/charging, left click is with hammer head, knocking back. Further attacks will stab, causing extra piercing damage
      *
      * Oscillates
      * primary methods to counter it are to predict your opponent's next strike hand and engage from range
