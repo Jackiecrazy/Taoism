@@ -21,27 +21,19 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Pollaxe extends TaoWeapon {
+public class Halberd extends TaoWeapon {
     /*
-     * A two-handed axe that strikes on both ends. High combo and defense, medium range and speed, low power
-     * Cue end can stab or be jammed into the opponent in a grapple, and won't be grabbed by the other guy
-     * Business end can stab, chop, hook, or smash
-     * Pruning this down:
-     * cue end can stab into a grapple or parry into a shove
-     * axe end can chop into a hook or smash into a stab
-     * either side being parried means you can hit with other side
-     * 4 blocks of reach, 1.5 handed
+     * A long-handled axe with incredible burst. High range and power, medium defense and speed, low combo
+     * 6 blocks of reach, 2 handed
      * Leap attacks deal double posture damage
-     * Right click is a cue stab
-     * Left click is a heavy overhead swing
-     *
-     * Oscillates
-     * primary methods to counter it are to predict your opponent's next strike hand and engage from range
+     * Left click is a standard attack that stacks cleave 2/3
+     * Right click is a stab that detonates cleave for piercing damage with 10 second cooldown
+     *      Each detonated layer of cleave will reduce a second of cleave
      */
 
     private static final boolean[] harvestList = {false, false, true, false};
 
-    public Pollaxe() {
+    public Halberd() {
         super(3, 0.8, 9, 2f);
     }
 

@@ -120,15 +120,15 @@ public class BohemianEarspoon extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
     }
 
-    public float newCooldown(EntityLivingBase elb, ItemStack item) {
-        if (getHand(item) == EnumHand.MAIN_HAND) {
-            float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
-            float min = Math.min(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
-            if (max != 0)
-                return (min / max) * 0.5f;
-        }
-        return 0f;
-    }
+//    public float newCooldown(EntityLivingBase elb, ItemStack item) {
+//        if (getHand(item) == EnumHand.MAIN_HAND) {
+//            float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
+//            float min = Math.min(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
+//            if (max != 0)
+//                return (min / max) * 0.5f;
+//        }
+//        return 0f;
+//    }
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return Event.Result.DENY;

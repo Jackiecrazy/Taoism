@@ -84,7 +84,7 @@ public class TaoCombatUtils {
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
-        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && (elb.onGround || TaoCasterData.getTaoCap(elb).getQi() > 2) && !elb.isSneaking()) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && (elb.onGround || TaoCasterData.getTaoCap(elb).getQi() > 2) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {
             //System.out.println("execute roll to side " + side);
             TaoCasterData.getTaoCap(elb).setRollCounter(0);
             TaoCasterData.getTaoCap(elb).setPrevSizes(elb.width, elb.height);

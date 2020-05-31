@@ -252,7 +252,7 @@ public class TaoisticEventHandler {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
             if (stack.getItem() instanceof ICombatManipulator) {
-                amnt = (((ICombatManipulator) stack.getItem()).hurtStart(ds, seme, uke, stack, amnt)) * (((ICombatManipulator) stack.getItem()).damageMultiplier(seme, uke, stack));
+                amnt = (((ICombatManipulator) stack.getItem()).hurtStart(ds, seme, uke, stack, amnt * (((ICombatManipulator) stack.getItem()).damageMultiplier(seme, uke, stack))));
             }
             if (seme instanceof EntityLiving)
                 if (CombatConfig.taoWeaponHitEntity) {
@@ -413,7 +413,7 @@ public class TaoisticEventHandler {
             //qi 1+ gives slow fall
             if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi() > 0) {
                 if (!p.isSneaking() && cap.getQi() > 3) {
-                    p.motionY *= (3/cap.getQi());
+                    p.motionY *= (3 / cap.getQi());
                 }
                 p.fallDistance = 0.1f;//for da critz
             }

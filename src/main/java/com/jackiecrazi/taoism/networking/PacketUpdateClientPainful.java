@@ -48,7 +48,7 @@ public class PacketUpdateClientPainful implements IMessage {
         parry = itsc.getParryCounter();
         dodge = itsc.getRollCounter();
         protec = itsc.getPosInvulTime();
-        taoAtk = Taoism.getAtk(elb);
+        //taoAtk = Taoism.getAtk(elb);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PacketUpdateClientPainful implements IMessage {
         protec = buf.readInt();
         width = buf.readFloat();
         height = buf.readFloat();
-        taoAtk = buf.readInt();
+        //taoAtk = buf.readInt();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class PacketUpdateClientPainful implements IMessage {
         buf.writeInt(protec);
         buf.writeFloat(width);
         buf.writeFloat(height);
-        buf.writeInt(taoAtk);
+        //buf.writeInt(taoAtk);
     }
 
     public static class UpdateClientHandler implements
@@ -138,7 +138,7 @@ public class PacketUpdateClientPainful implements IMessage {
                     i.setMaxPosture(m.maxPosture);
                     i.setComboSequence(m.combo);
                     i.setPrevSizes(m.width, m.height);
-                    Taoism.setAtk(e, m.taoAtk);
+                    //Taoism.setAtk(e, m.taoAtk);
                 }
             });
             return null;

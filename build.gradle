@@ -14,9 +14,9 @@ sourceSets {
     sourceSets ->
         main
         //delete this before compiling, and delete out and build, to prevent stupid errors
-//        main {
-//            output.resourcesDir = output.classesDir
-//        }
+        main {
+            output.resourcesDir = output.classesDir
+        }
         //add it back in afterwards otherwise the textures don't load, sadface
 }
 

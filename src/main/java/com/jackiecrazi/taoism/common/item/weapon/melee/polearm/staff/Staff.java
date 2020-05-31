@@ -115,8 +115,8 @@ public class Staff extends TaoWeapon {
         tooltip.add(I18n.format("staff.leap"));
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
-        tooltip.add(I18n.format("staff.throw"));
-        tooltip.add(I18n.format("staff.doink"));
+        //tooltip.add(I18n.format("staff.throw"));
+        //tooltip.add(I18n.format("staff.doink"));
         tooltip.add(I18n.format("staff.swipe"));
         tooltip.add(I18n.format("staff.oscillate"));
         tooltip.add(I18n.format("staff.block"));
@@ -131,7 +131,7 @@ public class Staff extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            float groundKB = attacker.onGround ? 0.4f : 1f;
+            float groundKB = attacker.onGround ? 0.5f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
             if(attacker.onGround) {
@@ -140,7 +140,10 @@ public class Staff extends TaoWeapon {
                     attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"),20, chi/4));
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f);
-                    target.addVelocity(0, -1-chi/5f, 0);
+                    target.motionY=0;
+                    //target.addVelocity(0, -1-chi/5f, 0);
+                    target.hurtResistantTime=0;
+//                    target.onGround=false;
                     target.fallDistance += chi;
                 }
                 target.velocityChanged = true;

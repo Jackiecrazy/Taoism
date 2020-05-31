@@ -335,13 +335,13 @@ public class ClientEvents {
         mc.getTextureManager().bindTexture(hud);
         ITaoStatCapability cap = TaoCasterData.getTaoCap(elb);
         GlStateManager.pushMatrix();
-        float posPerc = cap.getPosture() / cap.getMaxPosture();
+        float posPerc = MathHelper.clamp(cap.getPosture() / cap.getMaxPosture(),0,1);
         int down = cap.getDownTimer();
         if (down <= 0) {
             //bar, not rendered if down because that don't make sense
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
-            Color c = GRADIENT[MathHelper.clamp((int) (posPerc * (GRADIENT.length - 1)), 0, GRADIENT.length - 1)];
+            Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
             GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
             GlStateManager.popMatrix();
