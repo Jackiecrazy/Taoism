@@ -48,9 +48,7 @@ public class Kampilan extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround) {
             splash(attacker, stack, 120);
-        }
     }
 
     @Override

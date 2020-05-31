@@ -29,9 +29,10 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
 
     public static void updateCasterData(EntityLivingBase elb) {
         ITaoStatCapability itsc = elb.getCapability(CAP, null);
-        float percentage=itsc.getPosture()/itsc.getMaxPosture();
+        float percentage = itsc.getPosture() / itsc.getMaxPosture();
         itsc.setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
-        itsc.setPosture(itsc.getMaxPosture()*percentage);
+        if (!elb.world.isRemote)
+            itsc.setPosture(itsc.getMaxPosture() * percentage);
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
@@ -44,8 +45,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         float width = Math.max(elb.width, 1f);
         float height = (float) Math.ceil(elb.height);
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
-        float stateModifier = elb.onGround ? elb.isSneaking() ? 1.5f : 1f : 0.5f;
-        return Math.round(width * width * height * 5 * armor * stateModifier);
+        return Math.round(width * width * height * 5 * armor);
     }
 
     /**
@@ -107,16 +107,6 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         forceUpdateTrackingClients(elb);
     }
 
-    public static void forceUpdateTrackingClients(EntityLivingBase entity) {
-        if (!entity.world.isRemote) {
-            PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(entity);
-            Taoism.net.sendToAllTracking(pucp, entity);
-            if (entity instanceof EntityPlayerMP) {
-                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
-            }
-        }
-    }
-
     /**
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
@@ -130,7 +120,17 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
     private static float getQiDecayAmount(float currentQi, int ticks) {
-        return 0.005f * ticks * (currentQi+1)/8;
+        return 0.005f * ticks * (currentQi + 1) / 8;
+    }
+
+    public static void forceUpdateTrackingClients(EntityLivingBase entity) {
+        if (!entity.world.isRemote) {
+            PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(entity);
+            Taoism.net.sendToAllTracking(pucp, entity);
+            if (entity instanceof EntityPlayerMP) {
+                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
+            }
+        }
     }
 
     @Nonnull

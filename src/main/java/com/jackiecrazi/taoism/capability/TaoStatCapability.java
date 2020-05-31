@@ -10,8 +10,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
 public class TaoStatCapability implements ITaoStatCapability {
+    public static final int MAXDOWNTIME = 100;
     private static final float MAXQI = 9.99f;
-    public static final int MAXDOWNTIME=100;
     private EntityLivingBase e;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
@@ -20,26 +20,78 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int pcd;
     private int scd;
     private int qcd;
-
-    @Override
-    public int getQiGracePeriod() {
-        return qcd;
-    }
-
-    @Override
-    public void setQiGracePeriod(int amount) {
-        qcd=amount;
-    }
-
     private int down;
     private long timey;
     private boolean swi, protecc, off;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
-
     TaoStatCapability(EntityLivingBase elb) {
         e = elb;
+    }
+
+    @Override
+    public float getQi() {
+        return qi;
+    }
+
+    @Override
+    public void setQi(float amount) {
+        qi = MathHelper.clamp(amount, 0, MAXQI);
+    }
+
+    @Override
+    public float addQi(float amount) {
+        qi += amount;
+        if (amount > 0)
+            setQiGracePeriod(CombatConfig.qiGrace);
+        amount = 0;
+        if (qi > MAXQI) {
+            amount = qi - MAXQI;
+            qi = MAXQI;
+        }
+        return amount;
+    }
+
+    @Override
+    public boolean consumeQi(float amount) {
+        if (qi < amount) return false;
+        qi -= amount;
+        return true;
+    }
+
+    @Override
+    public float getLing() {
+        return ling;
+    }
+
+    @Override
+    public void setLing(float amount) {
+        ling = MathHelper.clamp(amount, 0f, getMaxLing());
+    }
+
+    @Override
+    public float addLing(float amount) {
+        setLing(amount + ling);
+        return amount;
+    }
+
+    @Override
+    public boolean consumeLing(float amount) {
+        if (ling < amount) return false;
+        ling -= amount;
+        setLingRechargeCD(CombatConfig.lingCD);
+        return true;
+    }
+
+    @Override
+    public float getSwing() {
+        return swing;
+    }
+
+    @Override
+    public void setSwing(float amount) {
+        swing = amount;
     }
 
     @Override
@@ -56,27 +108,22 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float addPosture(float amount) {
-        setPosture(posture+amount);
+        setPosture(posture + amount);
         return posture;
     }
 
     @Override
-    public int getDownTimer() {
-        return down;
-    }
-
-    @Override
-    public void setDownTimer(int time) {
-        down = time;
+    public float consumePosture(float amount, boolean canStagger) {
+        return consumePosture(amount, canStagger, null, null);
     }
 
     @Override
     public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
-        if(getDownTimer()>0)return 0;//cancel all posture reduction when downed so you get back up with a buffer
+        if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
         posture -= amount;
         if (posture <= 0f) {
-            boolean protect=isProtected();
+            boolean protect = isProtected();
             setProtected(false);//cancels ssp so you can regen posture without delay
             if ((cache >= getMaxPosture() / 4 && protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
                 //sudden stagger prevention
@@ -91,42 +138,6 @@ public class TaoStatCapability implements ITaoStatCapability {
         } else setPostureRechargeCD(CombatConfig.postureCD);
         //System.out.println(posture+" posture left on target");
         return 0f;
-    }
-
-    @Override
-    public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, null, null);
-    }
-
-    private void beatDown(EntityLivingBase attacker, float overflow) {
-        e.dismountRidingEntity();
-        if (attacker != null)
-            NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
-        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
-        TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
-        //babe! it's 4pm, time for your flattening!
-        //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
-        TaoCasterData.forceUpdateTrackingClients(e);
-        //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
-        //NeedyLittleThings.setSize(e, max, min);
-//        if (e instanceof EntityPlayer) {
-//            EntityPlayer p = (EntityPlayer) e;
-//            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
-//        }
-//        if (e.getRevengeTarget() instanceof EntityPlayer) {
-//            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
-//            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
-//        }
-        //trip horse, trip person!
-        if (e.isBeingRidden()) {
-            for (Entity ent : e.getPassengers())
-                if (ent instanceof EntityLivingBase) {
-                    ent.removePassengers();
-                    ITaoStatCapability cap=TaoCasterData.getTaoCap((EntityLivingBase) ent);
-                    cap.consumePosture(cap.getMaxPosture()+1,true);
-                }
-        }
-        //System.out.println("target is downed for " + downtimer + " ticks!");
     }
 
     @Override
@@ -186,70 +197,6 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public float getQi() {
-        return qi;
-    }
-
-    @Override
-    public void setQi(float amount) {
-        qi = MathHelper.clamp(amount, 0, MAXQI);
-    }
-
-    @Override
-    public float addQi(float amount) {
-        qi += amount;
-        if(amount>0)
-            setQiGracePeriod(CombatConfig.qiGrace);
-        amount = 0;
-        if (qi > MAXQI) {
-            amount = qi - MAXQI;
-            qi = MAXQI;
-        }
-        return amount;
-    }
-
-    @Override
-    public boolean consumeQi(float amount) {
-        if (qi < amount) return false;
-        qi -= amount;
-        return true;
-    }
-
-    @Override
-    public float getLing() {
-        return ling;
-    }
-
-    @Override
-    public void setLing(float amount) {
-        ling = MathHelper.clamp(amount, 0f, getMaxLing());
-    }
-
-    @Override
-    public float addLing(float amount) {
-        setLing(amount + ling);
-        return amount;
-    }
-
-    @Override
-    public boolean consumeLing(float amount) {
-        if (ling < amount) return false;
-        ling -= amount;
-        setLingRechargeCD(CombatConfig.lingCD);
-        return true;
-    }
-
-    @Override
-    public float getSwing() {
-        return swing;
-    }
-
-    @Override
-    public void setSwing(float amount) {
-        swing = amount;
-    }
-
-    @Override
     public void copy(ITaoStatCapability from) {
         setMaxLing(from.getMaxLing());
         setMaxPosture(from.getMaxPosture());
@@ -289,7 +236,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setMaxPosture(float amount) {
+        float percentage = posture / maxPosture;
         maxPosture = amount;
+        setPosture(percentage * amount);
     }
 
     @Override
@@ -320,6 +269,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setStaminaRechargeCD(int amount) {
         scd = amount;
+    }
+
+    @Override
+    public int getQiGracePeriod() {
+        return qcd;
+    }
+
+    @Override
+    public void setQiGracePeriod(int amount) {
+        qcd = amount;
     }
 
     @Override
@@ -369,7 +328,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setOffhandAttack(boolean off) {
-        this.off=off;
+        this.off = off;
     }
 
     @Override
@@ -390,6 +349,47 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setProtected(boolean protect) {
         protecc = protect;
+    }
+
+    @Override
+    public int getDownTimer() {
+        return down;
+    }
+
+    @Override
+    public void setDownTimer(int time) {
+        down = time;
+    }
+
+    private void beatDown(EntityLivingBase attacker, float overflow) {
+        e.dismountRidingEntity();
+        if (attacker != null)
+            NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
+        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
+        TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
+        //babe! it's 4pm, time for your flattening!
+        //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
+        TaoCasterData.forceUpdateTrackingClients(e);
+        //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
+        //NeedyLittleThings.setSize(e, max, min);
+//        if (e instanceof EntityPlayer) {
+//            EntityPlayer p = (EntityPlayer) e;
+//            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
+//        }
+//        if (e.getRevengeTarget() instanceof EntityPlayer) {
+//            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
+//            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
+//        }
+        //trip horse, trip person!
+        if (e.isBeingRidden()) {
+            for (Entity ent : e.getPassengers())
+                if (ent instanceof EntityLivingBase) {
+                    ent.removePassengers();
+                    ITaoStatCapability cap = TaoCasterData.getTaoCap((EntityLivingBase) ent);
+                    cap.consumePosture(cap.getMaxPosture() + 1, true);
+                }
+        }
+        //System.out.println("target is downed for " + downtimer + " ticks!");
     }
 
 

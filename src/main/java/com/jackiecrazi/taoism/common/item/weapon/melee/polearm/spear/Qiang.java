@@ -45,7 +45,7 @@ public class Qiang extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 12f;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 108f;
     }
 
     @Override
@@ -75,8 +75,7 @@ public class Qiang extends TaoWeapon {
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            if (attacker.onGround)
-                splash(attacker, stack, 120);
+            splash(attacker, stack, 120);
             //else splash(attacker, stack, 10);
         }
     }

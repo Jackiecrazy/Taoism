@@ -245,8 +245,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (e != null) {
                     NeedyLittleThings.taoWeaponAttack(e, p, offhand, false, true);
                 }
-                if(!worldIn.isRemote) {//worldIn.isRemote||e==null
+                if (worldIn.isRemote||e==null){
+                    float temp = p.getCooledAttackStrength(0.5f);
                     p.swingArm(handIn);
+                    TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp);
+                    //FIXME no matter which way you go, main hand's CD resets with offhand's
                 }
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);
             }
@@ -457,7 +460,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         if (hand != null && (TaoCombatUtils.getHandCoolDown(entityLiving, hand) > 0.9f || NeedyLittleThings.raytraceEntity(entityLiving.world, entityLiving, getReach(entityLiving, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
             //Well, ya got me. By all accounts, it doesn't make sense.
-            TaoCasterData.getTaoCap(entityLiving).setOffhandAttack(hand==EnumHand.OFF_HAND);
+            TaoCasterData.getTaoCap(entityLiving).setOffhandAttack(hand == EnumHand.OFF_HAND);
             //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
             aoe(stack, entityLiving, TaoCasterData.getTaoCap(entityLiving).getQiFloored());
             gettagfast(stack).setBoolean("connect", false);

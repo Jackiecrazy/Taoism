@@ -72,34 +72,38 @@ public class BohemianEarspoon extends TaoWeapon {
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (e instanceof EntityLivingBase && w.isRemote) {
+        if (e instanceof EntityLivingBase && !w.isRemote) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (isCharged(elb, stack) && getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null) {
+            if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null) {
                 EntityLivingBase target = elb.getLastAttackedEntity();
-                if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
-                    if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
-                        //too close! Rip out innards for double damage
-                        target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
+                    if(target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
+                        if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
+                            //too close! Rip out innards for double damage
+                            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                        }
+                        //a new challenger is approaching!
+                        Vec3d pos = elb.getPositionVector();
+                        Vec3d angle = new Vec3d(target.posX - (pos.x + 0.5D), target.posY - pos.y, target.posZ - (pos.z + 0.5D));
+                        double xForce = angle.x * 0.02;
+                        double yForce = angle.y * 0.02;
+                        double zForce = angle.z * 0.02;
+                        target.motionX += xForce;
+                        target.motionY += yForce;
+                        target.motionZ += zForce;
+                        target.velocityChanged = true;
                     }
-                    //a new challenger is approaching!
-                    Vec3d pos = elb.getPositionVector();
-                    Vec3d angle = new Vec3d(target.posX - (pos.x + 0.5D), target.posY - pos.y, target.posZ - (pos.z + 0.5D));
-                    double xForce = angle.x * 0.02;
-                    double yForce = angle.y * 0.02;
-                    double zForce = angle.z * 0.02;
-                    target.motionX += xForce;
-                    target.motionY += yForce;
-                    target.motionZ += zForce;
-                    target.velocityChanged = true;
-                }
+                } else elb.setLastAttackedEntity(null);
 
             }
         }
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
+        if (getHand(stack) == EnumHand.OFF_HAND && attacker.getLastAttackedEntity() != null) {
             splash(attacker, stack, 120);
+            attacker.setLastAttackedEntity(null);
+        }
     }
 
     @Override
@@ -138,10 +142,6 @@ public class BohemianEarspoon extends TaoWeapon {
         return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
     }
 
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
-    }
-
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
@@ -170,5 +170,9 @@ public class BohemianEarspoon extends TaoWeapon {
 
     private float getLastLastAttackedRangeSq(ItemStack is) {
         return gettagfast(is).getFloat("llastAttackedRange");
+    }
+
+    private float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
     }
 }

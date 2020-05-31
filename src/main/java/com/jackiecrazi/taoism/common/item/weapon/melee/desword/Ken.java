@@ -29,27 +29,6 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = attacker.motionY<0 ? 1.5f : 1f;
-        float aoe = isAoE(attacker, item) ? 1f : 1.5f;
-        return air*aoe;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1 + (getQiFromStack(item) / 27f);
-    }
-
-    private boolean isAoE(EntityLivingBase attacker, ItemStack is) {
-        return NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)) == null;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         if (isCharged(wielder, is)) return 9;
         return 3;
@@ -69,9 +48,7 @@ public class Ken extends TaoWeapon {
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (isAoE(attacker, stack))
-            if (attacker.onGround) {
-                splash(attacker, stack, 90);
-            }
+            splash(attacker, stack, 90);
 //            else {
 //                splash(attacker, stack, 10);
 //            }
@@ -101,5 +78,26 @@ public class Ken extends TaoWeapon {
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return isAoE(attacker, item) ? Event.Result.DENY : Event.Result.ALLOW;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float air = attacker.motionY < 0 ? 1.5f : 1f;
+        float aoe = isAoE(attacker, item) ? 1f : 1.5f;
+        return air * aoe;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1 + (getQiFromStack(item) / 27f);
+    }
+
+    private boolean isAoE(EntityLivingBase attacker, ItemStack is) {
+        return NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)) == null;
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 3;
     }
 }
