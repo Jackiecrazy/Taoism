@@ -90,17 +90,17 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final double speed;
     private final int damageType;
     private final double dmg;
-    private final float base;
+    private final float itemPostureMultiplier;
     private float qiRate = 0.5f;
 
-    public TaoWeapon(int damageType, double swingSpeed, double damage, float BasePostureConsumption) {
+    public TaoWeapon(int damageType, double swingSpeed, double damage, float attackPostureMultiplier) {
         super();
         this.damageType = damageType;
         speed = swingSpeed;
         this.setMaxDamage(getMaxChargeTime());
         this.setMaxStackSize(1);
         dmg = damage;
-        base = BasePostureConsumption;
+        itemPostureMultiplier = attackPostureMultiplier;
         this.setCreativeTab(Taoism.tabWea);
         String name = getClass().getSimpleName().toLowerCase();
         this.setRegistryName(name);
@@ -245,12 +245,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (e != null) {
                     NeedyLittleThings.taoWeaponAttack(e, p, offhand, false, true);
                 }
-                if (worldIn.isRemote||e==null){
-                    float temp = p.getCooledAttackStrength(0.5f);
-                    p.swingArm(handIn);
-                    TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp);
-                    //FIXME no matter which way you go, main hand's CD resets with offhand's
-                }
+                float temp = p.getCooledAttackStrength(0.5f);
+                p.swingArm(handIn);
+                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp);
+                //FIXME no matter which way you go, main hand's CD resets with offhand's
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);
             }
 
@@ -763,7 +761,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return base * (getDamDist(item) * amount);
+        return itemPostureMultiplier * (getDamDist(item) * amount);
     }
 
     @Override
@@ -789,7 +787,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1f;
+        return 1.5f;
     }
 
     @Override

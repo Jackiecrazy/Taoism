@@ -151,11 +151,10 @@ guandao.alt.attack=this switch counts as a frontal attack when switching to stri
 guandao.guard=in guard form, range 4, sweep radius 1.5, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
 guandao.strike=in strike form, range 7, sweep radius 3, deals base damage and has no riposte
 
-item.bohemianearspoon.name=Bohemian Earspoon
-bohear.dist=if the currently struck target is a similar distance away from the attacker as the last struck target:
-bohear.buff=multiply damage by up to 1.5x and reduce cooldown down to a minimum of half
-bohear.bash=right click to consume this buff to bash all enemies back slightly
-bohear.riposte=riposte: impale targets in the next 5 seconds, causing them to be unable to approach you until you change targets
+item.bohemianearspoon.name=Ghiavarina
+bohear.dist=normal attack damage scales according to distance between you and the target between two attacks, up to 1.5x
+bohear.buff=in addition, the target will not be able to approach you as long as you face them
+bohear.bash=right click to consume this buff and bash all enemies back slightly
 
 item.nunchaku.name=Nunchaku
 nunchaku.dual=When held in two hands, attack cooldown on one side is reset when attacking from the other

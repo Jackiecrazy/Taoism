@@ -27,23 +27,22 @@ public class Pollaxe extends TaoWeapon {
      * Cue end can stab or be jammed into the opponent in a grapple, and won't be grabbed by the other guy
      * Business end can stab, chop, hook, or smash
      * Pruning this down:
-     * cue end can stab into a grapple or parry into a shove
+     * cue end can stab into a grapple
      * axe end can chop into a hook or smash into a stab
-     * either side being parried means you can hit with other side
-     * 4 blocks of reach, 1.5 handed
-     * Leap attacks deal double posture damage
-     * Right click is a cue stab, if after a parry, double posture damage
-     * Left click is a heavy overhead swing, inflicting cleave (no stack), if after a parry, double posture damage
-     *      if sprinting/charging, left click is with hammer head, knocking back. Further attacks will stab, causing extra piercing damage
+     * either side being parried recharges other side, other hand cooldown halved after a hit
+     * 3 blocks of reach, 1.5 handed
+     * Right click is a fast cue stab. Second hit without disengagement: double posture damage
+     * Left click is a heavy overhead swing with axe, disabling shield. Second hit without disengagement: inflict cleave (no stack)
+     * If sprinting/charging, left click is with hammer head, knocking back. Second hit without disengagement: stab, causing 1.3x piercing damage
      *
      * Oscillates
-     * primary methods to counter it are to predict your opponent's next strike hand and engage from range
+     * primary methods to counter it are to disengage and keep a parrying hand handy
      */
 
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Pollaxe() {
-        super(3, 0.8, 9, 2f);
+        super(3, 1.2, 7, 1f);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
+        return 3f;
     }
 
     @Override
@@ -84,17 +83,17 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return !attacker.onGround;
+        return getHand(stack)==EnumHand.MAIN_HAND;
     }
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
-        return true;
+        return isOffhandEmpty(is);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.half") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("pollaxe.leap"));
         tooltip.add(I18n.format("pollaxe.cleave"));

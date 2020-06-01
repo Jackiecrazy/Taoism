@@ -27,19 +27,14 @@ public class GouLianQiang extends TaoWeapon {
     I imagine the cavity would lead to great catching of blades.
     Anyway this trips people and counters parries.
 
-    left click for a normal stab. Like the misericorde, this ignores half armor when hitting a downed target
+    left click for a normal stab. Like the misericorde, this ignores all armor when hitting a downed target
     right click to hook for no damage. Doing this twice in a row will trip, inflicting 50% max posture damage
     if the target is not facing the attacker, instantly trip
     if the target is unaware of attacker, instantly down
-
-    TODO this loses the spear's ability to pierce. Instead, winning a blade lock will disable the opponent's weapon for 1 second.
-    riposte:
-    //the next bash in 4 seconds AoEs, knocks back and briefly slows the opponents
-    //the next stab in 4 seconds instantly hooks and trips
      */
 
     public GouLianQiang() {
-        super(2, 1.3, 6d, 1f);
+        super(2, 1.4, 6d, 1f);
     }
 
     @Override
@@ -119,7 +114,7 @@ public class GouLianQiang extends TaoWeapon {
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
             //ignore half armor when downed
-            return target.getTotalArmorValue()/2;
+            return target.getTotalArmorValue();
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }

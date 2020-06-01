@@ -6,6 +6,12 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 
 public interface ITaoStatCapability {
+     public enum JUMPSTATE{
+          GROUNDED,
+          EXHAUSTED,
+          JUMPING,
+          DODGING
+     }
      float getQi();
      default int getQiFloored(){return (int)Math.floor(getQi());}
      void setQi(float amount);
@@ -15,6 +21,7 @@ public interface ITaoStatCapability {
      void setLing(float amount);
      float addLing(float amount);
      boolean consumeLing(float amount);
+
      /**
       * this will return the cached cooldown for players, and will track mob swing instead. Because Mojang didn't implement attack timers and nobody else bothered.
       *

@@ -472,8 +472,8 @@ public class NeedyLittleThings {
         double x = from.posX - to.posX;
         x = Math.max(Math.abs(x) - from.width / 2 - to.width / 2, 0);
         //stupid inconsistent game
-        double y = (from.posY) - (to.posY);
-        y = Math.max(Math.abs(y) - from.height / 2 - to.height / 2, 0);
+        double y = (from.posY+from.height/2) - (to.posY+to.height/2);
+        y = Math.max(Math.abs(y) - from.height/2 - to.height/2, 0);
         double z = from.posZ - to.posZ;
         z = Math.max(Math.abs(z) - from.width / 2 - to.width / 2, 0);
         return x * x + y * y + z * z;

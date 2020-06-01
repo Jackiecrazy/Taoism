@@ -27,6 +27,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -34,6 +35,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -178,7 +180,7 @@ public class TaoisticEventHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || !defend.isEmpty()) && ukeCap.consumePosture(atk * def, true, seme, ds) == 0f && smart && NeedyLittleThings.isFacingEntity(uke, seme, 90)) {
+            if ((!smart || !defend.isEmpty()) && NeedyLittleThings.isFacingEntity(uke, seme, 120) && ukeCap.consumePosture(atk * def, true, seme, ds) == 0f && smart) {
                 e.setCanceled(true);
                 uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
@@ -203,8 +205,9 @@ public class TaoisticEventHandler {
 
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
-            e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
             e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
+            if (e.getResult() == Event.Result.ALLOW || (e.getResult() == Event.Result.DEFAULT && e.isVanillaCritical()))
+                e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
         }
     }
 
@@ -389,8 +392,13 @@ public class TaoisticEventHandler {
     @SubscribeEvent
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
         EntityLivingBase elb = e.getEntityLiving();
-        if (TaoCasterData.getTaoCap(elb).getQi() > 0) {
-            elb.motionY *= 1 + (TaoCasterData.getTaoCap(elb).getQi() / 10);
+        float qi = TaoCasterData.getTaoCap(elb).getQi();
+        if (qi > 0) {
+            elb.motionY *= 1 + (qi / 10);
+            if (qi > 3 && elb.isSprinting()) {//long jump
+                elb.motionX *= 1 + ((qi - 3) / 14);
+                elb.motionZ *= 1 + ((qi - 3) / 14);
+            }
             elb.velocityChanged = true;
         }
     }
@@ -409,12 +417,14 @@ public class TaoisticEventHandler {
         EntityPlayer p = e.player;
         if (e.phase.equals(TickEvent.Phase.END)) {
             ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
-            //update max stamina, posture and ling. The other mobs don't have HUDs, so their spl only need to be recalculated when needed
+            //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (p.motionY < 0 && cap.getDownTimer() <= 0 && cap.getQi() > 0) {
-                if (!p.isSneaking() && cap.getQi() > 3) {
-                    p.motionY *= (3 / cap.getQi());
+            if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
+                //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
+                if (p.motionY < 0 && !p.isSneaking() && cap.getQi() > 3) {
+                    p.motionY *= (1 - (MathHelper.clamp(1 + p.motionX * p.motionX + p.motionZ * p.motionZ, 1f, 2f) * 3f / cap.getQi()));//
                 }
+                //
                 p.fallDistance = 0.1f;//for da critz
             }
             TaoCasterData.updateCasterData(p);

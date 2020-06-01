@@ -24,7 +24,6 @@ public class BohemianEarspoon extends TaoWeapon {
     /*
     A weapon all about negotiating distance. High range, medium power and defense, low combo and speed
     Normal attack's crit modifier is determined by the difference between the distance of you and the target in the last 2 attacks
-        its recharge time is also reduced down to a minimum of 50% depending on the difference
     Alt attack will consume this buff to do a small AoE swipe
     Riposte: for the next 7 seconds, your attacks mark a single target. The target cannot approach you unless they first exit your attack range.
         Either your movements force the target to move with you or the target's movements move you as well, depending on size
@@ -37,7 +36,7 @@ public class BohemianEarspoon extends TaoWeapon {
     };
 
     public BohemianEarspoon() {
-        super(2, 1.3, 6d, 1f);
+        super(2, 1.4, 6d, 1f);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class BohemianEarspoon extends TaoWeapon {
         super.onUpdate(stack, w, e, slot, onHand);
         if (e instanceof EntityLivingBase && !w.isRemote) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null) {
+            if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack)!=0) {
                 EntityLivingBase target = elb.getLastAttackedEntity();
                 if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
                     if(target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
@@ -93,8 +92,7 @@ public class BohemianEarspoon extends TaoWeapon {
                         target.motionZ += zForce;
                         target.velocityChanged = true;
                     }
-                } else elb.setLastAttackedEntity(null);
-
+                }
             }
         }
     }
@@ -102,7 +100,6 @@ public class BohemianEarspoon extends TaoWeapon {
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && attacker.getLastAttackedEntity() != null) {
             splash(attacker, stack, 120);
-            attacker.setLastAttackedEntity(null);
         }
     }
 
@@ -112,7 +109,6 @@ public class BohemianEarspoon extends TaoWeapon {
         tooltip.add(I18n.format("bohear.dist"));
         tooltip.add(I18n.format("bohear.buff"));
         tooltip.add(I18n.format("bohear.bash"));
-        tooltip.add(I18n.format("bohear.riposte"));
     }
 
     @Override
@@ -138,7 +134,7 @@ public class BohemianEarspoon extends TaoWeapon {
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
         float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
-        float lastAttackRange = 1 + min / (max * 1.5f);
+        float lastAttackRange = 1 + min / (max * 2f);
         return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
     }
 
@@ -147,8 +143,7 @@ public class BohemianEarspoon extends TaoWeapon {
             NeedyLittleThings.knockBack(target, attacker, 1f);
             setLastAttackedRangeSq(stack, 0);
         } else {
-            setLastLastAttackedRangeSq(stack, getLastAttackedRangeSq(stack));
-            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
+            setLastAttackedRangeSq(stack, (float) NeedyLittleThings.getDistSqCompensated(attacker,target));
         }
     }
 
@@ -158,18 +153,6 @@ public class BohemianEarspoon extends TaoWeapon {
         } else {
             gettagfast(item).removeTag("lastAttackedRange");
         }
-    }
-
-    private void setLastLastAttackedRangeSq(ItemStack item, float range) {
-        if (range != 0f) {
-            gettagfast(item).setFloat("llastAttackedRange", range);
-        } else {
-            gettagfast(item).removeTag("llastAttackedRange");
-        }
-    }
-
-    private float getLastLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("llastAttackedRange");
     }
 
     private float getLastAttackedRangeSq(ItemStack is) {

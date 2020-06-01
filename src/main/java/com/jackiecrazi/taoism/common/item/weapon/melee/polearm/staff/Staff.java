@@ -15,6 +15,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -33,7 +34,7 @@ public class Staff extends TaoWeapon {
      */
 
     public Staff() {
-        super(0, 1.4f, 5f, 1f);
+        super(0, 1.4f, 7f, 1.4f);
     }
 
     @Override
@@ -43,24 +44,12 @@ public class Staff extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return isCharged(wielder, is) && getHand(is) != EnumHand.OFF_HAND ? 2 : 1;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return attacker.motionY<0 ? 2f : 1f;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        //nerf offhand damage
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return off;
+        return getHand(is) != EnumHand.OFF_HAND ? 2 : 1;
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
+        return 5f;
     }
 
     @Override
@@ -128,31 +117,48 @@ public class Staff extends TaoWeapon {
         TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return Event.Result.DENY;
+        //recharged, fallen more than 0 blocks, not on ground, not on ladder, not in water, not blind, not riding, target is ELB
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        //nerf offhand damage
+        float off = getHand(item) == EnumHand.OFF_HAND ? 0.7f : 1f;
+        return off;
+    }
+
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             float groundKB = attacker.onGround ? 0.5f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB);
         } else {
-            if(attacker.onGround) {
+            if (attacker.onGround || attacker.isSneaking()) {
                 if (target.onGround) {
-                    target.addVelocity(0, chi/15f, 0);
-                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"),20, chi/4));
+                    target.addVelocity(0, chi / 15f, 0);
+                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4));
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f);
-                    target.motionY=0;
+                    target.motionY = 0;
                     //target.addVelocity(0, -1-chi/5f, 0);
-                    target.hurtResistantTime=0;
+                    target.hurtResistantTime = 0;
 //                    target.onGround=false;
                     target.fallDistance += chi;
                 }
                 target.velocityChanged = true;
-            }else{
+            } else {
                 if (target.onGround) {
-                    attacker.motionY= chi/15f;
+                    attacker.motionY = chi / 15f;
                     attacker.velocityChanged = true;
                 } else {
-                    target.motionY= chi/15f;
+                    target.motionY = chi / 15f;
                     target.velocityChanged = true;
                 }
             }
