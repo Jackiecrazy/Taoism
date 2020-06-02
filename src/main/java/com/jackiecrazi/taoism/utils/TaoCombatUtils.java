@@ -7,17 +7,13 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.CombatRules;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 
 public class TaoCombatUtils {
@@ -83,39 +79,6 @@ public class TaoCombatUtils {
                 (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
     }
 
-    public static boolean attemptDodge(EntityLivingBase elb, int side) {
-        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && (elb.onGround || TaoCasterData.getTaoCap(elb).getQi() > 2) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {
-            //System.out.println("execute roll to side " + side);
-            TaoCasterData.getTaoCap(elb).setRollCounter(0);
-            TaoCasterData.getTaoCap(elb).setPrevSizes(elb.width, elb.height);
-            float min = Math.min(elb.width, elb.height);
-            double x = 0, y = 0.3, z = 0;
-            switch (side) {
-                case 0://left
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw));
-                    break;
-                case 1://back
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw - 90));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw - 90));
-                    break;
-                case 2://right
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw - 180));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw - 180));
-                    break;
-            }
-            x /= 1.5;
-            z /= 1.5;
-
-            //NeedyLittleThings.setSize(elb, min, min);
-
-            elb.addVelocity(x, y, z);
-            elb.velocityChanged = true;
-            return true;
-        }
-        return false;
-    }
-
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
         if (!(elb instanceof EntityPlayer)) return;
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
@@ -139,42 +102,5 @@ public class TaoCombatUtils {
                     return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
             }
         return 1f;
-    }
-
-    public static float recalculateDamageIgnoreArmor(EntityLivingBase target, DamageSource ds, float orig, float pointsToIgnore) {
-        return armorCalc(target, Math.max(target.getTotalArmorValue() - pointsToIgnore, 0), target.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getAttributeValue(), ds, orig);
-    }
-
-    private static float armorCalc(EntityLivingBase target, float armor, double tough, DamageSource ds, float damage) {
-        if (!ds.isUnblockable())
-            damage = CombatRules.getDamageAfterAbsorb(damage, armor, (float) tough);
-        if (!ds.isDamageAbsolute())
-            damage = applyPotionDamageCalculations(target, ds, damage);
-        return damage;
-    }
-
-    private static float applyPotionDamageCalculations(EntityLivingBase elb, DamageSource source, float damage) {
-        if (source.isDamageAbsolute()) {
-            return damage;
-        } else {
-            if (elb.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-                int i = (elb.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
-                int j = 25 - i;
-                float f = damage * (float) j;
-                damage = f / 25.0F;
-            }
-
-            if (damage <= 0.0F) {
-                return 0.0F;
-            } else {
-                int k = EnchantmentHelper.getEnchantmentModifierDamage(elb.getArmorInventoryList(), source);
-
-                if (k > 0) {
-                    damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
-                }
-
-                return damage;
-            }
-        }
     }
 }

@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketUpdateClientPainful implements IMessage {
-    private int entityID, taoAtk;
+    private int entityID;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
     private float maxLing, maxPosture;
@@ -48,7 +48,7 @@ public class PacketUpdateClientPainful implements IMessage {
         parry = itsc.getParryCounter();
         dodge = itsc.getRollCounter();
         protec = itsc.getPosInvulTime();
-        //taoAtk = Taoism.getAtk(elb);
+
     }
 
     @Override
@@ -102,7 +102,6 @@ public class PacketUpdateClientPainful implements IMessage {
         buf.writeInt(protec);
         buf.writeFloat(width);
         buf.writeFloat(height);
-        //buf.writeInt(taoAtk);
     }
 
     public static class UpdateClientHandler implements
@@ -138,7 +137,6 @@ public class PacketUpdateClientPainful implements IMessage {
                     i.setMaxPosture(m.maxPosture);
                     i.setComboSequence(m.combo);
                     i.setPrevSizes(m.width, m.height);
-                    //Taoism.setAtk(e, m.taoAtk);
                 }
             });
             return null;

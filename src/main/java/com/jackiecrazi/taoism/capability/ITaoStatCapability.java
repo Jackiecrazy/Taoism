@@ -21,7 +21,8 @@ public interface ITaoStatCapability {
      void setLing(float amount);
      float addLing(float amount);
      boolean consumeLing(float amount);
-
+     JUMPSTATE getJumpState();
+     void setJumpState(JUMPSTATE js);
      /**
       * this will return the cached cooldown for players, and will track mob swing instead. Because Mojang didn't implement attack timers and nobody else bothered.
       *

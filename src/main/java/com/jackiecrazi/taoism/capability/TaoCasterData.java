@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -35,6 +36,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
             itsc.setPosture(itsc.getMaxPosture() * percentage);
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);
+        if(TaoMovementUtils.isTechnicallyGrounded(elb))
+            itsc.setJumpState(ITaoStatCapability.JUMPSTATE.GROUNDED);
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
     }
 

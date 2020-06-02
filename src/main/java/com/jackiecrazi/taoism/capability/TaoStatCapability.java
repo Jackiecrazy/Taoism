@@ -16,16 +16,15 @@ public class TaoStatCapability implements ITaoStatCapability {
     private float qi, ling, posture, swing;
     private int combo, ohcool;
     private float maxLing, maxPosture, maxStamina;
-    private int lcd;
-    private int pcd;
-    private int scd;
-    private int qcd;
+    private int lcd, pcd, scd, qcd;
     private int down;
     private long timey;
     private boolean swi, protecc, off;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
+    private JUMPSTATE state;
+
     TaoStatCapability(EntityLivingBase elb) {
         e = elb;
     }
@@ -82,6 +81,16 @@ public class TaoStatCapability implements ITaoStatCapability {
         ling -= amount;
         setLingRechargeCD(CombatConfig.lingCD);
         return true;
+    }
+
+    @Override
+    public JUMPSTATE getJumpState() {
+        return state;
+    }
+
+    @Override
+    public void setJumpState(JUMPSTATE js) {
+        state = js;
     }
 
     @Override
@@ -217,6 +226,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setLastUpdatedTime(from.getLastUpdatedTime());
         setOffHand(from.getOffHand());
         setOffhandAttack(from.isOffhandAttack());
+        setJumpState(from.getJumpState());
     }
 
     @Override

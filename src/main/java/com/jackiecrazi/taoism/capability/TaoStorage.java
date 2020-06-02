@@ -35,6 +35,7 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         nbt.setFloat("prevHeight",instance.getPrevSizes().getSecond());
         nbt.setInteger("protec", instance.getPosInvulTime());
         nbt.setBoolean("off",instance.isOffhandAttack());
+        nbt.setInteger("jump",instance.getJumpState().ordinal());
         nbt.setTag("offhandInfo",instance.getOffHand().writeToNBT(new NBTTagCompound()));
         return nbt;
     }
@@ -64,5 +65,6 @@ public class TaoStorage implements Capability.IStorage<ITaoStatCapability> {
         instance.setPosInvulTime(n.getInteger("protec"));
         instance.setOffHand(new ItemStack(n.getCompoundTag("offhandInfo")));
         instance.setOffhandAttack(n.getBoolean("off"));
+        instance.setJumpState(ITaoStatCapability.JUMPSTATE.values()[((NBTTagCompound) nbt).getInteger("jump")]);
     }
 }

@@ -421,8 +421,15 @@ public class TaoisticEventHandler {
             //qi 1+ gives slow fall
             if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
-                if (p.motionY < 0 && !p.isSneaking() && cap.getQi() > 3) {
-                    p.motionY *= (1 - (MathHelper.clamp(1 + p.motionX * p.motionX + p.motionZ * p.motionZ, 1f, 2f) * 3f / cap.getQi()));//
+                if (cap.getQi() > 3) {
+                    if (p.collidedHorizontally) {
+                        //vertical motion enabling, and shut off attempts to run off the wall
+                        //check if ne
+                        p.motionY=p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()*p.getLookVec().y;
+                    }
+                    if (p.motionY < 0 && !p.isSneaking())
+                        p.motionY *= (1 - (MathHelper.clamp(1 + p.motionX * p.motionX + p.motionZ * p.motionZ, 1f, 2f) * 3f / cap.getQi()));//
+
                 }
                 //
                 p.fallDistance = 0.1f;//for da critz

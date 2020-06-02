@@ -1,8 +1,7 @@
 package com.jackiecrazi.taoism.networking;
 
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -10,8 +9,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class PacketBeginParry implements IMessage {
-    public PacketBeginParry() {
+public class PacketJump implements IMessage {
+    public PacketJump() {
 
     }
 
@@ -24,15 +23,14 @@ public class PacketBeginParry implements IMessage {
 
     }
 
-    public static class ParryHandler implements IMessageHandler<PacketBeginParry, IMessage> {
+    public static class ParryHandler implements IMessageHandler<PacketJump, IMessage> {
 
         @Override
-        public IMessage onMessage(PacketBeginParry message, MessageContext ctx) {
+        public IMessage onMessage(PacketJump message, MessageContext ctx) {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
                 final EntityPlayer p = Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
-                if (TaoCasterData.getTaoCap(p).getParryCounter() > CombatConfig.parryCooldown)
-                    TaoCasterData.getTaoCap(p).setParryCounter(0);
+                TaoMovementUtils.attemptJump(p);
             });
             return null;
         }

@@ -10,7 +10,7 @@ import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.HudConfig;
-import com.jackiecrazi.taoism.networking.PacketBeginParry;
+import com.jackiecrazi.taoism.networking.PacketJump;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
 import net.minecraft.client.Minecraft;
@@ -69,7 +69,7 @@ public class ClientEvents {
      */
     private static long[] lastTap = {0, 0, 0};
     private static boolean[] tapped = {false, false, false};
-    private static boolean sneak = false;
+    private static boolean jump = false;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -158,12 +158,12 @@ public class ClientEvents {
             return;
         }
 
-        if (mi.sneak && !sneak) {
+        if (mi.jump && !jump) {
             //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-            Taoism.net.sendToServer(new PacketBeginParry());
+            Taoism.net.sendToServer(new PacketJump());
             //}
         }
-        sneak = mi.sneak;
+        jump = mi.sneak;
 
 
     }
