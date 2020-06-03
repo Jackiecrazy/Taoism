@@ -14,7 +14,7 @@ public class PacketDodge implements IMessage {
     /*
     //decreased gravity and high jump: scales with level, nerf it down a little, decreased gravity scales with horizontal speed, up to half
     backflip: level 0, direction+jump in midair, get 1 charge from being on ground, so can only do once, melds into double jump when unlocked
-    wall run: level 3, sprint next to wall, check collidedhorizontally, keep sprint on and move to look, disregarding looks "up". Fall if not sprinting
+    wall run: level 3, sprint next to wall, check collidedhorizontally, keep sprint on and move to look, fall if not sprinting
     extended jump: level 2, sprint+jump, horizontal velocity amplified along with vertical velocity
     extended aerial dodge: 2, double direction in air, recharged with jump
     double jump: 3, jump when airborne), hook into jump key

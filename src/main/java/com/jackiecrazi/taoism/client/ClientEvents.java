@@ -67,8 +67,8 @@ public class ClientEvents {
     /**
      * left, back, right
      */
-    private static long[] lastTap = {0, 0, 0};
-    private static boolean[] tapped = {false, false, false};
+    private static long[] lastTap = {0, 0, 0, 0};
+    private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false;
 
     @SubscribeEvent
@@ -150,6 +150,13 @@ public class ClientEvents {
                 lastTap[2] = mc.world.getTotalWorldTime();
             }
             tapped[2] = mi.rightKeyDown;
+            if (mi.forwardKeyDown && (!tapped[3] || mc.gameSettings.keyBindSprint.isPressed())) {
+                if (mc.world.getTotalWorldTime() - lastTap[3] <= ALLOWANCE) {
+                    Taoism.net.sendToServer(new PacketDodge(3));
+                }
+                lastTap[3] = mc.world.getTotalWorldTime();
+            }
+            tapped[3] = mi.forwardKeyDown;
         }
 
         if (TaoCasterData.getTaoCap(mc.player).getDownTimer() > 0) {
@@ -163,7 +170,7 @@ public class ClientEvents {
             Taoism.net.sendToServer(new PacketJump());
             //}
         }
-        jump = mi.sneak;
+        jump = mi.jump;
 
 
     }

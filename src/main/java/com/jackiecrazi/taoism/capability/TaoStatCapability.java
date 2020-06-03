@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
@@ -23,7 +24,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
-    private JUMPSTATE state;
+    private JUMPSTATE state=JUMPSTATE.GROUNDED;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = elb;
@@ -403,4 +404,60 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
 
+    @Override
+    public NBTTagCompound serializeNBT() {
+        NBTTagCompound nbt = new NBTTagCompound();
+        nbt.setFloat("qi", getQi());
+        nbt.setFloat("ling", getLing());
+        nbt.setFloat("swing", getSwing());
+        nbt.setFloat("posture", getPosture());
+        nbt.setInteger("parry", getParryCounter());
+        nbt.setInteger("combo", getComboSequence());
+        nbt.setFloat("maxling", getMaxLing());
+        nbt.setFloat("maxposture", getMaxPosture());
+        nbt.setInteger("lcd", getLingRechargeCD());
+        nbt.setInteger("pcd", getPostureRechargeCD());
+        nbt.setInteger("scd", getStaminaRechargeCD());
+        nbt.setInteger("qcd", getQiGracePeriod());
+        nbt.setLong("lastupdate", getLastUpdatedTime());
+        nbt.setBoolean("switch", isSwitchIn());
+        nbt.setInteger("ohcool", getOffhandCool());
+        nbt.setBoolean("protecc", isProtected());
+        nbt.setInteger("down", getDownTimer());
+        nbt.setInteger("dodge",getRollCounter());
+        nbt.setFloat("prevWidth",getPrevSizes().getFirst());
+        nbt.setFloat("prevHeight",getPrevSizes().getSecond());
+        nbt.setInteger("protec", getPosInvulTime());
+        nbt.setBoolean("off",isOffhandAttack());
+        nbt.setInteger("jump",getJumpState().ordinal());
+        nbt.setTag("offhandInfo",getOffHand().writeToNBT(new NBTTagCompound()));
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt) {
+        setQi(nbt.getFloat("qi"));
+        setLing(nbt.getFloat("ling"));
+        setSwing(nbt.getFloat("swing"));
+        setPosture(nbt.getFloat("posture"));
+        setParryCounter(nbt.getInteger("parry"));
+        setComboSequence((nbt.getInteger("combo")));
+        setMaxLing(nbt.getFloat("maxling"));
+        setMaxPosture(nbt.getFloat("maxposture"));
+        setLingRechargeCD(nbt.getInteger("lcd"));
+        setPostureRechargeCD(nbt.getInteger("pcd"));
+        setStaminaRechargeCD(nbt.getInteger("scd"));
+        setQiGracePeriod(nbt.getInteger("qcd"));
+        setLastUpdatedTime(nbt.getLong("lastupdate"));
+        setSwitchIn(nbt.getBoolean("switch"));
+        setOffhandCool(nbt.getInteger("ohcool"));
+        setProtected(nbt.getBoolean("protecc"));
+        setDownTimer(nbt.getInteger("down"));
+        setRollCounter(nbt.getInteger("dodge"));
+        setPrevSizes(nbt.getFloat("prevWidth"),nbt.getFloat("prevHeight"));
+        setPosInvulTime(nbt.getInteger("protec"));
+        setOffHand(new ItemStack(nbt.getCompoundTag("offhandInfo")));
+        setOffhandAttack(nbt.getBoolean("off"));
+        setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
+    }
 }

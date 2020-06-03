@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.capability;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 
@@ -289,6 +290,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
+
+    }
+
+    @Override
+    public NBTTagCompound serializeNBT() {
+        return null;
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt) {
 
     }
 }

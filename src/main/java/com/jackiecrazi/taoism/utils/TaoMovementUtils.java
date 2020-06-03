@@ -4,37 +4,52 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.config.CombatConfig;
-import javafx.util.Pair;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Tuple;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class TaoMovementUtils {
     private static Method jump = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70664_aZ", Void.TYPE);
 
     public static boolean isTechnicallyGrounded(EntityLivingBase elb) {
-        return elb.onGround || (TaoCasterData.getTaoCap(elb).getQi() > 3 && elb.collidedHorizontally && elb.isSprinting());
+        return elb.onGround || (TaoCasterData.getTaoCap(elb).getQi() > 3 && isWallClinging(elb));
     }
 
     public static boolean isWallClinging(EntityLivingBase elb) {
-        return elb.isSprinting() && elb.collidedHorizontally && !elb.collidedVertically;
+        boolean[] b = collisionStatus(elb);
+        return !elb.onGround && ((b[0] || b[1]) || (b[4] || b[5]));
     }
 
     /**
-     * Checks the bottom, then north, south, east, west in that order
+     * Checks the +x, -x, +y, -y, +z, -z, in that order
+     *
      * @param elb
      * @return
      */
-    public static Tuple<EnumFacing, NeedyLittleThings.HitResult> collisionStatus(EntityLivingBase elb){
-        elb.world.checkBlockCollision()
+    public static boolean[] collisionStatus(EntityLivingBase elb) {
+        double allowance = 0.1;
+        boolean[] ret = {false, false, false, false, false, false};
+        AxisAlignedBB aabb = elb.getEntityBoundingBox().grow(allowance / 2);
+        List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb);
+        for (AxisAlignedBB a : boxes) {
+            if (aabb.calculateXOffset(a, allowance) == allowance) ret[0] = true;
+            if (aabb.calculateXOffset(a, -allowance) == -allowance) ret[1] = true;
+            if (aabb.calculateYOffset(a, allowance) == allowance) ret[2] = true;
+            if (aabb.calculateYOffset(a, -allowance) == -allowance) ret[3] = true;
+            if (aabb.calculateZOffset(a, allowance) == allowance) ret[4] = true;
+            if (aabb.calculateZOffset(a, -allowance) == -allowance) ret[5] = true;
+        }
+        return ret;
     }
 
     public static boolean attemptJump(EntityLivingBase elb) {
+        //if you're on the ground, I'll let vanilla handle you
+        if (elb.onGround) return false;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
         //if you're exhausted or just jumped, you can't jump again
         if (itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING)
@@ -46,23 +61,29 @@ public class TaoMovementUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(isWallClinging(elb)){
+        if (isWallClinging(elb)) {
             //redistribute x, y and z according to look
-            Vec3d vec=elb.getLookVec();
-            double speed=Math.sqrt(elb.motionX*elb.motionX+elb.motionY*elb.motionY+elb.motionZ*elb.motionZ);
-            elb.motionX=vec.x*speed;
-            elb.motionY=vec.y*speed;
-            elb.motionZ=vec.z*speed;
+            Vec3d vec = elb.getLookVec();
+            double speed = Math.sqrt(elb.motionX * elb.motionX + elb.motionY * elb.motionY + elb.motionZ * elb.motionZ);
+            elb.motionX = vec.x * speed;
+            elb.motionY = vec.y * speed;
+            elb.motionZ = vec.z * speed;
         }
+        if (itsc.getQi() > 3)
+            itsc.setJumpState(ITaoStatCapability.JUMPSTATE.JUMPING);
+        else itsc.setJumpState(ITaoStatCapability.JUMPSTATE.EXHAUSTED);
         return true;
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
-        if (TaoCasterData.getTaoCap(elb).getRollCounter() > CombatConfig.rollCooldown && (elb.onGround || TaoCasterData.getTaoCap(elb).getQi() > 2) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        if (itsc.getRollCounter() > CombatConfig.rollCooldown && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.DODGING && (elb.onGround || itsc.getQi() > 2) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {
             //System.out.println("execute roll to side " + side);
-            TaoCasterData.getTaoCap(elb).setRollCounter(0);
-            TaoCasterData.getTaoCap(elb).setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-            TaoCasterData.getTaoCap(elb).setPrevSizes(elb.width, elb.height);
+            itsc.setRollCounter(0);
+            if (itsc.getQi() > 3)
+                itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
+            else itsc.setJumpState(ITaoStatCapability.JUMPSTATE.EXHAUSTED);
+            itsc.setPrevSizes(elb.width, elb.height);
             float min = Math.min(elb.width, elb.height);
             double x = 0, y = 0.3, z = 0;
             switch (side) {
@@ -78,13 +99,20 @@ public class TaoMovementUtils {
                     x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw - 180));
                     z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw - 180));
                     break;
+                case 3://forward
+                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw + 90));
+                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
+                    break;
             }
-            x /= 1.5;
-            z /= 1.5;
+            float divisor = side == 3 ? 5f : 20f;
+            float multiplier = (1 + (itsc.getQi() / divisor));
+            x *= 0.6 * multiplier;
+            z *= 0.6 * multiplier;
 
             //NeedyLittleThings.setSize(elb, min, min);
 
             elb.addVelocity(x, y, z);
+            itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
             elb.velocityChanged = true;
             return true;
         }

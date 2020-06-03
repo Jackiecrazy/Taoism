@@ -25,7 +25,7 @@ public class CommonProxy {
 		int dis=0;
     	Taoism.net.registerMessage(ExtendReachHandler.class, PacketExtendThyReach.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketMakeMove.MakeMoveHandler.class, PacketMakeMove.class, dis++, Side.SERVER);
-        Taoism.net.registerMessage(PacketJump.ParryHandler.class, PacketJump.class, dis++, Side.SERVER);
+        Taoism.net.registerMessage(PacketJump.JumpHandler.class, PacketJump.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketDodge.DodgeHandler.class, PacketDodge.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketUpdateClientPainful.UpdateClientHandler.class, PacketUpdateClientPainful.class, dis++, Side.CLIENT);
         Taoism.net.registerMessage(PacketUpdateSize.UpdateSizeHandler.class, PacketUpdateSize.class, dis++, Side.CLIENT);

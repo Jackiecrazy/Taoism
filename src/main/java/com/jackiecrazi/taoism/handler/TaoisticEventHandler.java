@@ -12,6 +12,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.GeneralConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -419,16 +420,24 @@ public class TaoisticEventHandler {
             ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
+            if (cap.getDownTimer() <= 0 && cap.getQi() > 0 && !p.isSneaking()) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
-                    if (p.collidedHorizontally) {
+                    if (TaoMovementUtils.isWallClinging(p) && cap.getJumpState() != ITaoStatCapability.JUMPSTATE.JUMPING && cap.getJumpState() != ITaoStatCapability.JUMPSTATE.DODGING) {//TODO only when sprinting?
                         //vertical motion enabling, and shut off attempts to run off the wall
-                        //check if ne
-                        p.motionY=p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()*p.getLookVec().y;
-                    }
-                    if (p.motionY < 0 && !p.isSneaking())
-                        p.motionY *= (1 - (MathHelper.clamp(1 + p.motionX * p.motionX + p.motionZ * p.motionZ, 1f, 2f) * 3f / cap.getQi()));//
+                        p.motionY = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * p.getLookVec().y;
+                        boolean[] faces = TaoMovementUtils.collisionStatus(p);
+                        //prevent you from walking off
+                        if (faces[0] || faces[1]) {
+                            p.motionY += p.motionZ;
+                            p.motionZ = 0;
+                        }
+                        if (faces[4] || faces[5]) {
+                            p.motionY += p.motionX;
+                            p.motionX = 0;
+                        }
+                    } else if (p.motionY < 0)
+                        p.motionY *= ((MathHelper.clamp(1 + p.motionX * p.motionX + p.motionZ * p.motionZ, 1f, 2f) * 3f / cap.getQi()));//
 
                 }
                 //

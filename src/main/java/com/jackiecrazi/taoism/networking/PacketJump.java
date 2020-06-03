@@ -23,7 +23,7 @@ public class PacketJump implements IMessage {
 
     }
 
-    public static class ParryHandler implements IMessageHandler<PacketJump, IMessage> {
+    public static class JumpHandler implements IMessageHandler<PacketJump, IMessage> {
 
         @Override
         public IMessage onMessage(PacketJump message, MessageContext ctx) {
