@@ -5,14 +5,12 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -30,10 +28,9 @@ public class Pollaxe extends TaoWeapon {
      * cue end can stab into a grapple
      * axe end can chop into a hook or smash into a stab
      * either side being parried recharges other side, other hand cooldown halved after a hit
-     * 3 blocks of reach, 1.5 handed
-     * Right click is a fast cue stab. Second hit without disengagement: double posture damage
-     * Left click is a heavy overhead swing with axe, disabling shield. Second hit without disengagement: inflict cleave (no stack)
-     * If sprinting/charging, left click is with hammer head, knocking back. Second hit without disengagement: stab, causing 1.3x piercing damage
+     * 3 blocks of reach, 1.5 handed, knockback is always converted into posture damage
+     * Right click is a fast cue stab. Second hit without disengagement: trip, double posture damage
+     * Left click is a heavy overhead swing with axe, disabling shield. Second hit without disengagement: stab, causing 1.3x piercing damage
      *
      * Oscillates
      * primary methods to counter it are to disengage and keep a parrying hand handy
@@ -56,18 +53,6 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return attacker.motionY<0 ? 2f : 1f;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        //nerf offhand damage
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return off;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 3f;
     }
@@ -83,12 +68,27 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return getHand(stack)==EnumHand.MAIN_HAND;
+        return getHand(stack) == EnumHand.MAIN_HAND;
     }
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return isOffhandEmpty(is);
+    }
+
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && !w.isRemote) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            if (elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) < NeedyLittleThings.getDistSqCompensated(elb, elb.getLastAttackedEntity())) {
+                setLastAttackedRangeSq(stack, 0);
+            }
+        }
+    }
+
+    @Override
+    protected double speed(ItemStack stack) {
+        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack)+4) * 3-4 : super.speed(stack);
     }
 
     @Override
@@ -113,7 +113,20 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public int getDamageType(ItemStack is) {
-        return getHand(is)==EnumHand.OFF_HAND ? 2 : 3;
+        return getHand(is) == EnumHand.OFF_HAND ? 2 : 3;
+    }
+
+    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(defender, other, 0.9f);
+    }
+
+    @Override
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
+            return super.postureDealtBase(attacker, defender, item, amount) * 2;
+        }
+        return super.postureDealtBase(attacker, defender, item, amount);
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
@@ -124,35 +137,42 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item)==EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker, target, item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
+        float crit = 1;
+        if (getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
+            crit *= 1.5f;
         }
+        crit = attacker.motionY < 0 ? crit * 1.5f : crit;
+        return crit;
     }
 
     @Override
-    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        float doot = super.hurtStart(ds, attacker, target, item, orig);
-        if (target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null) {
-            PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
-            if (getHand(item) == EnumHand.OFF_HAND){
-                ds.setDamageBypassesArmor();
-                target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
-                return doot + (pe.getAmplifier() / 2f);
-            }
-        }
-        return doot;
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        //nerf offhand damage
+        return getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
     }
 
     @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.MAIN_HAND) {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 50, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        TaoCasterData.getTaoCap(target).consumePosture(orig, true);
+        return 0;
+    }
+
+    private float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
+    }
+
+    private void setLastAttackedRangeSq(ItemStack item, float range) {
+        if (range != 0f) {
+            gettagfast(item).setFloat("lastAttackedRange", range);
+        } else {
+            gettagfast(item).removeTag("lastAttackedRange");
         }
     }
+
+
 }

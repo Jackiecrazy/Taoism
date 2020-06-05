@@ -10,6 +10,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
+import javax.annotation.Nullable;
+
 public class TaoStatCapability implements ITaoStatCapability {
     public static final int MAXDOWNTIME = 100;
     private static final float MAXQI = 9.99f;
@@ -24,10 +26,42 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
-    private JUMPSTATE state=JUMPSTATE.GROUNDED;
+    private JUMPSTATE state = JUMPSTATE.GROUNDED;
+    private ClingData cd=new ClingData(false, false, false, false);
 
     TaoStatCapability(EntityLivingBase elb) {
         e = elb;
+    }
+
+    @Override
+    public NBTTagCompound serializeNBT() {
+        NBTTagCompound nbt = new NBTTagCompound();
+        nbt.setFloat("qi", getQi());
+        nbt.setFloat("ling", getLing());
+        nbt.setFloat("swing", getSwing());
+        nbt.setFloat("posture", getPosture());
+        nbt.setInteger("parry", getParryCounter());
+        nbt.setInteger("combo", getComboSequence());
+        nbt.setFloat("maxling", getMaxLing());
+        nbt.setFloat("maxposture", getMaxPosture());
+        nbt.setInteger("lcd", getLingRechargeCD());
+        nbt.setInteger("pcd", getPostureRechargeCD());
+        nbt.setInteger("scd", getStaminaRechargeCD());
+        nbt.setInteger("qcd", getQiGracePeriod());
+        nbt.setLong("lastupdate", getLastUpdatedTime());
+        nbt.setBoolean("switch", isSwitchIn());
+        nbt.setInteger("ohcool", getOffhandCool());
+        nbt.setBoolean("protecc", isProtected());
+        nbt.setInteger("down", getDownTimer());
+        nbt.setInteger("dodge", getRollCounter());
+        nbt.setFloat("prevWidth", getPrevSizes().getFirst());
+        nbt.setFloat("prevHeight", getPrevSizes().getSecond());
+        nbt.setInteger("protec", getPosInvulTime());
+        nbt.setBoolean("off", isOffhandAttack());
+        nbt.setInteger("jump", getJumpState().ordinal());
+        nbt.setTag("offhandInfo", getOffHand().writeToNBT(new NBTTagCompound()));
+        cd.toNBT(nbt);
+        return nbt;
     }
 
     @Override
@@ -124,11 +158,21 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, null, null);
+        return consumePosture(amount, canStagger, e.getRevengeTarget(), e.getLastDamageSource());
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
+    public void setClingDirections(ClingData dirs) {
+        cd=dirs;
+    }
+
+    @Override
+    public ClingData getClingDirections() {
+        return cd;
+    }
+
+    @Override
+    public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant, @Nullable DamageSource ds) {
         if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
         posture -= amount;
@@ -228,6 +272,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setOffHand(from.getOffHand());
         setOffhandAttack(from.isOffhandAttack());
         setJumpState(from.getJumpState());
+        setClingDirections(from.getClingDirections());
     }
 
     @Override
@@ -403,37 +448,6 @@ public class TaoStatCapability implements ITaoStatCapability {
         //System.out.println("target is downed for " + downtimer + " ticks!");
     }
 
-
-    @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setFloat("qi", getQi());
-        nbt.setFloat("ling", getLing());
-        nbt.setFloat("swing", getSwing());
-        nbt.setFloat("posture", getPosture());
-        nbt.setInteger("parry", getParryCounter());
-        nbt.setInteger("combo", getComboSequence());
-        nbt.setFloat("maxling", getMaxLing());
-        nbt.setFloat("maxposture", getMaxPosture());
-        nbt.setInteger("lcd", getLingRechargeCD());
-        nbt.setInteger("pcd", getPostureRechargeCD());
-        nbt.setInteger("scd", getStaminaRechargeCD());
-        nbt.setInteger("qcd", getQiGracePeriod());
-        nbt.setLong("lastupdate", getLastUpdatedTime());
-        nbt.setBoolean("switch", isSwitchIn());
-        nbt.setInteger("ohcool", getOffhandCool());
-        nbt.setBoolean("protecc", isProtected());
-        nbt.setInteger("down", getDownTimer());
-        nbt.setInteger("dodge",getRollCounter());
-        nbt.setFloat("prevWidth",getPrevSizes().getFirst());
-        nbt.setFloat("prevHeight",getPrevSizes().getSecond());
-        nbt.setInteger("protec", getPosInvulTime());
-        nbt.setBoolean("off",isOffhandAttack());
-        nbt.setInteger("jump",getJumpState().ordinal());
-        nbt.setTag("offhandInfo",getOffHand().writeToNBT(new NBTTagCompound()));
-        return nbt;
-    }
-
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
         setQi(nbt.getFloat("qi"));
@@ -454,10 +468,11 @@ public class TaoStatCapability implements ITaoStatCapability {
         setProtected(nbt.getBoolean("protecc"));
         setDownTimer(nbt.getInteger("down"));
         setRollCounter(nbt.getInteger("dodge"));
-        setPrevSizes(nbt.getFloat("prevWidth"),nbt.getFloat("prevHeight"));
+        setPrevSizes(nbt.getFloat("prevWidth"), nbt.getFloat("prevHeight"));
         setPosInvulTime(nbt.getInteger("protec"));
         setOffHand(new ItemStack(nbt.getCompoundTag("offhandInfo")));
         setOffhandAttack(nbt.getBoolean("off"));
         setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
+        setClingDirections(new ClingData(nbt));
     }
 }

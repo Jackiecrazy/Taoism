@@ -63,8 +63,12 @@ public class Qiang extends TaoWeapon {
         return true;
     }
 
+    protected double speed(ItemStack stack) {
+        return (1d + (getHand(stack) == EnumHand.MAIN_HAND ? Math.sqrt(getLastAttackedRangeSq(stack))/6f : 0)) - 4d;
+    }
+
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0) {
+        if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0f) {
             splash(attacker, stack, 120);
             setLastAttackedRangeSq(stack, 0);
         }
@@ -83,13 +87,6 @@ public class Qiang extends TaoWeapon {
     @Override
     public int getDamageType(ItemStack is) {
         return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
-    }
-
-    public float newCooldown(EntityLivingBase elb, ItemStack item) {
-        if (getHand(item) == EnumHand.MAIN_HAND) {
-            return Math.min(getLastAttackedRangeSq(item) / 36, 1);
-        }
-        return 0f;
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
@@ -112,7 +109,7 @@ public class Qiang extends TaoWeapon {
     }
 
     private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
+        return gettagfast(is).hasKey("lastAttackedRange") ? gettagfast(is).getFloat("lastAttackedRange") : 0;
     }
 
     private void setLastAttackedRangeSq(ItemStack item, float range) {

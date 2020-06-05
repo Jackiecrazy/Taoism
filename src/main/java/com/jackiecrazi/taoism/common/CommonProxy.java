@@ -8,12 +8,18 @@ import com.jackiecrazi.taoism.networking.*;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach.ExtendReachHandler;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+
+import java.lang.reflect.Field;
 
 public class CommonProxy {
     protected ModelBase[] models={
@@ -48,5 +54,35 @@ public class CommonProxy {
 	}
     public ModelBase getModel(int index){
 	    return models[index%models.length];
+    }
+
+    Field hasBlock= ObfuscationReflectionHelper.findField(PlayerInteractionManager.class,"field_73088_d");
+	Field destroyPos=ObfuscationReflectionHelper.findField(PlayerInteractionManager.class, "field_180240_f");
+
+    public BlockPos getPlayerBreakingBlockCoords(EntityPlayer entityplayer)
+    {
+        if(entityplayer instanceof EntityPlayerMP)
+        {
+            try {
+                PlayerInteractionManager manager = ((EntityPlayerMP) (entityplayer)).interactionManager;
+                boolean hb = hasBlock.getBoolean(manager);
+                if (hb) {
+                    return (BlockPos) destroyPos.get(manager);
+                }
+            }catch(Exception ignored){}
+        }
+        return null;
+    }
+
+    public boolean isBreakingBlock(EntityPlayer entityplayer)
+    {
+        if(entityplayer instanceof EntityPlayerMP)
+        {
+            try {
+                PlayerInteractionManager manager = ((EntityPlayerMP) (entityplayer)).interactionManager;
+                return hasBlock.getBoolean(manager);
+            }catch(Exception ignored){}
+        }
+        return false;
     }
 }

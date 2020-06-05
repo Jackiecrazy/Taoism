@@ -44,7 +44,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -214,7 +213,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * Called when the equipped item is right clicked.
      */
-    @ParametersAreNonnullByDefault
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
         if (handIn == EnumHand.OFF_HAND) {
             ItemStack offhand = p.getHeldItemOffhand();
@@ -248,8 +246,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 float temp = p.getCooledAttackStrength(0.5f);
                 p.swingArm(handIn);
                 TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp);
-                //FIXME no matter which way you go, main hand's CD resets with offhand's
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);
+                return new ActionResult<>(EnumActionResult.SUCCESS, offhand);
             }
 
         }
@@ -452,10 +450,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (hand == null) {
             hand = entityLiving.swingingHand;
         }
-        if (hand == null && entityLiving.isSwingInProgress) {
-            //expensive? perhaps.
-            hand = entityLiving.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : entityLiving.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : null;
-        }
         if (hand != null && (TaoCombatUtils.getHandCoolDown(entityLiving, hand) > 0.9f || NeedyLittleThings.raytraceEntity(entityLiving.world, entityLiving, getReach(entityLiving, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
             //Well, ya got me. By all accounts, it doesn't make sense.
             TaoCasterData.getTaoCap(entityLiving).setOffhandAttack(hand == EnumHand.OFF_HAND);
@@ -509,10 +503,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
-        //if (enchantment.equals(Enchantment.getEnchantmentByLocation("bane_of_arthropods"))) return false;
-        //if (enchantment.equals(Enchantment.getEnchantmentByLocation("smite"))) return false;
-        //if (getDamageType(stack) == 0 && enchantment.equals(Enchantment.getEnchantmentByLocation("sharpness")))return false;
-        //That was very very badly thought out...
         return enchantment.type != null && enchantment.type.canEnchantItem(Items.IRON_SWORD);
     }
 
@@ -522,13 +512,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     @SideOnly(value = Side.CLIENT)
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean changed) {
-        if (!changed) try {
-            float swing = NeedyLittleThings.getCooledAttackStrengthOff(Minecraft.getMinecraft().player, 1f);
-            float newSwing = ClientEvents.okuyasu.getFloat(Minecraft.getMinecraft().getItemRenderer());
-            newSwing += MathHelper.clamp((swing * swing * swing) - newSwing, -0.4F, 0.4F);
-            ClientEvents.zaHando.setFloat(Minecraft.getMinecraft().getItemRenderer(), newSwing);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        if(getHand(oldStack)==EnumHand.OFF_HAND) {
+            if (!changed) try {
+                float swing = NeedyLittleThings.getCooledAttackStrengthOff(Minecraft.getMinecraft().player, 1f);
+                float newSwing = ClientEvents.okuyasu.getFloat(Minecraft.getMinecraft().getItemRenderer());
+                newSwing += MathHelper.clamp((swing * swing * swing) - newSwing, -0.4F, 0.4F);
+                ClientEvents.zaHando.setFloat(Minecraft.getMinecraft().getItemRenderer(), newSwing);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         return changed;
     }
@@ -751,7 +743,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        chargeWeapon(attacker, defender, item, getMaxChargeTime());
     }
 
     @Override

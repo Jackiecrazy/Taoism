@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/whole/ge"
+    "layer0": "taoism:weapon/whole/fu3"
   },
   "overrides": [
     {
@@ -22,7 +22,7 @@
       "scale": [ 1.85, 1.85, 0.85 ]
     },
     "firstperson_righthand": {
-      "rotation": [ -90, -90, 25 ],
+      "rotation": [ 0, -90, 25 ],
       "translation": [ 1.13, 3.2, 1.13 ],
       "scale": [ 1.68, 1.68, 0.68 ]
     },

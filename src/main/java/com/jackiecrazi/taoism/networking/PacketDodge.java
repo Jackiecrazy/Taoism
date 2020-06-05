@@ -10,11 +10,16 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketDodge implements IMessage {
-    int side;//0 left, 1 back, 2 right, 3 front
+    private int side;//0 left, 1 back, 2 right, 3 front
     /*
     //decreased gravity and high jump: scales with level, nerf it down a little, decreased gravity scales with horizontal speed, up to half
     backflip: level 0, direction+jump in midair, get 1 charge from being on ground, so can only do once, melds into double jump when unlocked
-    wall run: level 3, sprint next to wall, check collidedhorizontally, keep sprint on and move to look, fall if not sprinting
+    wall run: level 3, sprint next to wall when airborne, check collidedhorizontally and if last tick is sprinting on client, then send packet to request wall sticking.
+        NOTE: when sprinting and hitting a wall, there should be a brief moment in PlayerTickEvent.Pre where isSprinting() and collidedHorizontally are both true
+        Record the side on which the player sticks, and disallow future attempts to stick on the same side
+        After being stuck on wall, move at sprint speed. Perpendicular velocity is converted into vertical velocity
+        Jump gets a little buff away from wall and sets you sprinting for another wall stick
+        If at any moment your total velocity goes to or under walking speed, fall off. Half a second of grace during initial stick
     extended jump: level 2, sprint+jump, horizontal velocity amplified along with vertical velocity
     extended aerial dodge: 2, double direction in air, recharged with jump
     double jump: 3, jump when airborne), hook into jump key

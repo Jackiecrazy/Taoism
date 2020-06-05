@@ -36,14 +36,24 @@ public class ChickenSickle extends TaoWeapon {
     }
 
     @Override
-    public PartDefinition[] getPartNames(ItemStack is) {
-        return StaticRefs.SIMPLE;
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
+        return hemorrhage != null && hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue() ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
-        return hemorrhage !=null&& hemorrhage.getAmplifier()*4>=target.getTotalArmorValue() ? Event.Result.ALLOW : Event.Result.DENY;
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        PotionEffect hemorrhage = NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 1), NeedyLittleThings.POTSTACKINGMETHOD.ADD);
+        if (hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue()) {//isCharged(attacker,stack)
+            target.hurtResistantTime = 0;
+            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), (target.getMaxHealth() / 20) * hemorrhage.getAmplifier());
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 10, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+        } else target.addPotionEffect(hemorrhage);
+    }
+
+    @Override
+    public PartDefinition[] getPartNames(ItemStack is) {
+        return StaticRefs.SIMPLE;
     }
 
     @Override
@@ -64,15 +74,5 @@ public class ChickenSickle extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1;
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        PotionEffect hemorrhage=NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE,100,1), NeedyLittleThings.POTSTACKINGMETHOD.ADD);
-        if(hemorrhage.getAmplifier()*4>=target.getTotalArmorValue()){//isCharged(attacker,stack)
-            target.hurtResistantTime=0;
-            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(),(target.getMaxHealth()/100)*hemorrhage.getAmplifier());
-            target.addPotionEffect(NeedyLittleThings.stackPot(target,new PotionEffect(TaoPotion.BLEED, 10, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
-        }else target.addPotionEffect(hemorrhage);
     }
 }

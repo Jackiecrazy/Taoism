@@ -3,10 +3,8 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
-import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -48,18 +46,6 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return attacker.motionY<0 ? 2f : 1f;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        //nerf offhand damage
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return off;
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 4f;
     }
@@ -81,6 +67,10 @@ public class Halberd extends TaoWeapon {
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
+    }
+
+    protected double speed(ItemStack stack) {
+        return getHand(stack) == EnumHand.OFF_HAND ? 0.1 - 4d : super.speed(stack);
     }
 
     @Override
@@ -105,38 +95,39 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public int getDamageType(ItemStack is) {
-        return getHand(is)==EnumHand.OFF_HAND ? 2 : 3;
-    }
-
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        super.afterSwing(elb, is);
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        return getHand(is) == EnumHand.OFF_HAND ? 2 : 3;
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item)==EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return attacker.motionY < 0 ? 2f : 1f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        //nerf offhand damage
+        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
+        return off;
     }
 
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker, ds);
-        }
     }
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         float doot = super.hurtStart(ds, attacker, target, item, orig);
-        if (target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null) {
+        if (target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null && getHand(item) == EnumHand.OFF_HAND) {
             PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
-            if (getHand(item) == EnumHand.OFF_HAND){
-                ds.setDamageBypassesArmor();
-                target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
-                return doot + (pe.getAmplifier() / 2f);
-            }
+            ds.setDamageBypassesArmor();
+            target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
+            return doot + (pe.getAmplifier() * 2f);
         }
         return doot;
     }

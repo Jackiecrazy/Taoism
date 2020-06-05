@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.stick;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
@@ -50,14 +49,6 @@ public class Tonfa extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         TaoCasterData.getTaoCap(defender).addQi(1f);
-        if (defender.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
-            IChargeableWeapon icw = (IChargeableWeapon) defender.getHeldItemMainhand().getItem();
-            icw.chargeWeapon(defender, attacker, defender.getHeldItemMainhand(), icw.getMaxChargeTime());
-        }
-        if (defender.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
-            IChargeableWeapon icw = ((IChargeableWeapon) defender.getHeldItemOffhand().getItem());
-            icw.chargeWeapon(defender, attacker, defender.getHeldItemOffhand(), icw.getMaxChargeTime());
-        }
         int qi = TaoCasterData.getTaoCap(attacker).getQiFloored();
         if (qi >= 3) {
             Taoism.setAtk(attacker, 0);

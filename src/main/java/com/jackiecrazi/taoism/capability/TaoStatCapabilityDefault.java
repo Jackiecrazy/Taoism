@@ -59,6 +59,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public ClingData getClingDirections() {
+        return null;
+    }
+
+    @Override
+    public void setClingDirections(ClingData dirs) {
+
+    }
+
+    @Override
     public float getSwing() {
         return 0;
     }
