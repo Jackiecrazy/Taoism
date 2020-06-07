@@ -4,8 +4,11 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -19,43 +22,6 @@ public class TaoMovementUtils {
         return (TaoCasterData.getTaoCap(elb).getQi() > 3
                 && willHitWall(elb))
                 && elb.isSprinting();
-    }
-
-    public static boolean isTouchingWall(EntityLivingBase elb) {
-        boolean[] b = collisionStatus(elb);
-        return !elb.onGround && !b[2] && !b[3] && ((b[0] || b[1]) || (b[4] || b[5]));
-    }
-
-    public static boolean[] collisionStatus(EntityLivingBase elb) {
-        double allowance = 0.1;
-        boolean[] ret = {false, false, false, false, false, false};
-        AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.grow(allowance / 2));
-        for (AxisAlignedBB a : boxes) {
-            if (aabb.calculateXOffset(a, allowance) != allowance) ret[0] = true;
-            if (aabb.calculateXOffset(a, -allowance) != -allowance) ret[1] = true;
-            if (aabb.calculateYOffset(a, allowance) != allowance) ret[2] = true;
-            if (aabb.calculateYOffset(a, -allowance) != -allowance) ret[3] = true;
-            if (aabb.calculateZOffset(a, allowance) != allowance) ret[4] = true;
-            if (aabb.calculateZOffset(a, -allowance) != -allowance) ret[5] = true;
-        }
-        return ret;
-    }
-
-    public static boolean[] collisionStatusVelocitySensitive(EntityLivingBase elb) {
-        double allowance = 0.1;
-        boolean[] ret = {false, false, false, false, false, false};
-        AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ));
-        for (AxisAlignedBB a : boxes) {
-            if (aabb.calculateXOffset(a, allowance) != allowance) ret[0] = true;
-            if (aabb.calculateXOffset(a, -allowance) != -allowance) ret[1] = true;
-            if (aabb.calculateYOffset(a, allowance) != allowance) ret[2] = true;
-            if (aabb.calculateYOffset(a, -allowance) != -allowance) ret[3] = true;
-            if (aabb.calculateZOffset(a, allowance) != allowance) ret[4] = true;
-            if (aabb.calculateZOffset(a, -allowance) != -allowance) ret[5] = true;
-        }
-        return ret;
     }
 
     /**
@@ -77,18 +43,44 @@ public class TaoMovementUtils {
         return false;
     }
 
+    public static boolean[] collisionStatusVelocitySensitive(EntityLivingBase elb) {
+        double allowance = 0.1;
+        boolean[] ret = {false, false, false, false, false, false};
+        AxisAlignedBB aabb = elb.getEntityBoundingBox();
+        List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ));
+        for (AxisAlignedBB a : boxes) {
+            if (aabb.calculateXOffset(a, allowance) != allowance) ret[0] = true;
+            if (aabb.calculateXOffset(a, -allowance) != -allowance) ret[1] = true;
+            if (aabb.calculateYOffset(a, allowance) != allowance) ret[2] = true;
+            if (aabb.calculateYOffset(a, -allowance) != -allowance) ret[3] = true;
+            if (aabb.calculateZOffset(a, allowance) != allowance) ret[4] = true;
+            if (aabb.calculateZOffset(a, -allowance) != -allowance) ret[5] = true;
+        }
+        return ret;
+    }
+
     public static boolean attemptJump(EntityLivingBase elb) {
         //if you're on the ground, I'll let vanilla handle you
         if (elb.onGround) return false;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
-        //if you're exhausted or just jumped, you can't jump again
-        if ((itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING))
-            return false;
-        if (itsc.getQi() > 3)
-            itsc.setJumpState(ITaoStatCapability.JUMPSTATE.JUMPING);
-        else itsc.setJumpState(ITaoStatCapability.JUMPSTATE.EXHAUSTED);
+        //mario mario, wherefore art thou mario? Ignores all other jump condition checks
+        if (collidingEntity(elb) != null) {
+            Entity e = collidingEntity(elb);
+            if (e instanceof EntityLivingBase) {
+                EntityLivingBase target = (EntityLivingBase) e;
+                target.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
+                TaoCasterData.getTaoCap(target).consumePosture(5, true, elb);
+            }
+        } else {
+            //if you're exhausted or just jumped, you can't jump again
+            if ((itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING))
+                return false;
+            if (itsc.getQi() > 3)
+                itsc.setJumpState(ITaoStatCapability.JUMPSTATE.JUMPING);
+            else itsc.setJumpState(ITaoStatCapability.JUMPSTATE.EXHAUSTED);
+        }
         itsc.setClingDirections(new ITaoStatCapability.ClingData(false, false, false, false));
         if (elb instanceof EntityPlayer)
             ((EntityPlayer) elb).jump();
@@ -97,11 +89,11 @@ public class TaoMovementUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        double speed = Math.sqrt(elb.motionX * elb.motionX + elb.motionY + elb.motionY + elb.motionZ + elb.motionZ);
         if (isTouchingWall(elb)) {
             boolean[] dir = collisionStatus(elb);
-            double speed = Math.sqrt(elb.motionX * elb.motionX + elb.motionY + elb.motionY + elb.motionZ + elb.motionZ);
             //Vec3d look=elb.getLookVec();
-            elb.motionY/=2;
+            elb.motionY /= 2;
             if (dir[0]) {
                 elb.motionX += speed / 2;
             }
@@ -119,6 +111,47 @@ public class TaoMovementUtils {
         elb.velocityChanged = true;
         TaoCasterData.forceUpdateTrackingClients(elb);
         return true;
+    }
+
+    /**
+     * Checks the +x, -x, +y, -y, +z, -z, in that order
+     *
+     * @param elb
+     * @return
+     */
+    public static Entity collidingEntity(EntityLivingBase elb) {
+        AxisAlignedBB aabb = elb.getEntityBoundingBox();
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ), EntitySelectors.NOT_SPECTATING);
+        double dist = 0;
+        Entity pick = null;
+        for (Entity e : entities) {
+            if (e.getDistanceSq(elb) < dist || dist == 0) {
+                pick = e;
+                dist = e.getDistanceSq(elb);
+            }
+        }
+        return pick;
+    }
+
+    public static boolean isTouchingWall(EntityLivingBase elb) {
+        boolean[] b = collisionStatus(elb);
+        return !elb.onGround && !b[2] && !b[3] && ((b[0] || b[1]) || (b[4] || b[5]));
+    }
+
+    public static boolean[] collisionStatus(EntityLivingBase elb) {
+        double allowance = 0.1;
+        boolean[] ret = {false, false, false, false, false, false};
+        AxisAlignedBB aabb = elb.getEntityBoundingBox();
+        List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.grow(allowance / 2));
+        for (AxisAlignedBB a : boxes) {
+            if (aabb.calculateXOffset(a, allowance) != allowance) ret[0] = true;
+            if (aabb.calculateXOffset(a, -allowance) != -allowance) ret[1] = true;
+            if (aabb.calculateYOffset(a, allowance) != allowance) ret[2] = true;
+            if (aabb.calculateYOffset(a, -allowance) != -allowance) ret[3] = true;
+            if (aabb.calculateZOffset(a, allowance) != allowance) ret[4] = true;
+            if (aabb.calculateZOffset(a, -allowance) != -allowance) ret[5] = true;
+        }
+        return ret;
     }
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
@@ -150,7 +183,7 @@ public class TaoMovementUtils {
                     z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
                     break;
             }
-            float divisor = side == 3 ? 5f : 20f;
+            float divisor = side == 3 ? 10f : 20f;
             float multiplier = (1 + (itsc.getQi() / divisor));
             x *= 0.6 * multiplier;
             z *= 0.6 * multiplier;

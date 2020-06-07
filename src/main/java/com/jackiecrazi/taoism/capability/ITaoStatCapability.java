@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.capability;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -55,7 +54,7 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     float consumePosture(float amount, boolean canStagger);
 
-    float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds);
+    float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant);
 
     int getParryCounter();
 

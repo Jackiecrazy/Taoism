@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -127,6 +128,7 @@ public class Halberd extends TaoWeapon {
             PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
             ds.setDamageBypassesArmor();
             target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
+            TaoCombatUtils.rechargeHand(attacker, EnumHand.OFF_HAND, pe.getAmplifier()/10f);
             return doot + (pe.getAmplifier() * 2f);
         }
         return doot;

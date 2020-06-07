@@ -9,11 +9,12 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Halberd;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.BohemianEarspoon;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
-import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
@@ -45,14 +46,15 @@ public class TaoItems {
             chickensickle,
             ninetail,
             pollaxe,
+            halberd,
             changchui,
             goulianqiang,
             qinglongji,
             gun,
             yyd,
-    bohear,
-    nunchaku,
-    ropedart;
+            bohear,
+            nunchaku,
+            ropedart;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -81,14 +83,15 @@ public class TaoItems {
         chickensickle = new ChickenSickle();
         ninetail = new CatNineTails();
         pollaxe = new Pollaxe();
+        halberd=new Halberd();
         changchui = new ChangChui();
         goulianqiang = new GouLianQiang();
         qinglongji = new QingLongJi();
         gun = new Staff();
         yyd = new GuanDao();
-        bohear=new BohemianEarspoon();
-        nunchaku=new Nunchaku();
-        ropedart=new RopeDart();
+        bohear = new BohemianEarspoon();
+        nunchaku = new Nunchaku();
+        ropedart = new RopeDart();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);
@@ -101,6 +104,7 @@ public class TaoItems {
         e.getRegistry().register(ninetail);
         e.getRegistry().register(chickensickle);
         e.getRegistry().register(pollaxe);
+        e.getRegistry().register(halberd);
         e.getRegistry().register(changchui);
         e.getRegistry().register(goulianqiang);
         e.getRegistry().register(qinglongji);

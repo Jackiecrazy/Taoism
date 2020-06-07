@@ -14,6 +14,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -40,18 +41,6 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float aerial = attacker.motionY<0 ? 1.5f : 1f;
-        float hook = getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
-        return aerial * hook;
-    }
-
-    @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
     @Override
@@ -84,30 +73,40 @@ public class GouLianQiang extends TaoWeapon {
             splash(attacker, stack, 120);
     }
 
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            //main function. Check if previous move is also left click on the same target and trip if so
-            if ((!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker,90)) {
-                //we're going on a trip on our favourite hooked... ship?
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, null);
-            }
-        }
-    }
-
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("goulianqiang.trip"));
         tooltip.add(TextFormatting.ITALIC + I18n.format("goulianqiang.trip.riposte") + TextFormatting.RESET);
         tooltip.add(I18n.format("goulianqiang.bash"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("goulianqiang.bash.riposte") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
+    }
+
+    @Override
+    public int getDamageType(ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        if (getHand(is) == EnumHand.OFF_HAND&&TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND)<0.5f)//
+        if (getHand(is) == EnumHand.OFF_HAND && TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND) < 0.5f)//
             TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f);
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 2;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float aerial = attacker.motionY < 0 ? 1.5f : 1f;
+        float hook = getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
+        return aerial * hook;
     }
 
     @Override
@@ -117,5 +116,15 @@ public class GouLianQiang extends TaoWeapon {
             return target.getTotalArmorValue();
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
+    }
+
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            //main function. Check if previous move is also left click on the same target and trip if so
+            if ((!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90)) {
+                //we're going on a trip on our favourite hooked... ship?
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker);
+            }
+        }
     }
 }

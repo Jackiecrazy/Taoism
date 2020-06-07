@@ -122,9 +122,9 @@ public class ChangChui extends TaoWeapon {
         super.attackStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item)) {
             if (getHand(item) == EnumHand.OFF_HAND)
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker, ds);
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker);
             else
-                TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker, ds);
+                TaoCasterData.getTaoCap(target).consumePosture(postureDealtBase(attacker, target, item, orig), true, attacker);
         }
     }
 

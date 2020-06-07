@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.capability;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 
 public class TaoStatCapabilityDefault implements ITaoStatCapability {
@@ -99,7 +98,7 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant, DamageSource ds) {
+    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant) {
         return 0;
     }
 

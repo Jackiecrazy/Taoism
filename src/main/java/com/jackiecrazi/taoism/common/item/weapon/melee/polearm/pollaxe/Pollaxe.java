@@ -39,7 +39,7 @@ public class Pollaxe extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Pollaxe() {
-        super(3, 1.2, 7, 1f);
+        super(3, 1.2, 6, 1f);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return getHand(stack) == EnumHand.MAIN_HAND;
+        return getHand(stack) == EnumHand.MAIN_HAND && !attacker.onGround;
     }
 
     @Override
@@ -112,8 +112,11 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 2 : 3;
+    public int getDamageType(ItemStack item) {
+        if(getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0){
+            return 2;
+        }
+        return getHand(item) == EnumHand.OFF_HAND ? 0 : 3;
     }
 
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {

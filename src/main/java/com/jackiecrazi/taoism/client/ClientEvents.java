@@ -98,7 +98,7 @@ public class ClientEvents {
             }
             //cube bois become side bois
             //flat bois become flatter bois
-            if (sizes.getFirst() > sizes.getSecond()) {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
+            if (sizes.getFirst() >= sizes.getSecond()) {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
                 GlStateManager.translate(event.getX(), event.getY(), event.getZ());
                 //GlStateManager.rotate(180f, 0, 0, 0);
                 //GlStateManager.rotate(180f, 0, 1, 0);

@@ -20,12 +20,18 @@ public class RopeDart extends TaoWeapon {
     /*
      * A rope weapon that charges up into fast, unblockable and constricting hits. High speed and range, medium power and defense, low combo
      * Two handed.
+     * Lots of wrapping motions that burst into a quick release, can also continuously throw if needed. Almost like a dance, until it kills you.
      * Stores up charge when in hand, to a cap, released during an attack. Cannot block or parry.
      * Normal attack, notably, throws out a projectile instead of actually attacking, damage and velocity determined by charge.
      * This means it naturally ignores non-shield blocks.
-     * Alt attack is an arcing overhead smash. This ignores all forms of blocking, and bind 1/4 on first hit entity.
-     * The alt attack is capable of drawing bound enemies in on another click.
-     * Escape velocity for bound entity and catch threshold for projectile are both based on charge.
+     * Alt attack is an arcing overhead smash. This inflicts light bonking damage and, if not blocked or parried, will bind hit target
+     *      After bind, become capable of parrying and delivers a critical punch in the main hand with range 2
+     *      If binding person, lasso down with offhand, retrieves the rope and inflicts half max posture damage
+     *      If parried or blocked, disarm opponent until retrieved with offhand
+     *
+     * On the same vein:
+     * Meteor hammer: more swinging, stunning+kb hits, power+
+     * Flying claws: rip and grapple, pull enemies close or grapple away, speed+
      *
      * While equipped, the dart orbits around you in a set pattern. Saves summoning and killing, and gives a passive hit aura
      * At the same time, letting anyone get close is potentially fatal.
@@ -40,8 +46,13 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return getChargeTimeLeft(attacker, item)==0?2:1;
+    }
+
+    @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return (getMaxChargeTime() - getChargeTimeLeft(attacker, item)) / 10f;
+        return 1+getChargeTimeLeft(attacker, item)/20;
     }
 
     @Override
@@ -78,7 +89,7 @@ public class RopeDart extends TaoWeapon {
         if (!elb.world.isRemote && elb.world.getEntityByID(gettagfast(is).getInteger("dartId")) == null) {
             EntityRopeDart erd = new EntityRopeDart(elb.world, elb);
             erd.setPositionAndRotation(elb.posX, elb.posY + elb.getEyeHeight(), elb.posZ, elb.rotationYaw, elb.rotationPitch);
-            erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, (getMaxChargeTime() - getChargeTimeLeft(elb, is)) / 10f, 0.0F);
+            erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 0.5f+(getMaxChargeTime() - getChargeTimeLeft(elb, is)) / 10f, 0.0F);
             elb.world.spawnEntity(erd);
             gettagfast(is).setInteger("dartID", erd.getEntityId());
         }
@@ -132,5 +143,10 @@ public class RopeDart extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0;
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+
     }
 }

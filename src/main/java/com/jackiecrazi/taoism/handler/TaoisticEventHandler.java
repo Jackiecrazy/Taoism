@@ -147,7 +147,7 @@ public class TaoisticEventHandler {
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase) {
-            if (!NeedyLittleThings.isPhysicalDamage(ds))//ds.getImmediateSource() != ds.getTrueSource() ||
+            if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isMeleeDamage(ds))//
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
             TaoCasterData.updateCasterData(seme);
@@ -188,7 +188,7 @@ public class TaoisticEventHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || !defend.isEmpty()) && NeedyLittleThings.isFacingEntity(uke, seme, 120) && (ukeCap.consumePosture(atk * def, true, seme, ds) == 0f) && smart) {
+            if ((!smart || !defend.isEmpty()) && NeedyLittleThings.isFacingEntity(uke, seme, 120) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
                 uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
@@ -216,9 +216,9 @@ public class TaoisticEventHandler {
 
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
-            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
             if (e.getResult() == Event.Result.ALLOW || (e.getResult() == Event.Result.DEFAULT && e.isVanillaCritical()))
                 e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
+            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
         }
     }
 

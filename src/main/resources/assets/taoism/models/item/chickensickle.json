@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/whole/gou"
+    "layer0": "taoism:weapon/whole/chickensickle"
   },
   "display": {
     "thirdperson_righthand": {

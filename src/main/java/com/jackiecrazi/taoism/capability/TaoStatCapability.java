@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
@@ -158,7 +157,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, e.getRevengeTarget(), e.getLastDamageSource());
+        return consumePosture(amount, canStagger, e.getRevengeTarget());
     }
 
     @Override
@@ -172,7 +171,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant, @Nullable DamageSource ds) {
+    public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant) {
         if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
         posture -= amount;
