@@ -33,7 +33,7 @@ public class Pollaxe extends TaoWeapon {
      * Left click is a heavy overhead swing with axe, disabling shield. Second hit without disengagement: stab, causing 1.3x piercing damage
      *
      * Oscillates
-     * primary methods to counter it are to disengage and keep a parrying hand handy
+     * primary methods to counter it are to disengage and keep a parrying hand up
      */
 
     private static final boolean[] harvestList = {false, false, true, false};

@@ -97,8 +97,8 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        if (wielder.getCapability(TaoCasterData.CAP, null).getQi() >= 9)
-            return 5;
-        return 3;
+        if (TaoCasterData.getTaoCap(wielder).getQi() >= 5)
+            return 3;
+        return 1;
     }
 }

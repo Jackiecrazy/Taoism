@@ -84,6 +84,9 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void down(RenderLivingEvent.Pre event) {
+        //TODO display posture above entity in a chinesy HUD, give clear indication when they're downed
+        //I say, two stone lions on the sides of the screen wrapping a bar in the middle, glowing red when downed, would be nice?
+        //Or, say, a 华表 for your own posture?
         Tuple<Float, Float> sizes = new Tuple<>(event.getEntity().width, event.getEntity().height);//TaoCasterData.getTaoCap(event.getEntity()).getPrevSizes();
         if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive()) {
             GlStateManager.pushMatrix();

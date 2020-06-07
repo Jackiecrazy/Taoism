@@ -21,6 +21,7 @@ public class RopeDart extends TaoWeapon {
      * A rope weapon that charges up into fast, unblockable and constricting hits. High speed and range, medium power and defense, low combo
      * Two handed.
      * Lots of wrapping motions that burst into a quick release, can also continuously throw if needed. Almost like a dance, until it kills you.
+     * 镖打回头
      * Stores up charge when in hand, to a cap, released during an attack. Cannot block or parry.
      * Normal attack, notably, throws out a projectile instead of actually attacking, damage and velocity determined by charge.
      * This means it naturally ignores non-shield blocks.
@@ -148,5 +149,18 @@ public class RopeDart extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
 
+    }
+
+    private void setEngage(ItemStack is, boolean engaged){
+        gettagfast(is).setBoolean("engage",engaged);
+    }
+
+    private boolean isEngaged(ItemStack is){
+        return gettagfast(is).getBoolean("engage");
+    }
+
+    @Override
+    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
+        return isEngaged(item);
     }
 }

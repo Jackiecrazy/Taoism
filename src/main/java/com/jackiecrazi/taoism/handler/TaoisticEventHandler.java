@@ -428,6 +428,13 @@ public class TaoisticEventHandler {
         EntityPlayer p = e.player;
         ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
         if (e.phase.equals(TickEvent.Phase.START)) {
+            if (cap.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING || cap.getJumpState() == ITaoStatCapability.JUMPSTATE.DODGING) {
+                //spawn jump/dodge particles
+                double d0 = Taoism.unirand.nextGaussian() * 0.02D;
+                double d1 = Taoism.unirand.nextGaussian() * 0.02D;
+                double d2 = Taoism.unirand.nextGaussian() * 0.02D;
+                p.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY - 1.0D, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
+            }
             if (cap.getDownTimer() <= 0 && cap.getQi() > 0 && !p.isSneaking()) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
