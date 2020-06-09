@@ -121,7 +121,7 @@ public class GouLianQiang extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //main function. Check if previous move is also left click on the same target and trip if so
-            if ((!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) || isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90)) {
+            if (isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target)) {
                 //we're going on a trip on our favourite hooked... ship?
                 TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker);
             }

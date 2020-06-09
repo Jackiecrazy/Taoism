@@ -27,7 +27,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -105,14 +104,11 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         this.setRegistryName(name);
         this.setUnlocalizedName(name);
         listOfWeapons.add(this);
-        this.addPropertyOverride(new ResourceLocation("offhand"), new IItemPropertyGetter() {
-            @Override
-            public float apply(ItemStack stack, @Nullable World w, @Nullable EntityLivingBase elb) {
-                if (elb != null) {
-                    if (elb.getHeldItemOffhand() == stack && (!isTwoHanded(stack) || isDummy(stack))) return 1;
-                }
-                return 0;
+        this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
+            if (elb != null) {
+                if (elb.getHeldItemOffhand() == stack && (!isTwoHanded(stack) || isDummy(stack))) return 1;
             }
+            return 0;
         });
     }
 
@@ -123,13 +119,16 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     /**
      * @return whether the item is a dummy, i.e. alt attack
      */
-    private boolean isDummy(ItemStack item) {
+    protected boolean isDummy(ItemStack item) {
         return gettagfast(item).getBoolean("taodummy");
     }
 
     protected NBTTagCompound gettagfast(ItemStack is) {
-        if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
-        return is.getTagCompound();
+        if(is.getItem()instanceof TaoWeapon) {
+            if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
+            return is.getTagCompound();
+        }
+        return new NBTTagCompound();
     }
 
     protected TaoWeapon setQiAccumulationRate(float amount) {
@@ -341,7 +340,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
             if (isDummy(stack)) {
                 boolean diffItem = mainhand.getItem() != stack.getItem();
-                if (diffItem || !onOffhand) {//FIXME last slot overflow to first slot bug, switching to another weapon does not clear tag
+                boolean stillTwoHanded=isTwoHanded(mainhand);
+                if (diffItem || !onOffhand || !stillTwoHanded) {//FIXME last slot overflow to first slot bug
                     //check where to unwrap the stack to
                     ItemStack unwrap = unwrapDummy(stack);
                     if (onOffhand) {

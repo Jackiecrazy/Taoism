@@ -10,8 +10,8 @@ import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.HudConfig;
-import com.jackiecrazi.taoism.networking.PacketJump;
 import com.jackiecrazi.taoism.networking.PacketDodge;
+import com.jackiecrazi.taoism.networking.PacketJump;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -345,7 +345,7 @@ public class ClientEvents {
         mc.getTextureManager().bindTexture(hud);
         ITaoStatCapability cap = TaoCasterData.getTaoCap(elb);
         GlStateManager.pushMatrix();
-        float posPerc = MathHelper.clamp(cap.getPosture() / cap.getMaxPosture(),0,1);
+        float posPerc = MathHelper.clamp(cap.getPosture() / cap.getMaxPosture(), 0, 1);
         int down = cap.getDownTimer();
         if (down <= 0) {
             //bar, not rendered if down because that don't make sense

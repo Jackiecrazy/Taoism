@@ -2,10 +2,8 @@ package com.jackiecrazi.taoism.networking;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -51,9 +49,6 @@ public class PacketUpdateSize implements IMessage {
                 Entity e = thePlayer.world
                         .getEntityByID(m.entityID);
                 if (e == null) return;
-                if (e instanceof EntityLivingBase) {
-                    TaoCasterData.getTaoCap((EntityLivingBase) e).setPrevSizes(e.width, e.height);
-                }
                 NeedyLittleThings.setSize(e, m.w, m.h);
             });
             return null;

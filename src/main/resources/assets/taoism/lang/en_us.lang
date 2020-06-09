@@ -112,7 +112,7 @@ tonfa.riposte=riposte: next attack in 1 second will add resistance to self lasti
 item.chickensickle.name=Chicken Sickle
 chickensickle.normal=attacks stack hemorrhage II for 5 seconds
 chickensickle.detonate=if hemorrhage level exceeds armor, detonate for (level) percent max hp damage and convert hemorrhage to equivalent bleed
-chickensickle.debuff=hemorrhage will consume itself to add its potency and duration to any debuffs inflicted
+chickensickle.debuff=hemorrhage will consume itself to add a portion its duration to any debuffs inflicted, efficiency determined by potency
 
 item.catninetails.name=Cat of Nine Tails
 catninetails.lacerate=inflicts laceration III and stacks bleed III for 5 seconds on hit targets

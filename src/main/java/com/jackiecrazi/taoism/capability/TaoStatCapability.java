@@ -1,9 +1,12 @@
 package com.jackiecrazi.taoism.capability;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Tuple;
@@ -19,14 +22,14 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int combo, ohcool;
     private float maxLing, maxPosture, maxStamina;
     private int lcd, pcd, scd, qcd;
-    private int down;
+    private int down, bind;
     private long timey;
     private boolean swi, protecc, off;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private ItemStack lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
-    private ClingData cd=new ClingData(false, false, false, false);
+    private ClingData cd = new ClingData(false, false, false, false);
 
     TaoStatCapability(EntityLivingBase elb) {
         e = elb;
@@ -60,6 +63,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setInteger("jump", getJumpState().ordinal());
         nbt.setTag("offhandInfo", getOffHand().writeToNBT(new NBTTagCompound()));
         cd.toNBT(nbt);
+        nbt.setInteger("bind", getBindTime());
         return nbt;
     }
 
@@ -128,6 +132,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
+    public ClingData getClingDirections() {
+        return cd;
+    }
+
+    @Override
+    public void setClingDirections(ClingData dirs) {
+        cd = dirs;
+    }
+
+    @Override
     public float getSwing() {
         return swing;
     }
@@ -161,16 +175,6 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public void setClingDirections(ClingData dirs) {
-        cd=dirs;
-    }
-
-    @Override
-    public ClingData getClingDirections() {
-        return cd;
-    }
-
-    @Override
     public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant) {
         if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
@@ -187,8 +191,10 @@ public class TaoStatCapability implements ITaoStatCapability {
             amount = -posture;
             posture = 0f;
             beatDown(assailant, amount);
+            sync();
             return amount;
         } else setPostureRechargeCD(CombatConfig.postureCD);
+        sync();
         //System.out.println(posture+" posture left on target");
         return 0f;
     }
@@ -221,17 +227,6 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void addRollCounter(int amount) {
         dodge += amount;
-    }
-
-    @Override
-    public Tuple<Float, Float> getPrevSizes() {
-        return new Tuple<>(prevWidth, prevHeight);
-    }
-
-    @Override
-    public void setPrevSizes(float width, float height) {
-        prevWidth = width;
-        prevHeight = height;
     }
 
     @Override
@@ -272,6 +267,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setOffhandAttack(from.isOffhandAttack());
         setJumpState(from.getJumpState());
         setClingDirections(from.getClingDirections());
+        setBindTime(from.getBindTime());
     }
 
     @Override
@@ -416,6 +412,26 @@ public class TaoStatCapability implements ITaoStatCapability {
         down = time;
     }
 
+    @Override
+    public int getBindTime() {
+        return bind;
+    }
+
+    @Override
+    public void setBindTime(int time) {
+        bind = time;
+    }
+
+    @Override
+    public void sync() {
+        if (e.world.isRemote) return;//throw new UnsupportedOperationException("what are you doing?");
+        PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(e);
+        if (e instanceof EntityPlayerMP) {
+            Taoism.net.sendTo(pucp, (EntityPlayerMP) e);
+        }
+        Taoism.net.sendToAllTracking(pucp, e);
+    }
+
     private void beatDown(EntityLivingBase attacker, float overflow) {
         e.dismountRidingEntity();
         if (attacker != null)
@@ -447,6 +463,10 @@ public class TaoStatCapability implements ITaoStatCapability {
         //System.out.println("target is downed for " + downtimer + " ticks!");
     }
 
+    private Tuple<Float, Float> getPrevSizes() {
+        return new Tuple<>(prevWidth, prevHeight);
+    }
+
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
         setQi(nbt.getFloat("qi"));
@@ -473,5 +493,11 @@ public class TaoStatCapability implements ITaoStatCapability {
         setOffhandAttack(nbt.getBoolean("off"));
         setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
         setClingDirections(new ClingData(nbt));
+        setBindTime(nbt.getInteger("bind"));
+    }
+
+    private void setPrevSizes(float width, float height) {
+        prevWidth = width;
+        prevHeight = height;
     }
 }

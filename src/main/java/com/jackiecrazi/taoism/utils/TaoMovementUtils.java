@@ -162,8 +162,6 @@ public class TaoMovementUtils {
             if (itsc.getQi() > 3)
                 itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
             else itsc.setJumpState(ITaoStatCapability.JUMPSTATE.EXHAUSTED);
-            itsc.setPrevSizes(elb.width, elb.height);
-            float min = Math.min(elb.width, elb.height);
             double x = 0, y = 0.3, z = 0;
             switch (side) {
                 case 0://left

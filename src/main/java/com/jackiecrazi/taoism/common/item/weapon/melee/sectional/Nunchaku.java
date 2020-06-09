@@ -10,6 +10,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -51,36 +52,15 @@ public class Nunchaku extends TaoWeapon {
 
     public Nunchaku() {
         super(0, 1.5, 5f, 0.6f);
-        //this.addPropertyOverride();
-    }
-
-    @Override
-    public PartDefinition[] getPartNames(ItemStack is) {
-        return parts;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 20;
-    }
-
-    @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.7f;
+        this.addPropertyOverride(new ResourceLocation("nuns"), (stack, w, elb) -> {
+            int low = getCurrentMove(stack).isSneakPressed() ? 1 : 0;
+            int dual = isTwoHanded(stack) ? 2 : 0;
+            return low + dual;
+        });
     }
 
     public boolean isTwoHanded(ItemStack is) {
-        return isOffhandEmpty(is);
+        return isOffhandEmpty(is) || isDummy(is);
     }
 
     @Override
@@ -160,6 +140,31 @@ public class Nunchaku extends TaoWeapon {
     private void updateStanceSide(ItemStack is) {
         MoveCode mc = getCurrentMove(is);
         gettagfast(is).setBoolean("onOtherSide", mc.isValid() && !gettagfast(is).getBoolean("onOtherSide"));
+    }
+
+    @Override
+    public PartDefinition[] getPartNames(ItemStack is) {
+        return parts;
+    }
+
+    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 20;
+    }
+
+    @Override
+    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 0.7f;
     }
 
     private boolean lastOnOtherSide(ItemStack is) {

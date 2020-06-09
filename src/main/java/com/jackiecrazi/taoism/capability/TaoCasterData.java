@@ -1,15 +1,10 @@
 package com.jackiecrazi.taoism.capability;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
-import com.jackiecrazi.taoism.config.CombatConfig;
-import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Tuple;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -35,7 +30,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
             itsc.setPosture(itsc.getMaxPosture() * percentage);
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);
-        if(elb.onGround&&itsc.getJumpState()!= ITaoStatCapability.JUMPSTATE.GROUNDED) {
+        if (elb.onGround && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.GROUNDED) {
             elb.setSprinting(false);
             itsc.setJumpState(ITaoStatCapability.JUMPSTATE.GROUNDED);
         }
@@ -91,6 +86,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
         itsc.addParryCounter(diff);
         itsc.addRollCounter(diff);
+        if (itsc.getBindTime() > 0)
+            itsc.setBindTime(itsc.getBindTime() - 1);
         //roll ticking
 //        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
 //            Tuple<Float, Float> thing = itsc.getPrevSizes();
@@ -128,13 +125,15 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
     }
 
     public static void forceUpdateTrackingClients(EntityLivingBase entity) {
-        if (!entity.world.isRemote) {
-            PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(entity);
-            Taoism.net.sendToAllTracking(pucp, entity);
-            if (entity instanceof EntityPlayerMP) {
-                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
-            }
-        }
+//        if (!entity.world.isRemote) {
+//            PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(entity);
+//            Taoism.net.sendToAllTracking(pucp, entity);
+//            if (entity instanceof EntityPlayerMP) {
+//                Taoism.net.sendTo(pucp, (EntityPlayerMP) entity);
+//            }
+//        }
+        if (!entity.world.isRemote)
+            getTaoCap(entity).sync();
     }
 
     @Nonnull
@@ -158,18 +157,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         if (itsc.getDownTimer() > 0) {
             itsc.setDownTimer(itsc.getDownTimer() - 1);
             itsc.setPostureRechargeCD(itsc.getDownTimer());
-            if (itsc.getDownTimer() == 0) {
-                Tuple<Float, Float> thing = itsc.getPrevSizes();
-                elb.width = thing.getFirst();
-                elb.height = thing.getSecond();
-            }
         }
         itsc.addRollCounter(1);
-        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
-            Tuple<Float, Float> thing = itsc.getPrevSizes();
-            elb.width = thing.getFirst();
-            elb.height = thing.getSecond();
-        }
         itsc.setLastUpdatedTime(elb.world.getTotalWorldTime());
     }
 

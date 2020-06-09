@@ -70,7 +70,7 @@ public class Qiang extends TaoWeapon {
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0f) {
             splash(attacker, stack, 120);
-            setLastAttackedRangeSq(stack, 0);
+            setLastAttackedRangeSq(attacker.getHeldItemMainhand(), 0);
         }
     }
 
@@ -104,7 +104,7 @@ public class Qiang extends TaoWeapon {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
         } else {
-            setLastAttackedRangeSq(stack, (float) NeedyLittleThings.getDistSqCompensated(attacker, target));
+            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
         }
     }
 

@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.capability;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Tuple;
 
 public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
@@ -132,13 +131,7 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     }
 
-    @Override
-    public Tuple<Float, Float> getPrevSizes() {
-        return null;
-    }
-
-    @Override
-    public void setPrevSizes(float width, float height) {
+    private void setPrevSizes(float width, float height) {
 
     }
 
@@ -299,6 +292,21 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
+
+    }
+
+    @Override
+    public int getBindTime() {
+        return 0;
+    }
+
+    @Override
+    public void sync() {
+
+    }
+
+    @Override
+    public void setBindTime(int time) {
 
     }
 

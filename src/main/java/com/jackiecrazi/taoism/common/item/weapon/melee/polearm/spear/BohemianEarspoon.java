@@ -141,9 +141,9 @@ public class BohemianEarspoon extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
-            setLastAttackedRangeSq(stack, 0);
+            setLastAttackedRangeSq(attacker.getHeldItemMainhand(), 0);
         } else {
-            setLastAttackedRangeSq(stack, (float) NeedyLittleThings.getDistSqCompensated(attacker,target));
+            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
         }
     }
 

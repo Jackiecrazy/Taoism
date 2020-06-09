@@ -13,10 +13,7 @@ import com.jackiecrazi.taoism.config.GeneralConfig;
 import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
@@ -120,6 +117,7 @@ public class TaoisticEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void projectileParry(ProjectileImpactEvent e) {
+        if (EntityList.getKey(e.getEntity()).getResourceDomain().equals(Taoism.MODID)) return;//derp derp derp
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
@@ -137,7 +135,7 @@ public class TaoisticEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void parry(LivingAttackEvent e) {
         abort = false;
-        if (e.getAmount() == 0) {
+        if (e.getAmount() == 0 && !e.getEntityLiving().world.isRemote) {
             abort = true;
             return;
         }
@@ -158,7 +156,8 @@ public class TaoisticEventHandler {
             }
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
-            if (ukeCap.getDownTimer() > 0) return;//downed players are defenseless
+            if (semeCap.getBindTime() > 0) return;//bound entities cannot attack
+            if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
                 if (semeCap.getSwing() < CombatConfig.mobForcedCooldown || semeCap.getDownTimer() > 0) {//nein nein nein nein nein nein nein
@@ -216,9 +215,9 @@ public class TaoisticEventHandler {
 
         if (is.getItem() instanceof ICombatManipulator) {
             ICombatManipulator icm = (ICombatManipulator) is.getItem();
+            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
             if (e.getResult() == Event.Result.ALLOW || (e.getResult() == Event.Result.DEFAULT && e.isVanillaCritical()))
                 e.setDamageModifier(icm.critDamage(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is));
-            e.setResult(icm.critCheck(e.getEntityPlayer(), (EntityLivingBase) e.getTarget(), is, e.getDamageModifier(), e.isVanillaCritical()));
         }
     }
 
@@ -433,7 +432,7 @@ public class TaoisticEventHandler {
                 double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d1 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                p.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY - 1.0D, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
+                p.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY + p.width / 2, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
             }
             if (cap.getDownTimer() <= 0 && cap.getQi() > 0 && !p.isSneaking()) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed

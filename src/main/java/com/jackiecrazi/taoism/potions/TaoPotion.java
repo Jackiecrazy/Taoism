@@ -91,7 +91,7 @@ public class TaoPotion extends Potion {
         if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
             PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
             elb.removeActivePotionEffect(HEMORRHAGE);
-            current.combine(new PotionEffect(current.getPotion(), current.getDuration() + pe.getDuration(), current.getAmplifier() + 1 + pe.getAmplifier()));
+            current.combine(new PotionEffect(current.getPotion(), current.getDuration() + (pe.getDuration() * (pe.getAmplifier() + 1) / 4), current.getAmplifier()));
         }
     }
 

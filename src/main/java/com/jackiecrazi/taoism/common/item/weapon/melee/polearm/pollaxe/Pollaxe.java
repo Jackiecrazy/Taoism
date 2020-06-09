@@ -88,7 +88,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack)+4) * 3-4 : super.speed(stack);
+        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 3 - 4 : super.speed(stack);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public int getDamageType(ItemStack item) {
-        if(getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0){
+        if (getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
             return 2;
         }
         return getHand(item) == EnumHand.OFF_HAND ? 0 : 3;
@@ -140,7 +140,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return getHand(item) == EnumHand.MAIN_HAND && getLastMove(item).isLeftClick()? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override

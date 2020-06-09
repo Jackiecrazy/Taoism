@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.capability;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Tuple;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
@@ -68,10 +67,6 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     void addRollCounter(int amount);
 
-    Tuple<Float, Float> getPrevSizes();
-
-    void setPrevSizes(float width, float height);
-
     int getComboSequence();
 
     void setComboSequence(int amount);
@@ -135,6 +130,12 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     int getDownTimer();
 
     void setDownTimer(int time);
+
+    int getBindTime();
+
+    void setBindTime(int time);
+
+    void sync();
 
     enum JUMPSTATE {
         GROUNDED,
