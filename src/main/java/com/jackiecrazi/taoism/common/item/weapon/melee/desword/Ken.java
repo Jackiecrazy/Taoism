@@ -59,7 +59,6 @@ public class Ken extends TaoWeapon {
         tooltip.add(I18n.format("ken.combo"));
         tooltip.add(I18n.format("ken.qi"));
         tooltip.add(I18n.format("ken.aoe"));
-        tooltip.add(I18n.format("ken.leap"));
         tooltip.add(I18n.format("ken.stab"));
         tooltip.add(I18n.format("ken.riposte"));
     }
@@ -77,7 +76,7 @@ public class Ken extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isAoE(attacker, item) ? Event.Result.DENY : Event.Result.ALLOW;
+        return isAoE(attacker, item) ? Event.Result.DEFAULT : Event.Result.ALLOW;
     }
 
     @Override

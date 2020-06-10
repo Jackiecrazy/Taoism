@@ -53,11 +53,6 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
-    }
-
-    @Override
     public int getMaxChargeTime() {
         return 100;
     }
@@ -80,9 +75,22 @@ public class Pollaxe extends TaoWeapon {
         super.onUpdate(stack, w, e, slot, onHand);
         if (e instanceof EntityLivingBase && !w.isRemote) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) < NeedyLittleThings.getDistSqCompensated(elb, elb.getLastAttackedEntity())) {
+            if (elb.getLastAttackedEntity() != null && NeedyLittleThings.getDistSqCompensated(elb, elb.getLastAttackedEntity()) > getReach(elb, stack) * getReach(elb, stack)) {
                 setLastAttackedRangeSq(stack, 0);
             }
+        }
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 3f;
+    }
+
+    private void setLastAttackedRangeSq(ItemStack item, float range) {
+        if (range != 0f) {
+            gettagfast(item).setFloat("lastAttackedRange", range);
+        } else {
+            gettagfast(item).removeTag("lastAttackedRange");
         }
     }
 
@@ -93,14 +101,13 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.half") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("weapon.half") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.leap"));
-        tooltip.add(I18n.format("pollaxe.cleave"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("pollaxe.cleave.riposte") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.swipe"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("pollaxe.swipe.riposte") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.riposte"));
+        tooltip.add(I18n.format("pollaxe.knockback"));
+        tooltip.add(I18n.format("pollaxe.chop"));
+        tooltip.add(I18n.format("pollaxe.stab"));
+        tooltip.add(I18n.format("pollaxe.escape"));
+        tooltip.add(I18n.format("pollaxe.oscillate"));
     }
 
     /**
@@ -127,6 +134,7 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
+            setLastAttackedRangeSq(item,0);
             return super.postureDealtBase(attacker, defender, item, amount) * 2;
         }
         return super.postureDealtBase(attacker, defender, item, amount);
@@ -140,13 +148,14 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.MAIN_HAND && getLastMove(item).isLeftClick()? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return getHand(item) == EnumHand.MAIN_HAND && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0 ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
         float crit = 1;
         if (getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
+            setLastAttackedRangeSq(stack,0);
             crit *= 1.5f;
         }
         crit = attacker.motionY < 0 ? crit * 1.5f : crit;
@@ -167,14 +176,6 @@ public class Pollaxe extends TaoWeapon {
 
     private float getLastAttackedRangeSq(ItemStack is) {
         return gettagfast(is).getFloat("lastAttackedRange");
-    }
-
-    private void setLastAttackedRangeSq(ItemStack item, float range) {
-        if (range != 0f) {
-            gettagfast(item).setFloat("lastAttackedRange", range);
-        } else {
-            gettagfast(item).removeTag("lastAttackedRange");
-        }
     }
 
 

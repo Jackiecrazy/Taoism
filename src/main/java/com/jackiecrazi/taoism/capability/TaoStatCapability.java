@@ -171,7 +171,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, e.getRevengeTarget());
+        return consumePosture(amount, canStagger, null);
     }
 
     @Override

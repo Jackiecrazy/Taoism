@@ -20,7 +20,8 @@ weapon.dummy=this item is only a dummy for cleaner code. It will revert back to 
 weapon.hands=this weapon is two-handed and will disable offhand item use
 weapon.half=this weapon can be wielded in one hand, but will use two if possible
 weapon.parry=this weapon cannot block or parry
-weapon.ignore=this weapon ignores blocks, parries, and shields
+weapon.ignore=this weapon ignores parries and shields
+weapon.projectile=this weapon ignores parries
 weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %s
 taoism.weaponDefMult=defense posture multiplier: %s
@@ -28,90 +29,77 @@ taoism.weaponAttMult=attack posture multiplier: %s
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge
-ken.qi=qi level can amplify base damage up to 1.3x
-ken.aoe=attacks all enemies in a 1.5 block radius
-ken.stab=if an attack would only strike one target, additionally deal 1.2x damage
-ken.leap=if airborne, deal 1.8x damage without sweep
-ken.riposte=riposte: combo lengthened to 9 hits for 9 seconds
+ken.qi=+3%% damage per chi level
+ken.aoe=if not aiming, strikes all enemies in a 90 degree sector
+ken.stab=if aiming, deal an extra 20%% damage
+ken.riposte=a parry will reset the combo counter
 
 item.banfu.name=Sapper's Axe
 banfu.leap=leap attacks deal double damage
-banfu.cleave=reduces defense by 2 per chi level
-banfu.riposte=riposte: resets opponent attack time. The next attack in 5 seconds causes 0.35*damage posture loss regardless of block
+banfu.cleave=reduces enemy armor by 2 per chi level for 3 seconds
 
 item.balisong.name=Balisong
-balisong.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+balisong.switch=attack timer is immediately reset when switching in
 balisong.backstab=backstabs deal double damage
-balisong.darkness=being in darkness will increase your damage according to how dark it is
 balisong.initiative=the first strike on a target ignores all armor
 balisong.stance=has two forms, hammer stance and reverse stance; offhand balisong are held in reverse stance
 balisong.hammer=in hammer stance, combo limit extends by 1 per chi level, up to 6 at level 10
 balisong.reverse=in reverse stance, pierces 1 armor for every level of chi
-balisong.riposte=riposte: launches defender behind the attacker and resets combo, the next backstab in 3 seconds deals triple damage
+balisong.riposte=a successful parry is counted as a dodge forwards
 
 item.karambit.name=Karambit
-karambit.switch=can be switched into from an empty hand, or between the hands, without resetting the attack timer
+karambit.switch=attack timer is immediately reset when switching in
 karambit.backstab=backstabs deal 1.5x damage
-karambit.darkness=being in darkness will increase your damage according to how dark it is
 karambit.initiative=the first strike on a target ignores all armor
-karambit.bleed=inflicts a layer of bleed if target is unarmored, bleed infliction ignores 6 points of armor per chi level
-karambit.riposte=riposte: launches defender behind the attacker and resets combo, the next hit in 3 seconds adds 2 layers of bleed for 3 seconds
+karambit.bleed=stack a layer of bleed if target is unarmored, bleed stacking ignores 6 points of armor per chi level
+karambit.riposte=a successful parry is counted as a dodge forwards
 karambit.harvest=can also be used to harvest shearable blocks
 
 item.chui.name=Spherical Mace
 chui.leap=leap attacks deal double damage
 chui.stagger=damage against a staggered target is multiplied by 1.5
-chui.riposte=riposte: the next attack in 5 seconds causes 0.5*damage posture loss regardless of block
 
 item.cestus.name=Cestus
-cestus.armor=naturally adds 3 armor points
-cestus.leap=leap attacks deal 1.5x damage
+cestus.armor=naturally adds 2 armor points
 cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 9 chi
 cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
-cestus.riposte=riposte: grapples the enemy for 2 seconds, the next attack while grappled cannot be parried, deals 1.3x damage, and pulls them into the ground for 3.5 posture damage
+cestus.riposte=when parrying, gain a layer of chi
 
 item.kampilan.name=Kampilan
-kampilan.aoe=attacks all enemies in a 2.5 block radius
-kampilan.leap=leap attacks deal 1.5x single target damage
-kampilan.combo=chains 3 times at 3 chi, and 5 times at 9 chi
-kampilan.knockback=converts knockback to extra damage at 6 chi
-kampilan.riposte=riposte: successful hits in the next combo within 5 seconds will additionally convert knockback to posture damage
+kampilan.aoe=sweeps in a 120 degree sector
+kampilan.combo=chains 3 times and converts knockback into extra damage at 5 chi
+kampilan.riposte=a parry will reset the combo counter
 
 item.qiang.name=Tasseled Spear
 qiang.stab=normal attack damage scales with range, up to double at max range
-qiang.stab.riposte=when charged, normal attack will cut 3 times with a 1-tick interval
-qiang.bash=right click to bash an enemy back, dealing half the attack power as blunt damage
-qiang.bash.riposte=when charged, bash will affect all enemies in a 2 block radius, and will slow them for 1 second
-qiang.riposte=riposte: charges the weapon's next attack for 4 seconds
+qiang.recharge=in addition, attack speed is increased depending on distance, up to 2 at max range
+qiang.bash=right click to bash an enemy back, or sweep in a 120 degree sector if you performed a normal attack beforehand, for half damage
 
 item.goulianqiang.name=Hooked Spear
-goulianqiang.trip=right click on a target to ensnare them, right click again on the same target to trip them, removing half of their max posture
-goulianqiang.trip.riposte=when charged or if the target is not facing the attacker, only one attack is needed.
-goulianqiang.bash=normal attack will ignore half of the target's armor if they are downed
-goulianqiang.bash.riposte=when charged, this does not require the target to be downed
-goulianqiang.riposte=riposte: charges the weapon for 4 seconds
+goulianqiang.trip=right click on a target twice to trip them, dealing half their max posture, up to 7
+goulianqiang.trip.sneaky=if the target is not facing the attacker, only one attack is needed.
+goulianqiang.bash=normal attack will ignore half armor and inflict double damage if they are downed
 
 item.qinglongji.name=Qinglong Ji
 qinglongji.stab=normal attack is a stab that deals (1.5+chi/10)x damage
-qinglongji.alt=right click attacks all enemies in a 3+(chi/2) diameter
+qinglongji.alt=right click to sweep in a 60 degree(+chi*6) sector
 qinglongji.alt.bash=in normal grip this inflicts chi/10 seconds of slowness and reverses grip for 5 seconds
 qinglongji.alt.cut=when in reverse grip, switches back to normal grip, inflicting bleed for chi/2 seconds
 qinglongji.atkspd=attack speed scales with chi, up to a maximum of 1.9
-qinglongji.oscillate=the two attacks have separate cooldowns, and doing one will halve the cooldown of the other
+qinglongji.oscillate=the two attacks have separate cooldowns will halve each other's
 qinglongji.qi=only alternating attacks will accumulate chi
 qinglongji.riposte=riposte: instantly gain 2 layers of chi
 
 item.tonfa.name=Tonfa
 tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
 tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
-tonfa.parry=chi will increase by 1 per parry, both hands will briefly activate riposte after a parry
+tonfa.parry=chi will increase by 1 per parry
 tonfa.reset=at 3 chi and above, blocks and parries reset attack cooldown
 tonfa.defbreak=at 7 chi and above, blocks inflict defense break and parries additionally add fatigue
-tonfa.riposte=riposte: next attack in 1 second will add resistance to self lasting for the remainder of that second; cannot be staggered for 2 seconds
 
 item.chickensickle.name=Chicken Sickle
-chickensickle.normal=attacks stack hemorrhage II for 5 seconds
-chickensickle.detonate=if hemorrhage level exceeds armor, detonate for (level) percent max hp damage and convert hemorrhage to equivalent bleed
+chickensickle.normal=attacks stack hemorrhage I for 5 seconds
+chickensickle.detonate=if hemorrhage level*4 exceeds armor, detonate for up to 1/10 max hp damage and convert hemorrhage to equivalent bleed
 chickensickle.debuff=hemorrhage will consume itself to add a portion its duration to any debuffs inflicted, efficiency determined by potency
 
 item.catninetails.name=Cat of Nine Tails
@@ -119,13 +107,18 @@ catninetails.lacerate=inflicts laceration III and stacks bleed III for 5 seconds
 catninetails.armord=duration decreases for each point of armor
 catninetails.armorp=potency decreases for every 5 points of armor, rounding down
 
-item.pollaxe.name=Pole Axe
-pollaxe.leap=leap attacks deal double damage
-pollaxe.cleave=chops through enemy armor, stacking armor break II for 3 seconds
-pollaxe.cleave.riposte=when charged, normal attack will turn into a stab that deals extra piercing damage equal to double the potency of armor break
-pollaxe.swipe=right click to swipe in a 2 block radius with range 5, knocking enemies back slightly. When leaping, this is a single target knockback move
-pollaxe.swipe.riposte=when charged, swipe will add armor break III for 5 seconds; its damage is multiplied by 1+(cleave potency/10)
-pollaxe.riposte=riposte: charges the weapon's next attack for 5 seconds, additionally inflicting 0.35*damage posture loss regardless of block
+item.pollaxe.name=Pollaxe
+pollaxe.knockback=knockback is always converted into posture damage
+pollaxe.chop=the second consecutive normal attack becomes a stab that deals 1.5x damage
+pollaxe.stab=right click for a fast jab; the second consecutive jab grapples and trips for double posture damage
+pollaxe.escape=if the enemy leaves your attack range in between the two attacks, these effects will not trigger
+pollaxe.oscillate=performing either attack recharges the other hand by half, one hand being parried instantly resets the other hand
+
+item.halberd.name=Halberd
+halberd.leap=leap attacks deal double damage
+halberd.cleave=chops through enemy armor, stacking armor break II for 3 seconds
+halberd.stab=right click to stab the target, detonating armor break for 2 points of armor piercing damage per level of potency
+halberd.stab.cooldown=each layer of armor break detonated will reduce the cooldown for this attack by 1 second
 
 item.changchui.name=Great Hammer
 changchui.leap=leap attacks deal double damage
@@ -137,33 +130,42 @@ changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock 
 
 item.staff.name=Quarterstaff
 staff.leap=leap attacks deal 1.5x damage
-staff.flick=a normal strike on a grounded target will flick them into the air
-staff.smash=attacking an airborne target will pummel them into the ground, dealing extra fall damage
+staff.flick=a strike on a grounded target while grounded will flick them into the air, distance increased by chi
+staff.smash=attacking an airborne target while grounded will pummel them down, dealing extra fall damage scaling with chi
+staff.doink=if you are airborne, attacking a grounded target will boost you higher, distance increased by chi
+staff.throw=if both you and the opponent are airborne, the opponent is flicked up , distance increased by chi
+staff.sneak=aerial behavior can be overridden by sneaking
 staff.swipe=right click to swipe in a 2 block radius with range 4, knocking enemies back slightly
-staff.oscillate=the two attacks have separate cooldowns, allowing continuous alternating attacks
-staff.block=while blocking, a whirling flurry deflects projectiles with velocity less than current chi
-staff.riposte=riposte: for the next 10 seconds, combo limit is increased to 2
-staff.block.riposte=additionally, staff whirl automatically attacks once per second and deflects all projectiles; any projectile that would normally be deflected is now reflected towards its launcher
+staff.oscillate=the two attacks have separate cooldowns; normal attack can be chained twice
 
 item.guandao.name=Guan Dao
 guandao.alt=right click to switch between guard and strike forms, resetting normal attack cooldown
-guandao.alt.attack=this switch counts as a frontal attack when switching to strike and a backwards stab when switching to guard
-guandao.guard=in guard form, range 4, sweep radius 1.5, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
-guandao.strike=in strike form, range 7, sweep radius 3, deals base damage and has no riposte
+guandao.alt.attack=this counts as a frontal attack when switching to strike and a backwards stab when switching to guard
+guandao.guard=in guard form, range 4, 90 degree sweep, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
+guandao.strike=in strike form, range 7, 180 degree sweep, deals base damage
 
 item.bohemianearspoon.name=Ghiavarina
 bohear.dist=normal attack damage scales according to distance between you and the target between two attacks, up to 1.5x
-bohear.buff=in addition, the target will not be able to approach you as long as you face them
-bohear.bash=right click to consume this buff and bash all enemies back slightly
+bohear.buff=the attacked target will not be able to approach you as long as you face them
+bohear.rip=if they do so anyway and reach halfway in, rip out their innards for double bleeding damage
+bohear.bash=right click to consume this buff and sweep in a 120 degree sector, pushing enemies back
 
 item.nunchaku.name=Nunchaku
-nunchaku.dual=When held in two hands, attack cooldown on one side is reset when attacking from the other
-nunchaku.stance=After a given move the nunchaku will land on either the high (H) or low (L) side
-nunchaku.moves=A high attack can then be issued by normal attack, or a low one executed by back-attack
+nunchaku.dual=when held in two hands, attack cooldown on one side is reset when attacking from the other
+nunchaku.stance=after a given move the nunchaku will land on either the high (H) or low (L) side
+nunchaku.moves=a high attack can then be issued by normal attack, or a low one executed by sneak-attack
 nunchaku.flick=H-H: flick, very low cooldown
 nunchaku.smash=H-L: smash, deals 1.5x damage and slightly slows enemies
-nunchaku.sweep=L-L: sweep, radius 0.5
+nunchaku.sweep=L-L: sweep, sweep 90 degree
 nunchaku.spin=L-H: 8-spin, hits 3 times for 0.4x damage each
+
+item.ropedart.name=Rope Dart
+ropedart.projectile=normal attack throws out a projectile
+ropedart.damage=its damage is increased up to 1.5x from charge, with full charge also giving 1.5x crit
+ropedart.recharge=missing refunds all charge, hitting an entity refunds half charge, hitting a block expends all charge
+ropedart.alt=right click to throw a slower projectile that deals half damage and entangles the target
+ropedart.berserk=when entangled, the opponent cannot attack, you gain access to your offhand and can parry
+ropedart.disengage=attacking with the main hand will end entanglement
 
 <Resources>=
 

@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -9,6 +8,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -75,7 +75,7 @@ public class EntityRopeDart extends EntityThrowable {
                     is.getTagCompound().setBoolean("connected", true);
                     TaoCombatUtils.rechargeHand(getThrower(), hand, 1f);
                     if (getThrower() instanceof EntityPlayer)
-                        NeedyLittleThings.taoWeaponAttack(e, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true);
+                        TaoCombatUtils.taoWeaponAttack(e, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
                     hitStatus = 2;
                     //it hits alright, but I&F redirects it which causes it to lose projectile affix, so no hit
                     //I&F will also remove offhand buffs, if any, with multipart redirection

@@ -72,7 +72,6 @@ public class Cestus extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("cestus.armor"));
-        tooltip.add(I18n.format("cestus.leap"));
         tooltip.add(I18n.format("cestus.debuff"));
         tooltip.add(I18n.format("cestus.damage"));
         tooltip.add(I18n.format("cestus.riposte"));
@@ -81,7 +80,7 @@ public class Cestus extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //TODO buff me
-        TaoCasterData.getTaoCap(defender).addQi(2f);
+        TaoCasterData.getTaoCap(defender).addQi(1f);
         super.parrySkill(attacker, defender, item);
     }
 

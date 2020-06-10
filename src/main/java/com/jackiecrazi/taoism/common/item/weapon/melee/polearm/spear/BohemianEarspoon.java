@@ -108,6 +108,7 @@ public class BohemianEarspoon extends TaoWeapon {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("bohear.dist"));
         tooltip.add(I18n.format("bohear.buff"));
+        tooltip.add(I18n.format("bohear.rip"));
         tooltip.add(I18n.format("bohear.bash"));
     }
 

@@ -71,7 +71,6 @@ public class Chui extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("chui.leap"));
         tooltip.add(I18n.format("chui.stagger"));
-        tooltip.add(I18n.format("chui.riposte"));
     }
 
 }

@@ -1,12 +1,12 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -47,7 +48,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 1f;
+        return 2f;
     }
 
     @Override
@@ -60,17 +61,17 @@ public class Karambit extends TaoWeapon {
         return 2f;//not all that good at defense now is it...
     }
 
-    @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-    }
+//    @Override
+//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+//    }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("karambit.switch"));
         tooltip.add(I18n.format("karambit.backstab"));
-        //tooltip.add(I18n.format("karambit.initiative"));
-        tooltip.add(I18n.format("karambit.darkness"));
+        tooltip.add(I18n.format("karambit.initiative"));
+        //tooltip.add(I18n.format("karambit.darkness"));
         tooltip.add(I18n.format("karambit.bleed"));
         tooltip.add(I18n.format("karambit.riposte"));
         tooltip.add(I18n.format("karambit.harvest"));
@@ -90,14 +91,17 @@ public class Karambit extends TaoWeapon {
         defender.rotationYaw = attacker.rotationYaw;
         defender.rotationPitch = attacker.rotationPitch;
         Vec3d look = attacker.getLookVec();
-        defender.addVelocity(-look.x, -look.y, -look.z);
+        defender.motionX=-look.x;
+        defender.motionY=-look.y;
+        defender.motionZ=-look.z;
         defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
     }
 
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
-            Taoism.setAtk(elb, 5);
+            EnumHand hand=elb.getHeldItemOffhand()==stack?EnumHand.OFF_HAND:EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand,1);
         }
     }
 
@@ -111,10 +115,10 @@ public class Karambit extends TaoWeapon {
         return NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
     }
 
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
-    }
+//    @Override
+//    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+//        return 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
+//    }
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {

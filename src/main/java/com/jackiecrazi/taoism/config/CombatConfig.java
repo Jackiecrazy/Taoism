@@ -13,8 +13,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Config(modid = Taoism.MODID, name = Taoism.MODID + "/combat")
 @Config.LangKey("taoism.config.combat.title")
 public class CombatConfig {
+    @Config.Comment("Posture consumed per projectile parried.")
+    public static float posturePerProjectile = 0.5f;
     @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
-    public static float defaultMultiplierPostureDefend = 1f;
+    public static float defaultMultiplierPostureDefend = 1.4f;
+    @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
+    public static float defaultMultiplierPostureAttack = 0.15f;
     @Config.Comment("Cooldown after using spirit power before it starts recharging, currently unused.")
     public static int lingCD = 20;
     @Config.Comment("Cooldown after using spirit power before it starts recharging.")

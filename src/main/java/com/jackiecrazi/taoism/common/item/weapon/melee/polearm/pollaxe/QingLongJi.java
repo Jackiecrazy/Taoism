@@ -15,6 +15,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -36,17 +37,12 @@ public class QingLongJi extends TaoWeapon {
      */
     public QingLongJi() {
         super(2, 1.2, 5.5d, 1f);
+        this.addPropertyOverride(new ResourceLocation("invert"), (stack, world, ent) -> isCharged(null, stack) ? 1 : 0);
     }
 
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float chimult = TaoCasterData.getTaoCap(attacker).getQiFloored() / 10f;
-        return getHand(item) == EnumHand.OFF_HAND ? 1f : 1.5f * (1 + chimult);
     }
 
     @Override
@@ -74,11 +70,6 @@ public class QingLongJi extends TaoWeapon {
         return true;
     }
 
-    @Override
-    public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? isCharged(null, is) ? 1 : 0 : 2;
-    }
-
     protected double speed(ItemStack stack) {
         return (1.4d + (getQiFromStack(stack) / 20d)) - 4d;
     }
@@ -93,6 +84,10 @@ public class QingLongJi extends TaoWeapon {
         } else return 0f;
     }
 
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60 + chi * 6);
+    }
+
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
@@ -103,17 +98,21 @@ public class QingLongJi extends TaoWeapon {
         tooltip.add(I18n.format("qinglongji.oscillate"));
         tooltip.add(I18n.format("qinglongji.atkspd"));
         tooltip.add(TextFormatting.YELLOW + I18n.format("qinglongji.qi") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.BOLD + I18n.format("qinglongji.riposte") + TextFormatting.RESET);
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(attacker).addQi(2f);
+    public int getDamageType(ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? isCharged(null, is) ? 1 : 0 : 2;
     }
+
+//    @Override
+//    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+//        TaoCasterData.getTaoCap(attacker).addQi(1f);
+//    }
 
     @Override
     protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
+        if (!attacker.world.isRemote&&getHand(stack) == EnumHand.OFF_HAND) {
             if (isCharged(attacker, stack)) {
                 dischargeWeapon(attacker, stack);
             } else chargeWeapon(attacker, null, stack, 100);
@@ -124,11 +123,13 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isCharged(attacker, item) ^ getHand(item)==EnumHand.MAIN_HAND ? Event.Result.ALLOW : Event.Result.DENY;
+        return isCharged(attacker, item) ^ getHand(item) == EnumHand.MAIN_HAND ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60+chi*6);
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float chimult = TaoCasterData.getTaoCap(attacker).getQiFloored() / 10f;
+        return getHand(item) == EnumHand.OFF_HAND ? 1f : 1.5f * (1 + chimult);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

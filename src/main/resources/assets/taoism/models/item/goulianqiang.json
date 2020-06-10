@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/whole/ge"
+    "layer0": "taoism:weapon/whole/glq"
   },
   "overrides": [
     {

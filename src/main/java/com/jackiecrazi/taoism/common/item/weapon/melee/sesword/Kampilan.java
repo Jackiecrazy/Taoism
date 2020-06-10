@@ -54,9 +54,7 @@ public class Kampilan extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("kampilan.aoe"));
-        tooltip.add(I18n.format("kampilan.leap"));
         tooltip.add(I18n.format("kampilan.combo"));
-        tooltip.add(I18n.format("kampilan.knockback"));
         tooltip.add(I18n.format("kampilan.riposte"));
     }
 
@@ -81,7 +79,7 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        if (TaoCasterData.getTaoCap(attacker).getQiFloored() < 6)
+        if (TaoCasterData.getTaoCap(attacker).getQiFloored() <5)
             return orig;
         knock = orig;
         return 0;

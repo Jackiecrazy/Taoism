@@ -78,12 +78,10 @@ public class Halberd extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.leap"));
-        tooltip.add(I18n.format("pollaxe.cleave"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("pollaxe.cleave.riposte") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.swipe"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("pollaxe.swipe.riposte") + TextFormatting.RESET);
-        tooltip.add(I18n.format("pollaxe.riposte"));
+        tooltip.add(I18n.format("halberd.leap"));
+        tooltip.add(I18n.format("halberd.cleave"));
+        tooltip.add(I18n.format("halberd.stab"));
+        tooltip.add(TextFormatting.ITALIC + I18n.format("halberd.stab.cooldown") + TextFormatting.RESET);
     }
 
     /**

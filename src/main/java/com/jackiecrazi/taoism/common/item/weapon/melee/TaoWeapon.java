@@ -23,6 +23,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -48,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded {//, IMove
+public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded, IMove {
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     protected static final UUID QI_MODIFIER = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130003");
     //booleans only used when attacking to determine what type of attack it is
@@ -124,11 +125,15 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     }
 
     protected NBTTagCompound gettagfast(ItemStack is) {
-        if(is.getItem()instanceof TaoWeapon) {
+        if (is.getItem() instanceof TaoWeapon) {
             if (!is.hasTagCompound()) is.setTagCompound(new NBTTagCompound());
             return is.getTagCompound();
         }
         return new NBTTagCompound();
+    }
+
+    public EnumPhase getPhase(final ItemStack stack) {
+        return EnumPhase.IDLE;//TODO ?
     }
 
     protected TaoWeapon setQiAccumulationRate(float amount) {
@@ -240,7 +245,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 //                }
                 Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
                 if (e != null) {
-                    NeedyLittleThings.taoWeaponAttack(e, p, offhand, false, true);
+                    TaoCombatUtils.taoWeaponAttack(e, p, offhand, false, true);
                 }
                 float temp = p.getCooledAttackStrength(0.5f);
                 p.swingArm(handIn);
@@ -265,11 +270,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 gettagfast(stack).setBoolean("connect", true);
                 if (getHand(stack) != null && !attacker.world.isRemote) {
                     float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
-                    if (itsc.getQiFloored() < 4) {
-                        itsc.addQi(baseQi * 2);
-                    } else if (itsc.getQiFloored() < 7) {
-                        itsc.addQi(baseQi);
-                    } else itsc.addQi(baseQi / 2f);
+                    itsc.addQi(baseQi);
                     TaoCasterData.forceUpdateTrackingClients(attacker);
                 }
             }
@@ -305,7 +306,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             boolean onMainHand = mainhand == stack;
             if (onMainHand) {
                 setHandState(stack, EnumHand.MAIN_HAND);
-                boolean single = offhand.isEmpty() || isDummy(offhand);
+                boolean single = offhand.isEmpty() || (isDummy(offhand) && offhand.getItem() == mainhand.getItem());
                 gettagfast(stack).setBoolean("dual", single);
             } else if (onOffhand) {
                 setHandState(stack, EnumHand.OFF_HAND);
@@ -340,7 +341,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
             if (isDummy(stack)) {
                 boolean diffItem = mainhand.getItem() != stack.getItem();
-                boolean stillTwoHanded=isTwoHanded(mainhand);
+                boolean stillTwoHanded = isTwoHanded(mainhand);
                 if (diffItem || !onOffhand || !stillTwoHanded) {//FIXME last slot overflow to first slot bug
                     //check where to unwrap the stack to
                     ItemStack unwrap = unwrapDummy(stack);
@@ -512,7 +513,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     @SideOnly(value = Side.CLIENT)
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean changed) {
-        if(getHand(oldStack)==EnumHand.OFF_HAND) {
+        if (getHand(oldStack) == EnumHand.OFF_HAND) {
             if (!changed) try {
                 float swing = NeedyLittleThings.getCooledAttackStrengthOff(Minecraft.getMinecraft().player, 1f);
                 float newSwing = ClientEvents.okuyasu.getFloat(Minecraft.getMinecraft().getItemRenderer());
@@ -629,7 +630,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;
-                NeedyLittleThings.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
+                TaoCombatUtils.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
             } else attacker.attackEntityAsMob(target);
         }
     }
@@ -713,6 +714,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         afterSwing(elb, is);
         return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
+    }
+
+    @Override
+    public boolean onEntityItemUpdate(EntityItem entityItem) {
+        if(isDummy(entityItem.getItem())){
+            entityItem.setDead();
+            return true;
+        }
+        return super.onEntityItemUpdate(entityItem);
     }
 
     public long lastAttackTime(EntityLivingBase elb, ItemStack is) {

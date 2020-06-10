@@ -104,11 +104,11 @@ public class Staff extends TaoWeapon {
         tooltip.add(I18n.format("staff.leap"));
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
-        //tooltip.add(I18n.format("staff.throw"));
-        //tooltip.add(I18n.format("staff.doink"));
+        tooltip.add(I18n.format("staff.doink"));
+        tooltip.add(I18n.format("staff.throw"));
+        tooltip.add(I18n.format("staff.sneak"));
         tooltip.add(I18n.format("staff.swipe"));
         tooltip.add(I18n.format("staff.oscillate"));
-        tooltip.add(I18n.format("staff.block"));
     }
 
     @Override
@@ -155,10 +155,10 @@ public class Staff extends TaoWeapon {
                 target.velocityChanged = true;
             } else {
                 if (target.onGround) {
-                    attacker.motionY = chi / 15f;
+                    attacker.motionY = chi / 7f;
                     attacker.velocityChanged = true;
                 } else {
-                    target.motionY = chi / 15f;
+                    target.motionY = chi / 7f;
                     target.velocityChanged = true;
                 }
             }

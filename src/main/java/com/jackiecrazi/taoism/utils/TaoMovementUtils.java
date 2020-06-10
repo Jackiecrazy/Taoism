@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -17,6 +18,7 @@ import java.util.List;
 
 public class TaoMovementUtils {
     private static Method jump = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70664_aZ", Void.TYPE);
+    private static EnumFacing[] intToFacing = {EnumFacing.EAST, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN, EnumFacing.SOUTH, EnumFacing.NORTH};
 
     public static boolean shouldStick(EntityLivingBase elb) {
         return (TaoCasterData.getTaoCap(elb).getQi() > 3
@@ -89,23 +91,29 @@ public class TaoMovementUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        double speed = Math.sqrt(elb.motionX * elb.motionX + elb.motionY + elb.motionY + elb.motionZ + elb.motionZ);
+        double speed = Math.sqrt(NeedyLittleThings.getSpeedSq(elb));
         if (isTouchingWall(elb)) {
             boolean[] dir = collisionStatus(elb);
+            EnumFacing face = elb.getHorizontalFacing();
+            boolean modifyY=false;
             //Vec3d look=elb.getLookVec();
-            elb.motionY /= 2;
-            if (dir[0]) {
+            if (dir[0] && face != EnumFacing.WEST) {//east
                 elb.motionX += speed / 2;
+                modifyY=true;
             }
-            if (dir[1]) {
+            if (dir[1] && face != EnumFacing.EAST) {//west
                 elb.motionX -= speed / 2;
+                modifyY=true;
             }
-            if (dir[4]) {
+            if (dir[4] && face != EnumFacing.NORTH) {//south
                 elb.motionZ += speed / 2;
+                modifyY=true;
             }
-            if (dir[5]) {
+            if (dir[5] && face != EnumFacing.SOUTH) {//north
                 elb.motionZ -= speed / 2;
+                modifyY=true;
             }
+            if(modifyY)elb.motionY /= 2;
             elb.setSprinting(true);
         }
         elb.velocityChanged = true;
@@ -156,7 +164,7 @@ public class TaoMovementUtils {
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if (itsc.getRollCounter() > CombatConfig.rollCooldown && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.DODGING && (elb.onGround || itsc.getQi() > 2) && !elb.isSneaking() && (side != 3 || !elb.onGround) && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {
+        if (itsc.getRollCounter() > CombatConfig.rollCooldown && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.DODGING && (elb.onGround || itsc.getQi() > 2) && (side != 3 || !elb.onGround) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {//
             //System.out.println("execute roll to side " + side);
             itsc.setRollCounter(0);
             if (itsc.getQi() > 3)

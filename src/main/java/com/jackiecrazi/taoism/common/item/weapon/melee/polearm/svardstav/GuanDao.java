@@ -90,7 +90,7 @@ public class GuanDao extends TaoWeapon {
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && !isCharged(attacker, stack)) {
-            splash(attacker, null, stack, 360, NeedyLittleThings.raytraceEntities(attacker.world, attacker, getReach(attacker, stack)));
+            splash(attacker, null, stack, 360, NeedyLittleThings.raytraceEntities(attacker.world, attacker, -2));
         } else {
             splash(attacker, stack, isCharged(attacker, stack) ? 180 : 90);
         }

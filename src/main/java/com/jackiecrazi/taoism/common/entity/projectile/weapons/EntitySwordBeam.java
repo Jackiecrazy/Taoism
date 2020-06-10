@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -54,7 +53,7 @@ public class EntitySwordBeam extends EntityThrowable {
                         Entity e = result.entityHit;
                         float temp=TaoCombatUtils.getHandCoolDown(thrower, h);
                         TaoCombatUtils.rechargeHand(thrower, h, 1f);
-                        NeedyLittleThings.taoWeaponAttack(e, (EntityPlayer) thrower, thrower.getHeldItem(h), true, false);
+                        TaoCombatUtils.taoWeaponAttack(e, (EntityPlayer) thrower, thrower.getHeldItem(h), true, false);
                         TaoCombatUtils.rechargeHand(thrower, h, temp);
                     }
                 }

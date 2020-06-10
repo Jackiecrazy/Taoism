@@ -78,10 +78,8 @@ public class Qiang extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.stab"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.stab.riposte") + TextFormatting.RESET);
+        tooltip.add(I18n.format("qiang.recharge"));
         tooltip.add(I18n.format("qiang.bash"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("qiang.bash.riposte") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.BOLD + I18n.format("qiang.riposte") + TextFormatting.RESET);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class Qiang extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.OFF_HAND ? 0.3f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 54f;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 54f;
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

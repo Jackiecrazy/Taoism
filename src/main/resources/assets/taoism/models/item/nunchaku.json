@@ -6,6 +6,12 @@
   "overrides": [
     {
       "predicate": {
+        "nuns": 1
+      },
+      "model": "taoism:item/nunchakusinglelow"
+    },
+    {
+      "predicate": {
         "nuns": 2
       },
       "model": "taoism:item/nunchakudualhigh"
@@ -15,13 +21,8 @@
         "nuns": 3
       },
       "model": "taoism:item/nunchakuduallow"
-    },
-    {
-      "predicate": {
-        "nuns": 1
-      },
-      "model": "taoism:item/nunchakusinglelow"
-    }],
+    }
+  ],
   "display": {
     "thirdperson_righthand": {
       "rotation": [ 0, -90, 55 ],

@@ -1,13 +1,9 @@
 package com.jackiecrazi.taoism.api.alltheinterfaces;
 
-import com.jackiecrazi.taoism.common.entity.EntityMove;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
-import javax.annotation.Nullable;
-
 public interface IMove {
-    public enum EnumPhase{
+    enum EnumPhase{
         IDLE,
         WINDUP,
         WOUND,
@@ -19,9 +15,6 @@ public interface IMove {
     A byte is 8 bits so this fits perfectly.
      */
 
-    public EnumPhase getPhase(final ItemStack stack);
-
-    @Nullable
-    public EntityMove getMove(ItemStack stack, EntityLivingBase user, byte code);
+    EnumPhase getPhase(final ItemStack stack);
 
 }

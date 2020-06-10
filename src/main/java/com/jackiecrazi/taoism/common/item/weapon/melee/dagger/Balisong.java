@@ -1,11 +1,11 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -49,14 +49,14 @@ public class Balisong extends TaoWeapon {
         return NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
     }
 
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;
-    }
+//    @Override
+//    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+//        return 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;
+//    }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 1f;
+        return 2f;
     }
 
     @Override
@@ -69,17 +69,16 @@ public class Balisong extends TaoWeapon {
         return 2f;
     }
 
-    @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-    }
+//    @Override
+//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+//    }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("balisong.switch"));
         tooltip.add(I18n.format("balisong.backstab"));
         tooltip.add(I18n.format("balisong.initiative"));
-        tooltip.add(I18n.format("balisong.darkness"));
         tooltip.add(I18n.format("balisong.stance"));
         tooltip.add(I18n.format("balisong.hammer"));
         tooltip.add(I18n.format("balisong.reverse"));
@@ -93,7 +92,9 @@ public class Balisong extends TaoWeapon {
         defender.rotationPitch = attacker.rotationPitch;
         setCombo(defender, item, 0);
         Vec3d look = attacker.getLookVec();
-        defender.addVelocity(-look.x, -look.y, -look.z);
+        defender.motionX=-look.x;
+        defender.motionY=-look.y;
+        defender.motionZ=-look.z;
         defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
     }
@@ -101,7 +102,8 @@ public class Balisong extends TaoWeapon {
     @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
-            Taoism.setAtk(elb, 5);
+            EnumHand hand=elb.getHeldItemOffhand()==stack?EnumHand.OFF_HAND:EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand,1);
         }
     }
 
@@ -120,7 +122,7 @@ public class Balisong extends TaoWeapon {
             //ignore 1 point of armor every chi level
             return getQiFromStack(stack);
         }
-        if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker)) {
+        if ((target.getCombatTracker().getBestAttacker() != attacker)) {
             return target.getTotalArmorValue();
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);

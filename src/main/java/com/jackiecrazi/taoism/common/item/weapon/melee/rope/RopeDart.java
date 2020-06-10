@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -15,6 +16,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -140,7 +142,7 @@ public class RopeDart extends TaoWeapon {
                 gettagfast(stack).removeTag("dartID");
                 gettagfast(stack).removeTag("connected");
             }
-            if (gettagfast(stack).hasKey("bindID") && w.getEntityByID(getRopedTo(stack)) != null) {
+            if (gettagfast(stack).hasKey("bindID") && w.getEntityByID(getRopedTo(stack)) != null && onHand) {
                 Entity ent = w.getEntityByID(getRopedTo(stack));
                 if (ent instanceof EntityLivingBase) {
                     TaoCasterData.getTaoCap((EntityLivingBase) ent).setBindTime(10);
@@ -193,7 +195,15 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.projectile") + TextFormatting.RESET);
+        tooltip.add(I18n.format("ropedart.projectile"));
+        tooltip.add(I18n.format("ropedart.damage"));
+        tooltip.add(I18n.format("ropedart.recharge"));
+        tooltip.add(I18n.format("ropedart.alt"));
+        tooltip.add(I18n.format("ropedart.berserk"));
+        tooltip.add(I18n.format("ropedart.disengage"));
     }
 
     @Override
@@ -228,7 +238,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND ? 1f - (getChargeTimeLeft(attacker, item) / 10f) : 0.5f;
+        return getHand(item) == EnumHand.MAIN_HAND ? 1.5f - (getChargeTimeLeft(attacker, item) / 20f) : 0.5f;
     }
 
     @Override

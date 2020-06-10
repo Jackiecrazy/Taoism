@@ -65,6 +65,7 @@ public class ClientProxy extends CommonProxy {
         }, TaoItems.part);
         Taoism.logger.debug("gave color to the masses");
          */
+        //RenderingRegistry.registerEntityRenderingHandler();
     }
 
     public EntityPlayer getPlayerEntityFromContext(MessageContext ctx) {

@@ -59,7 +59,6 @@ public class BanFu extends TaoWeapon {
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("banfu.leap"));
         tooltip.add(I18n.format("banfu.cleave"));
-        tooltip.add(I18n.format("banfu.riposte"));
     }
 
     /**

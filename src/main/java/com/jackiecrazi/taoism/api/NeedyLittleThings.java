@@ -7,33 +7,24 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.MobEffects;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
@@ -46,7 +37,7 @@ public class NeedyLittleThings {
     /**
      * Copied from EntityArrow, because kek.
      */
-    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && e.canBeCollidedWith());
+    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> (e instanceof EntityLivingBase || e instanceof IProjectile) && e.canBeCollidedWith());
 
     public static boolean isMeleeDamage(DamageSource ds) {
         return isPhysicalDamage(ds) && !ds.isProjectile();
@@ -54,6 +45,10 @@ public class NeedyLittleThings {
 
     public static boolean isPhysicalDamage(DamageSource ds) {
         return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
+    }
+
+    public static double getSpeedSq(Entity e) {
+        return e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ;
     }
 
     public static void setSize(Entity e, float width, float height) {
@@ -246,216 +241,12 @@ public class NeedyLittleThings {
         else return DamageSource.causeMobDamage(elb);
     }
 
-    /**
-     * copy-pasted from EntityPlayer, as-is.
-     */
-    public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff) {
-        taoWeaponAttack(targetEntity, player, stack, main, updateOff, DamageSource.causePlayerDamage(player));
-    }
-
-    /**
-     * copy-pasted from EntityPlayer, as-is.
-     */
-    public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
-        {
-            if (updateOff) {
-                TaoCasterData.getTaoCap(player).setOffhandAttack(!main);
-            }
-            if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
-            if (targetEntity.canBeAttackedWithItem()) {
-                if (!targetEntity.hitByEntity(player)) {
-                    IAttributeInstance toUse = new AttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-                    IAttributeInstance att = player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-                    toUse.setBaseValue(att.getBaseValue());
-                    for (AttributeModifier am : att.getModifiers()) {
-                        if (!am.getName().equals("Weapon modifier"))
-                            toUse.applyModifier(am);
-                        //System.out.println(toUse.getAttributeValue());
-                    }
-                    for (AttributeModifier atm : stack.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).get(SharedMonsterAttributes.ATTACK_DAMAGE.getName()))
-                        toUse.applyModifier(atm);
-                    float damage = (float) toUse.getAttributeValue();
-                    float damageMods;
-
-                    if (targetEntity instanceof EntityLivingBase) {
-                        damageMods = EnchantmentHelper.getModifierForCreature(stack, ((EntityLivingBase) targetEntity).getCreatureAttribute());
-                    } else {
-                        damageMods = EnchantmentHelper.getModifierForCreature(stack, EnumCreatureAttribute.UNDEFINED);
-                    }
-
-                    float cooldown = main ?
-                            player.getCooledAttackStrength(0.5F) :
-                            NeedyLittleThings.getCooledAttackStrengthOff(player, 0.5f);
-                    //System.out.println(cooldown+String.valueOf(player.world.isRemote));
-                    damage = damage * (0.2F + cooldown * cooldown * 0.8F);
-                    damageMods = damageMods * cooldown;
-                    if (main)
-                        player.resetCooldown();
-                    else TaoCasterData.getTaoCap(player).setOffhandCool(0);
-
-                    if (damage > 0.0F || damageMods > 0.0F) {
-                        boolean recharged = cooldown > 0.9F;
-                        boolean knockback = false;
-                        int kbamnt = 0;
-                        kbamnt = kbamnt + EnchantmentHelper.getKnockbackModifier(player);
-
-                        if (player.isSprinting() && recharged) {
-                            player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, player.getSoundCategory(), 1.0F, 1.0F);
-                            ++kbamnt;
-                            knockback = true;
-                        }
-
-                        boolean crit = recharged && player.fallDistance > 0.0F && !player.onGround && !player.isOnLadder() && !player.isInWater() && !player.isPotionActive(MobEffects.BLINDNESS) && !player.isRiding() && targetEntity instanceof EntityLivingBase;
-                        crit = crit && !player.isSprinting();
-
-                        net.minecraftforge.event.entity.player.CriticalHitEvent critevent = net.minecraftforge.common.ForgeHooks.getCriticalHit(player, targetEntity, crit, crit ? 1.5F : 1.0F);
-                        crit = critevent != null;
-                        if (crit) {
-                            damage *= critevent.getDamageModifier();
-                        }
-
-                        damage = damage + damageMods;
-                        boolean sword = false;
-                        double speed = (double) (player.distanceWalkedModified - player.prevDistanceWalkedModified);
-
-                        if (recharged && !crit && !knockback && player.onGround && speed < (double) player.getAIMoveSpeed()) {
-
-                            if (stack.getItem() instanceof ItemSword) {
-                                sword = true;
-                            }
-                        }
-
-                        float health = 0.0F;
-                        boolean burning = false;
-                        int fireLevel = EnchantmentHelper.getFireAspectModifier(player);
-
-                        if (targetEntity instanceof EntityLivingBase) {
-                            health = ((EntityLivingBase) targetEntity).getHealth();
-
-                            if (fireLevel > 0 && !targetEntity.isBurning()) {
-                                burning = true;
-                                targetEntity.setFire(1);
-                            }
-                        }
-
-                        double motionX = targetEntity.motionX;
-                        double motionY = targetEntity.motionY;
-                        double motionZ = targetEntity.motionZ;
-                        boolean dealDamage = targetEntity.attackEntityFrom(ds, damage);
-
-                        if (dealDamage) {
-                            if (kbamnt > 0) {
-                                if (targetEntity instanceof EntityLivingBase) {
-                                    knockBack(((EntityLivingBase) targetEntity), player, (float) kbamnt * 0.5F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)));
-                                    //((EntityLivingBase) targetEntity).knockBack(player, (float) kbamnt * 0.5F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)));
-                                } else {
-                                    targetEntity.addVelocity((double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * (float) kbamnt * 0.5F), 0.1D, (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * (float) kbamnt * 0.5F));
-                                }
-
-                                player.motionX *= 0.6D;
-                                player.motionZ *= 0.6D;
-                                player.setSprinting(false);
-                            }
-
-                            if (sword) {
-                                float sweepratio = 1.0F + EnchantmentHelper.getSweepingDamageRatio(player) * damage;
-
-                                for (EntityLivingBase entitylivingbase : player.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                    if (entitylivingbase != player && entitylivingbase != targetEntity && !player.isOnSameTeam(entitylivingbase) && NeedyLittleThings.getDistSqCompensated(player, entitylivingbase) < 9.0D) {
-                                        entitylivingbase.knockBack(player, 0.4F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)));
-                                        entitylivingbase.attackEntityFrom(ds, sweepratio);
-                                    }
-                                }
-
-                                player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
-                                player.spawnSweepParticles();
-                            }
-
-                            if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged) {
-                                ((EntityPlayerMP) targetEntity).connection.sendPacket(new SPacketEntityVelocity(targetEntity));
-                                targetEntity.velocityChanged = false;
-                                targetEntity.motionX = motionX;
-                                targetEntity.motionY = motionY;
-                                targetEntity.motionZ = motionZ;
-                            }
-
-                            if (crit) {
-                                player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, player.getSoundCategory(), 1.0F, 1.0F);
-                                player.onCriticalHit(targetEntity);
-                            }
-
-                            if (!crit && !sword) {
-                                if (recharged) {
-                                    player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, player.getSoundCategory(), 1.0F, 1.0F);
-                                } else {
-                                    player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, player.getSoundCategory(), 1.0F, 1.0F);
-                                }
-                            }
-
-                            if (damageMods > 0.0F) {
-                                player.onEnchantmentCritical(targetEntity);
-                            }
-
-                            player.setLastAttackedEntity(targetEntity);
-
-                            if (targetEntity instanceof EntityLivingBase) {
-                                EnchantmentHelper.applyThornEnchantments((EntityLivingBase) targetEntity, player);
-                            }
-
-                            EnchantmentHelper.applyArthropodEnchantments(player, targetEntity);
-                            Entity entity = targetEntity;
-
-                            if (targetEntity instanceof MultiPartEntityPart) {
-                                IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
-
-                                if (ientitymultipart instanceof EntityLivingBase) {
-                                    entity = (EntityLivingBase) ientitymultipart;
-                                }
-                            }
-
-                            if (!stack.isEmpty() && entity instanceof EntityLivingBase) {
-                                ItemStack beforeHitCopy = stack.copy();
-                                stack.hitEntity((EntityLivingBase) entity, player);
-
-                                if (stack.isEmpty()) {
-                                    net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(player, beforeHitCopy, EnumHand.MAIN_HAND);
-                                    player.setHeldItem(main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, ItemStack.EMPTY);
-                                }
-                            }
-
-                            if (targetEntity instanceof EntityLivingBase) {
-                                float dealtdamage = health - ((EntityLivingBase) targetEntity).getHealth();
-                                player.addStat(StatList.DAMAGE_DEALT, Math.round(dealtdamage * 10.0F));
-
-                                if (fireLevel > 0) {
-                                    targetEntity.setFire(fireLevel * 4);
-                                }
-
-                                if (player.world instanceof WorldServer && dealtdamage > 2.0F) {
-                                    int k = (int) ((double) dealtdamage * 0.5D);
-                                    ((WorldServer) player.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D);
-                                }
-                            }
-
-                            player.addExhaustion(0.1F);
-                        } else {
-                            player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
-
-                            if (burning) {
-                                targetEntity.extinguish();
-                            }
-                        }
-                    }
-//                    if (updateOff) {
-//                        TaoWeapon.off = false;
-//                    }
-                }
-            }
-        }
-    }
-
     public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
         return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
+    }
+
+    public static float getCooldownPeriodOff(EntityLivingBase elb) {
+        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
     /**
@@ -463,24 +254,6 @@ public class NeedyLittleThings {
      */
     public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double zRatio) {
         knockBack(to, from, strength, xRatio, 0, zRatio);
-    }
-
-    /**
-     * modified getdistancesq to account for thicc mobs
-     */
-    public static double getDistSqCompensated(Entity from, Entity to) {
-        double x = from.posX - to.posX;
-        x = Math.max(Math.abs(x) - from.width / 2 - to.width / 2, 0);
-        //stupid inconsistent game
-        double y = (from.posY+from.height/2) - (to.posY+to.height/2);
-        y = Math.max(Math.abs(y) - from.height/2 - to.height/2, 0);
-        double z = from.posZ - to.posZ;
-        z = Math.max(Math.abs(z) - from.width / 2 - to.width / 2, 0);
-        return x * x + y * y + z * z;
-    }
-
-    public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -553,6 +326,20 @@ public class NeedyLittleThings {
             }
         }
         return entity;
+    }
+
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, Entity to) {
+        double x = from.posX - to.posX;
+        x = Math.max(Math.abs(x) - from.width / 2 - to.width / 2, 0);
+        //stupid inconsistent game
+        double y = (from.posY + from.height / 2) - (to.posY + to.height / 2);
+        y = Math.max(Math.abs(y) - from.height / 2 - to.height / 2, 0);
+        double z = from.posZ - to.posZ;
+        z = Math.max(Math.abs(z) - from.width / 2 - to.width / 2, 0);
+        return x * x + y * y + z * z;
     }
 
     public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {

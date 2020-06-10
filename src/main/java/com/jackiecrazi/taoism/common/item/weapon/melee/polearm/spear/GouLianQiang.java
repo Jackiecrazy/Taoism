@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -77,7 +78,7 @@ public class GouLianQiang extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("goulianqiang.trip"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("goulianqiang.trip.riposte") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.ITALIC + I18n.format("goulianqiang.trip.sneaky") + TextFormatting.RESET);
         tooltip.add(I18n.format("goulianqiang.bash"));
     }
 
@@ -113,7 +114,7 @@ public class GouLianQiang extends TaoWeapon {
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
             //ignore half armor when downed
-            return target.getTotalArmorValue();
+            return target.getTotalArmorValue() / 2;
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
@@ -123,7 +124,7 @@ public class GouLianQiang extends TaoWeapon {
             //main function. Check if previous move is also left click on the same target and trip if so
             if (isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target)) {
                 //we're going on a trip on our favourite hooked... ship?
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2f, true, attacker);
+                TaoCasterData.getTaoCap(target).consumePosture((float) Math.max(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, attacker);
             }
         }
     }
