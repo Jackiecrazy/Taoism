@@ -449,9 +449,9 @@ public class TaoisticEventHandler {
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getQi() > 0 && !p.isSneaking()) {
+            if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
-                if (cap.getQi() > 3) {
+                if (cap.getQi() > 3 && !p.isSneaking()) {
                     if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
                         //vertical motion enabling, and shut off attempts to run off the wall
                         double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2;

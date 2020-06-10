@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -63,6 +64,7 @@ public class RopeDart extends TaoWeapon {
         return gettagfast(is).hasKey("bindID") && gettagfast(is).getInteger("bindID") != gettagfast(is).getInteger("dartID");
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void render(RenderWorldLastEvent event) {
         if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() instanceof RopeDart) {

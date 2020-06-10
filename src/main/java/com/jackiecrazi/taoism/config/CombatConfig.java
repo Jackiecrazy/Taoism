@@ -39,8 +39,8 @@ public class CombatConfig {
     public static int mobUpdateInterval = 100;
     @Config.Comment("Number of enforced ticks between each mob attack, because slimes.")
     public static int mobForcedCooldown = 10;
-    @Config.Comment("Number of ticks after a qi add attempt for which your qi will not decrease.")
-    public static int qiGrace = 20;
+    @Config.Comment("Number of seconds after a qi add for which your qi will not decrease.")
+    public static int qiGrace = 10;
     @Config.Comment("Additional items eligible for parrying. See printParryList for easy registration.")
     public static String[] parryCapableItems = {"example:thing1", "example:thing2"};
     @Config.Comment("Changes chance based knockback resist to percentage based knockback resist, which I think makes more sense.")

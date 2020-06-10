@@ -16,79 +16,69 @@ item.weapon.name=武器
 
 weapon.shift=SHIFT查看數據...
 weapon.ctrl=CTRL查看能力...
-weapon.dummy=此物品僅占位用，停止裝備雙手兵器時會自動變回原來物品
+weapon.dummy=此物品僅佔位用，停止裝備雙手兵器時會自動變回原來物品
 weapon.hands=裝備此武器時無法以任何方式使用副手物品
-weapon.parry=無法格擋或招架
-weapon.ignore=無視格擋、招架與盾牌
+weapon.half=可單手或雙手使用
+weapon.parry=無法招架
+weapon.ignore=無視招架與盾牌
+weapon.projectile=無視招架
 weapon.disshield=騰空攻擊可禁用敵方盾牌
 taoism.weaponReach=攻擊範圍: %s
 taoism.weaponDefMult=防禦架勢倍率: %s
 taoism.weaponAttMult=攻擊架勢倍率: %s
 
 item.ken.name=劍
-ken.combo=普攻挽出三個劍花後才進入冷卻期
-ken.aoe=攻擊半徑為1.5方塊
-ken.stab=若攻擊只命中一個敵人，造成1.2倍傷害
-ken.leap=若攻擊時騰空，造成1.8倍的單體傷害
-ken.riposte=反擊：九秒內連擊上限上升至九
+ken.combo=普攻挽出三個劍花後才進入冷卻
+ken.qi=每層氣增傷3%%
+ken.aoe=若沒有對準敵人，橫掃身前90度的扇形區域
+ken.stab=若對準敵人，造成120%%傷害
+ken.riposte=招架後重置連擊
 
 item.banfu.name=板斧
 banfu.leap=騰空攻擊造成雙倍傷害
-banfu.cleave=攻擊附加三秒破甲，每層氣使敵方護甲減少2點
-banfu.riposte=反擊：重置敵人的攻擊時間，五秒內的下一次攻擊造成相當於傷害乘以0.35的架勢傷害，不論是否被抵擋
+banfu.cleave=攻擊附加三秒破甲，每層氣減少2點敵方護甲
 
 item.balisong.name=蝴蝶刀
-balisong.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
+balisong.switch=裝備時立刻重置冷卻
 balisong.backstab=背刺造成雙倍傷害
-balisong.darkness=在黑暗中提升傷害，最多雙倍
 balisong.initiative=第一次攻擊無視所有護甲
 balisong.stance=主手的蝴蝶刀為正握，副手的蝴蝶刀為反握
 balisong.hammer=正握時連擊上限每兩層氣增加一，最多連擊五次
-balisong.reverse=反握時每層氣使本次攻擊無視一點護甲
-balisong.riposte=反擊：跳到敵人身後並重置連擊次數，三秒內的下一次背刺造成三倍傷害
+balisong.reverse=反握時每層氣使攻擊無視一點護甲
+balisong.riposte=招架時閃避到攻擊者身後
 
 item.karambit.name=爪刀
-karambit.switch=空手裝備此武器或在雙手之間交替此武器時不會重置其冷卻
+karambit.switch=裝備時立刻重置冷卻
 karambit.backstab=背刺造成1.5倍傷害
-karambit.darkness=在黑暗中提升傷害，最多雙倍
 karambit.initiative=第一次攻擊無視所有護甲
-karambit.bleed=若目標沒有護甲則造成一層持續一秒的流血效果，每層氣使本效果無視6點護甲
-karambit.riposte=反擊：跳到敵人身後，三秒內的下一次攻擊額外附加兩層持續三秒的流血
-karambit.harvest=可以采集任何剪刀可以采集的方塊
+karambit.bleed=對無護甲的目標疊加一層持續一秒的流血，每層氣使觸發條件無視6點護甲
+karambit.riposte=招架時閃避到攻擊者身後
+karambit.harvest=可以採集剪刀能採集的方塊
 
 item.chui.name=博浪錘
 chui.leap=騰空攻擊造成雙倍傷害
-chui.stagger=對被擊倒的目標造成1.5倍傷害
-chui.riposte=反擊：五秒內下一次攻擊造成相當於攻擊傷害一半的架勢傷害，不論是否被抵擋
+chui.stagger=對擊倒的目標造成1.5倍傷害
 
 item.cestus.name=鐵拳套
-cestus.armor=增加三點護甲值
-cestus.leap=騰空攻擊造成1.5倍傷害
-cestus.debuff=三層氣時附加緩慢I、六層氣時附加緩慢II、十層氣時致盲
-cestus.damage=傷害在1、2、4、5層氣時增加1，每層6以上的氣增加2
-cestus.riposte=反擊：擒拿對手兩秒。下一次攻擊造成1.2倍傷害、無法被抵擋、且造成3.5架勢傷害
+cestus.armor=附加兩點護甲值
+cestus.debuff=三層氣以上附加緩慢I，六層以上附加緩慢II，九層以上致盲
+cestus.damage=傷害在1、2、4、5層氣時各增加一點，七層氣以上每層氣增加兩點
+cestus.riposte=招架後獲得一層氣
 
 item.kampilan.name=坎佩蘭刀
-kampilan.aoe=攻擊半徑為2.5方塊
-kampilan.leap=騰空攻擊造成1.5倍的單體傷害
-kampilan.combo=三層氣以上連擊3次，九層氣以上連擊5次
-kampilan.knockback=六層氣時將擊退效果轉化為傷害
-kampilan.riposte=反擊：五秒內，下一套連擊的擊退效果將會額外轉化為架勢傷害
+kampilan.aoe=橫掃120度的扇形區域
+kampilan.combo=五層氣時連擊上限升至三，且會把擊退轉化為額外傷害
+kampilan.riposte=招架後重置連擊
 
 item.qiang.name=紅纓槍
-qiang.stab=貫穿攻擊範圍內所有準星上的生物
-qiang.stab.riposte=槍花效果下，普攻將會在6刻內攻擊三次並造成切割傷害
-qiang.bash=右擊使用槍桿擊退敵人，造成0.5倍的鈍傷害
-qiang.bash.riposte=槍花效果下，擊退擁有範圍半徑2方塊，且對所有擊退的敵人造成一秒的緩慢I
-qiang.oscillate=兩種攻擊冷卻獨立，且成功攻擊會使另一種攻擊冷卻減半
-qiang.riposte=反擊：四秒內的下一次攻擊將會舞出槍花
+qiang.stab=傷害隨距離增加，在6方塊時達到兩倍
+qiang.recharge=攻速隨距離增加，在6方塊時達到2
+qiang.bash=右擊擊退目標造成減半傷害。若之前有普攻，橫掃120度的扇形區域
 
 item.goulianqiang.name=鉤鐮槍
-goulianqiang.trip=右擊目標兩次後會將其拉倒，造成最大架勢一半的架勢傷害
-goulianqiang.trip.riposte=若敵方沒有正對自己或自身"梁山"狀態下，一次攻擊即可觸發此效果
-goulianqiang.bash=普攻無視被擊倒的敵人一半護甲
-goulianqiang.bash.riposte="梁山"狀態下, 不需要擊倒敵人亦可以觸發此被動
-goulianqiang.riposte=反擊：進入"梁山"狀態，持續四秒
+goulianqiang.trip=副手連續攻擊敵人兩次後將其拉倒，造成最大架勢一半的傷害，不超過自身攻擊傷害
+goulianqiang.trip.sneaky=若目標並非正對攻擊者，只需要一次攻擊
+goulianqiang.bash=若目標被擊倒，普通攻擊會無視一半護甲且造成雙倍傷害
 
 item.qinglongji.name=青龍戟
 qinglongji.stab=普攻造成1.5倍傷害，每有一層氣額外提升0.1
@@ -98,63 +88,80 @@ qinglongji.alt.cut=逆鱗勢下此攻擊造成短暫流血並翻轉回備戰勢
 qinglongji.atkspd=攻速隨氣增加，最高1.9
 qinglongji.oscillate=兩種攻擊冷卻獨立，且成功攻擊會使另一種攻擊冷卻減半
 qinglongji.qi=只有交替攻擊才會積攢氣
-qinglongji.riposte=反擊：獲得兩層氣
 
 item.tonfa.name=鴛鴦拐
 tonfa.main=主手中高速旋擊，造成兩次傷害
 tonfa.off=副手中重拳出擊，附加短暫緩慢與虛弱
-tonfa.parry=招架時獲得一層氣，並同時激活雙手的反擊能力
-tonfa.reset=三層氣以上，格擋與招架均會重置攻擊冷卻
-tonfa.defbreak=七層氣以上，格擋為敵方附加破甲，招架額外附加疲勞
-tonfa.riposte=反擊：一秒內的攻擊會為自己增加一秒抗性，並在兩秒之內屹立不倒
+tonfa.parry=招架時獲得一層氣
+tonfa.reset=三層氣以上，招架會重置攻擊冷卻
+tonfa.defbreak=七層氣以上，招架額外附加挖掘疲勞與破甲
 
-item.chickensickle.name=雞刀鐮
-chickensickle.normal=攻擊拉入敵人並疊加五秒的內傷II
-chickensickle.riposte1=反擊：五秒內下一次攻擊疊加五秒的內傷III，然後引爆內傷
-chickensickle.riposte2=每層內傷造成最大生命0.01的傷害，隨後疊加五秒強度等同於內傷三分之一的流血
+item.chickensickle.name=雞爪鐮
+chickensickle.normal=攻擊疊加五秒內傷I
+chickensickle.detonate=若內傷層數超過護甲的25%%，造成最多10%%最大生命傷害並把內傷轉化為等量的流血
+chickensickle.debuff=內傷會消耗自己延長任何其他新加的負面效果，內傷層數決定轉換效率
 
 item.catninetails.name=九尾鞭
 catninetails.lacerate=攻擊附加五秒撕裂III並疊加一秒流血III
 catninetails.armord=敵方每點護甲值減少撕裂和流血的持續時間
 catninetails.armorp=敵方每五點護甲值減少一層效果強度，擁有十點護甲以上則完全免疫
 
-item.pollaxe.name=日華斧
-pollaxe.leap=騰空攻擊造成雙倍傷害
-pollaxe.cleave=普攻疊加三秒破甲II
-pollaxe.cleave.riposte=重劈狀態下，普攻造成穿刺傷害並引爆破甲，每層破甲造成2點穿刺傷害
-pollaxe.swipe=右擊可橫砍並擊退半徑2方塊的敵人，騰空時為單體擊退攻擊
-pollaxe.swipe.riposte=重劈狀態下，橫砍疊加五秒破甲III，每層破甲使該次傷害增加0.1倍
-pollaxe.riposte=反擊：五秒內的下一次攻擊將會打出重劈，造成相當於傷害乘以0.35的架勢傷害，不論是否被抵擋
+item.pollaxe.name=長柯斧
+pollaxe.knockback=所有擊退將會轉化為架勢傷害
+pollaxe.chop=連續第二次普攻時額外造成30%%傷害
+pollaxe.stab=右擊使用斧柄戳擊，連續第二次戳擊時造成雙倍架勢傷害
+pollaxe.escape=若敵人在兩次攻擊之間離開攻擊範圍，連續攻擊將被打斷
+pollaxe.oscillate=使用攻擊會重置另一種攻擊的一半冷卻，招架後另一隻手立刻刷新
+
+item.halberd.name=鳳頭斧
+halberd.leap=騰空攻擊造成雙倍傷害
+halberd.cleave=普攻疊加三秒破甲II
+halberd.stab=右擊使用槍頭引爆破甲，每層破甲造成2點無視護甲的傷害
+halberd.stab.cooldown=每層引爆的破甲使本攻擊冷卻減少一秒
 
 item.changchui.name=立瓜錘
-changchui.leap=騰空攻擊造成雙倍傷害
-changchui.armpen=被動無視三點護甲
-changchui.downed=對被擊倒的敵人造成雙倍傷害
-changchui.swipe=右擊可橫掃，擊退半徑2.5方塊的敵人，此攻擊擁有平常1.5倍的冷卻時間。騰空時為單體高擊退攻擊
-changchui.riposte=反擊：五秒內敵人必定受到全額架勢傷害且無法回復架勢
-changchui.swipe.riposte=橫掃會立刻消耗此強化，大幅度擊退敵人並造成其最大架勢三分之一的架勢傷害
+changchui.leap=騰空攻擊造成雙倍傷害，對擊倒的目標造成雙倍傷害
+changchui.armpen=被動無視3（+氣層數）點護甲
+changchui.enfeeble=六層氣以上時，普攻使目標在2秒內無法恢復架勢
+changchui.swipe=右擊擊退120度的扇形區域內所有目標，此攻擊冷卻較長
 
 item.staff.name=齊眉棍
-staff.leap=騰空攻擊造成1.5倍傷害
-staff.flick=若敵人在地上，普攻可將其挑飛
-staff.smash=若敵人在空中，普攻則會將其劈向地面，造成額外跌落傷害
-staff.swipe=右擊可橫掃，擊退半徑2方塊的敵人
-staff.oscillate=兩種攻擊冷卻獨立，可持續交替使用
-staff.block=格擋時舞起花棍，可抵擋速度低於自身氣的拋射物
-staff.riposte=反擊：十秒內，連擊上限增加至二
-staff.block.riposte=花棍每秒自動攻擊一次且可抵擋所有拋射物，速度低於自身氣的拋射物將會反彈給發射者
+staff.flick=在地上時，普攻根據氣挑飛地上的敵人，為自己附加短暫的跳躍效果
+staff.smash=若敵人在空中，將其擊落造成額外跌落傷害
+staff.doink=在空中時，攻擊地上的敵人會將自己挑的更高
+staff.throw=若雙方均騰空，將敵人挑的更高
+staff.sneak=可潛行強制使用地面攻擊
+staff.swipe=右擊橫掃並擊退身前120度扇形區域的敵人
+staff.oscillate=兩種攻擊冷卻獨立，主手攻擊可連擊一次
 
 item.guandao.name=偃月刀
 guandao.alt=右擊切換新月與血月模式，並立即重置普攻
 guandao.alt.attack=切換至血月模式時攻擊身前的敵人，切換回新月模式時攻擊身後的敵人
-guandao.guard=新月模式：範圍4，順劈半徑1.5，造成1.3倍(每層氣額外提高0.05)傷害。招架後獲得一層氣
-guandao.strike=血月模式：範圍7，順劈半徑3，無招架特效
+guandao.guard=新月模式：範圍4，橫掃90度，造成1.3倍(+氣*5%%)傷害，招架後獲得一層氣
+guandao.strike=血月模式：範圍7，橫掃180度，無傷害加成
 
 item.bohemianearspoon.name=狩獵槍
-bohear.dist=攻擊傷害和冷卻隨著本次攻擊的距離和上次攻擊的距離而波動
-bohear.buff=在兩次距離一樣時達到雙倍傷害和減半冷卻
-bohear.bash=右擊消耗此增益擊退範圍內所有敵人
-bohear.riposte=反擊：五秒內刺穿上一個攻擊目標，使其無法靠近你
+bohear.dist=普攻根據上次攻擊的距離而增傷，最多增上50%%
+bohear.buff=若持續面對攻擊目標，則它無法接近你
+bohear.rip=若它強行接近，刺穿該目標造成雙倍流血傷害
+bohear.bash=右擊消耗此強化擊退120度扇形區域內的敵人
+
+item.nunchaku.name=雙截棍
+nunchaku.dual=若雙手使用，一手的攻擊會立刻刷新另一手的冷卻
+nunchaku.stance=攻擊後雙截棍會處於上位或下位
+nunchaku.moves=普攻使其從當前位置移動到上位，或潛行攻擊使其移動到下位
+nunchaku.flick=上-上: 抽，攻速極高
+nunchaku.smash=上-下: 劈, 造成1.5倍傷害並附加短暫緩慢
+nunchaku.sweep=下-下: 掃，攻擊身前90度扇形區域
+nunchaku.spin=下-上: 旋，造成三次攻擊40%%的傷害
+
+item.ropedart.name=繩鏢
+ropedart.projectile=普攻丟出鏢頭，在擊中物體或飛過八個方塊後收回
+ropedart.damage=傷害根據蓄力時間增加，最多造成1.5倍傷害，滿蓄力額外造成1.5倍暴擊傷害
+ropedart.recharge=打空不消耗蓄力，打中目標消耗一半蓄力，打中方塊消耗所有蓄力
+ropedart.alt=右擊丟出鏢頭束縛第一個擊中的敵人，造成一半傷害
+ropedart.berserk=束縛時，敵人無法攻擊；你的副手重新啟用且主手可招架
+ropedart.disengage=再次使用繩鏢普攻將會結束此狀態
 
 <Resources>=
 
@@ -171,7 +178,7 @@ death.attack.bleed.player=%1$s 因 %2$s 流血而死
 
 <Weapon inscriptions>=
 metal1.inscription=十步一殺
-metal2.inscription=千裏不留
+metal2.inscription=千里不留
 metal3.inscription=都護鐵衣
 metal4.inscription=滿城金甲
 metal5.inscription=高堂明鏡
@@ -229,3 +236,4 @@ earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
 earth11.inscription=大花棉襖
+<Da​​mage sources>=

@@ -124,7 +124,7 @@ public class GouLianQiang extends TaoWeapon {
             //main function. Check if previous move is also left click on the same target and trip if so
             if (isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target)) {
                 //we're going on a trip on our favourite hooked... ship?
-                TaoCasterData.getTaoCap(target).consumePosture((float) Math.max(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, attacker);
+                TaoCasterData.getTaoCap(target).consumePosture((float) Math.min(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, attacker);
             }
         }
     }

@@ -82,7 +82,7 @@ public class ChangChui extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (attacker.onGround && getHand(stack) == EnumHand.OFF_HAND) {
+        if (getHand(stack) == EnumHand.OFF_HAND) {
             splash(attacker, stack, 120);
         }
     }
@@ -93,10 +93,8 @@ public class ChangChui extends TaoWeapon {
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("changchui.leap"));
         tooltip.add(I18n.format("changchui.armpen"));
-        tooltip.add(I18n.format("changchui.downed"));
+        tooltip.add(I18n.format("changchui.enfeeble"));
         tooltip.add(I18n.format("changchui.swipe"));
-        tooltip.add(I18n.format("changchui.riposte"));
-        tooltip.add(TextFormatting.ITALIC + I18n.format("changchui.swipe.riposte") + TextFormatting.RESET);
     }
 
     @Override
@@ -130,7 +128,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return 3;
+        return TaoCasterData.getTaoCap(attacker).getQiFloored()+3;
     }
 
     @Override
@@ -140,8 +138,8 @@ public class ChangChui extends TaoWeapon {
             float chargeKB = isCharged(attacker, stack) ? 2f : 1f;
             NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
         } else {
-            if (isCharged(attacker, stack)) {
-                target.addPotionEffect(new PotionEffect(TaoPotion.ENFEEBLE, getChargeTimeLeft(attacker, stack)));
+            if (TaoCasterData.getTaoCap(attacker).getQi()>6) {
+                target.addPotionEffect(new PotionEffect(TaoPotion.ENFEEBLE, 40));
             }
 //            for(ItemStack armor:target.getArmorInventoryList()){
 //                armor.addAttributeModifier();

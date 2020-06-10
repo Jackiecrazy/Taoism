@@ -37,7 +37,7 @@ public class NeedyLittleThings {
     /**
      * Copied from EntityArrow, because kek.
      */
-    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> (e instanceof EntityLivingBase || e instanceof IProjectile) && e.canBeCollidedWith());
+    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
 
     public static boolean isMeleeDamage(DamageSource ds) {
         return isPhysicalDamage(ds) && !ds.isProjectile();

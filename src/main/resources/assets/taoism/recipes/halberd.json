@@ -2,24 +2,24 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "ii",
-    "si"
+    "  a",
+    " s ",
+    "s  "
   ],
   "key":
   {
-    "i":
-    {
-      "type": "forge:ore_dict",
-      "ore": "nuggetIron"
-    },
     "s":
     {
       "type": "forge:ore_dict",
       "ore": "stickWood"
+    },
+    "a":
+    {
+      "item": "minecraft:iron_axe"
     }
   },
   "result":
   {
-    "item": "taoism:chickensickle"
+    "item": "taoism:pollaxe"
   }
 }

@@ -81,7 +81,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     public float addQi(float amount) {
         qi += amount;
         if (amount > 0)
-            setQiGracePeriod(CombatConfig.qiGrace);
+            setQiGracePeriod(CombatConfig.qiGrace * 20);
         amount = 0;
         if (qi > MAXQI) {
             amount = qi - MAXQI;
@@ -93,7 +93,10 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public boolean consumeQi(float amount) {
         if (qi < amount) return false;
+        int qibefore=(int)qi;
         qi -= amount;
+        if (getQiFloored()<qibefore)
+            setQiGracePeriod(CombatConfig.qiGrace * 20);
         return true;
     }
 
@@ -249,6 +252,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setMaxLing(from.getMaxLing());
         setMaxPosture(from.getMaxPosture());
         setQi(from.getQi());
+        setQiGracePeriod(from.getQiGracePeriod());
         setLing(from.getLing());
         setSwing(from.getSwing());
         setPosture(from.getPosture());
@@ -455,10 +459,10 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (e.isBeingRidden()) {
             for (Entity ent : e.getPassengers())
                 if (ent instanceof EntityLivingBase) {
-                    ent.removePassengers();
                     ITaoStatCapability cap = TaoCasterData.getTaoCap((EntityLivingBase) ent);
                     cap.consumePosture(cap.getMaxPosture() + 1, true);
                 }
+            e.removePassengers();
         }
         //System.out.println("target is downed for " + downtimer + " ticks!");
     }

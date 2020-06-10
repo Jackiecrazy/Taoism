@@ -76,7 +76,7 @@ qiang.recharge=in addition, attack speed is increased depending on distance, up 
 qiang.bash=right click to bash an enemy back, or sweep in a 120 degree sector if you performed a normal attack beforehand, for half damage
 
 item.goulianqiang.name=Hooked Spear
-goulianqiang.trip=right click on a target twice to trip them, dealing half their max posture, up to 7
+goulianqiang.trip=right click on a target twice to trip them, dealing half their max posture, up to the limit of your attack damage
 goulianqiang.trip.sneaky=if the target is not facing the attacker, only one attack is needed.
 goulianqiang.bash=normal attack will ignore half armor and inflict double damage if they are downed
 
@@ -88,7 +88,6 @@ qinglongji.alt.cut=when in reverse grip, switches back to normal grip, inflictin
 qinglongji.atkspd=attack speed scales with chi, up to a maximum of 1.9
 qinglongji.oscillate=the two attacks have separate cooldowns will halve each other's
 qinglongji.qi=only alternating attacks will accumulate chi
-qinglongji.riposte=riposte: instantly gain 2 layers of chi
 
 item.tonfa.name=Tonfa
 tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
@@ -121,21 +120,18 @@ halberd.stab=right click to stab the target, detonating armor break for 2 points
 halberd.stab.cooldown=each layer of armor break detonated will reduce the cooldown for this attack by 1 second
 
 item.changchui.name=Great Hammer
-changchui.leap=leap attacks deal double damage
-changchui.armpen=its massive weight allows it to passively ignore 3 points of armor
-changchui.downed=deals double damage against a downed target
-changchui.swipe=right click to swipe in a 2.5 block radius with range 5, knocking enemies back. Has a longer cooldown. When leaping, this is a single target high knockback move
-changchui.riposte=riposte: for the next 5 seconds, enemies will always take posture damage and cannot regenerate posture
-changchui.swipe.riposte=swipe will instantly consume this buff to majorly knock back all afflicted targets and remove a third of their max posture
+changchui.leap=leap attacks deal double damage, deals double damage against a downed target
+changchui.armpen=ignores 3(+chi) points of armor
+changchui.enfeeble=above 6 chi, normal attack causes target to be unable to recover posture for 2 seconds
+changchui.swipe=right click to swipe in a 120 degree sector, knocking enemies back. Has a longer cooldown
 
 item.staff.name=Quarterstaff
-staff.leap=leap attacks deal 1.5x damage
-staff.flick=a strike on a grounded target while grounded will flick them into the air, distance increased by chi
+staff.flick=a strike on a grounded target while grounded will flick them up, giving you a brief jump boost as well
 staff.smash=attacking an airborne target while grounded will pummel them down, dealing extra fall damage scaling with chi
 staff.doink=if you are airborne, attacking a grounded target will boost you higher, distance increased by chi
-staff.throw=if both you and the opponent are airborne, the opponent is flicked up , distance increased by chi
+staff.throw=if both you and the opponent are airborne, the opponent is flicked up, distance increased by chi
 staff.sneak=aerial behavior can be overridden by sneaking
-staff.swipe=right click to swipe in a 2 block radius with range 4, knocking enemies back slightly
+staff.swipe=right click to swing in a 120 degree sector, knocking enemies back slightly
 staff.oscillate=the two attacks have separate cooldowns; normal attack can be chained twice
 
 item.guandao.name=Guan Dao

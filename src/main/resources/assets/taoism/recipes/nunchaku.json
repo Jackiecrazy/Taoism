@@ -2,15 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "ii",
-    "si"
+    "rrr",
+    "s s"
   ],
   "key":
   {
-    "i":
+    "r":
     {
       "type": "forge:ore_dict",
-      "ore": "nuggetIron"
+      "ore": "string"
     },
     "s":
     {
@@ -20,6 +20,6 @@
   },
   "result":
   {
-    "item": "taoism:chickensickle"
+    "item": "taoism:nunchaku"
   }
 }

@@ -101,7 +101,6 @@ public class Staff extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
-        tooltip.add(I18n.format("staff.leap"));
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
         tooltip.add(I18n.format("staff.doink"));
@@ -155,10 +154,10 @@ public class Staff extends TaoWeapon {
                 target.velocityChanged = true;
             } else {
                 if (target.onGround) {
-                    attacker.motionY = chi / 7f;
+                    attacker.motionY = chi / 10f;
                     attacker.velocityChanged = true;
                 } else {
-                    target.motionY = chi / 7f;
+                    target.motionY = chi / 10f;
                     target.velocityChanged = true;
                 }
             }
