@@ -51,7 +51,7 @@ public class BanFu extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.5f;
+        return 0.7f;
     }
 
     @Override

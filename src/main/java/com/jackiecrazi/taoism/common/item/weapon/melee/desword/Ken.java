@@ -20,7 +20,7 @@ public class Ken extends TaoWeapon {
     //has low starting damage, chain up to do more damage
     public Ken() {
         super(1, 1.6, 6, 1f);
-        this.setQiAccumulationRate(0.3f);//slight nerf to account for extremely high attack speed
+        this.setQiAccumulationRate(0.18f);//slight nerf to account for extremely high attack speed
     }
 
     @Override

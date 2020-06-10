@@ -90,7 +90,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final int damageType;
     private final double dmg;
     private final float itemPostureMultiplier;
-    private float qiRate = 0.5f;
+    private float qiRate = 0.25f;
 
     public TaoWeapon(int damageType, double swingSpeed, double damage, float attackPostureMultiplier) {
         super();

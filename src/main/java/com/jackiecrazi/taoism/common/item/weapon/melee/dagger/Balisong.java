@@ -31,7 +31,7 @@ public class Balisong extends TaoWeapon {
 
     public Balisong() {
         super(2, 2, 5f, 0);
-        setQiAccumulationRate(0.75f);
+        setQiAccumulationRate(0.35f);
     }
 
     @Override

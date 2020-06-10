@@ -22,7 +22,7 @@ public class Kampilan extends TaoWeapon {
     // and follows up with 2 extra attacks at 9 chi
     public Kampilan() {
         super(1, 1.6d, 6.5d, 1f);
-        this.setQiAccumulationRate(0.33f);
+        this.setQiAccumulationRate(0.20f);
     }
 
     @Override

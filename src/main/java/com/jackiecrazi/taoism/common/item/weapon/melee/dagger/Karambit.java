@@ -33,7 +33,7 @@ public class Karambit extends TaoWeapon {
 
     public Karambit() {
         super(1, 2, 5f, 0);
-        setQiAccumulationRate(0.75f);
+        setQiAccumulationRate(0.35f);
     }
 
     @Override
