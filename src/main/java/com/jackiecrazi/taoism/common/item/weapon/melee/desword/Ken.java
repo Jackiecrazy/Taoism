@@ -81,7 +81,7 @@ public class Ken extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = attacker.motionY < 0 ? 1.5f : 1f;
+        float air = !attacker.onGround ? 1.5f : 1f;
         float aoe = isAoE(attacker, item) ? 1f : 1.5f;
         return air * aoe;
     }

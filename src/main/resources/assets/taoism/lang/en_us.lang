@@ -24,8 +24,8 @@ weapon.ignore=this weapon ignores parries and shields
 weapon.projectile=this weapon ignores parries
 weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %s
-taoism.weaponDefMult=defense posture multiplier: %s
-taoism.weaponAttMult=attack posture multiplier: %s
+taoism.weaponDefMult=defense posture multiplier: %.2f
+taoism.weaponAttMult=attack posture multiplier: %.2f
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge

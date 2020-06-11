@@ -3,9 +3,9 @@ package com.jackiecrazi.taoism.networking;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -42,7 +42,7 @@ public class PacketUpdateSize implements IMessage {
         @Override
         public IMessage onMessage(final PacketUpdateSize m,
                                   MessageContext ctx) {
-            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
                 //System.out.println("packet acquired!");
                 final EntityPlayer thePlayer = Taoism.proxy
                         .getPlayerEntityFromContext(ctx);

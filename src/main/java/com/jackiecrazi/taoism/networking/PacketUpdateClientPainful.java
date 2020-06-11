@@ -4,11 +4,11 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -43,7 +43,7 @@ public class PacketUpdateClientPainful implements IMessage {
         @Override
         public IMessage onMessage(final PacketUpdateClientPainful m,
                                   MessageContext ctx) {
-            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
                 final EntityPlayer thePlayer = Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
                 if (thePlayer == null || thePlayer.world == null) return;

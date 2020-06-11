@@ -43,7 +43,6 @@ public class Tonfa extends TaoWeapon {
         tooltip.add(I18n.format("tonfa.parry"));
         tooltip.add(I18n.format("tonfa.reset"));
         tooltip.add(I18n.format("tonfa.defbreak"));
-        tooltip.add(I18n.format("tonfa.riposte"));
     }
 
     @Override

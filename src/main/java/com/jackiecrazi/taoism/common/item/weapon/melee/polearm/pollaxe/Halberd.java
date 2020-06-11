@@ -33,7 +33,7 @@ public class Halberd extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Halberd() {
-        super(3, 0.8, 9, 2f);
+        super(3, 0.8, 9, 1f);
     }
 
     @Override

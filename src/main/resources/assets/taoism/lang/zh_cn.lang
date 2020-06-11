@@ -23,9 +23,9 @@ weapon.parry=无法招架
 weapon.ignore=无视招架与盾牌
 weapon.projectile=无视招架
 weapon.disshield=腾空攻击可禁用敌方盾牌
-taoism.weaponReach=攻击范围: %s
-taoism.weaponDefMult=防御架势倍率: %s
-taoism.weaponAttMult=攻击架势倍率: %s
+taoism.weaponReach=攻击范围: %.2f
+taoism.weaponDefMult=防御架势倍率: %.2f
+taoism.weaponAttMult=攻击架势倍率: %.2f
 
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却

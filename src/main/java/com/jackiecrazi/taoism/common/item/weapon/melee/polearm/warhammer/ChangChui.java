@@ -32,7 +32,7 @@ public class ChangChui extends TaoWeapon {
      */
     //private final AttributeModifier
     public ChangChui() {
-        super(0, 0.8f, 8.5f, 2f);
+        super(0, 0.8f, 8.5f, 1.5f);
     }
 
 //    @Override

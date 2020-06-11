@@ -339,7 +339,7 @@ public class NeedyLittleThings {
         y = Math.max(Math.abs(y) - from.height / 2 - to.height / 2, 0);
         double z = from.posZ - to.posZ;
         z = Math.max(Math.abs(z) - from.width / 2 - to.width / 2, 0);
-        return x * x + y * y + z * z;
+        return Math.min(x * x + y * y + z * z, from.getDistanceSq(to));
     }
 
     public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {

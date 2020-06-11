@@ -53,7 +53,7 @@ public class Nunchaku extends TaoWeapon {
     };
 
     public Nunchaku() {
-        super(0, 1.5, 5f, 0.6f);
+        super(0, 1.5, 5f, 0.8f);
         this.addPropertyOverride(new ResourceLocation("nuns"), (stack, w, elb) -> {
             int low = getCurrentMove(stack).isSneakPressed() ? 1 : 0;
             int dual = isTwoHanded(stack) ? 2 : 0;

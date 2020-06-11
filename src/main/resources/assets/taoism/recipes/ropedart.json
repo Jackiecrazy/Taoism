@@ -17,15 +17,10 @@
     {
       "type": "forge:ore_dict",
       "ore": "string"
-    },
-    "s":
-    {
-      "type": "forge:ore_dict",
-      "ore": "stickWood"
     }
   },
   "result":
   {
-    "item": "taoism:nunchaku"
+    "item": "taoism:ropedart"
   }
 }

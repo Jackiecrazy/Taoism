@@ -39,7 +39,7 @@ public class Pollaxe extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Pollaxe() {
-        super(3, 1.2, 6, 1f);
+        super(3, 1.2, 6, 1.5f);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.7f;
+        return 0.4f;
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
@@ -96,7 +96,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 3 - 4 : super.speed(stack);
+        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
     }
 
     @Override
