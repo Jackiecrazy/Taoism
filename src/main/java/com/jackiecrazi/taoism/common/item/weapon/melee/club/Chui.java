@@ -24,7 +24,7 @@ public class Chui extends TaoWeapon {
     //FIXME posture mult too high, hammers are crap at defending
 
     public Chui() {
-        super(0, 1.2f, 7f, 1.3f);
+        super(0, 1.4f, 7f, 1.3f);
     }
 
     @Override

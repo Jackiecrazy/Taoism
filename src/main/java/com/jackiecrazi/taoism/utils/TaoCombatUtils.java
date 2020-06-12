@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.utils;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IMove;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
@@ -33,12 +34,15 @@ public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
         ItemStack main = elb.getHeldItemMainhand();
         ItemStack off = elb.getHeldItemOffhand();
-        if (main.getItem() instanceof IMove) {
+        MoveCode mc=new MoveCode(moveCode);
+        //update mainhand if it's a left click or you're two-handed
+        if (((!(main.getItem() instanceof ITwoHanded) || ((ITwoHanded) main.getItem()).isTwoHanded(main) || mc.isLeftClick())) && main.getItem() instanceof IMove) {
             if (!main.hasTagCompound()) main.setTagCompound(new NBTTagCompound());
             main.getTagCompound().setByte("lastMove", main.getTagCompound().getByte("currentMove"));
             main.getTagCompound().setByte("currentMove", moveCode);
         }
-        if ((!(main.getItem() instanceof ITwoHanded) || ((ITwoHanded) main.getItem()).isTwoHanded(main)) && off.getItem() instanceof IMove) {
+        //update offhand if it's a right click or main hand's two-handed
+        if ((!(main.getItem() instanceof ITwoHanded) || ((ITwoHanded) main.getItem()).isTwoHanded(main) || !mc.isLeftClick()) && off.getItem() instanceof IMove) {//if it's left click, only the right hand needs to know, and if it's two-handed it'll be updated anyway
             if (!off.hasTagCompound()) off.setTagCompound(new NBTTagCompound());
             off.getTagCompound().setByte("lastMove", off.getTagCompound().getByte("currentMove"));
             off.getTagCompound().setByte("currentMove", moveCode);

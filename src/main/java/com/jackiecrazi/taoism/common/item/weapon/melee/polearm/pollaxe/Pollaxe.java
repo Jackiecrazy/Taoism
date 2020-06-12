@@ -73,7 +73,7 @@ public class Pollaxe extends TaoWeapon {
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (e instanceof EntityLivingBase && !w.isRemote) {
+        if (e instanceof EntityLivingBase && !w.isRemote && onHand) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (elb.getLastAttackedEntity() != null && NeedyLittleThings.getDistSqCompensated(elb, elb.getLastAttackedEntity()) > getReach(elb, stack) * getReach(elb, stack)) {
                 setLastAttackedRangeSq(stack, 0);

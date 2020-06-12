@@ -71,16 +71,16 @@ public class BohemianEarspoon extends TaoWeapon {
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (e instanceof EntityLivingBase && !w.isRemote) {
+        if (e instanceof EntityLivingBase && !w.isRemote && onHand) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack)!=0) {
+            if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) != 0) {
                 EntityLivingBase target = elb.getLastAttackedEntity();
                 if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
-                    if(target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
+                    if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
                             //too close! Rip out innards for double damage
                             target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
-                            setLastAttackedRangeSq(stack,0);
+                            setLastAttackedRangeSq(stack, 0);
                         }
                         //a new challenger is approaching!
                         Vec3d pos = elb.getPositionVector();
@@ -149,15 +149,15 @@ public class BohemianEarspoon extends TaoWeapon {
         }
     }
 
+    private float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
+    }
+
     private void setLastAttackedRangeSq(ItemStack item, float range) {
         if (range != 0f) {
             gettagfast(item).setFloat("lastAttackedRange", range);
         } else {
             gettagfast(item).removeTag("lastAttackedRange");
         }
-    }
-
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
     }
 }
