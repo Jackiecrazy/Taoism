@@ -124,8 +124,7 @@ public class TaoisticEventHandler {
                 e.setCanceled(true);
             if (NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
                 if(TaoCasterData.getTaoCap(uke).getQi()*TaoCasterData.getTaoCap(uke).getQi()>NeedyLittleThings.getSpeedSq(ent)&&TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile,false)==0) {
-                    ent.motionX = ent.motionZ = 0;
-                    ent.motionY = -0.1;
+                    ent.motionX = ent.motionY = ent.motionZ = 0;
                     ent.velocityChanged = true;
                     e.setCanceled(true);//seriously, who thought loading rooftops with a ton of archers was a good idea?
                 }

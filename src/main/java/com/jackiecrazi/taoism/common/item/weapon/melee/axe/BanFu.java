@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -51,7 +50,7 @@ public class BanFu extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.7f;
+        return 0.8f;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class BanFu extends TaoWeapon {
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //trap the opponent's weapon, resetting attack timer.
         //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
-        Taoism.setAtk(defender, 0);
+        //Taoism.setAtk(defender, 0);
         super.parrySkill(attacker, defender, item);
     }
 

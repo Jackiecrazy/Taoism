@@ -58,12 +58,13 @@ karambit.harvest=可以采集剪刀能采集的方块
 item.chui.name=博浪锤
 chui.leap=腾空攻击造成双倍伤害
 chui.stagger=对击倒的目标造成1.5倍伤害
+chui.slow=攻击附加缓慢，时长等同于气层数一半，强度等于气层数除以三
 
 item.cestus.name=铁拳套
 cestus.armor=附加两点护甲值
 cestus.debuff=三层气以上附加缓慢I，六层以上附加缓慢II，九层以上致盲
 cestus.damage=伤害在1、2、4、5层气时各增加一点，七层气以上每层气增加两点
-cestus.riposte=招架后获得一层气
+cestus.riposte=招架后获得0.3层气
 
 item.kampilan.name=坎佩兰刀
 kampilan.aoe=横扫120度的扇形区域
@@ -92,7 +93,7 @@ qinglongji.qi=只有交替攻击才会积攒气
 item.tonfa.name=鸳鸯拐
 tonfa.main=主手中高速旋击，造成两次伤害
 tonfa.off=副手中重拳出击，附加短暂缓慢与虚弱
-tonfa.parry=招架时获得一层气
+tonfa.parry=招架时获得0.3层气
 tonfa.reset=三层气以上，招架会重置攻击冷却
 tonfa.defbreak=七层气以上，招架额外附加挖掘疲劳与破甲
 
@@ -137,7 +138,7 @@ staff.oscillate=两种攻击冷却独立，主手攻击可连击一次
 item.guandao.name=偃月刀
 guandao.alt=右击切换新月与血月模式，并立即重置普攻
 guandao.alt.attack=切换至血月模式时攻击身前的敌人，切换回新月模式时攻击身后的敌人
-guandao.guard=新月模式：范围4，横扫90度，造成1.3倍(+气*5%%)伤害，招架后获得一层气
+guandao.guard=新月模式：范围4，横扫90度，造成1.3倍(+气*5%%)伤害，招架后获得0.3层气
 guandao.strike=血月模式：范围7，横扫180度，无伤害加成
 
 item.bohemianearspoon.name=狩猎枪
@@ -161,7 +162,7 @@ ropedart.damage=伤害根据蓄力时间增加，最多造成1.5倍伤害，满�
 ropedart.recharge=打空不消耗蓄力，打中目标消耗一半蓄力，打中方块消耗所有蓄力
 ropedart.alt=右击丢出镖头束缚第一个击中的敌人，造成一半伤害
 ropedart.berserk=束缚时，敌人无法攻击；你的副手重新启用且主手可招架
-ropedart.disengage=再次使用绳镖普攻将会结束此状态
+ropedart.disengage=再次使用普攻将会结束此状态
 
 <Resources>=
 

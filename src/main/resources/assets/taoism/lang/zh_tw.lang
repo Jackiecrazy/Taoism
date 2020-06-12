@@ -58,12 +58,13 @@ karambit.harvest=可以採集剪刀能採集的方塊
 item.chui.name=博浪錘
 chui.leap=騰空攻擊造成雙倍傷害
 chui.stagger=對擊倒的目標造成1.5倍傷害
+chui.slow=攻擊附加緩慢，時長等於氣層數一半，強度等於氣層數除以三
 
 item.cestus.name=鐵拳套
 cestus.armor=附加兩點護甲值
 cestus.debuff=三層氣以上附加緩慢I，六層以上附加緩慢II，九層以上致盲
 cestus.damage=傷害在1、2、4、5層氣時各增加一點，七層氣以上每層氣增加兩點
-cestus.riposte=招架後獲得一層氣
+cestus.riposte=招架後獲得0.3層氣
 
 item.kampilan.name=坎佩蘭刀
 kampilan.aoe=橫掃120度的扇形區域
@@ -92,7 +93,7 @@ qinglongji.qi=只有交替攻擊才會積攢氣
 item.tonfa.name=鴛鴦拐
 tonfa.main=主手中高速旋擊，造成兩次傷害
 tonfa.off=副手中重拳出擊，附加短暫緩慢與虛弱
-tonfa.parry=招架時獲得一層氣
+tonfa.parry=招架時獲得0.3層氣
 tonfa.reset=三層氣以上，招架會重置攻擊冷卻
 tonfa.defbreak=七層氣以上，招架額外附加挖掘疲勞與破甲
 
@@ -137,7 +138,7 @@ staff.oscillate=兩種攻擊冷卻獨立，主手攻擊可連擊一次
 item.guandao.name=偃月刀
 guandao.alt=右擊切換新月與血月模式，並立即重置普攻
 guandao.alt.attack=切換至血月模式時攻擊身前的敵人，切換回新月模式時攻擊身後的敵人
-guandao.guard=新月模式：範圍4，橫掃90度，造成1.3倍(+氣*5%%)傷害，招架後獲得一層氣
+guandao.guard=新月模式：範圍4，橫掃90度，造成1.3倍(+氣*5%%)傷害，招架後獲得0.3層氣
 guandao.strike=血月模式：範圍7，橫掃180度，無傷害加成
 
 item.bohemianearspoon.name=狩獵槍

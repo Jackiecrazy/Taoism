@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IMove;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -37,7 +38,7 @@ public class TaoCombatUtils {
             main.getTagCompound().setByte("lastMove", main.getTagCompound().getByte("currentMove"));
             main.getTagCompound().setByte("currentMove", moveCode);
         }
-        if (off.getItem() instanceof IMove) {
+        if ((!(main.getItem() instanceof ITwoHanded) || ((ITwoHanded) main.getItem()).isTwoHanded(main)) && off.getItem() instanceof IMove) {
             if (!off.hasTagCompound()) off.setTagCompound(new NBTTagCompound());
             off.getTagCompound().setByte("lastMove", off.getTagCompound().getByte("currentMove"));
             off.getTagCompound().setByte("currentMove", moveCode);

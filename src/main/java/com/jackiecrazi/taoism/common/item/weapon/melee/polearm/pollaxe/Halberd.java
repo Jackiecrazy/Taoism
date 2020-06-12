@@ -33,7 +33,7 @@ public class Halberd extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Halberd() {
-        super(3, 0.8, 9, 1f);
+        super(3, 1, 9, 1f);
     }
 
     @Override
@@ -100,6 +100,11 @@ public class Halberd extends TaoWeapon {
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+    }
+
+    @Override
+    public double attackDamage(ItemStack stack) {
+        return getHand(stack)==EnumHand.MAIN_HAND?super.attackDamage(stack):1;
     }
 
     @Override

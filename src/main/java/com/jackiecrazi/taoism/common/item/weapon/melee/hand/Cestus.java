@@ -80,7 +80,7 @@ public class Cestus extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //TODO buff me
-        TaoCasterData.getTaoCap(defender).addQi(1f);
+        TaoCasterData.getTaoCap(defender).addQi(0.3f);
         super.parrySkill(attacker, defender, item);
     }
 

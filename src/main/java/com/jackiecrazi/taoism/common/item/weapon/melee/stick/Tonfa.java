@@ -47,7 +47,7 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(defender).addQi(1f);
+        TaoCasterData.getTaoCap(defender).addQi(0.3f);
         int qi = TaoCasterData.getTaoCap(attacker).getQiFloored();
         if (qi >= 3) {
             Taoism.setAtk(attacker, 0);
@@ -100,7 +100,7 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 1f;
+        return 2f;
     }
 
     @Override

@@ -75,7 +75,7 @@ public class GuanDao extends TaoWeapon {
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         if (!isCharged(attacker, item))
-            TaoCasterData.getTaoCap(attacker).addQi(1f);
+            TaoCasterData.getTaoCap(attacker).addQi(0.3f);
     }
 
     @Override

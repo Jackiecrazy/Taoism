@@ -7,7 +7,9 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
@@ -41,14 +43,6 @@ public class Chui extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float ground=attacker.motionY<0?2f:1f;
-        float breach= TaoCasterData.getTaoCap(target).getDownTimer()>0?1.5f:1f;
-        return ground*breach;
-
-    }
-
-    @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 3f;
     }
@@ -58,19 +52,33 @@ public class Chui extends TaoWeapon {
         return 0.5f;
     }
 
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker,target,item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true, attacker);
-        }
-        //TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture()+11, true, attacker, ds);
-        dischargeWeapon(attacker,item);
-    }
-
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("chui.leap"));
         tooltip.add(I18n.format("chui.stagger"));
+        tooltip.add(I18n.format("chui.slow"));
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float ground = attacker.motionY < 0 ? 2f : 1f;
+        float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 1.5f : 1f;
+        return ground * breach;
+
+    }
+
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        super.attackStart(ds, attacker, target, item, orig);
+        if (isCharged(attacker, item)) {
+            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true, attacker);
+        }
+        //TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture()+11, true, attacker, ds);
+        dischargeWeapon(attacker, item);
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3));
     }
 
 }

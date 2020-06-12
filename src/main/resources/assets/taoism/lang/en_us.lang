@@ -57,13 +57,14 @@ karambit.harvest=can also be used to harvest shearable blocks
 
 item.chui.name=Spherical Mace
 chui.leap=leap attacks deal double damage
-chui.stagger=damage against a staggered target is multiplied by 1.5
+chui.stagger=deals 1.5x damage against downed targets
+chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration increases by half a second every level
 
 item.cestus.name=Cestus
 cestus.armor=naturally adds 2 armor points
 cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 9 chi
 cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
-cestus.riposte=when parrying, gain a layer of chi
+cestus.riposte=when parrying, gain 0.3 chi
 
 item.kampilan.name=Kampilan
 kampilan.aoe=sweeps in a 120 degree sector
@@ -92,7 +93,7 @@ qinglongji.qi=only alternating attacks will accumulate chi
 item.tonfa.name=Tonfa
 tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
 tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
-tonfa.parry=chi will increase by 1 per parry
+tonfa.parry=chi will increase by 0.3 per parry
 tonfa.reset=at 3 chi and above, blocks and parries reset attack cooldown
 tonfa.defbreak=at 7 chi and above, blocks inflict defense break and parries additionally add fatigue
 
@@ -137,7 +138,7 @@ staff.oscillate=the two attacks have separate cooldowns; normal attack can be ch
 item.guandao.name=Guan Dao
 guandao.alt=right click to switch between guard and strike forms, resetting normal attack cooldown
 guandao.alt.attack=this counts as a frontal attack when switching to strike and a backwards stab when switching to guard
-guandao.guard=in guard form, range 4, 90 degree sweep, deals 1.3(+chi/20)x damage, gains a layer of chi when parrying
+guandao.guard=in guard form, range 4, 90 degree sweep, deals 1.3(+chi/20)x damage, gains 0.3 chi when parrying
 guandao.strike=in strike form, range 7, 180 degree sweep, deals base damage
 
 item.bohemianearspoon.name=Ghiavarina

@@ -173,8 +173,4 @@ public class Nunchaku extends TaoWeapon {
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.7f;
     }
-
-    private boolean lastOnOtherSide(ItemStack is) {
-        return gettagfast(is).getBoolean("onOtherSide");
-    }
 }
