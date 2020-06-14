@@ -30,6 +30,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class NeedyLittleThings {
@@ -118,7 +119,7 @@ public class NeedyLittleThings {
                 length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.min(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() < toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
                 break;
         }
-        return new PotionEffect(p, length, potency);
+        return new PotionEffect(p, length, potency, true, false);
     }
 
     /**
@@ -136,6 +137,25 @@ public class NeedyLittleThings {
             to.velocityChanged = true;
         }
         //knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
+    }
+
+    /**
+     * Attempts to add the potion effect. If it fails, the function will *permanently* add all the attribute modifiers as punishment.
+     * Take that, wither!
+     */
+    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot){
+        Potion p=pot.getPotion();
+        elb.addPotionEffect(pot);
+        if(!elb.isPotionActive(p)){
+            for(Map.Entry<IAttribute, AttributeModifier> e:p.getAttributeModifierMap().entrySet()){
+                if(elb.getEntityAttribute(e.getKey())!=null){
+                    elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
+                    elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

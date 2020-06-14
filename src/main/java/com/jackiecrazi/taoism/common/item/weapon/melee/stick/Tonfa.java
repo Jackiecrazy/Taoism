@@ -83,9 +83,9 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND)
-            multiHit(attacker, target, 3, 3);
+            multiHit(attacker, stack, target, 3, 3);
     }
 
     @Override

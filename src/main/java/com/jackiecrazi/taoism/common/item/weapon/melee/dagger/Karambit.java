@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
@@ -91,17 +92,17 @@ public class Karambit extends TaoWeapon {
         defender.rotationYaw = attacker.rotationYaw;
         defender.rotationPitch = attacker.rotationPitch;
         Vec3d look = attacker.getLookVec();
-        defender.motionX=-look.x;
-        defender.motionY=-look.y;
-        defender.motionZ=-look.z;
+        defender.motionX = -look.x;
+        defender.motionY = -look.y;
+        defender.motionZ = -look.z;
         defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
     }
 
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
-            EnumHand hand=elb.getHeldItemOffhand()==stack?EnumHand.OFF_HAND:EnumHand.MAIN_HAND;
-            TaoCombatUtils.rechargeHand(elb, hand,1);
+            EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand, 1);
         }
     }
 
@@ -130,11 +131,10 @@ public class Karambit extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() != null && target.getLastDamageSource().getTrueSource() != attacker))
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
-        if (isCharged(attacker, stack)) {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, 60, 2), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
-            dischargeWeapon(attacker, stack);
-        }
+        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker))
+            if (!NeedyLittleThings.attemptAddPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1))) {
+                target.hurtResistantTime=0;
+                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), 3);//try to skip? you get more!
+            }
     }
 }

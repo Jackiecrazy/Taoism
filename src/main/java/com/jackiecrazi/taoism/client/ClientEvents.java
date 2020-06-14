@@ -186,9 +186,11 @@ public class ClientEvents {
             KeyBinding.unPressAllKeys();
             return;
         }
-        GameSettings gs = Minecraft.getMinecraft().gameSettings;
-        MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
-        Taoism.net.sendToServer(new PacketMakeMove(move));
+        if(!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player)) {
+            GameSettings gs = Minecraft.getMinecraft().gameSettings;
+            MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
+            Taoism.net.sendToServer(new PacketMakeMove(move));
+        }
     }
 
     @SubscribeEvent

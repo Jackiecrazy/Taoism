@@ -444,7 +444,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
         //babe! it's 4pm, time for your flattening!
         //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
-        TaoCasterData.forceUpdateTrackingClients(e);
+        sync();
         //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
         //NeedyLittleThings.setSize(e, max, min);
 //        if (e instanceof EntityPlayer) {

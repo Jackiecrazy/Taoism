@@ -34,7 +34,7 @@ public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
         ItemStack main = elb.getHeldItemMainhand();
         ItemStack off = elb.getHeldItemOffhand();
-        MoveCode mc=new MoveCode(moveCode);
+        MoveCode mc = new MoveCode(moveCode);
         //update mainhand if it's a left click or you're two-handed
         if (((!(main.getItem() instanceof ITwoHanded) || ((ITwoHanded) main.getItem()).isTwoHanded(main) || mc.isLeftClick())) && main.getItem() instanceof IMove) {
             if (!main.hasTagCompound()) main.setTagCompound(new NBTTagCompound());
@@ -124,8 +124,11 @@ public class TaoCombatUtils {
     /**
      * copy-pasted from EntityPlayer, as-is.
      */
-    public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff) {
-        taoWeaponAttack(targetEntity, player, stack, main, updateOff, DamageSource.causePlayerDamage(player));
+    public static void taoWeaponAttack(Entity targetEntity, EntityLivingBase elb, ItemStack stack, boolean main, boolean updateOff) {
+        if (elb instanceof EntityPlayer)
+            taoWeaponAttack(targetEntity, (EntityPlayer) elb, stack, main, updateOff, DamageSource.causePlayerDamage((EntityPlayer) elb));
+        else
+            targetEntity.attackEntityFrom(DamageSource.causeMobDamage(elb), (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
     }
 
     /**

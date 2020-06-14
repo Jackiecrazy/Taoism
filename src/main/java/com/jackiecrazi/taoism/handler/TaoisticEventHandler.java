@@ -123,7 +123,7 @@ public class TaoisticEventHandler {
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
             if (NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
-                if(TaoCasterData.getTaoCap(uke).getQi()*TaoCasterData.getTaoCap(uke).getQi()>NeedyLittleThings.getSpeedSq(ent)&&TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile,false)==0) {
+                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     ent.motionX = ent.motionY = ent.motionZ = 0;
                     ent.velocityChanged = true;
                     e.setCanceled(true);//seriously, who thought loading rooftops with a ton of archers was a good idea?
@@ -281,7 +281,6 @@ public class TaoisticEventHandler {
         boolean posBreak = false;
         //if posture is broken, damage increased, ignores deflection/absorption and resets posture
         if (ukeCap.getDownTimer() > 0) {
-            amnt*=1.5;
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
                 for (int i = 0; i < 5; ++i) {
@@ -294,7 +293,10 @@ public class TaoisticEventHandler {
             //System.out.println("FATALITY!");
             posBreak = true;
         }
-        if (ds.isUnblockable()) return;//to prevent loops
+        if (ds.isUnblockable()) {
+            e.setAmount(amnt);
+            return;//to prevent loops
+        }
         //deflect projectile damage
         if (NeedyLittleThings.isPhysicalDamage(ds) && ds.getImmediateSource() != null && !posBreak) {
             double dp = ds.getImmediateSource().getLookVec().dotProduct(uke.getLookVec());
@@ -451,6 +453,7 @@ public class TaoisticEventHandler {
             if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3 && !p.isSneaking()) {
+                    p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
                     if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
                         //vertical motion enabling, and shut off attempts to run off the wall
                         double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2;
@@ -485,9 +488,7 @@ public class TaoisticEventHandler {
                     } else if (p.motionY < 0)
                         p.motionY *= ((MathHelper.clamp(2 - (p.motionX * p.motionX + p.motionZ * p.motionZ), 1f, 2f) * 1.5f / cap.getQi()));//
 
-                }
-                //
-                p.fallDistance = 0.1f;//for da critz
+                } else p.fallDistance = 0.1f;//for da critz
             }
             TaoCasterData.updateCasterData(p);
             //recharge weapon

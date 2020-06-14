@@ -51,7 +51,7 @@ public abstract class EntityMove extends Entity {
             try {
                 if (attacker != null) this.setLocationAndAngles(attacker.posX, attacker.posY, attacker.posZ, 0f, 0f);
                 this.attackPre(attacker, stack, ticksExisted);
-                stack.setTagInfo("spawn", new NBTTagByte((byte)1));
+                stack.setTagInfo("spawning", new NBTTagByte((byte)1));
                 for (Entity e : this.compileList(attacker, stack, ticksExisted)) {
                     if (e instanceof EntityLivingBase && !attacked.contains(e)) {
                         EntityLivingBase en = (EntityLivingBase) e;
@@ -60,7 +60,7 @@ public abstract class EntityMove extends Entity {
                     }
                     //System.out.println("bye");
                 }
-                stack.setTagInfo("spawn", new NBTTagByte((byte)0));
+                stack.setTagInfo("spawning", new NBTTagByte((byte)0));
                 this.attackPost(attacker, stack, ticksExisted);
                 if (ticksExisted >= this.duration(attacker, attacker, stack)) this.setDead();
             } catch (Exception e) {

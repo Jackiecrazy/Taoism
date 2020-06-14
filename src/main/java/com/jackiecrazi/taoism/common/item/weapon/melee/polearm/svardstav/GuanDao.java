@@ -121,7 +121,7 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isCharged(attacker, item) ? Event.Result.DENY : Event.Result.ALLOW;
+        return isCharged(attacker, item)||getHand(item)==EnumHand.OFF_HAND ? Event.Result.DENY : Event.Result.ALLOW;
     }
 
     @Override

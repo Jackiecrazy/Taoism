@@ -21,7 +21,7 @@ public class Kampilan extends TaoWeapon {
     //high attack speed, has a big sweep, sinawalis at 3 chi, converts knockback to extra damage at 6 chi,
     // and follows up with 2 extra attacks at 9 chi
     public Kampilan() {
-        super(1, 1.6d, 6.5d, 1f);
+        super(1, 1.6d, 6d, 1f);
         this.setQiAccumulationRate(0.20f);
     }
 

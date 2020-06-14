@@ -53,7 +53,7 @@ public class Nunchaku extends TaoWeapon {
     };
 
     public Nunchaku() {
-        super(0, 1.5, 5f, 0.8f);
+        super(0, 1.6, 4f, 0.4f);
         this.addPropertyOverride(new ResourceLocation("nuns"), (stack, w, elb) -> {
             int low = getCurrentMove(stack).isSneakPressed() ? 1 : 0;
             int dual = isTwoHanded(stack) ? 2 : 0;
@@ -137,10 +137,10 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (!getCurrentMove(stack).isSneakPressed() && getLastMove(stack).isSneakPressed()) {//low high
             //8-spin!
-            multiHit(attacker, target, 1, 3);
+            multiHit(attacker, stack, target, 4, 2);
         }
     }
 
@@ -161,7 +161,7 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2.5f;
+        return 2f;
     }
 
     @Override

@@ -35,7 +35,7 @@ ken.stab=若對準敵人，造成120%%傷害
 ken.riposte=招架後重置連擊
 
 item.banfu.name=板斧
-banfu.leap=騰空攻擊造成雙倍傷害
+banfu.leap=爆擊造成雙倍傷害
 banfu.cleave=攻擊附加三秒破甲，每層氣減少2點敵方護甲
 
 item.balisong.name=蝴蝶刀
@@ -56,7 +56,7 @@ karambit.riposte=招架時閃避到攻擊者身後
 karambit.harvest=可以採集剪刀能採集的方塊
 
 item.chui.name=博浪錘
-chui.leap=騰空攻擊造成雙倍傷害
+chui.leap=爆擊造成雙倍傷害
 chui.stagger=對擊倒的目標造成1.5倍傷害
 chui.slow=攻擊附加緩慢，時長等於氣層數一半，強度等於氣層數除以三
 
@@ -115,13 +115,13 @@ pollaxe.escape=若敵人在兩次攻擊之間離開攻擊範圍，連續攻擊�
 pollaxe.oscillate=使用攻擊會重置另一種攻擊的一半冷卻，招架後另一隻手立刻刷新
 
 item.halberd.name=鳳頭斧
-halberd.leap=騰空攻擊造成雙倍傷害
+halberd.leap=爆擊造成雙倍傷害
 halberd.cleave=普攻疊加三秒破甲II
 halberd.stab=右擊使用槍頭引爆破甲，每層破甲造成2點無視護甲的傷害
 halberd.stab.cooldown=每層引爆的破甲使本攻擊冷卻減少一秒
 
 item.changchui.name=立瓜錘
-changchui.leap=騰空攻擊造成雙倍傷害，對擊倒的目標造成雙倍傷害
+changchui.leap=爆擊造成雙倍傷害，對擊倒的目標造成雙倍傷害
 changchui.armpen=被動無視3（+氣層數）點護甲
 changchui.enfeeble=六層氣以上時，普攻使目標在2秒內無法恢復架勢
 changchui.swipe=右擊擊退120度的扇形區域內所有目標，此攻擊冷卻較長

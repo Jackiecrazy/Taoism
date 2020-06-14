@@ -35,7 +35,7 @@ ken.stab=if aiming, deal an extra 20%% damage
 ken.riposte=a parry will reset the combo counter
 
 item.banfu.name=Sapper's Axe
-banfu.leap=leap attacks deal double damage
+banfu.leap=crits deal double damage
 banfu.cleave=reduces enemy armor by 2 per chi level for 3 seconds
 
 item.balisong.name=Balisong
@@ -56,7 +56,7 @@ karambit.riposte=a successful parry is counted as a dodge forwards
 karambit.harvest=can also be used to harvest shearable blocks
 
 item.chui.name=Spherical Mace
-chui.leap=leap attacks deal double damage
+chui.leap=crits deal double damage
 chui.stagger=deals 1.5x damage against downed targets
 chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration increases by half a second every level
 
@@ -115,13 +115,13 @@ pollaxe.escape=if the enemy leaves your attack range in between the two attacks,
 pollaxe.oscillate=performing either attack recharges the other hand by half, one hand being parried instantly resets the other hand
 
 item.halberd.name=Halberd
-halberd.leap=leap attacks deal double damage
+halberd.leap=crits deal double damage
 halberd.cleave=chops through enemy armor, stacking armor break II for 3 seconds
 halberd.stab=right click to stab the target, detonating armor break for 2 points of armor piercing damage per level of potency
 halberd.stab.cooldown=each layer of armor break detonated will reduce the cooldown for this attack by 1 second
 
 item.changchui.name=Great Hammer
-changchui.leap=leap attacks deal double damage, deals double damage against a downed target
+changchui.leap=crits deal double damage, deals double damage against a downed target
 changchui.armpen=ignores 3(+chi) points of armor
 changchui.enfeeble=above 6 chi, normal attack causes target to be unable to recover posture for 2 seconds
 changchui.swipe=right click to swipe in a 120 degree sector, knocking enemies back. Has a longer cooldown

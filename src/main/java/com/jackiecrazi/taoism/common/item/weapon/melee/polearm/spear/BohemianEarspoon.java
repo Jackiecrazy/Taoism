@@ -79,7 +79,7 @@ public class BohemianEarspoon extends TaoWeapon {
                     if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
                             //too close! Rip out innards for double damage
-                            target.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                            target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
                             setLastAttackedRangeSq(stack, 0);
                         }
                         //a new challenger is approaching!

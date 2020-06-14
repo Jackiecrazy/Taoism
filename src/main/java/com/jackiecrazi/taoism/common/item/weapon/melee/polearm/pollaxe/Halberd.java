@@ -33,7 +33,7 @@ public class Halberd extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Halberd() {
-        super(3, 1, 9, 1f);
+        super(3, 1, 8, 1f);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public double attackDamage(ItemStack stack) {
-        return getHand(stack)==EnumHand.MAIN_HAND?super.attackDamage(stack):1;
+        return getHand(stack)==EnumHand.OFF_HAND?1:super.attackDamage(stack);
     }
 
     @Override
@@ -115,8 +115,7 @@ public class Halberd extends TaoWeapon {
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         //nerf offhand damage
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
-        return off;
+        return 1;
     }
 
     @Override
@@ -140,7 +139,7 @@ public class Halberd extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 50, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
+            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
         }
     }
 }

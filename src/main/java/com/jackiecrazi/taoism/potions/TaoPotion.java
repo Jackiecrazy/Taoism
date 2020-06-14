@@ -21,8 +21,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TaoPotion extends Potion {
+    public static final UUID FORCEATTRIBUTEUUID = UUID.fromString("ab3ecb2f-a427-4701-a3bb-d20a6cde8ecf");//so you think immunity to my potions is clever, eh?
+
     public static Potion HIDE = null;
     /**
      * deals 1 damage per second, +0.5 per additional layer, and prevents healing

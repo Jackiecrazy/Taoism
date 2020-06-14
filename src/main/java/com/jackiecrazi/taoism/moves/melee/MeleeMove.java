@@ -1,18 +1,17 @@
 package com.jackiecrazi.taoism.moves.melee;
 
 import com.jackiecrazi.taoism.common.entity.EntityMove;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 public abstract class MeleeMove extends EntityMove {
     private static final UUID u = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d77");
-    private static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
 
     public MeleeMove(World worldIn) {
         super(worldIn);
@@ -31,18 +30,12 @@ public abstract class MeleeMove extends EntityMove {
         //AttributeModifier att=new AttributeModifier(u,"quickie",this.damageMultiplier(attacker,defender,stack,duration),2);
         //attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).applyModifier(att);
         if (attacker instanceof EntityPlayer) {
-
             //System.out.println("a");
             EntityPlayer p = ((EntityPlayer) attacker);
-            // ReflectionHelper.setPrivateValue(EntityLivingBase.class, p, 1600,"field_184617_aD","ticksSinceLastSwing","aE");
-            atk.setInt(p, 1600);
-//NeedyLittleThings.taoWeaponAttack(defender,p,stack,false);
+            EnumHand hand = p.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+            TaoCombatUtils.rechargeHand(attacker, hand, 1f);
             defender.hurtResistantTime = 0;
-            p.attackTargetEntityWithCurrentItem(defender);
-            //p.getCooldownTracker().setCooldown(stack.getItem(),20);
-            //defender.hurtResistantTime=0;
-            //defender.attackEntityFrom(DamageSource.causePlayerDamage(p), (float) p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
-
+            TaoCombatUtils.taoWeaponAttack(defender, p, stack, hand==EnumHand.MAIN_HAND, true);
         } else
             attacker.attackEntityAsMob(defender);
         //attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).removeModifier(u);

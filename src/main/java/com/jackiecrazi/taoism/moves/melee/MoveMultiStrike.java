@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.moves.melee;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -29,7 +30,7 @@ public class MoveMultiStrike extends MeleeMove {
     public ArrayList<Entity> compileList(EntityLivingBase attacker, ItemStack stack, int duration) {
         ArrayList<Entity> ret = new ArrayList<>();
         if (stack.getItem() instanceof IRange) {
-            if (((IRange) stack.getItem()).getReach(attacker, stack) * ((IRange) stack.getItem()).getReach(attacker, stack) < target.getDistanceSq(attacker))
+            if (((IRange) stack.getItem()).getReach(attacker, stack) * ((IRange) stack.getItem()).getReach(attacker, stack) < NeedyLittleThings.getDistSqCompensated(target,attacker))
                 return ret;
         }
         if (ticksExisted % interval == 0) {

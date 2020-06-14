@@ -68,7 +68,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
-        return isOffhandEmpty(is);
+        return isOffhandEmpty(is)||isDummy(is);
     }
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
@@ -96,7 +96,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
+        return super.speed(stack);//getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
     }
 
     @Override
@@ -127,8 +127,10 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(defender, other, 0.9f);
+        if(isTwoHanded(is)) {
+            EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+            TaoCombatUtils.rechargeHand(defender, other, 0.9f);
+        }
     }
 
     @Override
@@ -142,8 +144,10 @@ public class Pollaxe extends TaoWeapon {
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        if(isTwoHanded(is)) {
+            EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+            TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        }
     }
 
     @Override

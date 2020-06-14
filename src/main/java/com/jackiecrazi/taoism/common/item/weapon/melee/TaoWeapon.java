@@ -10,7 +10,6 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.client.KeyOverlord;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
-import com.jackiecrazi.taoism.moves.melee.MoveMultiStrike;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -20,7 +19,6 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.item.EntityItem;
@@ -31,10 +29,11 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -185,7 +184,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         NBTTagCompound ntc = gettagfast(stack);
         ntc.setInteger("lastAttackedID", target.getEntityId());
-        ntc.setBoolean("connect",false);
+        ntc.setBoolean("connect", false);
         //ntc.setByte("lastMove", new MoveCode(true, ).toByte());
     }
 
@@ -282,7 +281,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
             if (!gettagfast(stack).getBoolean("spawning")) {
                 gettagfast(stack).setBoolean("spawning", true);
-                spawnExtraMoves(stack, target, attacker, chi);
+                queueExtraMoves(stack, target, attacker, chi);
                 gettagfast(stack).setBoolean("spawning", false);
             }
         }
@@ -305,25 +304,42 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             boolean onOffhand = offhand == stack;
             ItemStack mainhand = elb.getHeldItemMainhand();
             boolean onMainHand = mainhand == stack;
+            final NBTTagCompound tag = gettagfast(stack);
             if (onMainHand) {
                 setHandState(stack, EnumHand.MAIN_HAND);
                 boolean single = offhand.isEmpty() || (isDummy(offhand) && offhand.getItem() == mainhand.getItem());
-                gettagfast(stack).setBoolean("dual", single);
+                tag.setBoolean("dual", single);
             } else if (onOffhand) {
                 setHandState(stack, EnumHand.OFF_HAND);
-                gettagfast(stack).removeTag("dual");
+                tag.removeTag("dual");
             } else {
                 setHandState(stack, null);
-                gettagfast(stack).removeTag("dual");
+                tag.removeTag("dual");
             }
             //discharge weapon
             if (onMainHand || onOffhand) {
                 if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage() - 1);
             } else {
                 stack.setItemDamage(0);
-                gettagfast(stack).removeTag("lastMove");
+                tag.removeTag("lastMove");
             }
             //TODO update swing and proc damage when it should
+            //multihit shenanigans
+            if (tag.hasKey("multiHitTarget")) {
+                //multiHitFrom/Till/Target/Interval
+                Entity victim = w.getEntityByID(tag.getInteger("multiHitTarget"));
+                if (victim != null && NeedyLittleThings.getDistSqCompensated(elb, victim) < getReach(elb, stack) * getReach(elb, stack)) {
+                    long from = tag.getLong("multiHitFrom");
+                    long till = tag.getLong("multiHitTill");
+                    long curr = w.getTotalWorldTime();
+                    int interval = tag.getInteger("multiHitInterval");
+                    if (till >= curr && from!=curr && (curr - from) % interval == 0) {
+                        TaoCombatUtils.rechargeHand(elb, getHand(stack),1);
+                        victim.hurtResistantTime=0;
+                        TaoCombatUtils.taoWeaponAttack(victim, elb, stack, onMainHand, false);
+                    }
+                }
+            }
             //two handed shenanigans
             if (isTwoHanded(stack)) {
                 //main hand, update offhand dummy
@@ -447,6 +463,24 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.onLeftClickEntity(stack, player, entity);
     }
 
+    @Nullable
+    protected EnumHand getHand(ItemStack item) {
+        if (isDummy(item)) return EnumHand.OFF_HAND;
+        if (gettagfast(item).hasKey("off")) {
+            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean onEntityItemUpdate(EntityItem entityItem) {
+        if (isDummy(entityItem.getItem())) {
+            entityItem.setDead();
+            return true;
+        }
+        return super.onEntityItemUpdate(entityItem);
+    }
+
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
         EnumHand hand = getHand(stack);
         if (hand == null) {
@@ -534,15 +568,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     }
 
-    @Nullable
-    protected EnumHand getHand(ItemStack item) {
-        if (isDummy(item)) return EnumHand.OFF_HAND;
-        if (gettagfast(item).hasKey("off")) {
-            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-        }
-        return null;
-    }
-
     /**
      * default method! Override for complex weapons!
      */
@@ -616,18 +641,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
             if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
                 continue;
-            if (target instanceof IProjectile) {
-                IProjectile ip = (IProjectile) target;
-                Vec3d velocity = new Vec3d(target.motionX, target.motionY, target.motionZ);
-                if (velocity.lengthSquared() < getQiFromStack(is) * getQiFromStack(is)) {
-                    NeedyLittleThings.knockBack(target, attacker, 1.6f);
-                } else {
-                    target.motionX = 0;
-                    target.motionZ = 0;
-                }
-                target.velocityChanged = true;
-                continue;
-            }
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
                 EntityPlayer p = (EntityPlayer) attacker;
@@ -695,13 +708,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return ret;
     }
 
-    public int getCombo(EntityLivingBase wielder, ItemStack is) {
-        return gettagfast(is).getInteger("combo");
-    }
-
 //    public EnumPhase getPhase(final ItemStack stack){
 //
 //    }
+
+    public int getCombo(EntityLivingBase wielder, ItemStack is) {
+        return gettagfast(is).getInteger("combo");
+    }
 
     public void setCombo(EntityLivingBase wielder, ItemStack stack, int to) {
         if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
@@ -715,15 +728,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         afterSwing(elb, is);
         return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
-    }
-
-    @Override
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
-        if(isDummy(entityItem.getItem())){
-            entityItem.setDead();
-            return true;
-        }
-        return super.onEntityItemUpdate(entityItem);
     }
 
     public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
@@ -743,9 +747,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return this.getMaxDamage(stack) - stack.getItemDamage() <= 1;
     }
 
-    protected void multiHit(EntityLivingBase attacker, Entity target, int interval, int duration) {
-        attacker.world.spawnEntity(new MoveMultiStrike(attacker, target, interval, duration));
-
+    protected void multiHit(EntityLivingBase attacker, ItemStack stack, Entity target, int duration, int interval) {
+        if (gettagfast(stack).getLong("multiHitTill") < attacker.world.getTotalWorldTime()) {
+            stack.setTagInfo("multiHitTarget", new NBTTagInt(target.getEntityId()));
+            stack.setTagInfo("multiHitFrom", new NBTTagLong(attacker.world.getTotalWorldTime()));
+            stack.setTagInfo("multiHitTill", new NBTTagLong(attacker.world.getTotalWorldTime() + duration));
+            stack.setTagInfo("multiHitInterval", new NBTTagInt(interval));
+        }
     }
 
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {
@@ -831,7 +839,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * spawns entities etc.
      */
-    protected void spawnExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
 
     }
 }
