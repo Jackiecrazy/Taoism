@@ -85,11 +85,11 @@ public class TaoMovementUtils {
             EntityLivingBase uke = (EntityLivingBase) ent;
             uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
             TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 10; ++i) {
                 double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d1 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                elb.world.spawnParticle(EnumParticleTypes.BLOCK_DUST, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
+                elb.world.spawnParticle(EnumParticleTypes.FIREWORKS_SPARK, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
             }
             elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
         } else {
