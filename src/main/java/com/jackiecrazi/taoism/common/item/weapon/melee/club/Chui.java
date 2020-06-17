@@ -1,10 +1,10 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,7 +25,7 @@ public class Chui extends TaoWeapon {
     //FIXME posture mult too high, hammers are crap at defending
 
     public Chui() {
-        super(0, 1.4f, 6f, 1.3f);
+        super(0, 1.4f, 7f, 1.3f);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        NeedyLittleThings.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3));
+        TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3));
     }
 
 }

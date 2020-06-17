@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -53,7 +54,7 @@ public class Nunchaku extends TaoWeapon {
     };
 
     public Nunchaku() {
-        super(0, 1.6, 4f, 0.4f);
+        super(0, 1.6, 5f, 0.6f);
         this.addPropertyOverride(new ResourceLocation("nuns"), (stack, w, elb) -> {
             int low = getCurrentMove(stack).isSneakPressed() ? 1 : 0;
             int dual = isTwoHanded(stack) ? 2 : 0;
@@ -132,7 +133,7 @@ public class Nunchaku extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getCurrentMove(stack).isSneakPressed() && !getLastMove(stack).isSneakPressed()) {//high low
             //smash!
-            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 10, 0));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 10, 0));
         }
     }
 

@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -142,7 +143,7 @@ public class Staff extends TaoWeapon {
             if (attacker.onGround || attacker.isSneaking()) {
                 if (target.onGround) {
                     target.addVelocity(0, chi / 15f, 0);
-                    attacker.addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4));
+                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4));
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f);
                     target.motionY = 0;

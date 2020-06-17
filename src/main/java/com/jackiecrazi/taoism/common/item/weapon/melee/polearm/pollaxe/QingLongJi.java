@@ -6,8 +6,8 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -112,7 +112,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
-        if (!attacker.world.isRemote&&getHand(stack) == EnumHand.OFF_HAND) {
+        if (!attacker.world.isRemote && getHand(stack) == EnumHand.OFF_HAND) {
             if (isCharged(attacker, stack)) {
                 dischargeWeapon(attacker, stack);
             } else chargeWeapon(attacker, null, stack, 100);
@@ -137,10 +137,10 @@ public class QingLongJi extends TaoWeapon {
             NeedyLittleThings.knockBack(target, attacker, 0.3f);
             if (isCharged(attacker, stack)) {
                 //crescent cut!
-                target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, chi * 4, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+                TaoPotionUtils.forceBleed(target, attacker, chi * 4, 0, TaoPotionUtils.POTSTACKINGMETHOD.ADD);
             } else {
                 //butt smash!
-                target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0));
+                TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0));
             }
         }
     }

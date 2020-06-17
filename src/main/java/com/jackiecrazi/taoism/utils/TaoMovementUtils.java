@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.utils;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -7,9 +8,8 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntitySelectors;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -61,6 +61,18 @@ public class TaoMovementUtils {
         return ret;
     }
 
+    public static boolean attemptSlide(EntityLivingBase elb) {
+        if (!elb.onGround) return false;
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        //qi has to be nonzero
+        if (itsc.getQi() == 0) return false;
+        itsc.setRollCounter(0);
+        itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
+        elb.motionX = itsc.getQi() * Math.cos(NeedyLittleThings.rad(elb.rotationYaw + 90));
+        elb.motionZ = itsc.getQi() * Math.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
+        return true;
+    }
+
     public static boolean attemptJump(EntityLivingBase elb) {
         //if you're on the ground, I'll let vanilla handle you
         if (elb.onGround) return false;
@@ -68,13 +80,18 @@ public class TaoMovementUtils {
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
-        if (collidingEntity(elb) != null) {
-            Entity e = collidingEntity(elb);
-            if (e instanceof EntityLivingBase) {
-                EntityLivingBase target = (EntityLivingBase) e;
-                target.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
-                TaoCasterData.getTaoCap(target).consumePosture(5, true, elb);
+        Entity ent = collidingEntity(elb);
+        if (ent instanceof EntityLivingBase) {
+            EntityLivingBase uke = (EntityLivingBase) ent;
+            uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
+            TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
+            for (int i = 0; i < 5; ++i) {
+                double d0 = Taoism.unirand.nextGaussian() * 0.02D;
+                double d1 = Taoism.unirand.nextGaussian() * 0.02D;
+                double d2 = Taoism.unirand.nextGaussian() * 0.02D;
+                elb.world.spawnParticle(EnumParticleTypes.BLOCK_DUST, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
             }
+            elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
         } else {
             //if you're exhausted or just jumped, you can't jump again
             if ((itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING))
@@ -95,25 +112,25 @@ public class TaoMovementUtils {
         if (isTouchingWall(elb)) {
             boolean[] dir = collisionStatus(elb);
             EnumFacing face = elb.getHorizontalFacing();
-            boolean modifyY=false;
+            boolean modifyY = false;
             //Vec3d look=elb.getLookVec();
             if (dir[0] && face != EnumFacing.WEST) {//east
                 elb.motionX += speed / 2;
-                modifyY=true;
+                modifyY = true;
             }
             if (dir[1] && face != EnumFacing.EAST) {//west
                 elb.motionX -= speed / 2;
-                modifyY=true;
+                modifyY = true;
             }
             if (dir[4] && face != EnumFacing.NORTH) {//south
                 elb.motionZ += speed / 2;
-                modifyY=true;
+                modifyY = true;
             }
             if (dir[5] && face != EnumFacing.SOUTH) {//north
                 elb.motionZ -= speed / 2;
-                modifyY=true;
+                modifyY = true;
             }
-            if(modifyY)elb.motionY /= 2;
+            if (modifyY) elb.motionY /= 2;
             elb.setSprinting(true);
         }
         elb.velocityChanged = true;
@@ -129,7 +146,7 @@ public class TaoMovementUtils {
      */
     public static Entity collidingEntity(EntityLivingBase elb) {
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ), EntitySelectors.NOT_SPECTATING);
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 3, elb.motionY * 3, elb.motionZ * 3), EntitySelectors.NOT_SPECTATING);
         double dist = 0;
         Entity pick = null;
         for (Entity e : entities) {

@@ -1,15 +1,16 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
-import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -48,7 +49,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is)==EnumHand.MAIN_HAND?5f:6f;
+        return getHand(is) == EnumHand.MAIN_HAND ? 5f : 6f;
     }
 
     @Override
@@ -68,6 +69,11 @@ public class Halberd extends TaoWeapon {
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
+    }
+
+    @Override
+    public double attackDamage(ItemStack stack) {
+        return getHand(stack) == EnumHand.OFF_HAND ? 1 : super.attackDamage(stack);
     }
 
     protected double speed(ItemStack stack) {
@@ -98,40 +104,29 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? gettagfast(is).getFloat("lastDootLevel") : super.newCooldown(elb, is);
+    }
+
+    @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
-    public double attackDamage(ItemStack stack) {
-        return getHand(stack)==EnumHand.OFF_HAND?1:super.attackDamage(stack);
-    }
-
-    @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return attacker.motionY < 0 ? 2f : 1f;
-    }
-
-    @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        //nerf offhand damage
-        return 1;
-    }
-
-    @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker, target, item, orig);
+        return getHand(item) == EnumHand.MAIN_HAND ? 2f : 1f;
     }
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         float doot = super.hurtStart(ds, attacker, target, item, orig);
-        if (target.getActivePotionEffect(TaoPotion.ARMORBREAK) != null && getHand(item) == EnumHand.OFF_HAND) {
-            PotionEffect pe = target.getActivePotionEffect(TaoPotion.ARMORBREAK);
+        if (getHand(item) == EnumHand.OFF_HAND) {
+            float effectiveLevel = (float) TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR);
             ds.setDamageBypassesArmor();
             target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
-            TaoCombatUtils.rechargeHand(attacker, EnumHand.OFF_HAND, pe.getAmplifier()/10f);
-            return doot + (pe.getAmplifier() * 2f);
+            item.setTagInfo("lastDootLevel", new NBTTagFloat(effectiveLevel / 10f));
+            return doot + (effectiveLevel * 2f);
         }
         return doot;
     }
@@ -139,7 +134,7 @@ public class Halberd extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 1), NeedyLittleThings.POTSTACKINGMETHOD.MAXDURATION));
+            TaoPotionUtils.attemptStackPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 1), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION));
         }
     }
 }

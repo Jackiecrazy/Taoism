@@ -1,11 +1,11 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -26,7 +26,7 @@ public class BanFu extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public BanFu() {
-        super(3, 1.4, 6f, 1.5f);
+        super(3, 1.4, 7f, 1.5f);
         this.setHarvestLevel("axe", 2);
     }
 
@@ -94,7 +94,7 @@ public class BanFu extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (chi > 0) {
-            NeedyLittleThings.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
         }
     }
 

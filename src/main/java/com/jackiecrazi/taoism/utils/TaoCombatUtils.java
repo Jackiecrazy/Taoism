@@ -18,7 +18,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.Item;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,11 +59,11 @@ public class TaoCombatUtils {
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shield and sword block
-        if ((main.getItem().isShield(main, elb) || contains(main.getItem())) && mainRec) {
+        if (isParryCapable(main, elb) && mainRec) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if ((off.getItem().isShield(off, elb) || contains(off.getItem())) && offRec) {
+        if (isParryCapable(off, elb) && offRec) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
@@ -79,12 +79,12 @@ public class TaoCombatUtils {
         return ret;
     }
 
-    private static boolean contains(Item i) {
-        if (i.getRegistryName() == null) return false;
+    public static boolean isParryCapable(ItemStack i, EntityLivingBase e) {
+        if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.parryCapableItems) {
-            if (s.equals(i.getRegistryName().toString())) return true;
+            if (s.equals(i.getItem().getRegistryName().toString())) return true;
         }
-        return false;
+        return i.getItem().isShield(i, e) || i.getItem().getItemUseAction(i) == EnumAction.BLOCK;
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {

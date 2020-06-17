@@ -1,14 +1,15 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.pick;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
@@ -43,12 +44,12 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        PotionEffect hemorrhage = NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), NeedyLittleThings.POTSTACKINGMETHOD.ADD);
-        if (hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue()) {//isCharged(attacker,stack)
+        PotionEffect hemorrhage = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
+        if (!TaoPotionUtils.attemptAddPot(target, hemorrhage) || hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue()) {//isCharged(attacker,stack)
             target.hurtResistantTime = 0;
-            target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), target.getMaxHealth() / (20 - 2*(hemorrhage.getAmplifier())));
-            target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, hemorrhage.getDuration(), hemorrhage.getAmplifier()), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
-        } else target.addPotionEffect(hemorrhage);
+            target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), Math.min(target.getMaxHealth() / (20 - 2 * (hemorrhage.getAmplifier())), 2 * (float) attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
+            TaoPotionUtils.forceBleed(target, attacker, hemorrhage.getDuration(), hemorrhage.getAmplifier(), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
+        }
     }
 
     @Override

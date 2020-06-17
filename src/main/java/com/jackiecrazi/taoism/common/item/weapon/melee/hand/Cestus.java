@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -30,7 +31,7 @@ public class Cestus extends TaoWeapon {
     //naturally adds 2 armor points, applies slow 1 at 3 chi, and slow 2 at 6 chi. At 10 chi blindness. Damage scales with chi
     //to compensate for so many perks, is single target and short range, but no knockback
     public Cestus() {
-        super(0, 2, 4d, 1.3f);
+        super(0, 2, 5d, 1.3f);
     }
 
     @Override
@@ -102,10 +103,10 @@ public class Cestus extends TaoWeapon {
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int qi) {
         if (qi >= 3) {
-            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1));
         }
         if (qi >= 9) {
-            target.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 40, 0));
+            TaoPotionUtils.attemptAddPot(target,new PotionEffect(MobEffects.BLINDNESS, 40, 0));
         }
         if (isCharged(attacker, stack)) {
             TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker);

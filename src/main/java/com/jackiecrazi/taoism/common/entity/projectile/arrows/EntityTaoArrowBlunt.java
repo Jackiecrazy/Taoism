@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.arrows;
 
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
@@ -38,6 +39,6 @@ public class EntityTaoArrowBlunt extends EntityTaoArrow {
     @Override
     protected void arrowHit(EntityLivingBase living)
     {
-        living.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS,20));
+        TaoPotionUtils.attemptAddPot(living, new PotionEffect(MobEffects.SLOWNESS,20));
     }
 }

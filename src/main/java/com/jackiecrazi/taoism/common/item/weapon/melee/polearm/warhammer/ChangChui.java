@@ -7,6 +7,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -139,7 +140,7 @@ public class ChangChui extends TaoWeapon {
             NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
         } else {
             if (TaoCasterData.getTaoCap(attacker).getQi()>6) {
-                target.addPotionEffect(new PotionEffect(TaoPotion.ENFEEBLE, 40));
+                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 40));
             }
 //            for(ItemStack armor:target.getArmorInventoryList()){
 //                armor.addAttributeModifier();

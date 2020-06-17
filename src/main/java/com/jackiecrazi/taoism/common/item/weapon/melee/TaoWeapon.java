@@ -185,6 +185,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         NBTTagCompound ntc = gettagfast(stack);
         ntc.setInteger("lastAttackedID", target.getEntityId());
         ntc.setBoolean("connect", false);
+        ntc.setBoolean("effect", false);
         //ntc.setByte("lastMove", new MoveCode(true, ).toByte());
     }
 

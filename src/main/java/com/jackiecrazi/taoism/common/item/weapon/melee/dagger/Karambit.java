@@ -3,17 +3,15 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
@@ -132,9 +130,6 @@ public class Karambit extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker))
-            if (!NeedyLittleThings.attemptAddPot(target, new PotionEffect(TaoPotion.BLEED, 20, 1))) {
-                target.hurtResistantTime=0;
-                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), 3);//try to skip? you get more!
-            }
+            TaoPotionUtils.forceBleed(target, attacker, 20, 1, TaoPotionUtils.POTSTACKINGMETHOD.NONE);
     }
 }

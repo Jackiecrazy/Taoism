@@ -1,11 +1,11 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.whip;
 
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -91,8 +91,8 @@ public class CatNineTails extends TaoWeapon {
             potency = 2 - (Math.floorDiv(armor, 5));
             duration = 100 - (armor * 10);
         }
-        target.addPotionEffect(new PotionEffect(TaoPotion.LACERATION, duration, potency));
-        target.addPotionEffect(NeedyLittleThings.stackPot(target, new PotionEffect(TaoPotion.BLEED, duration, potency), NeedyLittleThings.POTSTACKINGMETHOD.ADD));
+        TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.LACERATION, duration, potency));
+        TaoPotionUtils.forceBleed(target, attacker, duration, potency, TaoPotionUtils.POTSTACKINGMETHOD.ADD);
     }
 
     @Override

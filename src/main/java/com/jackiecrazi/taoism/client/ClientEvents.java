@@ -13,6 +13,7 @@ import com.jackiecrazi.taoism.config.HudConfig;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import com.jackiecrazi.taoism.networking.PacketJump;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -69,7 +70,7 @@ public class ClientEvents {
      */
     private static long[] lastTap = {0, 0, 0, 0};
     private static boolean[] tapped = {false, false, false, false};
-    private static boolean jump = false;
+    private static boolean jump = false, sneak = false;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -101,7 +102,7 @@ public class ClientEvents {
             }
             //cube bois become side bois
             //flat bois become flatter bois
-            if (sizes.getFirst() >= sizes.getSecond()) {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
+            else {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
                 GlStateManager.translate(event.getX(), event.getY(), event.getZ());
                 //GlStateManager.rotate(180f, 0, 0, 0);
                 //GlStateManager.rotate(180f, 0, 1, 0);
@@ -175,7 +176,12 @@ public class ClientEvents {
         }
         jump = mi.jump;
 
-
+        if (mc.player.isSprinting() && mi.sneak && !sneak) {
+            //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
+            Taoism.net.sendToServer(new PacketJump());
+            //}
+        }
+        sneak = mi.sneak;
     }
 
     @SubscribeEvent
@@ -186,7 +192,7 @@ public class ClientEvents {
             KeyBinding.unPressAllKeys();
             return;
         }
-        if(!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player)) {
+        if (!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player)) {
             GameSettings gs = Minecraft.getMinecraft().gameSettings;
             MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
             Taoism.net.sendToServer(new PacketMakeMove(move));
@@ -206,7 +212,8 @@ public class ClientEvents {
             }
         }
         //force offhand to have some semblance of cooldown
-        if (!(e.getItemStack().getItem() instanceof TaoWeapon)) return;
+        if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isParryCapable(e.getItemStack(), p))
+            return;
         e.setCanceled(true);
         ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();
         float f1 = p.prevRotationPitch + (p.rotationPitch - p.prevRotationPitch) * e.getPartialTicks();

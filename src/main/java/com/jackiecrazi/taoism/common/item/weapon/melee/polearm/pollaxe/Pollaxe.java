@@ -39,7 +39,7 @@ public class Pollaxe extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Pollaxe() {
-        super(3, 1.2, 6, 1.5f);
+        super(3, 1.2, 7, 1.5f);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -53,8 +54,8 @@ public class Tonfa extends TaoWeapon {
             Taoism.setAtk(attacker, 0);
         }
         if (qi >= 7) {
-            attacker.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
-            attacker.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7));
         }
     }
 
@@ -65,19 +66,19 @@ public class Tonfa extends TaoWeapon {
             Taoism.setAtk(attacker, 0);
         }
         if (qi >= 7) {
-            attacker.addPotionEffect(new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            target.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 20));
-            target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 20));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 20));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, 20));
         }
         if (isCharged(attacker, stack)) {
-            attacker.addPotionEffect(new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)));
-            attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 40));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.RESOLUTION, 40));
 
         }
     }

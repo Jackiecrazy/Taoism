@@ -15,8 +15,6 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
@@ -30,11 +28,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class NeedyLittleThings {
-    public final static UUID MODIFIER_UUID = UUID.fromString("294093da-54f0-4c1b-9dbb-13b77534a84c");
     /**
      * Copied from EntityArrow, because kek.
      */
@@ -91,38 +86,6 @@ public class NeedyLittleThings {
     }
 
     /**
-     * increases the potion amplifier on the entity, with options on the duration
-     */
-    public static PotionEffect stackPot(EntityLivingBase elb, PotionEffect toAdd, POTSTACKINGMETHOD method) {
-        PotionEffect pe = elb.getActivePotionEffect(toAdd.getPotion());
-        if (pe == null) {
-            return toAdd;
-        }
-        Potion p = toAdd.getPotion();
-        int length = pe.getDuration();
-        int potency = pe.getAmplifier() + 1 + toAdd.getAmplifier();
-
-        switch (method) {
-            case ADD:
-                length += pe.getDuration();
-                break;
-            case MAXDURATION:
-                length = Math.max(pe.getDuration(), toAdd.getDuration());
-                break;
-            case MAXPOTENCY:
-                length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.max(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() > toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
-                break;
-            case MINDURATION:
-                length = Math.min(pe.getDuration(), toAdd.getDuration());
-                break;
-            case MINPOTENCY:
-                length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.min(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() < toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
-                break;
-        }
-        return new PotionEffect(p, length, potency, true, false);
-    }
-
-    /**
      * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
     public static void knockBack(Entity to, Entity from, float strength) {
@@ -137,25 +100,6 @@ public class NeedyLittleThings {
             to.velocityChanged = true;
         }
         //knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
-    }
-
-    /**
-     * Attempts to add the potion effect. If it fails, the function will *permanently* add all the attribute modifiers as punishment.
-     * Take that, wither!
-     */
-    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot){
-        Potion p=pot.getPotion();
-        elb.addPotionEffect(pot);
-        if(!elb.isPotionActive(p)){
-            for(Map.Entry<IAttribute, AttributeModifier> e:p.getAttributeModifierMap().entrySet()){
-                if(elb.getEntityAttribute(e.getKey())!=null){
-                    elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
-                    elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
-                }
-            }
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -381,14 +325,6 @@ public class NeedyLittleThings {
             }
         }
         return ret;
-    }
-
-    public enum POTSTACKINGMETHOD {
-        ADD,
-        MAXDURATION,
-        MAXPOTENCY,
-        MINDURATION,
-        MINPOTENCY,
     }
 
     public static class HitResult {
