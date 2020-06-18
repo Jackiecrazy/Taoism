@@ -1,8 +1,11 @@
 package com.jackiecrazi.taoism.capability;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
+import com.jackiecrazi.taoism.networking.PacketUpdateAttackTimer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -45,6 +48,16 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         float height = (float) Math.ceil(elb.height);
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
         return Math.round(width * width * height * 5 * armor);
+    }
+
+    public static void syncAttackTimer(EntityLivingBase entity){
+        if (!entity.world.isRemote) {
+            PacketUpdateAttackTimer puat=new PacketUpdateAttackTimer(entity);
+            Taoism.net.sendToAllTracking(puat, entity);
+            if (entity instanceof EntityPlayerMP) {
+                Taoism.net.sendTo(puat, (EntityPlayerMP) entity);
+            }
+        }
     }
 
     /**
@@ -105,8 +118,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 30f);
-        return ticks * armorMod * 0.05f * posMult * elb.getHealth() / elb.getMaxHealth();
+        float armorMod = 1f ;//- ((float) elb.getTotalArmorValue() / 60f);
+        return ticks * armorMod * 0.05f * posMult * (float)(Math.sqrt(elb.getHealth()) / Math.sqrt(elb.getMaxHealth()));
     }
 
     /**

@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -51,6 +52,11 @@ public class Chui extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.5f;
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return TaoCasterData.getTaoCap(target).getDownTimer()>0? Event.Result.ALLOW:super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override

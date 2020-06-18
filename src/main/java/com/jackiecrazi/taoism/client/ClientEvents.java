@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.client;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.BinaryMachiavelli;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
@@ -13,6 +14,7 @@ import com.jackiecrazi.taoism.config.HudConfig;
 import com.jackiecrazi.taoism.networking.PacketDodge;
 import com.jackiecrazi.taoism.networking.PacketJump;
 import com.jackiecrazi.taoism.networking.PacketMakeMove;
+import com.jackiecrazi.taoism.networking.PacketSlide;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -55,14 +57,32 @@ public class ClientEvents {
     public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
     public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
     private static final int ALLOWANCE = 7;
-    private static final Color[] GRADIENT = {
-            new Color(200, 37, 56),
-            new Color(177, 52, 51),
-            new Color(141, 71, 43),
-            new Color(103, 94, 36),
-            new Color(69, 115, 30),
-            new Color(46, 127, 24),
-
+    private static final int[] GRADIENTE = {
+            new Color(200, 37, 56).getRGB(),
+            new Color(177, 52, 51).getRGB(),
+            new Color(141, 71, 43).getRGB(),
+            new Color(103, 94, 36).getRGB(),
+            new Color(69, 115, 30).getRGB(),
+            new Color(46, 127, 24).getRGB(),
+    };
+    private static final int[] GRADIENT = {
+            0xFF0000,
+            0xFF2000,
+            0xFF4000,
+            0xFF6000,
+            0xFF8000,
+            0xFFA000,
+            0xFFC000,
+            0xFFE000,
+            0xFFFF00, //max, step by 15
+            0xE0FF00,
+            0xC0FF00,
+            0xA0FF00,
+            0x80FF00,
+            0x60FF00,
+            0x40FF00,
+            0x20FF00,
+            0x10FF00
     };
     private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
     private static final ResourceLocation hood = new ResourceLocation(Taoism.MODID, "textures/hud/icons.png");
@@ -179,7 +199,7 @@ public class ClientEvents {
 
         if (mc.player.isSprinting() && mi.sneak && !sneak) {
             //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-            Taoism.net.sendToServer(new PacketJump());
+            Taoism.net.sendToServer(new PacketSlide());
             //}
         }
         sneak = mi.sneak;
@@ -322,8 +342,8 @@ public class ClientEvents {
                         //bar
                         GlStateManager.pushMatrix();
                         GlStateManager.enableAlpha();
-                        Color c = GRADIENT[MathHelper.clamp((int) (qiExtra * (GRADIENT.length)), 0, GRADIENT.length - 1)];
-                        GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+                        int c = GRADIENTE[MathHelper.clamp((int) (qiExtra * (GRADIENTE.length)), 0, GRADIENTE.length - 1)];
+                        GlStateManager.color(red(c), green(c), blue(c));
                         mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64) + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();
 
@@ -340,17 +360,36 @@ public class ClientEvents {
                     }
 
                     //render posture bar if not full
-                    //if (cap.getPosture() < cap.getMaxPosture())
-                    drawPostureBarreAt(player, width, height);
+                    if (cap.getPosture() < cap.getMaxPosture())
+                        drawPostureBarreAt(player, width / 2, height - 57);
                     Entity look = getEntityLookedAt(player);
-                    if (look instanceof EntityLivingBase && TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() && HudConfig.client.displayEnemyPosture) {
-                        drawPostureBarreAt((EntityLivingBase) look, width, height / 3);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
+                    if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture()) {
+                        drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                     }
                 }
             }
     }
 
-    private static void drawPostureBarreAt(EntityLivingBase elb, int width, int height) {
+    private static float red(int a) {
+        return BinaryMachiavelli.getInteger(a, 16, 23) / 255f;
+    }
+
+    private static float green(int a) {
+        return BinaryMachiavelli.getInteger(a, 8, 15) / 255f;
+    }
+
+    private static float blue(int a) {
+        return BinaryMachiavelli.getInteger(a, 0, 7) / 255f;
+    }
+
+    /**
+     * Draws it with the coord as its center
+     *
+     * @param elb
+     * @param atX
+     * @param atY
+     */
+    private static void drawPostureBarreAt(EntityLivingBase elb, int atX, int atY) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager().bindTexture(hood);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -358,34 +397,43 @@ public class ClientEvents {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
         mc.mcProfiler.startSection("postureBar");
         float cap = itsc.getMaxPosture();
-        int left = width / 2 - 91;
+        int left = atX - 91;
         float posPerc = MathHelper.clamp(itsc.getPosture() / itsc.getMaxPosture(), 0, 1);
-        Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))].brighter();
-
+        int c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
         if (cap > 0) {
             short barWidth = 182;
             int filled = (int) (itsc.getPosture() / itsc.getMaxPosture() * (float) (barWidth));
-            int top = height - 54;
-            mc.ingameGUI.drawTexturedModalRect(left, top, 0, 64, barWidth, 5);
-            if (itsc.getPosInvulTime() > 0) {
+            int invulTime = (int) ((float) itsc.getPosInvulTime() / (float) CombatConfig.ssptime * (float) (barWidth));
+            mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 64, barWidth, 5);
+            if (filled > invulTime) {
+                GlStateManager.color(red(c), green(c), blue(c));
+                mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, filled, 5);
+            }
+            if (itsc.getDownTimer() > 0) {
+                invulTime = (int) ((float) itsc.getDownTimer() / (float) TaoStatCapability.MAXDOWNTIME * (float) (barWidth));
+                GlStateManager.color(0, 0, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
+                mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, invulTime, 5);
+            } else {
                 GlStateManager.color(1, 215f / 255f, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
-                filled = (int) ((float)itsc.getPosInvulTime() / (float)CombatConfig.ssptime * (float) (barWidth));
-            } else
-                GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
-            mc.ingameGUI.drawTexturedModalRect(left, top, 0, 69, filled, 5);
+                mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, invulTime, 5);
+            }
+            if (filled <= invulTime) {
+                GlStateManager.color(red(c), green(c), blue(c));
+                mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, filled, 5);
+            }
         }
-
         mc.mcProfiler.endSection();
-        mc.mcProfiler.startSection("postureNumber");
-        String text = "" + itsc.getPosture();
-        int x = (width - mc.fontRenderer.getStringWidth(text)) / 2;
-        int y = height - 55;
-        mc.fontRenderer.drawString(text, x + 1, y, 0);
-        mc.fontRenderer.drawString(text, x - 1, y, 0);
-        mc.fontRenderer.drawString(text, x, y + 1, 0);
-        mc.fontRenderer.drawString(text, x, y - 1, 0);
-        mc.fontRenderer.drawString(text, x, y, c.getRGB());
-        mc.mcProfiler.endSection();
+//        mc.mcProfiler.startSection("postureNumber");
+//        float postureNumber = ((int) (itsc.getPosture() * 100)) / 100f;
+//        String text = "" + postureNumber;
+//        int x = atX - (mc.fontRenderer.getStringWidth(text) / 2);
+//        int y = atY - 1;
+//        mc.fontRenderer.drawString(text, x + 1, y, 0);
+//        mc.fontRenderer.drawString(text, x - 1, y, 0);
+//        mc.fontRenderer.drawString(text, x, y + 1, 0);
+//        mc.fontRenderer.drawString(text, x, y - 1, 0);
+//        mc.fontRenderer.drawString(text, x, y, c.getRGB());
+//        mc.mcProfiler.endSection();
         mc.getTextureManager().bindTexture(Gui.ICONS);
         GlStateManager.enableBlend();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -394,7 +442,7 @@ public class ClientEvents {
     public static Entity getEntityLookedAt(Entity e) {
         Entity foundEntity = null;
 
-        final double finalDistance = 32;
+        final double finalDistance = 16;
         double distance = finalDistance;
         RayTraceResult pos = raycast(e, finalDistance);
 
@@ -485,8 +533,8 @@ public class ClientEvents {
             //bar, not rendered if down because that don't make sense
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
-            Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
-            GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+            int c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+            GlStateManager.color(red(c), green(c), blue(c));
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
             GlStateManager.popMatrix();
             //base shield layer

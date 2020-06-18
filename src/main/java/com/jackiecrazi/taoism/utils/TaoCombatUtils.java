@@ -106,6 +106,7 @@ public class TaoCombatUtils {
                 break;
             case MAIN_HAND:
                 Taoism.setAtk(elb, (int) (percent * totalSec));
+                TaoCasterData.syncAttackTimer(elb);
                 break;
         }
     }

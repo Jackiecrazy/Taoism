@@ -35,6 +35,8 @@ public class CommonProxy {
         Taoism.net.registerMessage(PacketDodge.DodgeHandler.class, PacketDodge.class, dis++, Side.SERVER);
         Taoism.net.registerMessage(PacketUpdateClientPainful.UpdateClientHandler.class, PacketUpdateClientPainful.class, dis++, Side.CLIENT);
         Taoism.net.registerMessage(PacketUpdateSize.UpdateSizeHandler.class, PacketUpdateSize.class, dis++, Side.CLIENT);
+        Taoism.net.registerMessage(PacketSlide.SlideHandler.class, PacketSlide.class, dis++, Side.SERVER);
+        Taoism.net.registerMessage(PacketUpdateAttackTimer.UpdateAttackTimerHandler.class, PacketUpdateAttackTimer.class, dis++, Side.CLIENT);
 
         CapabilityManager.INSTANCE.register(ITaoStatCapability.class, new TaoStorage(), TaoStatCapabilityDefault::new);
     }

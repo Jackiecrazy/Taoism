@@ -175,11 +175,11 @@ public class NeedyLittleThings {
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int angle) {
         Vec3d posVec = entity2.getPositionVector();
         Vec3d lookVec = entity1.getLook(1.0F);
-        Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector()).normalize();
+        Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0)).normalize();
         //relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
 
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
-        double cos = Math.cos(rad(angle / 2));
+        double cos = MathHelper.cos(rad(angle / 2));
         return dotsq < -(cos * cos);
     }
 

@@ -11,6 +11,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
@@ -68,8 +70,10 @@ public class TaoMovementUtils {
         if (itsc.getQi() == 0) return false;
         itsc.setRollCounter(0);
         itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-        elb.motionX = itsc.getQi() * Math.cos(NeedyLittleThings.rad(elb.rotationYaw + 90));
-        elb.motionZ = itsc.getQi() * Math.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
+        Vec3d v=elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
+        elb.motionX = (1+itsc.getQi()/4) * v.x;
+        elb.motionZ = (1+itsc.getQi()/4) * v.z;
+        elb.velocityChanged = true;
         return true;
     }
 
@@ -113,18 +117,18 @@ public class TaoMovementUtils {
             boolean[] dir = collisionStatus(elb);
             EnumFacing face = elb.getHorizontalFacing();
             boolean facingWall = false;
-            switch (face){
+            switch (face) {
                 case WEST:
-                    facingWall=dir[0];
+                    facingWall = dir[0];
                     break;
                 case EAST:
-                    facingWall=dir[1];
+                    facingWall = dir[1];
                     break;
                 case NORTH:
-                    facingWall=dir[4];
+                    facingWall = dir[4];
                     break;
                 case SOUTH:
-                    facingWall=dir[5];
+                    facingWall = dir[5];
                     break;
             }
             //Vec3d look=elb.getLookVec();
@@ -200,20 +204,20 @@ public class TaoMovementUtils {
             double x = 0, y = 0.3, z = 0;
             switch (side) {
                 case 0://left
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw));
+                    x = MathHelper.cos(NeedyLittleThings.rad(elb.rotationYaw));
+                    z = MathHelper.sin(NeedyLittleThings.rad(elb.rotationYaw));
                     break;
                 case 1://back
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw - 90));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw - 90));
+                    x = MathHelper.cos(NeedyLittleThings.rad(elb.rotationYaw - 90));
+                    z = MathHelper.sin(NeedyLittleThings.rad(elb.rotationYaw - 90));
                     break;
                 case 2://right
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw - 180));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw - 180));
+                    x = MathHelper.cos(NeedyLittleThings.rad(elb.rotationYaw - 180));
+                    z = MathHelper.sin(NeedyLittleThings.rad(elb.rotationYaw - 180));
                     break;
                 case 3://forward
-                    x = Math.cos(NeedyLittleThings.rad(elb.rotationYaw + 90));
-                    z = Math.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
+                    x = MathHelper.cos(NeedyLittleThings.rad(elb.rotationYaw + 90));
+                    z = MathHelper.sin(NeedyLittleThings.rad(elb.rotationYaw + 90));
                     break;
             }
             float divisor = side == 3 ? 10f : 20f;

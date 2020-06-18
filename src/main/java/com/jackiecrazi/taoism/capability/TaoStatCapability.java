@@ -182,18 +182,18 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant) {
-        if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
-        float cache = posture;
+        if (getDownTimer() > 0 || getPosInvulTime() > 0)
+            return 0;//cancel all posture reduction when downed so you get back up with a buffer
         posture -= amount;
-        EntityLivingBase elb=e.get();
-        if (posture <= 0f&&elb!=null) {
+        EntityLivingBase elb = e.get();
+        if (posture <= 0f && elb != null) {
             boolean protect = isProtected();
             setProtected(false);//cancels ssp so you can regen posture without delay
             if ((protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
                 //sudden stagger prevention
                 posture = 0.01f;
                 if (canStagger && getPosInvulTime() <= 0) setPosInvulTime(CombatConfig.ssptime);
-                elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, Taoism.unirand.nextFloat()*0.4f + 0.8f, Taoism.unirand.nextFloat()*0.4f + 0.8f);
+                elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
                 return 0f;
             }
             amount = -posture;
@@ -350,9 +350,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosInvulTime(int time) {
-        int temp=protec;
+        int temp = protec;
         protec = Math.max(time, 0);
-        if(temp>0&&protec==0)sync();
+        if (temp > 0 && protec == 0) sync();
     }
 
     @Override
@@ -437,8 +437,8 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void sync() {
-        EntityLivingBase elb=e.get();
-        if(elb==null)return;
+        EntityLivingBase elb = e.get();
+        if (elb == null) return;
         if (elb.world.isRemote) return;//throw new UnsupportedOperationException("what are you doing?");
         PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(elb);
         if (elb instanceof EntityPlayerMP) {
@@ -448,14 +448,14 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {
-        EntityLivingBase elb=e.get();
-        if(elb==null)return;
+        EntityLivingBase elb = e.get();
+        if (elb == null) return;
         elb.dismountRidingEntity();
         if (attacker != null)
             NeedyLittleThings.knockBack(elb, attacker, overflow * 0.4F);
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
-        setDownTimer(downtimer);
-        elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat()*0.4f + 0.8f, Taoism.unirand.nextFloat()*0.4f + 0.8f);
+        setDownTimer(MAXDOWNTIME);
+        elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
         if (elb.isBeingRidden()) {
             for (Entity ent : elb.getPassengers())

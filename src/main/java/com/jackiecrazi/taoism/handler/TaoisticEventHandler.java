@@ -124,9 +124,12 @@ public class TaoisticEventHandler {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            if (NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
+            if (!uke.world.isRemote&&NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
                 if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
-                    ent.motionX = ent.motionY = ent.motionZ = 0;
+                    Vec3d look=uke.getLookVec();
+                    ent.motionX=look.x;
+                    ent.motionY=look.y;
+                    ent.motionZ=look.z;
                     ent.velocityChanged = true;
                     e.setCanceled(true);//seriously, who thought loading rooftops with a ton of archers was a good idea?
                 }
@@ -146,7 +149,7 @@ public class TaoisticEventHandler {
         TaoCasterData.updateCasterData(uke);
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
-        if (ds.getTrueSource() instanceof EntityLivingBase&&!uke.world.isRemote) {
+        if (ds.getTrueSource() instanceof EntityLivingBase && !uke.world.isRemote) {
             if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isMeleeDamage(ds))//
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
@@ -158,7 +161,7 @@ public class TaoisticEventHandler {
             }
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
-            if(semeCap.getBindTime() > 0||semeCap.getDownTimer() > 0){//bound and downed entities cannot attack
+            if (semeCap.getBindTime() > 0 || semeCap.getDownTimer() > 0) {//bound and downed entities cannot attack
                 e.setCanceled(true);
                 return;
             }
@@ -192,9 +195,9 @@ public class TaoisticEventHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || (!defend.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 90))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
+            if ((!smart || (!defend.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 120))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
-                uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
+                uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1-(ukeCap.getPosture()/ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
@@ -390,17 +393,17 @@ public class TaoisticEventHandler {
     public static void resetStat(EntityJoinWorldEvent ev) {
         Entity e = ev.getEntity();
         if (e == null) return;
-        if(e instanceof EntityThrowable){
-            EntityThrowable et=(EntityThrowable) e;
-            EntityLivingBase elb=et.getThrower();
-            if(elb!=null&&TaoCasterData.getTaoCap(elb).getDownTimer()>0){
+        if (e instanceof EntityThrowable) {
+            EntityThrowable et = (EntityThrowable) e;
+            EntityLivingBase elb = et.getThrower();
+            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
                 ev.setCanceled(true);
             }
         }
-        if(e instanceof EntityFireball){
-            EntityFireball et=(EntityFireball) e;
-            EntityLivingBase elb=et.shootingEntity;
-            if(elb!=null&&TaoCasterData.getTaoCap(elb).getDownTimer()>0){
+        if (e instanceof EntityFireball) {
+            EntityFireball et = (EntityFireball) e;
+            EntityLivingBase elb = et.shootingEntity;
+            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
                 ev.setCanceled(true);
             }
         }
@@ -427,9 +430,9 @@ public class TaoisticEventHandler {
     @SubscribeEvent
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
         EntityLivingBase elb = e.getEntityLiving();
-        ITaoStatCapability itsc=TaoCasterData.getTaoCap(elb);
-        if(itsc.getDownTimer()>0){
-            elb.motionY=0;
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        if (itsc.getDownTimer() > 0) {
+            elb.motionY = 0;
             return;
         }
         float qi = TaoCasterData.getTaoCap(elb).getQi();
@@ -446,7 +449,7 @@ public class TaoisticEventHandler {
     @SubscribeEvent
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(e.getEntityLiving());
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0|| itsc.getPosInvulTime() > 0;
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || e.getEntityLiving().world.getClosestPlayerToEntity(e.getEntityLiving(), 16) != null;
         if (e.getEntityLiving().ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(e.getEntityLiving());
         }

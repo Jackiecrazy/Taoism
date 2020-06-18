@@ -17,6 +17,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -109,6 +110,11 @@ public class ChangChui extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         return (TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 2f : 1f) * attacker.motionY < 0 ? 2f : 1f;
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return TaoCasterData.getTaoCap(target).getDownTimer()>0? Event.Result.ALLOW:super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
