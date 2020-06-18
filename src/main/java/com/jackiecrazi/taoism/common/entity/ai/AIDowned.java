@@ -6,6 +6,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 
 public class AIDowned extends EntityAIBase {
     private EntityLiving t;
+
     public AIDowned(EntityLiving target) {
         t=target;
         this.setMutexBits(0xFFFFFF);
@@ -19,5 +20,10 @@ public class AIDowned extends EntityAIBase {
     @Override
     public boolean isInterruptible() {
         return false;
+    }
+
+    @Override
+    public void startExecuting() {
+        //t.targetTasks.removeTask();
     }
 }

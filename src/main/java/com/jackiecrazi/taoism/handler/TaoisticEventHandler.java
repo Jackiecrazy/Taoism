@@ -18,6 +18,8 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -144,7 +146,7 @@ public class TaoisticEventHandler {
         TaoCasterData.updateCasterData(uke);
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
-        if (ds.getTrueSource() instanceof EntityLivingBase) {
+        if (ds.getTrueSource() instanceof EntityLivingBase&&!uke.world.isRemote) {
             if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isMeleeDamage(ds))//
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
@@ -156,8 +158,11 @@ public class TaoisticEventHandler {
             }
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
-            if (semeCap.getBindTime() > 0) return;//bound entities cannot attack
-            if (ukeCap.getDownTimer() > 0 || semeCap.getDownTimer() > 0) return;//downed things are defenseless
+            if(semeCap.getBindTime() > 0||semeCap.getDownTimer() > 0){//bound and downed entities cannot attack
+                e.setCanceled(true);
+                return;
+            }
+            if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
                 if (semeCap.getSwing() < CombatConfig.mobForcedCooldown) {//nein nein nein nein nein nein nein
@@ -385,6 +390,20 @@ public class TaoisticEventHandler {
     public static void resetStat(EntityJoinWorldEvent ev) {
         Entity e = ev.getEntity();
         if (e == null) return;
+        if(e instanceof EntityThrowable){
+            EntityThrowable et=(EntityThrowable) e;
+            EntityLivingBase elb=et.getThrower();
+            if(elb!=null&&TaoCasterData.getTaoCap(elb).getDownTimer()>0){
+                ev.setCanceled(true);
+            }
+        }
+        if(e instanceof EntityFireball){
+            EntityFireball et=(EntityFireball) e;
+            EntityLivingBase elb=et.shootingEntity;
+            if(elb!=null&&TaoCasterData.getTaoCap(elb).getDownTimer()>0){
+                ev.setCanceled(true);
+            }
+        }
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             TaoCasterData.updateCasterData(elb);
@@ -399,6 +418,8 @@ public class TaoisticEventHandler {
                 EntityLiving el = (EntityLiving) e;
                 el.tasks.addTask(-1, new AIDowned(el));
                 el.targetTasks.addTask(-1, new AIDowned(el));
+                el.tasks.addTask(0, new AIDowned(el));
+                el.targetTasks.addTask(0, new AIDowned(el));
             }
         }
     }
@@ -406,6 +427,11 @@ public class TaoisticEventHandler {
     @SubscribeEvent
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
         EntityLivingBase elb = e.getEntityLiving();
+        ITaoStatCapability itsc=TaoCasterData.getTaoCap(elb);
+        if(itsc.getDownTimer()>0){
+            elb.motionY=0;
+            return;
+        }
         float qi = TaoCasterData.getTaoCap(elb).getQi();
         if (qi > 0) {
             elb.motionY *= 1 + (qi / 10);
@@ -420,7 +446,7 @@ public class TaoisticEventHandler {
     @SubscribeEvent
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(e.getEntityLiving());
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0;
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0|| itsc.getPosInvulTime() > 0;
         if (e.getEntityLiving().ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(e.getEntityLiving());
         }

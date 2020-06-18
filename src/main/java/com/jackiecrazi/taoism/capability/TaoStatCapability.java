@@ -7,17 +7,20 @@ import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 
 public class TaoStatCapability implements ITaoStatCapability {
     public static final int MAXDOWNTIME = 100;
     private static final float MAXQI = 9.99f;
-    private EntityLivingBase e;
+    private WeakReference<EntityLivingBase> e;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
     private float maxLing, maxPosture, maxStamina;
@@ -32,7 +35,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private ClingData cd = new ClingData(false, false, false, false);
 
     TaoStatCapability(EntityLivingBase elb) {
-        e = elb;
+        e = new WeakReference<>(elb);
     }
 
     @Override
@@ -93,9 +96,9 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public boolean consumeQi(float amount) {
         if (qi < amount) return false;
-        int qibefore=(int)qi;
+        int qibefore = (int) qi;
         qi -= amount;
-        if (getQiFloored()<qibefore)
+        if (getQiFloored() < qibefore)
             setQiGracePeriod(CombatConfig.qiGrace * 20);
         return true;
     }
@@ -182,13 +185,15 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (getDownTimer() > 0) return 0;//cancel all posture reduction when downed so you get back up with a buffer
         float cache = posture;
         posture -= amount;
-        if (posture <= 0f) {
+        EntityLivingBase elb=e.get();
+        if (posture <= 0f&&elb!=null) {
             boolean protect = isProtected();
             setProtected(false);//cancels ssp so you can regen posture without delay
-            if ((cache >= getMaxPosture() / 4 && protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
+            if ((protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
                 //sudden stagger prevention
                 posture = 0.01f;
                 if (canStagger && getPosInvulTime() <= 0) setPosInvulTime(CombatConfig.ssptime);
+                elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, Taoism.unirand.nextFloat()*0.4f + 0.8f, Taoism.unirand.nextFloat()*0.4f + 0.8f);
                 return 0f;
             }
             amount = -posture;
@@ -196,10 +201,12 @@ public class TaoStatCapability implements ITaoStatCapability {
             beatDown(assailant, amount);
             sync();
             return amount;
-        } else setPostureRechargeCD(CombatConfig.postureCD);
-        sync();
-        //System.out.println(posture+" posture left on target");
-        return 0f;
+        } else {
+            setPostureRechargeCD(CombatConfig.postureCD);
+            sync();
+            //System.out.println(posture+" posture left on target");
+            return 0f;
+        }
     }
 
     @Override
@@ -343,7 +350,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setPosInvulTime(int time) {
+        int temp=protec;
         protec = Math.max(time, 0);
+        if(temp>0&&protec==0)sync();
     }
 
     @Override
@@ -428,43 +437,34 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void sync() {
-        if (e.world.isRemote) return;//throw new UnsupportedOperationException("what are you doing?");
-        PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(e);
-        if (e instanceof EntityPlayerMP) {
-            Taoism.net.sendTo(pucp, (EntityPlayerMP) e);
+        EntityLivingBase elb=e.get();
+        if(elb==null)return;
+        if (elb.world.isRemote) return;//throw new UnsupportedOperationException("what are you doing?");
+        PacketUpdateClientPainful pucp = new PacketUpdateClientPainful(elb);
+        if (elb instanceof EntityPlayerMP) {
+            Taoism.net.sendTo(pucp, (EntityPlayerMP) elb);
         }
-        Taoism.net.sendToAllTracking(pucp, e);
+        Taoism.net.sendToAllTracking(pucp, elb);
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {
-        e.dismountRidingEntity();
+        EntityLivingBase elb=e.get();
+        if(elb==null)return;
+        elb.dismountRidingEntity();
         if (attacker != null)
-            NeedyLittleThings.knockBack(e, attacker, overflow * 0.4F);
+            NeedyLittleThings.knockBack(elb, attacker, overflow * 0.4F);
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
-        TaoCasterData.getTaoCap(e).setDownTimer(downtimer);
-        //babe! it's 4pm, time for your flattening!
-        //TaoCasterData.getTaoCap(e).setPrevSizes(e.width, e.height);//set this on the client as well
+        setDownTimer(downtimer);
+        elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat()*0.4f + 0.8f, Taoism.unirand.nextFloat()*0.4f + 0.8f);
         sync();
-        //float min = Math.min(e.width, e.height), max = Math.max(e.width, e.height);
-        //NeedyLittleThings.setSize(e, max, min);
-//        if (e instanceof EntityPlayer) {
-//            EntityPlayer p = (EntityPlayer) e;
-//            p.sendStatusMessage(new TextComponentTranslation("you have been staggered for " + downtimer / 20f + " seconds!"), true);
-//        }
-//        if (e.getRevengeTarget() instanceof EntityPlayer) {
-//            EntityPlayer p = (EntityPlayer) e.getRevengeTarget();
-//            p.sendStatusMessage(new TextComponentTranslation("the target has been staggered for " + downtimer / 20f + " seconds!"), true);
-//        }
-        //trip horse, trip person!
-        if (e.isBeingRidden()) {
-            for (Entity ent : e.getPassengers())
+        if (elb.isBeingRidden()) {
+            for (Entity ent : elb.getPassengers())
                 if (ent instanceof EntityLivingBase) {
                     ITaoStatCapability cap = TaoCasterData.getTaoCap((EntityLivingBase) ent);
                     cap.consumePosture(cap.getMaxPosture() + 1, true);
                 }
-            e.removePassengers();
+            elb.removePassengers();
         }
-        //System.out.println("target is downed for " + downtimer + " ticks!");
     }
 
     private Tuple<Float, Float> getPrevSizes() {

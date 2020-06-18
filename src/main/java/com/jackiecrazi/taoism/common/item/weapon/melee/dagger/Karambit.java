@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -14,7 +13,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -72,7 +70,7 @@ public class Karambit extends TaoWeapon {
         tooltip.add(I18n.format("karambit.initiative"));
         //tooltip.add(I18n.format("karambit.darkness"));
         tooltip.add(I18n.format("karambit.bleed"));
-        tooltip.add(I18n.format("karambit.riposte"));
+        //tooltip.add(I18n.format("karambit.riposte"));
         tooltip.add(I18n.format("karambit.harvest"));
     }
 
@@ -86,14 +84,14 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(defender).setRollCounter(0);
-        defender.rotationYaw = attacker.rotationYaw;
-        defender.rotationPitch = attacker.rotationPitch;
-        Vec3d look = attacker.getLookVec();
-        defender.motionX = -look.x;
-        defender.motionY = -look.y;
-        defender.motionZ = -look.z;
-        defender.velocityChanged = true;
+//        TaoCasterData.getTaoCap(defender).setRollCounter(0);
+//        defender.rotationYaw = attacker.rotationYaw;
+//        defender.rotationPitch = attacker.rotationPitch;
+//        Vec3d look = attacker.getLookVec();
+//        defender.motionX = -look.x;
+//        defender.motionY = -look.y;
+//        defender.motionZ = -look.z;
+//        defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
     }
 

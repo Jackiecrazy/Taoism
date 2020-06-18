@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
@@ -13,7 +12,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -82,20 +80,20 @@ public class Balisong extends TaoWeapon {
         tooltip.add(I18n.format("balisong.stance"));
         tooltip.add(I18n.format("balisong.hammer"));
         tooltip.add(I18n.format("balisong.reverse"));
-        tooltip.add(I18n.format("balisong.riposte"));
+        //tooltip.add(I18n.format("balisong.riposte"));
     }
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        TaoCasterData.getTaoCap(defender).setRollCounter(0);
-        defender.rotationYaw = attacker.rotationYaw;
-        defender.rotationPitch = attacker.rotationPitch;
-        setCombo(defender, item, 0);
-        Vec3d look = attacker.getLookVec();
-        defender.motionX=-look.x;
-        defender.motionY=-look.y;
-        defender.motionZ=-look.z;
-        defender.velocityChanged = true;
+        //TaoCasterData.getTaoCap(defender).setRollCounter(0);
+//        defender.rotationYaw = attacker.rotationYaw;
+//        defender.rotationPitch = attacker.rotationPitch;
+//        setCombo(defender, item, 0);
+//        Vec3d look = attacker.getLookVec();
+//        defender.motionX=-look.x;
+//        defender.motionY=-look.y;
+//        defender.motionZ=-look.z;
+//        defender.velocityChanged = true;
         super.parrySkill(attacker, defender, item);
     }
 

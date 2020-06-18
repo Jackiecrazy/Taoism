@@ -62,17 +62,13 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
             itsc.addLing(diff * lingMult);
             itsc.setLingRechargeCD(0);
         }
-        //downed ticking
         if (itsc.getDownTimer() > 0) {
             itsc.setDownTimer(itsc.getDownTimer() - ticks);
-            //elb.addVelocity(0,-0.08,0);
-            //elb.velocityChanged=true;
             if (itsc.getDownTimer() <= 0) {
-                //yes honey
                 int overflow = -itsc.getDownTimer();
                 itsc.setDownTimer(0);
                 itsc.addPosture(getPostureRegenAmount(elb, overflow));
-            } else itsc.setPostureRechargeCD(itsc.getDownTimer());
+            }
         }
         diff = ticks;
         if (itsc.getPostureRechargeCD() <= diff || !itsc.isProtected()) {
@@ -83,17 +79,13 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         } else itsc.setPostureRechargeCD(itsc.getPostureRechargeCD() - ticks);
         diff = ticks;
         //value updating
-        itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
-        itsc.addParryCounter(diff);
-        itsc.addRollCounter(diff);
+        if(ticks>0) {//so apparently time can randomly run backwards. Hmm.
+            itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
+            itsc.addParryCounter(diff);
+            itsc.addRollCounter(diff);
+        }
         if (itsc.getBindTime() > 0)
             itsc.setBindTime(itsc.getBindTime() - 1);
-        //roll ticking
-//        if (itsc.getRollCounter() == CombatConfig.rollCooldown) {
-//            Tuple<Float, Float> thing = itsc.getPrevSizes();
-//            elb.width = thing.getFirst();
-//            elb.height = thing.getSecond();
-//        }
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
         diff = ticks - itsc.getQiGracePeriod();
         //qi decay

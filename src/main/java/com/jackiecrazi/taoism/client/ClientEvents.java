@@ -65,6 +65,7 @@ public class ClientEvents {
 
     };
     private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
+    private static final ResourceLocation hood = new ResourceLocation(Taoism.MODID, "textures/hud/icons.png");
     /**
      * left, back, right
      */
@@ -339,14 +340,138 @@ public class ClientEvents {
                     }
 
                     //render posture bar if not full
-                    if (cap.getPosture() < cap.getMaxPosture())
-                        drawPostureBarAt(player, Math.min(HudConfig.client.posture.x, width - 64), Math.min(HudConfig.client.posture.y, height - 64));
+                    //if (cap.getPosture() < cap.getMaxPosture())
+                    drawPostureBarreAt(player, width, height);
                     Entity look = getEntityLookedAt(player);
                     if (look instanceof EntityLivingBase && TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() && HudConfig.client.displayEnemyPosture) {
-                        drawPostureBarAt((EntityLivingBase) look, Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
+                        drawPostureBarreAt((EntityLivingBase) look, width, height / 3);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                     }
                 }
             }
+    }
+
+    private static void drawPostureBarreAt(EntityLivingBase elb, int width, int height) {
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.getTextureManager().bindTexture(hood);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableBlend();
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        mc.mcProfiler.startSection("postureBar");
+        float cap = itsc.getMaxPosture();
+        int left = width / 2 - 91;
+        float posPerc = MathHelper.clamp(itsc.getPosture() / itsc.getMaxPosture(), 0, 1);
+        Color c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))].brighter();
+
+        if (cap > 0) {
+            short barWidth = 182;
+            int filled = (int) (itsc.getPosture() / itsc.getMaxPosture() * (float) (barWidth));
+            int top = height - 54;
+            mc.ingameGUI.drawTexturedModalRect(left, top, 0, 64, barWidth, 5);
+            if (itsc.getPosInvulTime() > 0) {
+                GlStateManager.color(1, 215f / 255f, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
+                filled = (int) ((float)itsc.getPosInvulTime() / (float)CombatConfig.ssptime * (float) (barWidth));
+            } else
+                GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+            mc.ingameGUI.drawTexturedModalRect(left, top, 0, 69, filled, 5);
+        }
+
+        mc.mcProfiler.endSection();
+        mc.mcProfiler.startSection("postureNumber");
+        String text = "" + itsc.getPosture();
+        int x = (width - mc.fontRenderer.getStringWidth(text)) / 2;
+        int y = height - 55;
+        mc.fontRenderer.drawString(text, x + 1, y, 0);
+        mc.fontRenderer.drawString(text, x - 1, y, 0);
+        mc.fontRenderer.drawString(text, x, y + 1, 0);
+        mc.fontRenderer.drawString(text, x, y - 1, 0);
+        mc.fontRenderer.drawString(text, x, y, c.getRGB());
+        mc.mcProfiler.endSection();
+        mc.getTextureManager().bindTexture(Gui.ICONS);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    public static Entity getEntityLookedAt(Entity e) {
+        Entity foundEntity = null;
+
+        final double finalDistance = 32;
+        double distance = finalDistance;
+        RayTraceResult pos = raycast(e, finalDistance);
+
+        Vec3d positionVector = e.getPositionVector();
+        if (e instanceof EntityPlayer)
+            positionVector = positionVector.addVector(0, e.getEyeHeight(), 0);
+
+        if (pos != null)
+            distance = pos.hitVec.distanceTo(positionVector);
+
+        Vec3d lookVector = e.getLookVec();
+        Vec3d reachVector = positionVector.addVector(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance);
+
+        Entity lookedEntity = null;
+        List<Entity> entitiesInBoundingBox = e.getEntityWorld().getEntitiesWithinAABBExcludingEntity(e, e.getEntityBoundingBox().grow(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance).expand(1F, 1F, 1F));
+        double minDistance = distance;
+
+        for (Entity entity : entitiesInBoundingBox) {
+            if (entity.canBeCollidedWith()) {
+                float collisionBorderSize = entity.getCollisionBorderSize();
+                AxisAlignedBB hitbox = entity.getEntityBoundingBox().expand(collisionBorderSize, collisionBorderSize, collisionBorderSize);
+                RayTraceResult interceptPosition = hitbox.calculateIntercept(positionVector, reachVector);
+
+                if (hitbox.contains(positionVector)) {
+                    if (0.0D < minDistance || minDistance == 0.0D) {
+                        lookedEntity = entity;
+                        minDistance = 0.0D;
+                    }
+                } else if (interceptPosition != null) {
+                    double distanceToEntity = positionVector.distanceTo(interceptPosition.hitVec);
+
+                    if (distanceToEntity < minDistance || minDistance == 0.0D) {
+                        lookedEntity = entity;
+                        minDistance = distanceToEntity;
+                    }
+                }
+            }
+
+            if (lookedEntity != null && (minDistance < distance || pos == null))
+                foundEntity = lookedEntity;
+        }
+
+        return foundEntity;
+    }
+
+	/*@SubscribeEvent
+	public static void colorize(ColorHandlerEvent event){
+		Taoism.logger.debug("this is being called");
+	}*/
+
+    /*public static void draw(int x, int y, int textureX, int textureY, int width, int height) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y + height, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y + 0, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x, y + 0, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
+        tessellator.draw();
+    }*/
+
+    public static RayTraceResult raycast(Entity e, double len) {
+        Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);
+        if (e instanceof EntityPlayer)
+            vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
+
+        Vec3d look = e.getLookVec();
+        if (look == null)
+            return null;
+
+        return raycast(e.getEntityWorld(), vec, look, len);
+    }
+
+    public static RayTraceResult raycast(World world, Vec3d origin, Vec3d ray, double len) {
+        Vec3d end = origin.add(ray.normalize().scale(len));
+        RayTraceResult pos = world.rayTraceBlocks(origin, end);
+        return pos;
     }
 
     private static void drawPostureBarAt(EntityLivingBase elb, int x, int y) {
@@ -404,89 +529,6 @@ public class ClientEvents {
         GlStateManager.disableAlpha();
         GlStateManager.popMatrix();
         mc.getTextureManager().bindTexture(Gui.ICONS);
-    }
-
-	/*@SubscribeEvent
-	public static void colorize(ColorHandlerEvent event){
-		Taoism.logger.debug("this is being called");
-	}*/
-
-    /*public static void draw(int x, int y, int textureX, int textureY, int width, int height) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(x, y + height, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
-        bufferbuilder.pos(x + width, y + height, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + height) * 0.00390625F).endVertex();
-        bufferbuilder.pos(x + width, y + 0, (double)this.zLevel).tex((float)(textureX + width) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
-        bufferbuilder.pos(x, y + 0, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
-        tessellator.draw();
-    }*/
-
-    public static Entity getEntityLookedAt(Entity e) {
-        Entity foundEntity = null;
-
-        final double finalDistance = 32;
-        double distance = finalDistance;
-        RayTraceResult pos = raycast(e, finalDistance);
-
-        Vec3d positionVector = e.getPositionVector();
-        if (e instanceof EntityPlayer)
-            positionVector = positionVector.addVector(0, e.getEyeHeight(), 0);
-
-        if (pos != null)
-            distance = pos.hitVec.distanceTo(positionVector);
-
-        Vec3d lookVector = e.getLookVec();
-        Vec3d reachVector = positionVector.addVector(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance);
-
-        Entity lookedEntity = null;
-        List<Entity> entitiesInBoundingBox = e.getEntityWorld().getEntitiesWithinAABBExcludingEntity(e, e.getEntityBoundingBox().grow(lookVector.x * finalDistance, lookVector.y * finalDistance, lookVector.z * finalDistance).expand(1F, 1F, 1F));
-        double minDistance = distance;
-
-        for (Entity entity : entitiesInBoundingBox) {
-            if (entity.canBeCollidedWith()) {
-                float collisionBorderSize = entity.getCollisionBorderSize();
-                AxisAlignedBB hitbox = entity.getEntityBoundingBox().expand(collisionBorderSize, collisionBorderSize, collisionBorderSize);
-                RayTraceResult interceptPosition = hitbox.calculateIntercept(positionVector, reachVector);
-
-                if (hitbox.contains(positionVector)) {
-                    if (0.0D < minDistance || minDistance == 0.0D) {
-                        lookedEntity = entity;
-                        minDistance = 0.0D;
-                    }
-                } else if (interceptPosition != null) {
-                    double distanceToEntity = positionVector.distanceTo(interceptPosition.hitVec);
-
-                    if (distanceToEntity < minDistance || minDistance == 0.0D) {
-                        lookedEntity = entity;
-                        minDistance = distanceToEntity;
-                    }
-                }
-            }
-
-            if (lookedEntity != null && (minDistance < distance || pos == null))
-                foundEntity = lookedEntity;
-        }
-
-        return foundEntity;
-    }
-
-    public static RayTraceResult raycast(Entity e, double len) {
-        Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);
-        if (e instanceof EntityPlayer)
-            vec = vec.add(new Vec3d(0, e.getEyeHeight(), 0));
-
-        Vec3d look = e.getLookVec();
-        if (look == null)
-            return null;
-
-        return raycast(e.getEntityWorld(), vec, look, len);
-    }
-
-    public static RayTraceResult raycast(World world, Vec3d origin, Vec3d ray, double len) {
-        Vec3d end = origin.add(ray.normalize().scale(len));
-        RayTraceResult pos = world.rayTraceBlocks(origin, end);
-        return pos;
     }
 }
 

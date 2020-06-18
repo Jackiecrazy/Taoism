@@ -84,7 +84,7 @@ public class TaoMovementUtils {
         if (ent instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) ent;
             uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
-            TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
+            TaoCasterData.getTaoCap(uke).consumePosture(7, true, elb);
             for (int i = 0; i < 10; ++i) {
                 double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d1 = Taoism.unirand.nextGaussian() * 0.02D;
@@ -112,25 +112,35 @@ public class TaoMovementUtils {
         if (isTouchingWall(elb)) {
             boolean[] dir = collisionStatus(elb);
             EnumFacing face = elb.getHorizontalFacing();
-            boolean modifyY = false;
+            boolean facingWall = false;
+            switch (face){
+                case WEST:
+                    facingWall=dir[0];
+                    break;
+                case EAST:
+                    facingWall=dir[1];
+                    break;
+                case NORTH:
+                    facingWall=dir[4];
+                    break;
+                case SOUTH:
+                    facingWall=dir[5];
+                    break;
+            }
             //Vec3d look=elb.getLookVec();
-            if (dir[0] && face != EnumFacing.WEST) {//east
+            if (dir[0] && !facingWall) {//east
                 elb.motionX += speed / 2;
-                modifyY = true;
             }
-            if (dir[1] && face != EnumFacing.EAST) {//west
+            if (dir[1] && !facingWall) {//west
                 elb.motionX -= speed / 2;
-                modifyY = true;
             }
-            if (dir[4] && face != EnumFacing.NORTH) {//south
+            if (dir[4] && !facingWall) {//south
                 elb.motionZ += speed / 2;
-                modifyY = true;
             }
-            if (dir[5] && face != EnumFacing.SOUTH) {//north
+            if (dir[5] && !facingWall) {//north
                 elb.motionZ -= speed / 2;
-                modifyY = true;
             }
-            if (modifyY) elb.motionY /= 2;
+            if (!facingWall) elb.motionY /= 2;
             elb.setSprinting(true);
         }
         elb.velocityChanged = true;

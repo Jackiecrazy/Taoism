@@ -67,6 +67,11 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
+    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
+        return getHand(item)==EnumHand.MAIN_HAND;
+    }
+
+    @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
     }
