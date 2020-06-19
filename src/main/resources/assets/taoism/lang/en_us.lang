@@ -26,6 +26,8 @@ weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %s
 taoism.weaponDefMult=defense posture multiplier: %.2f
 taoism.weaponAttMult=attack posture multiplier: %.2f
+taoism.notenoughqi=You need nine levels of chi to charge an execution
+taoism.alreadycharged=This weapon is already charged
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge

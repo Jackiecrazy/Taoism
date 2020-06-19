@@ -5,7 +5,9 @@ import net.minecraft.item.ItemStack;
 
 public interface IChargeableWeapon {
 
-    void chargeWeapon(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, int ticks);
+    boolean canCharge(EntityLivingBase wielder, ItemStack item);
+
+    void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks);
 
     void dischargeWeapon(EntityLivingBase attacker, ItemStack item);
 

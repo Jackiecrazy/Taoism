@@ -4,6 +4,8 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.BinaryMachiavelli;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -11,10 +13,7 @@ import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.HudConfig;
-import com.jackiecrazi.taoism.networking.PacketDodge;
-import com.jackiecrazi.taoism.networking.PacketJump;
-import com.jackiecrazi.taoism.networking.PacketMakeMove;
-import com.jackiecrazi.taoism.networking.PacketSlide;
+import com.jackiecrazi.taoism.networking.*;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -40,10 +39,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.awt.*;
@@ -63,9 +64,20 @@ public class ClientEvents {
             new Color(141, 71, 43).getRGB(),
             new Color(103, 94, 36).getRGB(),
             new Color(69, 115, 30).getRGB(),
-            new Color(46, 127, 24).getRGB(),
+            new Color(46, 127, 24).getRGB()
     };
-    private static final int[] GRADIENT = {
+    private static final int[] GRADIENTSSP = {
+            0xE0FF00,
+            0xC0FF00,
+            0xA0FF00,
+            0x80FF00,
+            0x60FF00,
+            0x40FF00,
+            0x20FF00,
+            0x10FF00,
+            0x00FF00
+    };
+    private static final int[] GRADIENTDOWN = {
             0xFF0000,
             0xFF2000,
             0xFF4000,
@@ -74,15 +86,7 @@ public class ClientEvents {
             0xFFA000,
             0xFFC000,
             0xFFE000,
-            0xFFFF00, //max, step by 15
-            0xE0FF00,
-            0xC0FF00,
-            0xA0FF00,
-            0x80FF00,
-            0x60FF00,
-            0x40FF00,
-            0x20FF00,
-            0x10FF00
+            0xFFFF00 //max, step by 15
     };
     private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
     private static final ResourceLocation hood = new ResourceLocation(Taoism.MODID, "textures/hud/icons.png");
@@ -92,6 +96,7 @@ public class ClientEvents {
     private static long[] lastTap = {0, 0, 0, 0};
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false, sneak = false;
+    private static int leftClickAt = 0, rightClickAt=0;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -102,6 +107,25 @@ public class ClientEvents {
 
     private static void regWeap(Item i) {
         ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
+    }
+
+    //attacks when out of range, charges for l'execution
+    @SubscribeEvent
+    public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
+        //System.out.println("hi");
+        EntityPlayer p = e.getEntityPlayer();
+        ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
+        if (i.getItem() instanceof IRange) {
+            //System.out.println("range!");
+            IRange icr = (IRange) i.getItem();
+
+            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
+            if (elb != null) {
+                //System.out.println("sending packet!");
+                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
+            }
+        }
+        System.out.println("tikataka");
     }
 
     @SubscribeEvent
@@ -217,6 +241,28 @@ public class ClientEvents {
             GameSettings gs = Minecraft.getMinecraft().gameSettings;
             MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
             Taoism.net.sendToServer(new PacketMakeMove(move));
+            leftClickAt=rightClickAt=0;
+        }
+    }
+
+    private static final int CHARGE=50;
+
+    @SubscribeEvent
+    public static void longPress(TickEvent.ClientTickEvent e) {
+        if (e.phase == TickEvent.Phase.START) {
+            Minecraft mc=Minecraft.getMinecraft();
+            if(mc.gameSettings.keyBindAttack.isKeyDown()&&mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon){
+                leftClickAt++;
+                if(leftClickAt==CHARGE){
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+                }
+            }
+            if(mc.gameSettings.keyBindUseItem.isKeyDown()&&mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon){
+                rightClickAt++;
+                if(rightClickAt==CHARGE){
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
+                }
+            }
         }
     }
 
@@ -399,7 +445,8 @@ public class ClientEvents {
         float cap = itsc.getMaxPosture();
         int left = atX - 91;
         float posPerc = MathHelper.clamp(itsc.getPosture() / itsc.getMaxPosture(), 0, 1);
-        int c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+        int c = GRADIENTDOWN[(int) (posPerc * (GRADIENTDOWN.length - 1))];
+        if (itsc.isProtected()) c = GRADIENTSSP[(int) (posPerc * (GRADIENTSSP.length - 1))];
         if (cap > 0) {
             short barWidth = 182;
             int filled = (int) (itsc.getPosture() / itsc.getMaxPosture() * (float) (barWidth));
@@ -414,7 +461,7 @@ public class ClientEvents {
                 GlStateManager.color(0, 0, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
                 mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, invulTime, 5);
             } else {
-                GlStateManager.color(1, 215f / 255f, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
+                GlStateManager.color(1, 225f / 255f, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
                 mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, invulTime, 5);
             }
             if (filled <= invulTime) {
@@ -533,7 +580,7 @@ public class ClientEvents {
             //bar, not rendered if down because that don't make sense
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
-            int c = GRADIENT[(int) (posPerc * (GRADIENT.length - 1))];
+            int c = GRADIENTSSP[(int) (posPerc * (GRADIENTSSP.length - 1))];
             GlStateManager.color(red(c), green(c), blue(c));
             mc.ingameGUI.drawTexturedModalRect(x, y + (int) ((1 - posPerc) * 64), 128, 128, 64, (int) (posPerc * 64));//+(int)(qiExtra*32)
             GlStateManager.popMatrix();

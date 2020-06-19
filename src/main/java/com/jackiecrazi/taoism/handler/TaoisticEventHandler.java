@@ -10,7 +10,6 @@ import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.GeneralConfig;
-import com.jackiecrazi.taoism.networking.PacketExtendThyReach;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.entity.*;
@@ -33,9 +32,7 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -48,55 +45,6 @@ public class TaoisticEventHandler {
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
     public static boolean modCall;
     private static boolean abort = false;
-    //	@SubscribeEvent
-//	public static void pleasekillmeoff(PlayerInteractEvent.RightClickItem e) {
-//		//System.out.println("hi");
-//		EntityPlayer p = e.getEntityPlayer();
-//		if (e.getItemStack().equals(e.getEntityPlayer().getHeldItem(EnumHand.MAIN_HAND))) return;
-//		ItemStack i = p.getHeldItem(EnumHand.OFF_HAND);
-//		if (!i.isEmpty()) {
-//			//System.out.println("nonnull");
-//			if (i.getItem() instanceof ICustomRange) {
-//				//System.out.println("range!");
-//				ICustomRange icr = (ICustomRange) i.getItem();
-//
-//				EntityLivingBase elb = NeedyLittleThings.raytraceEntities(p.world, p, icr.getReach(p, i));
-//				if (elb != null) {
-//					//System.out.println("sending packet!");
-//					Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), false));
-//				}
-//			}
-//		}
-//	} //stop stealing other people's jobs!
-
-    //attacks when out of range
-    @SubscribeEvent
-    public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
-        //System.out.println("hi");
-        EntityPlayer p = e.getEntityPlayer();
-        ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
-        if (i.getItem() instanceof IRange) {
-            //System.out.println("range!");
-            IRange icr = (IRange) i.getItem();
-
-            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
-            if (elb != null) {
-                //System.out.println("sending packet!");
-                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void updateCaps(AttackEntityEvent e) {
-        /*if (TaoWeapon.aoe) {
-            EntityPlayer p = e.getEntityPlayer();
-            //misc code for updating capability
-            int swing = TaoCasterData.getTaoCap(p).getOffhandCool();
-            TaoCasterData.getTaoCap(p).setSwing(TaoWeapon.off ? swing : Taoism.getAtk(p));
-        }*/
-        //moved to TaoWeapon#onEntitySwing, kept here for posterity
-    }
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.LOWEST)

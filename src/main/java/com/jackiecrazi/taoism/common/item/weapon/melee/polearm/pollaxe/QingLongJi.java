@@ -115,7 +115,7 @@ public class QingLongJi extends TaoWeapon {
         if (!attacker.world.isRemote && getHand(stack) == EnumHand.OFF_HAND) {
             if (isCharged(attacker, stack)) {
                 dischargeWeapon(attacker, stack);
-            } else chargeWeapon(attacker, null, stack, 100);
+            } else chargeWeapon(attacker, stack, 100);
         }
         EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
         TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);

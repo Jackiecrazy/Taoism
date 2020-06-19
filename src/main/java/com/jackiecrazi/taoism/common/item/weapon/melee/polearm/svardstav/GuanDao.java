@@ -113,7 +113,7 @@ public class GuanDao extends TaoWeapon {
             } else {
                 //guard form
                 if (!attacker.world.isRemote)
-                    chargeWeapon(attacker, null, stack, 100);
+                    chargeWeapon(attacker, stack, 100);
                 TaoCombatUtils.rechargeHand(attacker, EnumHand.MAIN_HAND, 0.8f);
             }
         }

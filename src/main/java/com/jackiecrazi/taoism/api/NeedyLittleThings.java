@@ -173,7 +173,7 @@ public class NeedyLittleThings {
      * returns true if entity2 is within a (angle) degree sector in front of entity1
      */
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int angle) {
-        Vec3d posVec = entity2.getPositionVector();
+        Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0)).normalize();
         //relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
@@ -191,9 +191,9 @@ public class NeedyLittleThings {
      * returns true if entity is within a 90 degree sector behind the target
      */
     public static boolean isBehindEntity(Entity entity, Entity target) {
-        Vec3d posVec = entity.getPositionVector();
+        Vec3d posVec = entity.getPositionVector().addVector(0, entity.getEyeHeight(), 0);
         Vec3d lookVec = target.getLook(1.0F);
-        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector()).normalize();
+        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector().addVector(0, target.getEyeHeight(), 0)).normalize();
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         return dotsq > 0.5D;

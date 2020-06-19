@@ -111,7 +111,7 @@ public class EntityRopeDart extends EntityThrowable {
         ItemStack main = getThrower().getHeldItem(hand);
         RopeDart rd = ((RopeDart) main.getItem());
         main.removeSubCompound("connected");
-        rd.chargeWeapon(getThrower(), null, main, rd.getMaxChargeTime());
+        rd.chargeWeapon(getThrower(), main, rd.getMaxChargeTime());
 
     }
 }

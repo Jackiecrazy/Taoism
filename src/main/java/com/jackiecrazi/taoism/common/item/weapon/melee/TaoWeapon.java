@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -334,9 +335,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     long till = tag.getLong("multiHitTill");
                     long curr = w.getTotalWorldTime();
                     int interval = tag.getInteger("multiHitInterval");
-                    if (till >= curr && from!=curr && (curr - from) % interval == 0) {
-                        TaoCombatUtils.rechargeHand(elb, getHand(stack),1);
-                        victim.hurtResistantTime=0;
+                    if (till >= curr && from != curr && (curr - from) % interval == 0) {
+                        TaoCombatUtils.rechargeHand(elb, getHand(stack), 1);
+                        victim.hurtResistantTime = 0;
                         TaoCombatUtils.taoWeaponAttack(victim, elb, stack, onMainHand, false);
                     }
                 }
@@ -540,7 +541,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
-        return enchantment.type != null && enchantment.type.canEnchantItem(Items.IRON_SWORD);
+        if (enchantment.equals(Enchantment.getEnchantmentByLocation("unbreaking"))) return false;
+        if (enchantment.equals(Enchantment.getEnchantmentByLocation("mending"))) return false;
+        return enchantment.type != null && (enchantment.type.canEnchantItem(Items.IRON_SWORD) || enchantment.type.canEnchantItem(Items.IRON_AXE));
     }
 
     /**
@@ -580,6 +583,23 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     abstract protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn);
 
+    private ItemStack unwrapDummy(ItemStack from) {
+        NBTTagCompound sub = from.getSubCompound("sub");
+        if (sub != null) {
+            ItemStack is = new ItemStack(sub);
+            if (!is.hasTagCompound() || is.getTagCompound().hasNoTags()) is.setTagCompound(null);
+            return is;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    protected boolean[] harvestable(ItemStack is) {
+        return new boolean[]{false, false, false, false};
+    }
+
     private void setHandState(ItemStack is, @Nullable EnumHand hand) {
         if (hand != null) {
             gettagfast(is).setBoolean("off", hand == EnumHand.OFF_HAND);
@@ -605,23 +625,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         nbt.removeTag("taodummy");
         nbt.removeTag("sub");
         return nbt.equals(compare.getTagCompound());
-    }
-
-    private ItemStack unwrapDummy(ItemStack from) {
-        NBTTagCompound sub = from.getSubCompound("sub");
-        if (sub != null) {
-            ItemStack is = new ItemStack(sub);
-            if (!is.hasTagCompound() || is.getTagCompound().hasNoTags()) is.setTagCompound(null);
-            return is;
-        }
-        return ItemStack.EMPTY;
-    }
-
-    /**
-     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
-     */
-    protected boolean[] harvestable(ItemStack is) {
-        return new boolean[]{false, false, false, false};
     }
 
     public int getDamageType(ItemStack is) {
@@ -659,13 +662,31 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
-    public void chargeWeapon(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, int ticks) {
-        if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
-            //forward it to the main item, then do nothing as the main item will forward it back.
-            chargeWeapon(attacker, defender, attacker.getHeldItemMainhand(), ticks);
+    public boolean canCharge(EntityLivingBase wielder, ItemStack item) {
+        return true;
+    }
+
+    @Override
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+        /*
+        At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
+         */
+        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("changchui.armpen"), true);
             return;
         }
-        item.setItemDamage(ticks);
+        if(isCharged(attacker, item)){
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("changchui.armpen"), true);
+            return;
+        }
+        if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
+            return;
+        }
+        gettagfast(item).setBoolean("charge", true);
     }
 
     @Override
@@ -674,12 +695,12 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //forward it to the main item, then do nothing as the main item will forward it back.
             dischargeWeapon(elb, elb.getHeldItemMainhand());
         }
-        item.setItemDamage(0);
+        gettagfast(item).setBoolean("charge", false);
     }
 
     @Override
     public boolean isCharged(EntityLivingBase elb, ItemStack item) {
-        return item.getItemDamage() != 0;
+        return gettagfast(item).getBoolean("charge");
     }
 
     @Override

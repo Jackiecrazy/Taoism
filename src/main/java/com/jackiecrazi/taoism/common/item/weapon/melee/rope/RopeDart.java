@@ -192,7 +192,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
-        return (double) getChargeTimeLeft(null, stack) / (double) getMaxChargeTime();
+        return (double) stack.getItemDamage() / (double) getMaxChargeTime();
     }
 
     @Override
@@ -230,17 +230,17 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.MAIN_HAND && getChargeTimeLeft(attacker, item) == 0 ? Event.Result.ALLOW : Event.Result.DENY;
+        return getHand(item) == EnumHand.MAIN_HAND && item.getItemDamage() == 0 ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND && getChargeTimeLeft(attacker, item) == 0 ? 1.5f : 1;
+        return getHand(item) == EnumHand.MAIN_HAND && item.getItemDamage() == 0 ? 1.5f : 1;
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND ? 1.5f - (getChargeTimeLeft(attacker, item) / 20f) : 0.5f;
+        return getHand(item) == EnumHand.MAIN_HAND ? 1.5f - (item.getItemDamage() / 20f) : 0.5f;
     }
 
     @Override
@@ -252,7 +252,7 @@ public class RopeDart extends TaoWeapon {
     @Override
     public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (ds.isProjectile()) {
-            chargeWeapon(attacker, target, stack, getMaxChargeTime() / 2);
+            stack.setItemDamage(getMaxChargeTime() / 2);
         }
         return orig;
     }
