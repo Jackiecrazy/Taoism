@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.item.weapon.melee.stick;
+package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;

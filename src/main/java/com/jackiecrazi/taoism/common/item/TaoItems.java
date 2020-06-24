@@ -22,7 +22,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangCh
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
-import com.jackiecrazi.taoism.common.item.weapon.melee.stick.Tonfa;
+import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
