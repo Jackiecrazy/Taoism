@@ -67,11 +67,6 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
-        return getHand(item)==EnumHand.MAIN_HAND;
-    }
-
-    @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
     }
@@ -114,6 +109,11 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
+    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
+        return getHand(item) == EnumHand.MAIN_HAND;
+    }
+
+    @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return getHand(item) == EnumHand.OFF_HAND ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
@@ -139,7 +139,7 @@ public class Halberd extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
-            TaoPotionUtils.attemptStackPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 1), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION));
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
         }
     }
 }

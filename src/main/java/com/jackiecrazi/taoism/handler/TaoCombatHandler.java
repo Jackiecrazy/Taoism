@@ -2,49 +2,43 @@ package com.jackiecrazi.taoism.handler;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.api.alltheinterfaces.*;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IAmVerySmart;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ICombatManipulator;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
-import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
-import com.jackiecrazi.taoism.config.GeneralConfig;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
-import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.UUID;
 
-public class TaoisticEventHandler {
-
-    private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
-    public static boolean modCall;
+@Mod.EventBusSubscriber(modid = Taoism.MODID)
+public class TaoCombatHandler {
     private static boolean abort = false;
+    public static boolean modCall;
+    private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -72,12 +66,12 @@ public class TaoisticEventHandler {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            if (!uke.world.isRemote&&NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
+            if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
                 if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
-                    Vec3d look=uke.getLookVec();
-                    ent.motionX=look.x;
-                    ent.motionY=look.y;
-                    ent.motionZ=look.z;
+                    Vec3d look = uke.getLookVec();
+                    ent.motionX = look.x;
+                    ent.motionY = look.y;
+                    ent.motionZ = look.z;
                     ent.velocityChanged = true;
                     e.setCanceled(true);//seriously, who thought loading rooftops with a ton of archers was a good idea?
                 }
@@ -145,7 +139,7 @@ public class TaoisticEventHandler {
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
             if ((!smart || (!defend.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 120))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
-                uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1-(ukeCap.getPosture()/ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
+                uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
@@ -274,6 +268,7 @@ public class TaoisticEventHandler {
         e.setAmount(amnt);
     }
 
+
     //modifies damage after armor, since some items naturally ignore some armor.
     //♂ boy ♂ next ♂ door ♂
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -321,219 +316,4 @@ public class TaoisticEventHandler {
         TaoCasterData.forceUpdateTrackingClients(uke);
     }
 
-    //adds relevant attributes to everyone
-    @SubscribeEvent
-    public static void itsDangerousToGoAlone(EntityEvent.EntityConstructing e) {
-        if (e.getEntity() instanceof EntityLivingBase) {
-            EntityLivingBase elb = (EntityLivingBase) e.getEntity();
-            elb.getAttributeMap().registerAttribute(TaoEntities.DEFLECT);
-            elb.getAttributeMap().registerAttribute(TaoEntities.ABLATION);
-            elb.getAttributeMap().registerAttribute(TaoEntities.QIRATE);
-            elb.getAttributeMap().registerAttribute(TaoEntities.LINGREGEN);
-            elb.getAttributeMap().registerAttribute(TaoEntities.POSREGEN);
-            for (int i = 0; i < IElemental.ATTRIBUTES.length; i++) {
-                elb.getAttributeMap().registerAttribute(IElemental.ATTRIBUTES[i]);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void resetStat(EntityJoinWorldEvent ev) {
-        Entity e = ev.getEntity();
-        if (e == null) return;
-        if (e instanceof EntityThrowable) {
-            EntityThrowable et = (EntityThrowable) e;
-            EntityLivingBase elb = et.getThrower();
-            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
-                ev.setCanceled(true);
-            }
-        }
-        if (e instanceof EntityFireball) {
-            EntityFireball et = (EntityFireball) e;
-            EntityLivingBase elb = et.shootingEntity;
-            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
-                ev.setCanceled(true);
-            }
-        }
-        if (e instanceof EntityLivingBase) {
-            EntityLivingBase elb = (EntityLivingBase) e;
-            TaoCasterData.updateCasterData(elb);
-            TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
-            if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
-                if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
-                    Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
-                    elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
-                }
-            }
-            if (elb instanceof EntityLiving && !((EntityLiving) elb).isAIDisabled()) {
-                EntityLiving el = (EntityLiving) e;
-                el.tasks.addTask(-1, new AIDowned(el));
-                el.targetTasks.addTask(-1, new AIDowned(el));
-                el.tasks.addTask(0, new AIDowned(el));
-                el.targetTasks.addTask(0, new AIDowned(el));
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
-        EntityLivingBase elb = e.getEntityLiving();
-        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if (itsc.getDownTimer() > 0) {
-            elb.motionY = 0;
-            return;
-        }
-        float qi = TaoCasterData.getTaoCap(elb).getQi();
-        if (qi > 0) {
-            elb.motionY *= 1 + (qi / 10);
-            if (qi > 3 && elb.isSprinting()) {//long jump
-                elb.motionX *= 1 + ((qi - 3) / 14);
-                elb.motionZ *= 1 + ((qi - 3) / 14);
-            }
-            elb.velocityChanged = true;
-        }
-    }
-
-    @SubscribeEvent
-    public static void ugh(LivingEvent.LivingUpdateEvent e) {
-        ITaoStatCapability itsc = TaoCasterData.getTaoCap(e.getEntityLiving());
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || e.getEntityLiving().world.getClosestPlayerToEntity(e.getEntityLiving(), 16) != null;
-        if (e.getEntityLiving().ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
-            TaoCasterData.updateCasterData(e.getEntityLiving());
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void tickStuff(TickEvent.PlayerTickEvent e) {
-        EntityPlayer p = e.player;
-        ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
-        if (e.phase.equals(TickEvent.Phase.START)) {
-            if (cap.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING || cap.getJumpState() == ITaoStatCapability.JUMPSTATE.DODGING) {
-                //spawn jump/dodge particles
-                double d0 = Taoism.unirand.nextGaussian() * 0.02D;
-                double d1 = Taoism.unirand.nextGaussian() * 0.02D;
-                double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                p.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY + p.width / 2, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
-            }
-            if (cap.getDownTimer() <= 0 && cap.getQi() > 0 && !p.isSneaking()) {
-                //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
-                if (cap.getQi() > 3) {
-                    if (TaoMovementUtils.shouldStick(p)) {
-                        cap.setJumpState(ITaoStatCapability.JUMPSTATE.CLINGING);
-                        cap.setClingDirections(new ITaoStatCapability.ClingData(TaoMovementUtils.collisionStatus(p)));
-                    }
-                    TaoCasterData.forceUpdateTrackingClients(p);
-                }
-            }
-        } else {
-            //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
-            //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
-                //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
-                if (cap.getQi() > 3 && !p.isSneaking()) {
-                    p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
-                    if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
-                        //vertical motion enabling, and shut off attempts to run off the wall
-                        double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2;
-                        Vec3d vec = p.getLookVec();
-                        p.motionY = speed * p.getLookVec().y;
-                        boolean[] faces = TaoMovementUtils.collisionStatus(p);
-                        //prevent you from walking off
-                        if (faces[0]) {//+x
-                            vec = new Vec3d(0, vec.y - vec.x, vec.z);
-//                            p.posX = p.prevPosX;
-//                            p.motionX = 0;
-//                            p.motionX = 0;
-//                            p.motionZ = speed * p.getLookVec().z * 2;
-                        }
-                        if (faces[1]) {//-x
-                            vec = new Vec3d(0, vec.y + vec.x, vec.z);
-                        }
-                        if (faces[4]) {//+z
-                            vec = new Vec3d(vec.x, vec.y - vec.z, 0);
-//                            p.posZ = p.prevPosZ;
-//                            p.motionZ = 0;
-//                            p.motionZ = 0;
-//                            p.motionX = speed * p.getLookVec().x * 2;
-                        }
-                        if (faces[5]) {//-z
-                            vec = new Vec3d(vec.x, vec.y + vec.z, 0);
-                        }
-                        vec = vec.normalize();
-                        p.motionX = vec.x * speed;
-                        p.motionY = vec.y * speed;
-                        p.motionZ = vec.z * speed;
-                    } else if (p.motionY < 0)
-                        p.motionY *= ((MathHelper.clamp(2 - (p.motionX * p.motionX + p.motionZ * p.motionZ), 1f, 2f) * 1.5f / cap.getQi()));//
-
-                } else p.fallDistance = 0.1f;//for da critz
-            }
-            TaoCasterData.updateCasterData(p);
-            //recharge weapon
-            //hacky, but well...
-            if (!Taoism.proxy.isBreakingBlock(p)) {
-                ItemStack mainhand = p.getHeldItemMainhand();
-                ItemStack offhand = p.getHeldItemOffhand();
-                if (Taoism.getAtk(p) == 0) {//fresh switch in, do not execute following code
-                    if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND)
-                        cap.setSwitchIn(true);
-                }
-                //if (p.world.isRemote) return;
-                if (Taoism.getAtk(p) == 1) {
-                    if (!cap.isSwitchIn()) {
-//                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriod(p))
-//                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));
-                        //System.out.println("update combo main");
-                        if (mainhand.getItem() instanceof ICombo && p.swingingHand != EnumHand.OFF_HAND) {
-                            ICombo tw = (ICombo) mainhand.getItem();
-                            long cache = tw.lastAttackTime(p, mainhand);
-                            tw.updateLastAttackTime(p, mainhand);
-                            long newcache = tw.lastAttackTime(p, mainhand);
-                            if (newcache - cache > CombatConfig.timeBetweenAttacks) {
-                                tw.setCombo(p, mainhand, 0);
-                            }
-                            float cd = tw.newCooldown(p, mainhand);
-                            if (cd != 0)
-                                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd);
-                            tw.setCombo(p, mainhand, tw.getCombo(p, mainhand) + 1);
-                            TaoCasterData.getTaoCap(p).setOffhandAttack(false);
-                        }
-                    } else {
-                        if (mainhand.getItem() instanceof ISpecialSwitchIn && p.swingingHand != EnumHand.OFF_HAND) {
-                            ISpecialSwitchIn issi = (ISpecialSwitchIn) mainhand.getItem();
-                            issi.onSwitchIn(mainhand, p);
-                        }
-                        cap.setSwitchIn(false);
-                    }
-                }
-                if (offhand.getItem() instanceof ICombo) {
-                    if (cap.getOffhandCool() == 1) {
-//                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriodOff(p))
-//                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.OFF_HAND));
-                        //System.out.println("update combo off");
-                        ICombo tw = (ICombo) offhand.getItem();
-                        long cache = tw.lastAttackTime(p, offhand);
-                        tw.updateLastAttackTime(p, offhand);
-                        long newcache = tw.lastAttackTime(p, offhand);
-                        if (newcache - cache > CombatConfig.timeBetweenAttacks) {
-                            tw.setCombo(p, offhand, 0);
-                        }
-                        float cd = tw.newCooldown(p, offhand);
-                        if (cd != 0)
-                            TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd);
-                        tw.setCombo(p, offhand, tw.getCombo(p, offhand) + 1);
-                        TaoCasterData.getTaoCap(p).setOffhandAttack(false);
-                    }
-                }
-                if (cap.getOffHand().getItem() != offhand.getItem()) {
-                    //new offhand item!
-                    if (offhand.getItem() instanceof ISpecialSwitchIn) {
-                        ISpecialSwitchIn issi = (ISpecialSwitchIn) offhand.getItem();
-                        issi.onSwitchIn(offhand, p);
-                    }
-                    cap.setOffHand(offhand);
-                }
-            }
-        }
-    }
 }

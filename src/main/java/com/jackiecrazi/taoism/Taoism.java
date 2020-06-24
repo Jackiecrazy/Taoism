@@ -7,8 +7,6 @@ import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
 import com.jackiecrazi.taoism.crafting.TaoCrafting;
-import com.jackiecrazi.taoism.handler.TaoCapabilityHandler;
-import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -103,8 +101,6 @@ public class Taoism {
         MinecraftForge.EVENT_BUS.register(TaoBlocks.class);
         MinecraftForge.EVENT_BUS.register(TaoCrafting.class);
         MinecraftForge.EVENT_BUS.register(TaoPotion.class);
-        MinecraftForge.EVENT_BUS.register(TaoisticEventHandler.class);
-        MinecraftForge.EVENT_BUS.register(TaoCapabilityHandler.class);
         MinecraftForge.EVENT_BUS.register(TaoEntities.class);
         atk.setAccessible(true);
         bypassArmor.setAccessible(true);

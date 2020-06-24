@@ -2,7 +2,7 @@ package com.jackiecrazi.taoism.common.item.arrows;
 
 import com.jackiecrazi.taoism.api.BinaryMachiavelli;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IDamageType;
-import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrow;
+import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowBlunt;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowHarpoon;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowScream;
@@ -57,8 +57,8 @@ public class TaoArrow extends ItemArrow implements IDamageType {
     @Nonnull
     public EntityArrow createArrow(@Nonnull World worldIn, @Nonnull ItemStack stack, EntityLivingBase shooter) {
         try {
-            EntityTaoArrow eta=(EntityTaoArrow) factories[stack.getItemDamage()].newInstance(worldIn, shooter,stack);
-            if(hasMotor(stack))eta.setCharge(EntityTaoArrow.maxCharge);
+            EntityTaoProjectile eta=(EntityTaoProjectile) factories[stack.getItemDamage()].newInstance(worldIn, shooter,stack);
+            if(hasMotor(stack))eta.setCharge(EntityTaoProjectile.maxCharge);
             eta.setWarhead(getWarhead(stack));
             return eta;
         } catch (Exception e) {

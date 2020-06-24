@@ -1,0 +1,46 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "taoism:blank"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "type": 1
+      },
+      "model": "taoism:projectile/dart"
+    },{
+      "predicate": {
+        "type": 2
+      },
+      "model": "taoism:item/banfu"
+    },
+    {
+      "predicate": {
+        "type": 3
+      },
+      "model": "taoism:projectile/swordbeam"
+    }],
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [ 0, -90, 55 ],
+      "translation": [ 0, 4.0, 0.5 ],
+      "scale": [ 1.55, 1.55, 0.85 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 0, 90, -55 ],
+      "translation": [ 0, 4.0, 0.5 ],
+      "scale": [ 1.55, 1.55, 0.85 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ -90, -90, 25 ],
+      "translation": [ 1.13, 3.2, 1.13 ],
+      "scale": [ 1.43, 1.43, 0.68 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ 0, 90, -25 ],
+      "translation": [ 1.13, 3.2, 1.13 ],
+      "scale": [ 1.43, 1.43, 0.68 ]
+    }
+  }
+}

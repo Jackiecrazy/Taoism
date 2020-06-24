@@ -133,7 +133,7 @@ public class Nunchaku extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getCurrentMove(stack).isSneakPressed() && !getLastMove(stack).isSneakPressed()) {//high low
             //smash!
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 10, 0));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 10, 0), false);
         }
     }
 

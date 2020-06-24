@@ -9,8 +9,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@Mod.EventBusSubscriber(modid = Taoism.MODID)
 public class TaoCapabilityHandler {
     public static final ResourceLocation TAOCAP = new ResourceLocation(Taoism.MODID, "stuff");
 

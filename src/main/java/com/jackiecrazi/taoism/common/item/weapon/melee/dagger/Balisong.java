@@ -44,7 +44,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? isCharged(attacker, item) ? 3f : 2f : 1f;
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? 3f : 1f;
     }
 
 //    @Override

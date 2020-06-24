@@ -8,7 +8,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class EntityTaoArrowBlunt extends EntityTaoArrow {
+public class EntityTaoArrowBlunt extends EntityTaoProjectile {
     public EntityTaoArrowBlunt(World worldIn) {
         super(worldIn);
     }
@@ -39,6 +39,6 @@ public class EntityTaoArrowBlunt extends EntityTaoArrow {
     @Override
     protected void arrowHit(EntityLivingBase living)
     {
-        TaoPotionUtils.attemptAddPot(living, new PotionEffect(MobEffects.SLOWNESS,20));
+        TaoPotionUtils.attemptAddPot(living, new PotionEffect(MobEffects.SLOWNESS,20), false);
     }
 }

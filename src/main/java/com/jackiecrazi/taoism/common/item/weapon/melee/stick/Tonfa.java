@@ -54,8 +54,8 @@ public class Tonfa extends TaoWeapon {
             Taoism.setAtk(attacker, 0);
         }
         if (qi >= 7) {
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7), false);
         }
     }
 
@@ -66,19 +66,19 @@ public class Tonfa extends TaoWeapon {
             Taoism.setAtk(attacker, 0);
         }
         if (qi >= 7) {
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 20));
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, 20));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 20), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, 20), false);
         }
         if (isCharged(attacker, stack)) {
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)));
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.RESOLUTION, 40));
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)), false);
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.RESOLUTION, 40), false);
 
         }
     }

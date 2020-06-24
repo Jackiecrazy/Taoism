@@ -85,7 +85,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3));
+        TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3), false);
     }
 
 }

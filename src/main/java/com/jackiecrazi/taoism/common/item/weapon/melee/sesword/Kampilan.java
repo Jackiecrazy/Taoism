@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.sesword;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -47,8 +48,19 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-            splash(attacker, stack, 120);
+    protected void aoe(ItemStack stack, EntityLivingBase elb, int chi) {
+        if(isCharged(elb, stack)&&!elb.world.isRemote){
+            if(TaoCasterData.getTaoCap(elb).consumeQi(0.5f))
+            splash(elb,stack, 360);
+            if(TaoCasterData.getTaoCap(elb).getQi()<5){
+                for (int i = 0; i < 5; i++) {
+                    float rotation = 72*i;
+                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack);
+                    esb.shoot(elb, 0, elb.rotationYaw+rotation, 0.0F, 1f, 0.0F);
+                    elb.world.spawnEntity(esb);
+                }
+            }
+        }else splash(elb, stack, 120);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
+import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.HudConfig;
@@ -90,19 +91,21 @@ public class ClientEvents {
     };
     private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
     private static final ResourceLocation hood = new ResourceLocation(Taoism.MODID, "textures/hud/icons.png");
+    private static final int CHARGE = 50;
     /**
      * left, back, right
      */
     private static long[] lastTap = {0, 0, 0, 0};
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false, sneak = false;
-    private static int leftClickAt = 0, rightClickAt=0;
+    private static int leftClickAt = 0, rightClickAt = 0;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
         for (Item i : TaoWeapon.listOfWeapons) {
             regWeap(i);
         }
+        regWeap(TaoItems.prop);
     }
 
     private static void regWeap(Item i) {
@@ -125,7 +128,6 @@ public class ClientEvents {
                 Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
             }
         }
-        System.out.println("tikataka");
     }
 
     @SubscribeEvent
@@ -178,29 +180,30 @@ public class ClientEvents {
         Minecraft mc = Minecraft.getMinecraft();
         MovementInput mi = e.getMovementInput();
         if (TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
-            if (mi.leftKeyDown && (!tapped[0] || mc.gameSettings.keyBindSprint.isPressed())) {
-                if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE) {
+            final boolean onSprint = mc.gameSettings.keyBindSprint.isPressed();
+            if (mi.leftKeyDown && (!tapped[0] || onSprint)) {
+                if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE || onSprint) {
                     Taoism.net.sendToServer(new PacketDodge(0));
                 }
                 lastTap[0] = mc.world.getTotalWorldTime();
             }
             tapped[0] = mi.leftKeyDown;
-            if (mi.backKeyDown && (!tapped[1] || mc.gameSettings.keyBindSprint.isPressed())) {
-                if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE) {
+            if (mi.backKeyDown && (!tapped[1] || onSprint)) {
+                if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE || onSprint) {
                     Taoism.net.sendToServer(new PacketDodge(1));
                 }
                 lastTap[1] = mc.world.getTotalWorldTime();
             }
             tapped[1] = mi.backKeyDown;
-            if (mi.rightKeyDown && (!tapped[2] || mc.gameSettings.keyBindSprint.isPressed())) {
-                if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE) {
+            if (mi.rightKeyDown && (!tapped[2] || onSprint)) {
+                if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE || onSprint) {
                     Taoism.net.sendToServer(new PacketDodge(2));
                 }
                 lastTap[2] = mc.world.getTotalWorldTime();
             }
             tapped[2] = mi.rightKeyDown;
-            if (mi.forwardKeyDown && (!tapped[3] || mc.gameSettings.keyBindSprint.isPressed())) {
-                if (mc.world.getTotalWorldTime() - lastTap[3] <= ALLOWANCE) {
+            if (mi.forwardKeyDown && (!tapped[3] || onSprint)) {
+                if (mc.world.getTotalWorldTime() - lastTap[3] <= ALLOWANCE || onSprint) {
                     Taoism.net.sendToServer(new PacketDodge(3));
                 }
                 lastTap[3] = mc.world.getTotalWorldTime();
@@ -213,20 +216,21 @@ public class ClientEvents {
             KeyBinding.unPressAllKeys();
             return;
         }
+        if (mc.player.isSprinting() && TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
+            if (mi.jump && !jump) {
+                //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketJump());
+                //}
+            }
+            jump = mi.jump;
 
-        if (mi.jump && !jump) {
-            //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-            Taoism.net.sendToServer(new PacketJump());
-            //}
+            if (mi.sneak && !sneak) {
+                //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
+                Taoism.net.sendToServer(new PacketSlide());
+                //}
+            }
+            sneak = mi.sneak;
         }
-        jump = mi.jump;
-
-        if (mc.player.isSprinting() && mi.sneak && !sneak) {
-            //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-            Taoism.net.sendToServer(new PacketSlide());
-            //}
-        }
-        sneak = mi.sneak;
     }
 
     @SubscribeEvent
@@ -241,25 +245,23 @@ public class ClientEvents {
             GameSettings gs = Minecraft.getMinecraft().gameSettings;
             MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
             Taoism.net.sendToServer(new PacketMakeMove(move));
-            leftClickAt=rightClickAt=0;
+            leftClickAt = rightClickAt = 0;
         }
     }
-
-    private static final int CHARGE=50;
 
     @SubscribeEvent
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
-            Minecraft mc=Minecraft.getMinecraft();
-            if(mc.gameSettings.keyBindAttack.isKeyDown()&&mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon){
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
                 leftClickAt++;
-                if(leftClickAt==CHARGE){
+                if (leftClickAt == CHARGE) {
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
-            if(mc.gameSettings.keyBindUseItem.isKeyDown()&&mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon){
+            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
                 rightClickAt++;
-                if(rightClickAt==CHARGE){
+                if (rightClickAt == CHARGE) {
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
                 }
             }

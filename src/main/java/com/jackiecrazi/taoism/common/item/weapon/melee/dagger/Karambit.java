@@ -109,7 +109,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? 1.5f : 1f;
+        return NeedyLittleThings.isBehindEntity(attacker, target) ? 2f : 1f;
     }
 
 //    @Override

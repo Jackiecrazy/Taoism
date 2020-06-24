@@ -140,7 +140,7 @@ public class QingLongJi extends TaoWeapon {
                 TaoPotionUtils.forceBleed(target, attacker, chi * 4, 0, TaoPotionUtils.POTSTACKINGMETHOD.ADD);
             } else {
                 //butt smash!
-                TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0));
+                TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0), false);
             }
         }
     }

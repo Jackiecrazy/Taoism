@@ -11,7 +11,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -59,7 +58,8 @@ public class TaoPotion extends Potion {
     @SubscribeEvent
     public static void init(RegistryEvent.Register<Potion> event) {
         HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
-        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed");
+        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed")
+                .registerPotionAttributeModifier(TaoEntities.HEAL, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 0);
         ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -1, 2);
         RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
@@ -107,15 +107,6 @@ public class TaoPotion extends Potion {
 
     private static boolean isSpecialDamage(DamageSource ds) {
         return !ds.damageType.equals("bleed") && (ds.isMagicDamage() || ds.isUnblockable() || ds.isDamageAbsolute());
-    }
-
-    @SubscribeEvent
-    public static void nope(LivingHealEvent e) {
-        if (e.getEntityLiving().getActivePotionEffect(BLEED) != null) {
-            float debuff = (e.getEntityLiving().getActivePotionEffect(BLEED).getAmplifier() + 1) * 0.3f;
-            if (debuff >= 1) e.setCanceled(true);
-            e.setAmount(e.getAmount() * 1 - debuff);
-        }
     }
 
     @Override

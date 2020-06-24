@@ -24,9 +24,9 @@ public class TaoPotionUtils {
      */
     public static void forceBleed(EntityLivingBase elb, Entity attacker, int duration, int potency, POTSTACKINGMETHOD method) {
         PotionEffect pe = stackPot(elb, new PotionEffect(TaoPotion.BLEED, duration, potency, false, false), method);
-        if (!attemptAddPot(elb, pe)) {
+        if (!attemptAddPot(elb, pe, true)) {
             elb.hurtResistantTime = 0;
-            elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), (1 + potency) * duration / 20);
+            elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), (1 + potency) * duration / 10);
             elb.hurtResistantTime = 0;
         }
     }
@@ -67,7 +67,7 @@ public class TaoPotionUtils {
      * Attempts to add the potion effect. If it fails, the function will *permanently* apply all the attribute modifiers.
      * Take that, wither!
      */
-    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot) {
+    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot, boolean stackWhenFailed) {
         Potion p = pot.getPotion();
         elb.addPotionEffect(pot);
         if (!elb.isPotionActive(p)) {

@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 
-public class EntityTaoArrowScream extends EntityTaoArrow {
+public class EntityTaoArrowScream extends EntityTaoProjectile {
     @Override
     public int getDamageType(ItemStack is) {
         return 0;

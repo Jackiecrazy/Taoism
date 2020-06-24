@@ -91,7 +91,7 @@ public class CatNineTails extends TaoWeapon {
             potency = 2 - (Math.floorDiv(armor, 5));
             duration = 100 - (armor * 10);
         }
-        TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.LACERATION, duration, potency));
+        TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.LACERATION, duration, potency), false);
         TaoPotionUtils.forceBleed(target, attacker, duration, potency, TaoPotionUtils.POTSTACKINGMETHOD.ADD);
     }
 

@@ -12,7 +12,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -83,14 +82,9 @@ public class BohemianEarspoon extends TaoWeapon {
                             setLastAttackedRangeSq(stack, 0);
                         }
                         //a new challenger is approaching!
-                        Vec3d pos = elb.getPositionVector();
-                        Vec3d angle = new Vec3d(target.posX - (pos.x + 0.5D), target.posY - pos.y, target.posZ - (pos.z + 0.5D));
-                        double xForce = angle.x * 0.02;
-                        double yForce = angle.y * 0.02;
-                        double zForce = angle.z * 0.02;
-                        target.motionX += xForce;
-                        target.motionY += yForce;
-                        target.motionZ += zForce;
+                        target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.02;
+                        target.motionY += ((target.posY) - elb.posY) * 0.02;
+                        target.motionZ += (target.posZ - (elb.posZ + 0.5D)) * 0.02;
                         target.velocityChanged = true;
                     }
                 }

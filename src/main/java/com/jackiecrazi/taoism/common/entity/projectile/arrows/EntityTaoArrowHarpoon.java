@@ -11,7 +11,7 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraft.world.storage.loot.LootTableList;
 
-public class EntityTaoArrowHarpoon extends EntityTaoArrow {
+public class EntityTaoArrowHarpoon extends EntityTaoProjectile {
     @Override
     public int getDamageType(ItemStack is) {
         return 2;

@@ -3,11 +3,13 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBanfu;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -22,6 +24,8 @@ public class BanFu extends TaoWeapon {
     //Like the axe, a powerful weapon designed to counter heavy armor. Good power and defense potential, decent reach, combo and trickery
     //Leap attacks deal double damage, attacks always decrease posture,
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
+    //execution: thrown, dealing constant chip damage and rooting the enemy.
+    // Another attack pulls it back regardless of range for damage in that line and ST detonation for the target
 
     private static final boolean[] harvestList = {false, false, true, false};
 
@@ -52,6 +56,26 @@ public class BanFu extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.8f;
+    }
+
+    @Override
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
+        if(isCharged(elb, stack)&&!elb.world.isRemote){
+            if(gettagfast(stack).getBoolean("thrown")){
+                Entity ebf= elb.world.getEntityByID(gettagfast(stack).getInteger("thrownID"));
+                if(ebf instanceof EntityBanfu){
+                    ((EntityBanfu) ebf).onRecall();
+                }
+            }else {
+                EntityBanfu ebf = new EntityBanfu(elb.world, elb, getHand(stack));
+                ebf.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
+                elb.world.spawnEntity(ebf);
+                gettagfast(stack).setInteger("thrownID", ebf.getEntityId());
+
+            }
+            return true;
+        }
+        return super.onEntitySwing(elb, stack);
     }
 
     @Override
@@ -94,7 +118,7 @@ public class BanFu extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (chi > 0) {
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1));
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1), false);
         }
     }
 

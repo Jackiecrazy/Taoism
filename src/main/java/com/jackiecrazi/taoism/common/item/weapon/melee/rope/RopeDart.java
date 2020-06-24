@@ -130,6 +130,13 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
+    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
+    }
+
+    @Override
     public boolean isTwoHanded(ItemStack is) {
         return !isEngaged(is);
     }
@@ -159,8 +166,6 @@ public class RopeDart extends TaoWeapon {
         if (!elb.world.isRemote) {
             if (elb.world.getEntityByID(gettagfast(is).getInteger("dartID")) == null) {
                 EntityRopeDart erd = new EntityRopeDart(elb.world, elb, getHand(is));
-                erd.rotationPitch = elb.rotationPitch;
-                erd.rotationYaw = elb.rotationYaw;
                 if (getHand(is) == EnumHand.MAIN_HAND) {
 //                    if (isEngaged(is)) {
 //                        Entity e = elb.world.getEntityByID(((RopeDart) is.getItem()).getRopedTo(is));

@@ -26,14 +26,14 @@ weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %s
 taoism.weaponDefMult=defense posture multiplier: %.2f
 taoism.weaponAttMult=attack posture multiplier: %.2f
-taoism.notenoughqi=You need nine levels of chi to charge an execution
-taoism.alreadycharged=This weapon is already charged
+weapon.notenoughqi=You need nine levels of chi to charge an execution
+weapon.alreadycharged=This weapon is already charged
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge
 ken.qi=+3%% damage per chi level
-ken.aoe=if not aiming, strikes all enemies in a 90 degree sector
-ken.stab=if aiming, deal an extra 20%% damage
+ken.aoe=strikes all enemies in a 90 degree sector
+ken.stab=if only one target was attacked, deal an extra 20%% damage
 ken.riposte=a parry will reset the combo counter
 
 item.banfu.name=Sapper's Axe

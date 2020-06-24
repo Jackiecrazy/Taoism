@@ -143,7 +143,7 @@ public class Staff extends TaoWeapon {
             if (attacker.onGround || attacker.isSneaking()) {
                 if (target.onGround) {
                     target.addVelocity(0, chi / 15f, 0);
-                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4));
+                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4), false);
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f);
                     target.motionY = 0;

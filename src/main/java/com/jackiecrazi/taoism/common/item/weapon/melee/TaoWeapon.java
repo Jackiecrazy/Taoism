@@ -34,7 +34,6 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -136,9 +135,8 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         return EnumPhase.IDLE;//TODO ?
     }
 
-    protected TaoWeapon setQiAccumulationRate(float amount) {
+    protected void setQiAccumulationRate(float amount) {
         qiRate = amount;
-        return this;
     }
 
     /*
@@ -671,16 +669,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("changchui.armpen"), true);
-            return;
-        }
-        if(isCharged(attacker, item)){
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("changchui.armpen"), true);
-            return;
-        }
+//        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
+//            if (attacker instanceof EntityPlayer)
+//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
+//            return;
+//        }
+//        if(isCharged(attacker, item)){
+//            if (attacker instanceof EntityPlayer)
+//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
+//            return;
+//        }
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
@@ -804,7 +802,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        dischargeWeapon(elb, is);
     }
 
     @Override

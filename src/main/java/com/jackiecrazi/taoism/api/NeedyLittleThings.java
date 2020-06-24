@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.handler.TaoisticEventHandler;
+import com.jackiecrazi.taoism.handler.TaoCombatHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.*;
@@ -18,10 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -106,7 +103,7 @@ public class NeedyLittleThings {
      * knockback in EntityLivingBase except it makes sense and the resist is factored into the event
      */
     public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double yRatio, double zRatio) {
-        TaoisticEventHandler.modCall = true;
+        TaoCombatHandler.modCall = true;
         net.minecraftforge.event.entity.living.LivingKnockBackEvent event = net.minecraftforge.common.ForgeHooks.onLivingKnockBack(to, from, strength * (float) (1 - to.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue()), xRatio, zRatio);
         if (event.isCanceled()) return;
         strength = event.getStrength();
@@ -154,7 +151,7 @@ public class NeedyLittleThings {
 
     public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
         IAttributeInstance a = elb.getEntityAttribute(ia);
-        if (a == null) return 1;
+        if (a == null || hand == null) return 1;
         IAttributeInstance toUse = new AttributeMap().registerAttribute(ia);
         toUse.setBaseValue(a.getBaseValue());
         for (AttributeModifier am : a.getModifiers()) {
@@ -306,6 +303,34 @@ public class NeedyLittleThings {
         double me = x * x + y * y + z * z;
         double you = from.getDistanceSq(to);
         return Math.min(me, you);
+    }
+
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, Vec3d to) {
+        double x = from.posX - to.x;
+        x = Math.max(Math.abs(x) - ((from.width / 2)), 0);
+        //stupid inconsistent game
+        double y = (from.posY + from.height / 2) - (to.y);
+        y = Math.max(Math.abs(y) - (from.height / 2), 0);
+        double z = from.posZ - to.z;
+        z = Math.max(Math.abs(z) - (from.width / 2), 0);
+        return x * x + y * y + z * z;
+    }
+
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, BlockPos to) {
+        double x = from.posX - to.getX();
+        x = Math.max(Math.abs(x) - ((from.width / 2)), 0);
+        //stupid inconsistent game
+        double y = (from.posY + from.height / 2) - (to.getY());
+        y = Math.max(Math.abs(y) - (from.height / 2), 0);
+        double z = from.posZ - to.getZ();
+        z = Math.max(Math.abs(z) - (from.width / 2), 0);
+        return x * x + y * y + z * z;
     }
 
     public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {

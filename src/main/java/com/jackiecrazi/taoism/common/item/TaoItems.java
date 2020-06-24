@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.item;
 
 import com.jackiecrazi.taoism.common.item.arrows.TaoArrow;
+import com.jackiecrazi.taoism.common.item.prop.ItemProjectileProp;
 import com.jackiecrazi.taoism.common.item.weapon.melee.ItemBlueprint;
 import com.jackiecrazi.taoism.common.item.weapon.melee.axe.BanFu;
 import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
@@ -33,6 +34,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class TaoItems {
     public static final ItemArmor.ArmorMaterial TAO = EnumHelper.addArmorMaterial("tao", "tao", 15, new int[]{1, 4, 5, 2}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0F);
     public static final Item.ToolMaterial TAOW = EnumHelper.addToolMaterial("tao", 0, 1, 1f, 0f, 1);
+    public static Item prop;
     public static Item
             kampilan,
             cestus,
@@ -92,6 +94,7 @@ public class TaoItems {
         bohear = new BohemianEarspoon();
         nunchaku = new Nunchaku();
         ropedart = new RopeDart();
+        prop=new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);
@@ -113,6 +116,7 @@ public class TaoItems {
         e.getRegistry().register(bohear);
         e.getRegistry().register(nunchaku);
         e.getRegistry().register(ropedart);
+        e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);
         //armor
