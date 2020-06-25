@@ -61,6 +61,7 @@ public class TaoCombatHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void projectileParry(ProjectileImpactEvent e) {
         Entity ent = e.getEntity();
+        if(ent==null) return;
         if (EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)) return;//derp derp derp
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;

@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
+import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherAnchor;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -8,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
@@ -26,12 +28,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
-    Entity target;
-    List<WeakReference<Entity>> hitList=new ArrayList<>();
-    Vec3d offset;
-    //on impact, hits for full damage and tethers itself to the mob, copying its velocity.
-    //while tethered, disables the entity's movements
-    //when recalled, flies straight back to the caster, damaging all entities on its flight path for half melee damage
+    private Entity target;
+    private List<WeakReference<Entity>> hitList = new ArrayList<>();
+    private Vec3d offset;
 
     public EntityBanfu(World worldIn) {
         super(worldIn);
@@ -55,7 +54,7 @@ public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
 
     @Override
     public Entity getTetheredEntity() {
-        return target;
+        return hitStatus == 5 ? getThrower() : target;
     }
 
     @Override
@@ -107,13 +106,13 @@ public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
             TaoPotionUtils.attemptAddPot((EntityLivingBase) getTetheredEntity(), new PotionEffect(MobEffects.SLOWNESS, 10, 2), false);
         }
         //return trip ranged shock
-        if (hitStatus == -2) {
-            loop:for(Entity e:world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(5,5,5))){
-                if(e!=shootingEntity){
-                    for(WeakReference<Entity> wr: hitList){
-                        if(wr.get()==e)continue loop;
+        if (hitStatus <= 0) {
+            loop:
+            for (Entity e : world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(5, 5, 5))) {
+                if (e != shootingEntity) {
+                    for (WeakReference<Entity> wr : hitList) {
+                        if (wr.get() == e) continue loop;
                     }
-                    onHitEntity(e);
                     hitList.add(new WeakReference<>(e));
                 }
             }
@@ -128,19 +127,14 @@ public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
 
     @Override
     protected void onHitEntity(Entity hit) {
-        if (hitStatus > 0 || world.isRemote) return;
+        if (hitStatus > 0 || world.isRemote || getThrower() == null) return;
         ItemStack is = getThrower().getHeldItem(hand);
         if (is.getItem() != stack.getItem() || !is.hasTagCompound()) onRetrieveWeapon();
-        assert is.getTagCompound() != null;
-        if (hitStatus == -2) {//return trip, shock enemies nearby for slow II
-            TaoCombatUtils.rechargeHand(getThrower(), hand, 1f);
-            if (getThrower() instanceof EntityPlayer)
-                TaoCombatUtils.taoWeaponAttack(hit, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
-            if(hit instanceof EntityLivingBase)
-                TaoPotionUtils.attemptAddPot((EntityLivingBase) hit, new PotionEffect(MobEffects.SLOWNESS, 60, 1), false);
+        if (hitStatus == 5) {//return trip, do nothing until it gets back into your hand
             return;
         }
         super.onHitEntity(hit);
+        assert is.getTagCompound() != null;
         target = hit;
         offset = this.getPositionVector().subtract(target.getPositionVector());
         startRiding(target, true);
@@ -150,12 +144,17 @@ public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
             TaoCombatUtils.taoWeaponAttack(hit, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
     }
 
+    @Override
+    protected void onRetrieveWeapon() {
+        shooketh();
+        super.onRetrieveWeapon();
+    }
+
     public void onRecall() {
         if (target != null && getThrower() instanceof EntityPlayer) {
             TaoCombatUtils.taoWeaponAttack(target, (EntityPlayer) getThrower(), stack, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
         }
-        updateHitStatus(-2);
-        target = getThrower();
+        updateHitStatus(5);
         super.onRecall();
     }
 
@@ -166,5 +165,20 @@ public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
             return (Minecraft.getMinecraft().getRenderPartialTicks() + ticksExisted) * 20;
         }
         return ticksExisted * 3;
+    }
+
+    private void shooketh() {
+        if (getThrower() == null) return;
+        for (WeakReference<Entity> wr : hitList) {
+            Entity e = wr.get();
+            if (e != null && getThrower() instanceof EntityPlayer) {
+                TaoCombatUtils.rechargeHand(getThrower(), hand, 1f);
+                TaoCombatUtils.taoWeaponAttack(target, (EntityPlayer) getThrower(), stack, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
+                if (e instanceof EntityLivingBase)
+                    TaoPotionUtils.attemptAddPot((EntityLivingBase) e, new PotionEffect(MobEffects.SLOWNESS, 60, 1), false);
+            }
+        }
+        double extra = 1 + (target instanceof EntityLivingBase ? (((EntityLivingBase) target).getMaxHealth() - ((EntityLivingBase) target).getHealth()) / ((EntityLivingBase) target).getMaxHealth() : 0);
+        target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(getThrower()), (float) (2 * extra * getThrower().getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
     }
 }

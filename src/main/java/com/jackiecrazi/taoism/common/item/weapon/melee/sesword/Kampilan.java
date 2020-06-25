@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.sesword;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -55,7 +56,7 @@ public class Kampilan extends TaoWeapon {
             if(TaoCasterData.getTaoCap(elb).getQi()<5){
                 for (int i = 0; i < 5; i++) {
                     float rotation = 72*i;
-                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack);
+                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack).setRenderRotation(-40+ Taoism.unirand.nextInt(80));
                     esb.shoot(elb, 0, elb.rotationYaw+rotation, 0.0F, 1f, 0.0F);
                     elb.world.spawnEntity(esb);
                 }

@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.desword;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
@@ -59,9 +60,10 @@ public class Ken extends TaoWeapon {
                 }
                 Vec3d look = elb.getLookVec();
                 for (int i = 0; i < numToFire; i++) {
-                    float rotation = (getCombo(elb, is) + i) % 2 * 30;
-                    if (rotation == 0) rotation = -30;
-                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(is), is).rotateY(rotation);
+                    float rotation = (getCombo(elb, is) + i) % 2 * 20;
+                    if (rotation == 0) rotation = -40;
+                    rotation+= Taoism.unirand.nextInt(20);
+                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(is), is).setRenderRotation(rotation);
                     esb.setPositionAndRotation(elb.posX + (look.x * i * 2), elb.posY + (double) elb.getEyeHeight() - 0.10000000149011612D + (look.y * i * 2), elb.posZ + (look.z * i * 2), elb.rotationYaw, elb.rotationPitch);
                     esb.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
                     elb.world.spawnEntity(esb);

@@ -34,6 +34,11 @@ public class Pollaxe extends TaoWeapon {
      *
      * Oscillates
      * primary methods to counter it are to disengage and keep a parrying hand up
+     *
+     * Execution: hit an enemy far back and break posture on first hit (head cleave)
+     * flash in front of them and stab with second hit, dealing extra damage with lost hp (devil's toothpick)
+     * begin attracting nearby enemies:
+     * third hit is a whirlwind slash that cuts enemies in half (ear cleaning)
      */
 
     private static final boolean[] harvestList = {false, false, true, false};

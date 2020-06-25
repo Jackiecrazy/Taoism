@@ -24,8 +24,13 @@ public class BanFu extends TaoWeapon {
     //Like the axe, a powerful weapon designed to counter heavy armor. Good power and defense potential, decent reach, combo and trickery
     //Leap attacks deal double damage, attacks always decrease posture,
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
-    //execution: thrown, dealing constant chip damage and rooting the enemy.
-    // Another attack pulls it back regardless of range for damage in that line and ST detonation for the target
+    //execution: whirl into a frenzy, drawing nearby mobs into the twister
+    //      in most places it is a whirlwind (extra cutting damage)
+    //      in dry places it is a dust devil (blind)
+    //      in watery places it is a waterspout (drown)
+    //      in hot places it is a fire whirl (fire)
+    // you attack constantly, alternating between both hands, knockback converted into more damage where applicable
+    // enemy is prevented from dying until this ends, at which point all enemies are flung up and away in a rain of blood
 
     private static final boolean[] harvestList = {false, false, true, false};
 
@@ -71,7 +76,6 @@ public class BanFu extends TaoWeapon {
                 ebf.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
                 elb.world.spawnEntity(ebf);
                 gettagfast(stack).setInteger("thrownID", ebf.getEntityId());
-
             }
             return true;
         }

@@ -49,7 +49,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.MAIN_HAND ? 5f : 6f;
+        return 5;
     }
 
     @Override

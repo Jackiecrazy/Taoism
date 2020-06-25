@@ -59,7 +59,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is)==EnumHand.MAIN_HAND?5f:4f;
+        return 5;
     }
 
     @Override

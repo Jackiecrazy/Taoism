@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class EntitySwordBeam extends EntityThrownWeapon {
     private EnumHand h;
     private String s;
-    private float ySpin;
+    private float zSpin;
 
     public EntitySwordBeam(World w) {
         super(w);
@@ -25,8 +25,8 @@ public class EntitySwordBeam extends EntityThrownWeapon {
         h = hand;
     }
 
-    public EntitySwordBeam rotateY(float amnt){
-        this.ySpin=amnt;
+    public EntitySwordBeam setRenderRotation(float amnt){
+        this.zSpin =amnt;
         return this;
     }
 
@@ -72,17 +72,17 @@ public class EntitySwordBeam extends EntityThrownWeapon {
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setFloat("spin", ySpin);
+        compound.setFloat("spin", zSpin);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        ySpin=compound.getFloat("spin");
+        zSpin =compound.getFloat("spin");
     }
 
     @Override
     public float zSpin() {
-        return ySpin;
+        return zSpin;
     }
 }

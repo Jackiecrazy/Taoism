@@ -20,12 +20,15 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class EntityTaoProjectile extends EntityArrow implements IDamageType {
 
@@ -33,6 +36,8 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
     protected int charge = 0;
     protected int warhead = 0;//0 for nothing, 1 for incendiary, 2 for poison smoke, 3 for fragmenting
     private ItemStack arrow = new ItemStack(Items.ARROW);
+    private String throwerName="";
+    private EntityLivingBase thrower;
     private Field
             inTile = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_145790_g"),
             inData = ObfuscationReflectionHelper.findField(EntityArrow.class, "field_70253_h"),
@@ -89,6 +94,7 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
     }
 
     protected void init(EntityLivingBase shooter) {
+        thrower=shooter;
         init();
     }
 
@@ -107,12 +113,27 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
         compound.setInteger("charge", charge);
         if (arrow != null)
             compound.setTag("taotag", arrow.writeToNBT(new NBTTagCompound()));
+        if ((this.throwerName == null || this.throwerName.isEmpty()) && this.thrower instanceof EntityPlayer)
+        {
+            this.throwerName = this.thrower.getName();
+        }
+
+        compound.setString("ownerName", this.throwerName == null ? "" : this.throwerName);
     }
 
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         charge = compound.getInteger("charge");
         arrow = new ItemStack(compound.getCompoundTag("taotag"));
+        this.thrower = null;
+        this.throwerName = compound.getString("ownerName");
+
+        if (this.throwerName.isEmpty())
+        {
+            this.throwerName = null;
+        }
+
+        this.thrower = this.getThrower();
     }
 
     protected ItemStack getArrowStack() {
@@ -256,6 +277,34 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
     public void extinguish() {
         super.extinguish();
         charge = 0;
+    }
+
+    @Nullable
+    public EntityLivingBase getThrower()
+    {
+        if (this.thrower == null && this.throwerName != null && !this.throwerName.isEmpty())
+        {
+            this.thrower = this.world.getPlayerEntityByName(this.throwerName);
+
+            if (this.thrower == null && this.world instanceof WorldServer)
+            {
+                try
+                {
+                    Entity entity = ((WorldServer)this.world).getEntityFromUuid(UUID.fromString(this.throwerName));
+
+                    if (entity instanceof EntityLivingBase)
+                    {
+                        this.thrower = (EntityLivingBase)entity;
+                    }
+                }
+                catch (Throwable var2)
+                {
+                    this.thrower = null;
+                }
+            }
+        }
+
+        return this.thrower;
     }
 
     @Override

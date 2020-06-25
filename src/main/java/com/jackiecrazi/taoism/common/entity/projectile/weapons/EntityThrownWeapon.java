@@ -32,11 +32,6 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         this.rotationYaw = dude.rotationYaw;
     }
 
-    protected EntityLivingBase getThrower() {
-        if (this.shootingEntity instanceof EntityLivingBase) return (EntityLivingBase) shootingEntity;
-        throw new IllegalArgumentException("shooting entity is not living");
-    }
-
     @Override
     public void handleStatusUpdate(byte id) {
         super.handleStatusUpdate(id);
@@ -70,7 +65,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     @Override
     public void onUpdate() {
         if (!world.isRemote) {
-            if(firstUpdate){
+            if (firstUpdate) {
                 sync();
             }
             if (!(this.shootingEntity instanceof EntityLivingBase) || ((EntityLivingBase) shootingEntity).getHeldItem(hand).getItem() != stack.getItem()) {
@@ -82,6 +77,14 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
             }
         }
         super.onUpdate();
+    }
+
+    @Override
+    public void onCollideWithPlayer(EntityPlayer player) {
+        super.onCollideWithPlayer(player);
+        if (shootingEntity == player && hitStatus > 0) {
+            onRetrieveWeapon();
+        }
     }
 
     @Override
@@ -103,14 +106,6 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
             updateHitStatus(2);
     }
 
-    @Override
-    public void onCollideWithPlayer(EntityPlayer player) {
-        super.onCollideWithPlayer(player);
-        if(shootingEntity==player&&hitStatus!=-1){
-            onRetrieveWeapon();
-        }
-    }
-
     protected void onRetrieveWeapon() {
         if (stack != null)
             stack.getTagCompound().setBoolean("thrown", false);
@@ -130,7 +125,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
             return;
         }
         shoot(shootingEntity.posX - posX, shootingEntity.posY + shootingEntity.getEyeHeight() / 2 - posY, shootingEntity.posZ - posZ, 0.8f, 0);
-        inGround=false;
+        inGround = false;
         velocityChanged = true;
         sync();
     }

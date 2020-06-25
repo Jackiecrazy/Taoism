@@ -26,6 +26,8 @@ weapon.disshield=腾空攻击可禁用敌方盾牌
 taoism.weaponReach=攻击范围: %.2f
 taoism.weaponDefMult=防御架势倍率: %.2f
 taoism.weaponAttMult=攻击架势倍率: %.2f
+weapon.notenoughqi=需要九层气才能触发斩杀
+weapon.alreadycharged=斩杀已经触发
 
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却
@@ -107,20 +109,20 @@ catninetails.lacerate=攻击附加五秒撕裂III并叠加一秒流血III
 catninetails.armord=敌方每点护甲值减少撕裂和流血的持续时间
 catninetails.armorp=敌方每五点护甲值减少一层效果强度，拥有十点护甲以上则完全免疫
 
-item.pollaxe.name=长柯斧
+item.pollaxe.name=宣花斧
 pollaxe.knockback=所有击退将会转化为架势伤害
 pollaxe.chop=连续第二次普攻时额外造成30%%伤害
 pollaxe.stab=右击使用斧柄戳击，连续第二次戳击时造成双倍架势伤害
 pollaxe.escape=若敌人在两次攻击之间离开攻击范围，连续攻击将被打断
 pollaxe.oscillate=使用攻击会重置另一种攻击的一半冷却，招架后另一只手立刻刷新
 
-item.halberd.name=凤头斧
+item.halberd.name=日华斧
 halberd.leap=暴击造成双倍伤害
 halberd.cleave=普攻叠加三秒破甲II
 halberd.stab=右击使用枪头引爆破甲，每层破甲造成2点无视护甲的伤害
 halberd.stab.cooldown=每层引爆的破甲使本攻击冷却减少一秒
 
-item.changchui.name=立瓜锤
+item.changchui.name=琉森锤／渡鸦喙
 changchui.leap=暴击造成双倍伤害，对击倒的目标造成双倍伤害
 changchui.armpen=被动无视3（+气层数）点护甲
 changchui.enfeeble=六层气以上时，普攻使目标在2秒内无法恢复架势
