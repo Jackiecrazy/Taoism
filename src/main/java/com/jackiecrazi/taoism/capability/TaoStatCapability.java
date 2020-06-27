@@ -2,14 +2,17 @@ package com.jackiecrazi.taoism.capability;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ICombatManipulator;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
@@ -23,14 +26,14 @@ public class TaoStatCapability implements ITaoStatCapability {
     private WeakReference<EntityLivingBase> e;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
-    private float maxLing, maxPosture, maxStamina;
+    private float maxLing, maxPosture, recordedDamage;
     private int lcd, pcd, scd, qcd;
     private int down, bind;
     private long timey;
-    private boolean swi, protecc, off;
+    private boolean swi, protecc, off, recording;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
-    private ItemStack lastTickOffhand;
+    private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
 
@@ -65,6 +68,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setBoolean("off", isOffhandAttack());
         nbt.setInteger("jump", getJumpState().ordinal());
         nbt.setTag("offhandInfo", getOffHand().writeToNBT(new NBTTagCompound()));
+        nbt.setFloat("recDam", getRecordedDamage());
+        nbt.setBoolean("reccing", recording);
         cd.toNBT(nbt);
         nbt.setInteger("bind", getBindTime());
         return nbt;
@@ -94,12 +99,13 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public boolean consumeQi(float amount) {
-        if (qi < amount) return false;
+    public boolean consumeQi(float amount, float above) {
+        if (qi < amount + above) return false;
         int qibefore = (int) qi;
         qi -= amount;
         if (getQiFloored() < qibefore)
             setQiGracePeriod(CombatConfig.qiGrace * 20);
+        sync();
         return true;
     }
 
@@ -279,6 +285,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         setJumpState(from.getJumpState());
         setClingDirections(from.getClingDirections());
         setBindTime(from.getBindTime());
+        setRecordedDamage(from.getRecordedDamage());
+        recording = from.isRecordingDamage();
     }
 
     @Override
@@ -397,12 +405,12 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public ItemStack getOffHand() {
-        return lastTickOffhand == null ? ItemStack.EMPTY : lastTickOffhand;
+        return lastTickOffhand == null || lastTickOffhand.get() == null ? ItemStack.EMPTY : lastTickOffhand.get();
     }
 
     @Override
     public void setOffHand(ItemStack is) {
-        lastTickOffhand = is.copy();
+        lastTickOffhand = new WeakReference<>(is);
     }
 
     @Override
@@ -433,6 +441,50 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setBindTime(int time) {
         bind = time;
+    }
+
+    @Override
+    public float getRecordedDamage() {
+        return recordedDamage;
+    }
+
+    @Override
+    public void setRecordedDamage(float amount) {
+        recordedDamage = amount;
+    }
+
+    @Override
+    public void addRecordedDamage(float amount) {
+        setRecordedDamage(getRecordedDamage() + amount);
+    }
+
+    @Override
+    public boolean isRecordingDamage() {
+        return recording;
+    }
+
+    @Override
+    public void startRecordingDamage() {
+        recording = true;
+        sync();
+    }
+
+    @Override
+    public void stopRecordingDamage(EntityLivingBase elb) {
+        if (!recording || getRecordedDamage() <= 0) return;
+        final EntityLivingBase target = e.get();
+        recording = false;
+        sync();
+        if (target != null) {
+            float damage = getRecordedDamage();
+            ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);
+            DamageSource ds = NeedyLittleThings.causeLivingDamage(elb);
+            if (is != null && is.getItem() instanceof ICombatManipulator) {
+                damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
+            }
+            target.hurtResistantTime = 0;
+            target.attackEntityFrom(ds, damage);
+        }
     }
 
     @Override
@@ -498,6 +550,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
         setClingDirections(new ClingData(nbt));
         setBindTime(nbt.getInteger("bind"));
+        setRecordedDamage(nbt.getFloat("recDam"));
+        recording = nbt.getBoolean("reccing");
     }
 
     private void setPrevSizes(float width, float height) {

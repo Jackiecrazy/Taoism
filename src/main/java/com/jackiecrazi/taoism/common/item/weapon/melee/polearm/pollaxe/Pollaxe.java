@@ -11,7 +11,9 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -54,7 +56,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
+        return isCharged(wielder, is) ? 3 : 1;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
-        return isOffhandEmpty(is)||isDummy(is);
+        return isOffhandEmpty(is) || isDummy(is);
     }
 
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
@@ -83,11 +85,38 @@ public class Pollaxe extends TaoWeapon {
             if (elb.getLastAttackedEntity() != null && NeedyLittleThings.getDistSqCompensated(elb, elb.getLastAttackedEntity()) > getReach(elb, stack) * getReach(elb, stack)) {
                 setLastAttackedRangeSq(stack, 0);
             }
+            if (getCombo(elb, stack) == 2) {
+                //attract entities in a 12 block radius until they're 3 blocks around the dude
+                for (Entity a : w.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 2))) {
+                    double distsq = NeedyLittleThings.getDistSqCompensated(elb, a);
+                    Vec3d point = elb.getPositionVector();
+                    //update the entity's relative position to the point
+                    //if the distance is below expected, add outwards velocity
+                    //if the distance is above expected, add inwards velocity
+                    //otherwise do nothing
+                    if (distsq > 9) {
+                        a.motionX += (point.x - a.posX) * 0.02;
+                        a.motionY += (point.y - a.posY) * 0.02;
+                        a.motionZ += (point.z - a.posZ) * 0.02;
+                    } else if (distsq < 9) {
+                        a.motionX -= (point.x - a.posX) * 0.02;
+                        a.motionY -= (point.y - a.posY) * 0.02;
+                        a.motionZ -= (point.z - a.posZ) * 0.02;
+                    }
+                    a.velocityChanged = true;
+                }
+            }
         }
     }
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
+        if (isCharged(p, is)) {
+            if (getCombo(p, is) == 1)
+                return 99;
+            if (getCombo(p, is) == 2)
+                return 6;
+        }
         return 3f;
     }
 
@@ -101,7 +130,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        return super.speed(stack);//getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
+        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
     }
 
     @Override
@@ -132,7 +161,7 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
-        if(isTwoHanded(is)) {
+        if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
             TaoCombatUtils.rechargeHand(defender, other, 0.9f);
         }
@@ -141,7 +170,7 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
-            setLastAttackedRangeSq(item,0);
+            setLastAttackedRangeSq(item, 0);
             return super.postureDealtBase(attacker, defender, item, amount) * 2;
         }
         return super.postureDealtBase(attacker, defender, item, amount);
@@ -149,7 +178,7 @@ public class Pollaxe extends TaoWeapon {
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
-        if(isTwoHanded(is)) {
+        if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
             TaoCombatUtils.rechargeHand(elb, other, 0.5f);
         }
@@ -157,6 +186,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        setLastAttackedRangeSq(item, (float) attacker.getDistanceSq(target));
         return getHand(item) == EnumHand.MAIN_HAND && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0 ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
@@ -164,7 +194,7 @@ public class Pollaxe extends TaoWeapon {
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
         float crit = 1;
         if (getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
-            setLastAttackedRangeSq(stack,0);
+            setLastAttackedRangeSq(stack, 0);
             crit *= 1.5f;
         }
         crit = attacker.motionY < 0 ? crit * 1.5f : crit;
@@ -178,7 +208,34 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
+    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
+            return orig + Math.min(target.getMaxHealth() / 2, orig * 5);
+        }
+        return orig;
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (isCharged(attacker, stack) && getCombo(attacker, stack) == 1) {//second hit
+            //teleport to right in front of the entity attacked
+            Vec3d end = target.getPositionVector().add(NeedyLittleThings.getThiccVec(attacker.getPositionVector(), target).scale(3));
+            attacker.setPositionAndUpdate(end.x, end.y, end.z);
+        }
+    }
+
+    @Override
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
+            splash(attacker, stack, 360);
+        }
+    }
+
+    @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (isCharged(attacker, stack) && getCombo(attacker, stack) == 0) {
+            return super.knockback(attacker, target, stack, orig) * 2;
+        }
         TaoCasterData.getTaoCap(target).consumePosture(orig, true);
         return 0;
     }

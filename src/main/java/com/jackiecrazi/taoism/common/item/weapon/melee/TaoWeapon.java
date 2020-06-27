@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -89,7 +90,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final int damageType;
     private final double dmg;
     private final float itemPostureMultiplier;
-    private float qiRate = 0.25f;
+    protected float qiRate = 0.25f;
 
     public TaoWeapon(int damageType, double swingSpeed, double damage, float attackPostureMultiplier) {
         super();
@@ -139,6 +140,10 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
         qiRate = amount;
     }
 
+    public double getDamage() {
+        return dmg;
+    }
+
     /*
     First and foremost, attacks and defences can be "hard" or "soft".
 An attack has a windup, wound and recovery phase. These phases preclude all other phases on that hand:
@@ -157,10 +162,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 //    public boolean onLeftClickEntity(final ItemStack stack, final EntityPlayer player, final Entity entity) {
 //        return notSpecialing;
 //    }
-
-    public double getDamage() {
-        return dmg;
-    }
 
     private void updateWielderDataStart(ItemStack stack, EntityLivingBase attacker, EntityLivingBase target) {
         if (isDummy(stack) && attacker.getHeldItemMainhand() != stack) {//better safe than sorry...
@@ -445,7 +446,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected float getQiAccumulationRate(ItemStack is) {
-        return qiRate;
+        return isCharged(null, is) ? 0 : qiRate;
     }
 
     @Override
@@ -541,7 +542,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("unbreaking"))) return false;
         if (enchantment.equals(Enchantment.getEnchantmentByLocation("mending"))) return false;
-        return enchantment.type != null && (enchantment.type.canEnchantItem(Items.IRON_SWORD) || enchantment.type.canEnchantItem(Items.IRON_AXE));
+        return enchantment.type != null && (enchantment.type.canEnchantItem(Items.IRON_SWORD));
     }
 
     /**
@@ -669,16 +670,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-//        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
-//            if (attacker instanceof EntityPlayer)
-//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
-//            return;
-//        }
-//        if(isCharged(attacker, item)){
-//            if (attacker instanceof EntityPlayer)
-//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
-//            return;
-//        }
+        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
+            return;
+        }
+        if(isCharged(attacker, item)){
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
+            return;
+        }
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
@@ -728,44 +729,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return ret;
     }
 
-//    public EnumPhase getPhase(final ItemStack stack){
-//
-//    }
-
-    public int getCombo(EntityLivingBase wielder, ItemStack is) {
-        return gettagfast(is).getInteger("combo");
-    }
-
-    public void setCombo(EntityLivingBase wielder, ItemStack stack, int to) {
-        if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
-            //forward it to the main item, then do nothing as the main item will forward it back.
-            setCombo(wielder, wielder.getHeldItemMainhand(), to);
-            return;
-        }
-        gettagfast(stack).setInteger("combo", to % getComboLength(wielder, stack));
-    }
-
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        afterSwing(elb, is);
-        return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
-    }
-
-    public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
-        return gettagfast(is).getLong("lastAttack");
-    }
-
-    public void updateLastAttackTime(EntityLivingBase wielder, ItemStack stack) {
-        if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
-            //forward it to the main item, then do nothing as the main item will forward it back.
-            updateLastAttackTime(wielder, wielder.getHeldItemMainhand());
-            return;
-        }
-        gettagfast(stack).setLong("lastAttack", wielder.world.getTotalWorldTime());
-    }
-
     public boolean isBroken(ItemStack stack) {
         return this.getMaxDamage(stack) - stack.getItemDamage() <= 1;
     }
+
+//    public EnumPhase getPhase(final ItemStack stack){
+//
+//    }
 
     protected void multiHit(EntityLivingBase attacker, ItemStack stack, Entity target, int duration, int interval) {
         if (gettagfast(stack).getLong("multiHitTill") < attacker.world.getTotalWorldTime()) {
@@ -799,9 +769,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (getHand(stack) == EnumHand.OFF_HAND) {
             TaoCasterData.getTaoCap(elb).setOffhandCool(2);
         }
-    }
-
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
     }
 
     @Override
@@ -848,6 +815,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return 0;
     }
 
+    @Override
+    public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return orig;
+    }
+
     /**
      * generally applies some effects
      */
@@ -861,4 +833,46 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
 
     }
+
+    public int getCombo(EntityLivingBase wielder, ItemStack is) {
+        return gettagfast(is).getInteger("combo");
+    }
+
+
+    public void setCombo(EntityLivingBase wielder, ItemStack stack, int to) {
+        if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            setCombo(wielder, wielder.getHeldItemMainhand(), to);
+            return;
+        }
+        gettagfast(stack).setInteger("combo", to % getComboLength(wielder, stack));
+    }
+
+
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        afterSwing(elb, is);
+        return getCombo(elb, is) != getComboLength(elb, is) - 1 ? 0.8f : 0f;
+    }
+
+
+    @Override
+    public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
+        if (isCharged(elb, is)) return elb.world.getTotalWorldTime();
+        return gettagfast(is).getLong("lastAttack");
+    }
+
+    public void updateLastAttackTime(EntityLivingBase wielder, ItemStack stack) {
+        if (isDummy(stack) && wielder.getHeldItemMainhand() != stack) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            updateLastAttackTime(wielder, wielder.getHeldItemMainhand());
+            return;
+        }
+        gettagfast(stack).setLong("lastAttack", wielder.world.getTotalWorldTime());
+    }
+
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+    }
+
+
 }

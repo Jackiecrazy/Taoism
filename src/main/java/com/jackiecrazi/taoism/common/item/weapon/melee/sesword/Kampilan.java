@@ -48,20 +48,25 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
+    protected float getQiAccumulationRate(ItemStack is) {
+        return qiRate;
+    }
+
+    @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase elb, int chi) {
-        if(isCharged(elb, stack)&&!elb.world.isRemote){
-            if(TaoCasterData.getTaoCap(elb).consumeQi(0.5f))
-            splash(elb,stack, 360);
-            if(TaoCasterData.getTaoCap(elb).getQi()<5){
+        if (isCharged(elb, stack) && !elb.world.isRemote) {
+            if (TaoCasterData.getTaoCap(elb).consumeQi(0.5f, 5))
+                splash(elb, stack, 360);
+            else {
                 for (int i = 0; i < 5; i++) {
-                    float rotation = 72*i;
-                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack).setRenderRotation(-40+ Taoism.unirand.nextInt(80));
-                    esb.shoot(elb, 0, elb.rotationYaw+rotation, 0.0F, 1f, 0.0F);
+                    float rotation = 72 * i;
+                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack).setRenderRotation(-40 + Taoism.unirand.nextInt(80));
+                    esb.shoot(elb, 0, elb.rotationYaw + rotation, 0.0F, 1f, 0.0F);
                     elb.world.spawnEntity(esb);
                 }
             }
-        }else splash(elb, stack, 120);
+        } else splash(elb, stack, 120);
     }
 
     @Override
@@ -79,12 +84,6 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        boolean comboEnded = getCombo(elb, is) == getComboLength(elb, is) - 1;
-        if (comboEnded) dischargeWeapon(elb, is);
-    }
-
-    @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         if (attacker.motionY < 0) return 1.5f;
         else return 1f;
@@ -92,7 +91,7 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        if (TaoCasterData.getTaoCap(attacker).getQiFloored() <5)
+        if (TaoCasterData.getTaoCap(attacker).getQiFloored() < 5)
             return orig;
         knock = orig;
         return 0;
@@ -104,6 +103,12 @@ public class Kampilan extends TaoWeapon {
             TaoCasterData.getTaoCap(target).consumePosture(knock, true, attacker);
         }
         return super.hurtStart(ds, attacker, target, item, orig) + knock;
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        boolean comboEnded = getCombo(elb, is) == getComboLength(elb, is) - 1;
+        if (comboEnded) dischargeWeapon(elb, is);
     }
 
     @Override

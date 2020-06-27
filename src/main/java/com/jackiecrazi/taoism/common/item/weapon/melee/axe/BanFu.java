@@ -1,11 +1,14 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 
+import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBanfu;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -14,6 +17,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -25,7 +32,8 @@ public class BanFu extends TaoWeapon {
     //Leap attacks deal double damage, attacks always decrease posture,
     // and lowers the enemy's defense by 2 points per successful attack per chi level, for 3 seconds
     //execution: whirl into a frenzy, drawing nearby mobs into the twister
-    //      in most places it is a whirlwind (extra cutting damage)
+    //double axe bonus: aspected whirlwind
+    //      in most places it is a tornado (extra cutting damage)
     //      in dry places it is a dust devil (blind)
     //      in watery places it is a waterspout (drown)
     //      in hot places it is a fire whirl (fire)
@@ -49,11 +57,6 @@ public class BanFu extends TaoWeapon {
         return 1;
     }
 
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f;
-    }
-
     public int getMaxChargeTime() {
         return 100;
     }
@@ -63,23 +66,103 @@ public class BanFu extends TaoWeapon {
         return 0.8f;
     }
 
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return !attacker.onGround;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack) && getHand(stack) != null) {
+            final EntityLivingBase elb = (EntityLivingBase) e;
+            //it spins you right round, baby, right round
+            elb.rotationYaw += 3;
+            for (Entity a : w.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
+                double distsq = NeedyLittleThings.getDistSqCompensated(elb, a);
+                Vec3d point = elb.getPositionVector();
+                //update the entity's relative position to the point
+                //if the distance is below expected, add outwards velocity
+                //if the distance is above expected, add inwards velocity
+                //otherwise do nothing
+                if (distsq > getReach(elb, stack) * getReach(elb, stack)) {
+                    a.motionX += (point.x - a.posX) * 0.02;
+                    a.motionY = 0.01;
+                    a.motionZ += (point.z - a.posZ) * 0.02;
+                } else if (distsq < getReach(elb, stack) * getReach(elb, stack)) {
+                    a.motionX -= (point.x - a.posX) * 0.02;
+                    a.motionY = 0.01;
+                    a.motionZ -= (point.z - a.posZ) * 0.02;
+                }
+                a.motionX += (a.posZ - elb.posZ) * 0.01;
+                a.motionZ -= (a.posX - elb.posX) * 0.01;
+                a.velocityChanged = true;
+
+                if (!w.isRemote) {
+                    if (elb.ticksExisted % 10 == 0) {
+                        if (a instanceof EntityLivingBase) {
+                            ITaoStatCapability itsc = TaoCasterData.getTaoCap((EntityLivingBase) a);
+                            itsc.startRecordingDamage();
+                        }
+                        if(!TaoCasterData.getTaoCap(elb).consumeQi(0.3f, 5)){
+                            dischargeWeapon(elb, stack);
+                            return;
+                        }
+                        if (elb.ticksExisted % 20 == 0) {
+                            TaoCombatUtils.attack(elb, a, getHand(stack));
+                        } else
+                            TaoCombatUtils.attack(elb, a, getHand(stack) == EnumHand.MAIN_HAND ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
+                    }
+                } else {
+                    //client side, particle time!
+                    //10 rand calls per tick, should be fine...
+                    for (int h = 0; h < 5; h++) {
+                        for (int f = 0; f < 5; f++) {
+                            float angle = NeedyLittleThings.rad(w.rand.nextFloat() * 360);
+                            elb.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, e.posX + MathHelper.sin(angle) * h, elb.posY + h, elb.posZ + MathHelper.cos(angle) * h, MathHelper.cos(angle), 0.1, -MathHelper.sin(angle));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 3f;
+    }
+
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
-        if(isCharged(elb, stack)&&!elb.world.isRemote){
-            if(gettagfast(stack).getBoolean("thrown")){
-                Entity ebf= elb.world.getEntityByID(gettagfast(stack).getInteger("thrownID"));
-                if(ebf instanceof EntityBanfu){
-                    ((EntityBanfu) ebf).onRecall();
-                }
-            }else {
-                EntityBanfu ebf = new EntityBanfu(elb.world, elb, getHand(stack));
-                ebf.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
-                elb.world.spawnEntity(ebf);
-                gettagfast(stack).setInteger("thrownID", ebf.getEntityId());
-            }
+        if (isCharged(elb, stack)) {
+            dischargeWeapon(elb, stack);
+            if(!elb.world.isRemote)
             return true;
         }
         return super.onEntitySwing(elb, stack);
+    }
+
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack stack) {
+        super.dischargeWeapon(elb, stack);
+        if (!elb.world.isRemote) {
+            for (Entity a : elb.world.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
+                if (a instanceof EntityLivingBase) {
+                    TaoCasterData.getTaoCap((EntityLivingBase) a).stopRecordingDamage(elb);
+                }
+                Vec3d point = elb.getPositionVector();
+                a.motionX = -(point.x - a.posX) * 0.05;
+                a.motionZ = -(point.z - a.posZ) * 0.05;
+                a.velocityChanged = true;
+            }
+            dischargeWeapon(elb, stack);
+        } else {
+            for (int i = (int) elb.posX - 6; i < (int) elb.posX + 6; ++i) {
+                for (int j = (int) elb.posZ - 6; j < (int) elb.posZ + 6; ++j) {
+                    double speed = Taoism.unirand.nextGaussian() * 0.05D;
+                    elb.world.spawnParticle(EnumParticleTypes.DRIP_LAVA, i + (double) (Taoism.unirand.nextFloat() * 2.0F), elb.posY + 10.0D + (Taoism.unirand.nextFloat() * 5), j + (double) (Taoism.unirand.nextFloat()), 0, speed, 0);
+                }
+            }
+        }
     }
 
     @Override
@@ -106,6 +189,11 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return isCharged(attacker, item) ? 0 : super.postureDealtBase(attacker, defender, item, amount);
+    }
+
+    @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         return attacker.motionY < 0 ? 2f : 1f;
     }
@@ -113,10 +201,11 @@ public class BanFu extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.35f, true, attacker);
-        }
-        dischargeWeapon(attacker, item);
+    }
+
+    @Override
+    public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return super.onStoppedRecording(ds, attacker, target, item, orig);
     }
 
     @Override
@@ -124,9 +213,5 @@ public class BanFu extends TaoWeapon {
         if (chi > 0) {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1), false);
         }
-    }
-
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return !attacker.onGround;
     }
 }

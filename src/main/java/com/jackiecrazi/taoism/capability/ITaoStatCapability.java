@@ -16,7 +16,7 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     float addQi(float amount);
 
-    boolean consumeQi(float amount);
+    boolean consumeQi(float amount, float above);
 
     float getLing();
 
@@ -134,6 +134,18 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     int getBindTime();
 
     void setBindTime(int time);
+
+    float getRecordedDamage();
+
+    void setRecordedDamage(float amount);
+
+    void addRecordedDamage(float amount);
+
+    boolean isRecordingDamage();
+
+    void startRecordingDamage();
+
+    void stopRecordingDamage(EntityLivingBase elb);
 
     void sync();
 

@@ -22,7 +22,7 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
-    public boolean consumeQi(float amount) {
+    public boolean consumeQi(float amount, float above) {
         return false;
     }
 
@@ -128,10 +128,6 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void addRollCounter(int amount) {
-
-    }
-
-    private void setPrevSizes(float width, float height) {
 
     }
 
@@ -301,12 +297,42 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
-    public void sync() {
+    public void setBindTime(int time) {
 
     }
 
     @Override
-    public void setBindTime(int time) {
+    public float getRecordedDamage() {
+        return 0;
+    }
+
+    @Override
+    public void setRecordedDamage(float amount) {
+
+    }
+
+    @Override
+    public void addRecordedDamage(float amount) {
+
+    }
+
+    @Override
+    public boolean isRecordingDamage() {
+        return false;
+    }
+
+    @Override
+    public void startRecordingDamage() {
+
+    }
+
+    @Override
+    public void stopRecordingDamage(EntityLivingBase elb) {
+
+    }
+
+    @Override
+    public void sync() {
 
     }
 

@@ -54,4 +54,12 @@ public interface ICombatManipulator {
      * @return a new damage if necessary
      */
     int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
+     * This is called by TaoStatCapability when an entity is no longer "immune" to damage after a cinematic execution sequence
+     * @param ds a DamageSource as dictated by {@link com.jackiecrazi.taoism.api.NeedyLittleThings#causeLivingDamage(EntityLivingBase)}
+     * @param orig the recorded damage
+     * @return a new damage if necessary
+     */
+    float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 }

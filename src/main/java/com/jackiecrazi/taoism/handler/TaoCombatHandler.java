@@ -36,9 +36,9 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Taoism.MODID)
 public class TaoCombatHandler {
-    private static boolean abort = false;
-    public static boolean modCall;
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
+    public static boolean modCall;
+    private static boolean abort = false;
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -61,7 +61,7 @@ public class TaoCombatHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void projectileParry(ProjectileImpactEvent e) {
         Entity ent = e.getEntity();
-        if(ent==null) return;
+        if (ent == null) return;
         if (EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)) return;//derp derp derp
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
@@ -109,6 +109,7 @@ public class TaoCombatHandler {
                 return;
             }
             if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
+            if (ukeCap.isRecordingDamage()) return;//prevent parries when being executed, and makes it look better
             //slime, I despise thee.
             if (!(seme instanceof EntityPlayer)) {
                 if (semeCap.getSwing() < CombatConfig.mobForcedCooldown) {//nein nein nein nein nein nein nein
@@ -238,7 +239,8 @@ public class TaoCombatHandler {
                     double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                     double d1 = Taoism.unirand.nextGaussian() * 0.02D;
                     double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                    seme.world.spawnParticle(EnumParticleTypes.VILLAGER_ANGRY, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
+                    seme.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
+                    //fixme doesn't work because this is server only
                 }
                 seme.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_GENERIC_BIG_FALL, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
             }
@@ -308,6 +310,18 @@ public class TaoCombatHandler {
     public static void hahaNope(LivingDamageEvent e) {
         if (abort) return;
         EntityLivingBase uke = e.getEntityLiving();
+        if (e.getSource().getTrueSource() != null && e.getSource().getTrueSource() instanceof EntityLivingBase) {
+            EntityLivingBase seme = ((EntityLivingBase) e.getSource().getTrueSource());
+            ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
+            if (stack.getItem() instanceof ICombatManipulator) {
+                e.setAmount(((ICombatManipulator) stack.getItem()).finalDamageMods(e.getSource(), seme, uke, stack, e.getAmount()));
+            }
+        }
+        if (TaoCasterData.getTaoCap(uke).isRecordingDamage()) {//record damage for rainy days
+            TaoCasterData.getTaoCap(uke).addRecordedDamage(e.getAmount());
+            e.setAmount(0);
+            e.setCanceled(true);
+        }
         uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
         if (!e.isCanceled() && TaoCasterData.getTaoCap(uke).getDownTimer() <= 0) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows

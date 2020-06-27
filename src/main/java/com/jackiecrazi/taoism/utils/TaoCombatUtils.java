@@ -49,6 +49,16 @@ public class TaoCombatUtils {
         }
     }
 
+    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent){
+        target.hurtResistantTime=0;
+        rechargeHand(elb, hand, cooldownPercent);
+        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand==EnumHand.MAIN_HAND, true);
+    }
+
+    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand){
+        attackAtStrength(elb, target, hand, 1);
+    }
+
     public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
         return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
     }

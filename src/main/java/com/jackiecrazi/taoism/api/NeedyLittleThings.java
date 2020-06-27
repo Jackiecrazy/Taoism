@@ -132,6 +132,13 @@ public class NeedyLittleThings {
         }
     }
 
+    /**
+     * returns the position closest to pos at which compensated distance to e is 0
+     */
+    public static Vec3d getThiccVec(Vec3d pos, Entity e) {
+        return pos.subtract(e.getPositionVector()).normalize().scale(Math.max(e.width, e.height));
+    }
+
     public static void swapItemInHands(EntityLivingBase elb) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         elb.setHeldItem(EnumHand.OFF_HAND, main);

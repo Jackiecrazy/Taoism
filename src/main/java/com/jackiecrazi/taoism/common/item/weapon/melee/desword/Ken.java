@@ -50,11 +50,16 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
+    protected float getQiAccumulationRate(ItemStack is) {
+        return qiRate;
+    }
+
+    @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
         if (isCharged(elb, is)) {
-            if (!elb.world.isRemote && TaoCasterData.getTaoCap(elb).consumeQi(0.5f)) {
+            if (!elb.world.isRemote) {
                 int numToFire = 1;
-                if (TaoCasterData.getTaoCap(elb).getQi() < 5) {
+                if (!TaoCasterData.getTaoCap(elb).consumeQi(0.5f, 5)) {
                     numToFire = 3;
                     dischargeWeapon(elb, is);
                 }
@@ -62,7 +67,7 @@ public class Ken extends TaoWeapon {
                 for (int i = 0; i < numToFire; i++) {
                     float rotation = (getCombo(elb, is) + i) % 2 * 20;
                     if (rotation == 0) rotation = -40;
-                    rotation+= Taoism.unirand.nextInt(20);
+                    rotation += Taoism.unirand.nextInt(20);
                     EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(is), is).setRenderRotation(rotation);
                     esb.setPositionAndRotation(elb.posX + (look.x * i * 2), elb.posY + (double) elb.getEyeHeight() - 0.10000000149011612D + (look.y * i * 2), elb.posZ + (look.z * i * 2), elb.rotationYaw, elb.rotationPitch);
                     esb.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);

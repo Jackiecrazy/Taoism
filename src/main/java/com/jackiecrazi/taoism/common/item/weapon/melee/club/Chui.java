@@ -23,7 +23,7 @@ public class Chui extends TaoWeapon {
     //a powerful crushing weapon. Brutal, somewhat defensive, with decent reach but low trickery potential
     //leap attacks deal double instead of 1.5x damage. Attacks always decrease posture,
     // and will additionally deal 1.5x damage against staggered targets for a total of triple damage
-    //FIXME posture mult too high, hammers are crap at defending
+    //execution
 
     public Chui() {
         super(0, 1.4f, 7f, 1.3f);
@@ -76,11 +76,6 @@ public class Chui extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
-        if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(orig * 0.5f, true, attacker);
-        }
-        //TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture()+11, true, attacker, ds);
-        dischargeWeapon(attacker, item);
     }
 
     @Override

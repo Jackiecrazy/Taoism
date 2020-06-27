@@ -95,7 +95,7 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
-    public static void nope(LivingHealEvent e) {
+    public static void sike(LivingHealEvent e) {
         e.setAmount((float) (e.getEntityLiving().getEntityAttribute(TaoEntities.HEAL).getAttributeValue()*e.getAmount()));
         if(e.getAmount()==0)e.setCanceled(true);
     }

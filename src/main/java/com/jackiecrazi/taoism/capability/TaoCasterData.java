@@ -34,7 +34,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         itsc.setMaxLing(10f);
         if (elb.onGround && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.GROUNDED) {
-            elb.setSprinting(false);
+            //elb.setSprinting(false);
             itsc.setJumpState(ITaoStatCapability.JUMPSTATE.GROUNDED);
         }
         tickCasterData(elb, (int) (elb.world.getTotalWorldTime() - itsc.getLastUpdatedTime()));
@@ -103,7 +103,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         diff = ticks - itsc.getQiGracePeriod();
         //qi decay
         if (diff > 0) {
-            if (!itsc.consumeQi(getQiDecayAmount(itsc.getQi(), diff)))
+            if (!itsc.consumeQi(getQiDecayAmount(itsc.getQi(), diff), 5))
                 itsc.setQi(0);
         } else itsc.setQiGracePeriod(-diff);
 
