@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -29,6 +30,10 @@ public class Halberd extends TaoWeapon {
      * Left click is a standard attack that stacks cleave 2/3
      * Right click is a stab that detonates cleave for piercing damage with 10 second cooldown
      *      Each detonated layer of cleave will reduce a second of cleave
+     *
+     * Execution: length 18 width 3 ravine chop that roots enemies
+     *      After a short delay, shrapnel/spikes emerge from the shattered area and impale mobs
+     * should look like a series of dust particles, then just place very short "spike" blocks along the way that decay eventually?
      */
 
     private static final boolean[] harvestList = {false, false, true, false};
@@ -134,6 +139,17 @@ public class Halberd extends TaoWeapon {
             return doot + (effectiveLevel * 2f);
         }
         return doot;
+    }
+
+    @Override
+    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+        if(isCharged(entityLiving, stack)&&!entityLiving.world.isRemote){
+            EntityAxeCleave eac=new EntityAxeCleave(entityLiving.world, entityLiving, EnumHand.MAIN_HAND, stack);
+            eac.shoot(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0, 0.5f, 0);
+            entityLiving.world.spawnEntity(eac);
+            dischargeWeapon(entityLiving, stack);
+        }
+        return super.onEntitySwing(entityLiving, stack);
     }
 
     @Override

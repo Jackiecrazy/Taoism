@@ -71,8 +71,8 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+        super.onUpdate(stack, w, e, slot, onMainhand);
         if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack) && getHand(stack) != null) {
             final EntityLivingBase elb = (EntityLivingBase) e;
             //it spins you right round, baby, right round

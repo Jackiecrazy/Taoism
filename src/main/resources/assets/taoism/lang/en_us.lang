@@ -28,6 +28,7 @@ taoism.weaponDefMult=defense posture multiplier: %.2f
 taoism.weaponAttMult=attack posture multiplier: %.2f
 weapon.notenoughqi=You need nine levels of chi to charge an execution
 weapon.alreadycharged=This weapon is already charged
+weapon.discharge=This weapon has discharged
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge

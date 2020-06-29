@@ -146,7 +146,7 @@ public class ChangChui extends TaoWeapon {
             NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
         } else {
             if (TaoCasterData.getTaoCap(attacker).getQi()>6) {
-                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 40), false);
+                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 40, chi/3), false);
             }
 //            for(ItemStack armor:target.getArmorInventoryList()){
 //                armor.addAttributeModifier();

@@ -8,10 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
-import java.util.UUID;
-
 public abstract class MeleeMove extends EntityMove {
-    private static final UUID u = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d77");
 
     public MeleeMove(World worldIn) {
         super(worldIn);

@@ -49,61 +49,14 @@ public class TaoCombatUtils {
         }
     }
 
-    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent){
-        target.hurtResistantTime=0;
-        rechargeHand(elb, hand, cooldownPercent);
-        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand==EnumHand.MAIN_HAND, true);
-    }
-
-    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand){
+    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand) {
         attackAtStrength(elb, target, hand, 1);
     }
 
-    public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
-        return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
-    }
-
-    public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
-        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
-        boolean mainRec = NeedyLittleThings.getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
-        float defMult = 42;//meaning of life, the universe and everything
-        ItemStack ret = ItemStack.EMPTY;
-        //shield and sword block
-        if (isParryCapable(main, elb) && mainRec) {
-            ret = main;
-            defMult = CombatConfig.defaultMultiplierPostureDefend;
-        }
-        if (isParryCapable(off, elb) && offRec) {
-            ret = off;
-            defMult = CombatConfig.defaultMultiplierPostureDefend;
-        }
-        //offhand
-        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, off) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
-            defMult = ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount);
-            ret = off;
-        }
-        //mainhand
-        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, main) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
-            ret = main;
-        }
-        return ret;
-    }
-
-    public static boolean isParryCapable(ItemStack i, EntityLivingBase e) {
-        if (i.getItem().getRegistryName() == null) return false;
-        for (String s : CombatConfig.parryCapableItems) {
-            if (s.equals(i.getItem().getRegistryName().toString())) return true;
-        }
-        return i.getItem().isShield(i, e) || i.getItem().getItemUseAction(i) == EnumAction.BLOCK;
-    }
-
-    public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
-    }
-
-    public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
-        return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 2f) *
-                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
+    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent) {
+        target.hurtResistantTime = 0;
+        rechargeHand(elb, hand, cooldownPercent);
+        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true);
     }
 
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
@@ -121,17 +74,6 @@ public class TaoCombatUtils {
         }
     }
 
-    public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
-        if (elb instanceof EntityPlayer)
-            switch (hand) {
-                case OFF_HAND:
-                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
-                case MAIN_HAND:
-                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
-            }
-        return 1f;
-    }
-
     /**
      * copy-pasted from EntityPlayer, as-is.
      */
@@ -147,6 +89,7 @@ public class TaoCombatUtils {
      */
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
         {
+            if (targetEntity == null) return;
             if (updateOff) {
                 TaoCasterData.getTaoCap(player).setOffhandAttack(!main);
             }
@@ -341,5 +284,63 @@ public class TaoCombatUtils {
                 }
             }
         }
+    }
+
+    public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
+        return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
+    }
+
+    public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
+        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        boolean mainRec = NeedyLittleThings.getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        float defMult = 42;//meaning of life, the universe and everything
+        ItemStack ret = ItemStack.EMPTY;
+        //shield and sword block
+        if (isParryCapable(main, elb) && mainRec) {
+            ret = main;
+            defMult = CombatConfig.defaultMultiplierPostureDefend;
+        }
+        if (isParryCapable(off, elb) && offRec) {
+            ret = off;
+            defMult = CombatConfig.defaultMultiplierPostureDefend;
+        }
+        //offhand
+        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, off) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+            defMult = ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount);
+            ret = off;
+        }
+        //mainhand
+        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, main) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+            ret = main;
+        }
+        return ret;
+    }
+
+    public static boolean isParryCapable(ItemStack i, EntityLivingBase e) {
+        if (i.getItem().getRegistryName() == null) return false;
+        for (String s : CombatConfig.parryCapableItems) {
+            if (s.equals(i.getItem().getRegistryName().toString())) return true;
+        }
+        return i.getItem().isShield(i, e) || i.getItem().getItemUseAction(i) == EnumAction.BLOCK;
+    }
+
+    public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
+        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
+    }
+
+    public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
+        return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 2f) *
+                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
+    }
+
+    public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
+        if (elb instanceof EntityPlayer)
+            switch (hand) {
+                case OFF_HAND:
+                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
+                case MAIN_HAND:
+                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
+            }
+        return 1f;
     }
 }

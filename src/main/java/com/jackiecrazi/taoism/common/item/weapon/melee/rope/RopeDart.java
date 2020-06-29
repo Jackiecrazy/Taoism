@@ -142,8 +142,8 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+        super.onUpdate(stack, w, e, slot, onMainhand);
         if (!w.isRemote) {
             if (gettagfast(stack).hasKey("dartID")
                     && e.world.getEntityByID(
@@ -151,7 +151,7 @@ public class RopeDart extends TaoWeapon {
                 gettagfast(stack).removeTag("dartID");
                 gettagfast(stack).removeTag("connected");
             }
-            if (gettagfast(stack).hasKey("bindID") && w.getEntityByID(getRopedTo(stack)) != null && onHand) {
+            if (gettagfast(stack).hasKey("bindID") && w.getEntityByID(getRopedTo(stack)) != null && onMainhand) {
                 Entity ent = w.getEntityByID(getRopedTo(stack));
                 if (ent instanceof EntityLivingBase) {
                     TaoCasterData.getTaoCap((EntityLivingBase) ent).setBindTime(10);

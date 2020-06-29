@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
@@ -11,9 +10,9 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class EntitySwordBeam extends EntityThrownWeapon {
-    private EnumHand h;
-    private String s;
-    private float zSpin;
+    protected EnumHand h;
+    protected String s;
+    protected float zSpin;
 
     public EntitySwordBeam(World w) {
         super(w);
@@ -52,16 +51,12 @@ public class EntitySwordBeam extends EntityThrownWeapon {
             if (getThrower() != null) {
                 if (result.entityHit != null) {
                     if (result.entityHit != getThrower()) {
-                        if(this.getDistanceSq(getThrower()) > 100 || ticksExisted > 60 || h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
+                        if(h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
                                 this.setDead();
                                 return;
                             }
                         Entity e = result.entityHit;
-                        e.hurtResistantTime=0;
-                        float temp=TaoCombatUtils.getHandCoolDown(getThrower(), h);
-                        TaoCombatUtils.rechargeHand(getThrower(), h, 1f);
-                        TaoCombatUtils.taoWeaponAttack(e, (EntityPlayer) getThrower(), getThrower().getHeldItem(h), true, false);
-                        TaoCombatUtils.rechargeHand(getThrower(), h, temp);
+                        TaoCombatUtils.attack(getThrower(), e, hand);
                         setDead();
                     }
                 }else setDead();

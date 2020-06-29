@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.entity;
 
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoProjectile;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBanfu;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
@@ -32,6 +33,7 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityRopeDart.class));
         e.getRegistry().register(factoryArrow(EntityBanfu.class));
         e.getRegistry().register(factoryArrow(EntitySwordBeam.class));
+        e.getRegistry().register(factoryArrow(EntityAxeCleave.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
         return EntityEntryBuilder.create().entity(move).name(move.getSimpleName()).tracker(64,20,false).id(move.getName(),id++).build();

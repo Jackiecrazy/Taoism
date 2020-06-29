@@ -5,9 +5,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
@@ -68,9 +66,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
         if (is.getItem() != stack.getItem() || !is.hasTagCompound()) onRetrieveWeapon();
         assert is.getTagCompound() != null;
         is.getTagCompound().setBoolean("connected", true);
-        TaoCombatUtils.rechargeHand(getThrower(), hand, 1f);
-        if (shootingEntity instanceof EntityPlayer)
-            TaoCombatUtils.taoWeaponAttack(hit, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()));
+        TaoCombatUtils.attack(getThrower(), hit, hand);
     }
 
     protected void onRetrieveWeapon() {

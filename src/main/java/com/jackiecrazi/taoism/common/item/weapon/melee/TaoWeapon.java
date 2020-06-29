@@ -298,7 +298,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * gradually discharges the weapon
      */
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             ItemStack offhand = elb.getHeldItemOffhand();
@@ -482,19 +482,19 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.onEntityItemUpdate(entityItem);
     }
 
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
         EnumHand hand = getHand(stack);
         if (hand == null) {
-            hand = entityLiving.swingingHand;
+            hand = elb.swingingHand;
         }
-        if (hand != null && (TaoCombatUtils.getHandCoolDown(entityLiving, hand) > 0.9f || NeedyLittleThings.raytraceEntity(entityLiving.world, entityLiving, getReach(entityLiving, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
+        if (hand != null && (TaoCombatUtils.getHandCoolDown(elb, hand) > 0.9f || NeedyLittleThings.raytraceEntity(elb.world, elb, getReach(elb, stack)) != null)) {//FIXME hand cooldown will not work if attacking single target because order weirdness
             //Well, ya got me. By all accounts, it doesn't make sense.
-            TaoCasterData.getTaoCap(entityLiving).setOffhandAttack(hand == EnumHand.OFF_HAND);
+            TaoCasterData.getTaoCap(elb).setOffhandAttack(hand == EnumHand.OFF_HAND);
             //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
-            aoe(stack, entityLiving, TaoCasterData.getTaoCap(entityLiving).getQiFloored());
+            aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
             gettagfast(stack).setBoolean("connect", false);
         }
-        return super.onEntitySwing(entityLiving, stack);
+        return super.onEntitySwing(elb, stack);
     }
 
     public double getDurabilityForDisplay(ItemStack stack) {
@@ -599,6 +599,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return new boolean[]{false, false, false, false};
     }
 
+    protected boolean isBeingHeld(EntityLivingBase elb, ItemStack stack) {
+        return elb.getHeldItemMainhand() == stack || elb.getHeldItemOffhand() == stack;
+    }
+
     private void setHandState(ItemStack is, @Nullable EnumHand hand) {
         if (hand != null) {
             gettagfast(is).setBoolean("off", hand == EnumHand.OFF_HAND);
@@ -642,7 +646,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if (!NeedyLittleThings.isFacingEntity(attacker, target, degrees) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
+            if ((degrees != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, degrees)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
                 continue;
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
@@ -670,16 +674,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
-            return;
-        }
-        if(isCharged(attacker, item)){
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
-            return;
-        }
+//        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
+//            if (attacker instanceof EntityPlayer)
+//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
+//            return;
+//        }
+//        if(isCharged(attacker, item)){
+//            if (attacker instanceof EntityPlayer)
+//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
+//            return;
+//        }
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
@@ -690,6 +694,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        if (elb instanceof EntityPlayer)
+            ((EntityPlayer) elb).sendStatusMessage(new TextComponentTranslation("weapon.discharge"), true);
         if (isDummy(item) && elb.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             dischargeWeapon(elb, elb.getHeldItemMainhand());
@@ -705,6 +711,23 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     @Override
     public int getChargeTimeLeft(EntityLivingBase elb, ItemStack item) {
         return item.getItemDamage();
+    }
+
+    protected void setLastAttackedRangeSq(EntityLivingBase attacker, ItemStack item, float range) {
+        if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), range);
+            return;
+        }
+        if (range != 0f) {
+            gettagfast(item).setFloat("lastAttackedRange", range);
+        } else {
+            gettagfast(item).removeTag("lastAttackedRange");
+        }
+    }
+
+    protected float getLastAttackedRangeSq(ItemStack is) {
+        return gettagfast(is).getFloat("lastAttackedRange");
     }
 
     /**
@@ -761,7 +784,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return itemPostureMultiplier * (getDamDist(item) * amount);
+        return itemPostureMultiplier * (getDamDist(item));
     }
 
     @Override

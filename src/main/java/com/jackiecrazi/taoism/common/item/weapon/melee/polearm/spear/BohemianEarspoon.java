@@ -68,9 +68,9 @@ public class BohemianEarspoon extends TaoWeapon {
         return true;
     }
 
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
-        if (e instanceof EntityLivingBase && !w.isRemote && onHand) {
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+        super.onUpdate(stack, w, e, slot, onMainhand);
+        if (e instanceof EntityLivingBase && !w.isRemote && onMainhand) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) != 0) {
                 EntityLivingBase target = elb.getLastAttackedEntity();
@@ -79,7 +79,7 @@ public class BohemianEarspoon extends TaoWeapon {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
                             //too close! Rip out innards for double damage
                             target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
-                            setLastAttackedRangeSq(stack, 0);
+                            setLastAttackedRangeSq(elb, stack, 0);
                         }
                         //a new challenger is approaching!
                         target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.02;
@@ -137,21 +137,9 @@ public class BohemianEarspoon extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
-            setLastAttackedRangeSq(attacker.getHeldItemMainhand(), 0);
+            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), 0);
         } else {
-            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
-        }
-    }
-
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).getFloat("lastAttackedRange");
-    }
-
-    private void setLastAttackedRangeSq(ItemStack item, float range) {
-        if (range != 0f) {
-            gettagfast(item).setFloat("lastAttackedRange", range);
-        } else {
-            gettagfast(item).removeTag("lastAttackedRange");
+            setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }
     }
 }

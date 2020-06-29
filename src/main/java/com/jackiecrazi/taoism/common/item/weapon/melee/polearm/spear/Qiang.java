@@ -64,13 +64,13 @@ public class Qiang extends TaoWeapon {
     }
 
     protected double speed(ItemStack stack) {
-        return (1d + (getHand(stack) == EnumHand.MAIN_HAND ? Math.sqrt(getLastAttackedRangeSq(stack))/6f : 0)) - 4d;
+        return (1d + (getHand(stack) == EnumHand.MAIN_HAND ? Math.sqrt(getLastAttackedRangeSq(stack)) / 6f : 0)) - 4d;
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0f) {
             splash(attacker, stack, 120);
-            setLastAttackedRangeSq(attacker.getHeldItemMainhand(), 0);
+            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), 0);
         }
     }
 
@@ -87,12 +87,6 @@ public class Qiang extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        super.afterSwing(elb, is);
-        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
-    }
-
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         return getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 54f;
@@ -102,16 +96,14 @@ public class Qiang extends TaoWeapon {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 1f);
         } else {
-            setLastAttackedRangeSq(stack, (float) attacker.getDistanceSq(target));
+            setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }
     }
 
-    private float getLastAttackedRangeSq(ItemStack is) {
-        return gettagfast(is).hasKey("lastAttackedRange") ? gettagfast(is).getFloat("lastAttackedRange") : 0;
-    }
-
-    private void setLastAttackedRangeSq(ItemStack item, float range) {
-        gettagfast(item).setFloat("lastAttackedRange", range);
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        super.afterSwing(elb, is);
+        EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 
     @Override

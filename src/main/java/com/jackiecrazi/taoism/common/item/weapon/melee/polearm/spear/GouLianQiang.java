@@ -87,12 +87,6 @@ public class GouLianQiang extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
     }
 
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        super.afterSwing(elb, is);
-        if (getHand(is) == EnumHand.OFF_HAND && TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND) < 0.5f)//
-            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f);
-    }
-
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? Event.Result.ALLOW : Event.Result.DENY;
@@ -105,9 +99,7 @@ public class GouLianQiang extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float aerial = attacker.motionY < 0 ? 1.5f : 1f;
-        float hook = getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
-        return aerial * hook;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
     }
 
     @Override
@@ -121,11 +113,18 @@ public class GouLianQiang extends TaoWeapon {
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            //main function. Check if previous move is also left click on the same target and trip if so
-            if (isCharged(attacker, stack) || !NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target)) {
+            //main function. Check if previous move is also right click on the same target and trip if so
+            if (!NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) && getLastAttackedRangeSq(stack)!=0) {
                 //we're going on a trip on our favourite hooked... ship?
+                setLastAttackedRangeSq(attacker, stack, 0);
                 TaoCasterData.getTaoCap(target).consumePosture((float) Math.min(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, attacker);
-            }
+            }else setLastAttackedRangeSq(attacker, stack, 1);
         }
+    }
+
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        super.afterSwing(elb, is);
+        if (getHand(is) == EnumHand.OFF_HAND && TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND) < 0.5f)//
+            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f);
     }
 }

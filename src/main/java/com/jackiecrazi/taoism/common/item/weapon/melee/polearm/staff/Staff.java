@@ -69,8 +69,8 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+        super.onUpdate(stack, w, e, slot, onMainhand);
 //        if (onHand && e instanceof EntityLivingBase) {
 //            EntityLivingBase elb = (EntityLivingBase) e;
 ////            if (e.ticksExisted % 20 == 1)

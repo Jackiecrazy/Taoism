@@ -8,6 +8,8 @@ import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -19,9 +21,12 @@ import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
+import java.util.UUID;
 
 public class TaoStatCapability implements ITaoStatCapability {
     public static final int MAXDOWNTIME = 100;
+    private static final UUID STOPMOVING = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d77");
     private static final float MAXQI = 9.99f;
     private WeakReference<EntityLivingBase> e;
     private float qi, ling, posture, swing;
@@ -430,6 +435,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
+        if (time == 0 && e.get() != null) {
+            Objects.requireNonNull(e.get()).getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+        }
         down = time;
     }
 
@@ -507,6 +515,8 @@ public class TaoStatCapability implements ITaoStatCapability {
             NeedyLittleThings.knockBack(elb, attacker, overflow * 0.4F);
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
         setDownTimer(MAXDOWNTIME);
+        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
         if (elb.isBeingRidden()) {

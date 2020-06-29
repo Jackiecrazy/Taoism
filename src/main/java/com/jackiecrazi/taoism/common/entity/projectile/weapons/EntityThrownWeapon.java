@@ -63,6 +63,11 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     }
 
     @Override
+    protected float velocityMultiplier() {
+        return 1f;
+    }
+
+    @Override
     public void onUpdate() {
         if (!world.isRemote) {
             if (firstUpdate) {
@@ -96,7 +101,6 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         super.onHitBlock(rtr);
         if (hitStatus <= 0) {
             updateHitStatus(1);
-            inGround = true;
         }
     }
 

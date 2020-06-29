@@ -34,7 +34,7 @@ public class TaoMovementUtils {
      * @param elb
      * @return
      */
-    public static boolean willHitWall(EntityLivingBase elb) {
+    public static boolean willHitWall(Entity elb) {
         double allowance = 1;
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
         List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ));
@@ -158,7 +158,7 @@ public class TaoMovementUtils {
      * @param elb
      * @return
      */
-    public static Entity collidingEntity(EntityLivingBase elb) {
+    public static Entity collidingEntity(Entity elb) {
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
         List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 3, elb.motionY * 3, elb.motionZ * 3), EntitySelectors.NOT_SPECTATING);
         double dist = 0;
@@ -172,12 +172,12 @@ public class TaoMovementUtils {
         return pick;
     }
 
-    public static boolean isTouchingWall(EntityLivingBase elb) {
+    public static boolean isTouchingWall(Entity elb) {
         boolean[] b = collisionStatus(elb);
         return !elb.onGround && !b[2] && !b[3] && ((b[0] || b[1]) || (b[4] || b[5]));
     }
 
-    public static boolean[] collisionStatus(EntityLivingBase elb) {
+    public static boolean[] collisionStatus(Entity elb) {
         double allowance = 0.1;
         boolean[] ret = {false, false, false, false, false, false};
         AxisAlignedBB aabb = elb.getEntityBoundingBox();

@@ -6,6 +6,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
+    //TODO aside from bind and stagger, get a tracker for root. Rooted mobs cannot move, bound mobs cannot attack, stagger is bind+root
+    //for reference, dead cells has shock, bleed, poison, burn (oil), freeze, stun, slow
+    //dark souls 3: frostbite, curse, bleed, poison, toxic, hollow. Stamina and absorption are of concern
+    //sekiro: burn (blocks posture regen), poison, terror, enfeeblement (weaken attacks, disable items, reduced max hp and speed),
+    //poison resets posture regen. there. done.
     default int getQiFloored() {
         return (int) Math.floor(getQi());
     }
