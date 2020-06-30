@@ -20,6 +20,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.Item;
@@ -30,6 +31,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -74,6 +76,12 @@ public class TaoEntityHandler {
                 ev.setCanceled(true);
             }
         }
+        if (e instanceof EntityArrow) {
+            EntityArrow et = (EntityArrow) e;
+            if (et.shootingEntity instanceof EntityLivingBase && TaoCasterData.getTaoCap((EntityLivingBase) et.shootingEntity).getDownTimer() > 0) {
+                ev.setCanceled(true);
+            }
+        }
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             TaoCasterData.updateCasterData(elb);
@@ -96,8 +104,8 @@ public class TaoEntityHandler {
 
     @SubscribeEvent
     public static void sike(LivingHealEvent e) {
-        e.setAmount((float) (e.getEntityLiving().getEntityAttribute(TaoEntities.HEAL).getAttributeValue()*e.getAmount()));
-        if(e.getAmount()==0)e.setCanceled(true);
+        e.setAmount((float) (e.getEntityLiving().getEntityAttribute(TaoEntities.HEAL).getAttributeValue() * e.getAmount()));
+        if (e.getAmount() == 0) e.setCanceled(true);
     }
 
 
@@ -105,7 +113,7 @@ public class TaoEntityHandler {
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
         EntityLivingBase elb = e.getEntityLiving();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if (itsc.getDownTimer() > 0) {
+        if (itsc.getDownTimer() > 0 || itsc.getRootTime() > 0) {
             elb.motionY = 0;
             return;
         }
@@ -121,11 +129,23 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
+    public static void interceptTeleport(EnderTeleportEvent e){
+        if(TaoCasterData.getTaoCap(e.getEntityLiving()).getRootTime()>0){
+            e.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
-        ITaoStatCapability itsc = TaoCasterData.getTaoCap(e.getEntityLiving());
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || e.getEntityLiving().world.getClosestPlayerToEntity(e.getEntityLiving(), 16) != null;
-        if (e.getEntityLiving().ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
-            TaoCasterData.updateCasterData(e.getEntityLiving());
+        final EntityLivingBase elb = e.getEntityLiving();
+        ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
+            TaoCasterData.updateCasterData(elb);
+        }
+        if(itsc.getRootTime()>0){
+            elb.posX=elb.prevPosX;
+            elb.posZ=elb.prevPosZ;
         }
     }
 
@@ -141,7 +161,7 @@ public class TaoEntityHandler {
                 double d2 = Taoism.unirand.nextGaussian() * 0.02D;
                 p.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY + p.width / 2, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
             }
-            if (p.isSprinting() && cap.getDownTimer() <= 0 && cap.getQi() > 0) {
+            if (p.isSprinting() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.shouldStick(p)) {
@@ -154,7 +174,7 @@ public class TaoEntityHandler {
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getQi() > 0) {
+            if (cap.getDownTimer() <= 0 && cap.getRootTime() > 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?

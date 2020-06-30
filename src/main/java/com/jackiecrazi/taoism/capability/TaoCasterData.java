@@ -99,6 +99,8 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         }
         if (itsc.getBindTime() > 0)
             itsc.setBindTime(itsc.getBindTime() - 1);
+        if (itsc.getRootTime() > 0)
+            itsc.setRootTime(itsc.getRootTime() - 1);
         itsc.setOffhandCool(itsc.getOffhandCool() + ticks);
         diff = ticks - itsc.getQiGracePeriod();
         //qi decay

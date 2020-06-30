@@ -21,7 +21,6 @@ import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 import java.util.UUID;
 
 public class TaoStatCapability implements ITaoStatCapability {
@@ -33,7 +32,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int combo, ohcool;
     private float maxLing, maxPosture, recordedDamage;
     private int lcd, pcd, scd, qcd;
-    private int down, bind;
+    private int down, bind, root;
     private long timey;
     private boolean swi, protecc, off, recording;
     private int parry, dodge, protec;
@@ -77,6 +76,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setBoolean("reccing", recording);
         cd.toNBT(nbt);
         nbt.setInteger("bind", getBindTime());
+        nbt.setInteger("root", getRootTime());
         return nbt;
     }
 
@@ -188,19 +188,20 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public float consumePosture(float amount, boolean canStagger) {
-        return consumePosture(amount, canStagger, null);
+        return consumePosture(amount, canStagger, false, null);
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger, @Nullable EntityLivingBase assailant) {
+    public float consumePosture(float amount, boolean canStagger, boolean force, @Nullable EntityLivingBase assailant) {
         if (getDownTimer() > 0 || getPosInvulTime() > 0)
             return 0;//cancel all posture reduction when downed so you get back up with a buffer
+        float prevPos = posture;
         posture -= amount;
         EntityLivingBase elb = e.get();
         if (posture <= 0f && elb != null) {
             boolean protect = isProtected();
             setProtected(false);//cancels ssp so you can regen posture without delay
-            if ((protect && CombatConfig.ssp) || !canStagger || getPosInvulTime() > 0) {
+            if ((protect && prevPos > getMaxPosture() / 10f && CombatConfig.ssp && !force) || !canStagger || getPosInvulTime() > 0) {
                 //sudden stagger prevention
                 posture = 0.01f;
                 if (canStagger && getPosInvulTime() <= 0) setPosInvulTime(CombatConfig.ssptime);
@@ -290,6 +291,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setJumpState(from.getJumpState());
         setClingDirections(from.getClingDirections());
         setBindTime(from.getBindTime());
+        setRootTime(from.getRootTime());
         setRecordedDamage(from.getRecordedDamage());
         recording = from.isRecordingDamage();
     }
@@ -435,10 +437,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
-        if (time == 0 && e.get() != null) {
-            Objects.requireNonNull(e.get()).getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-        }
         down = time;
+        if (time == 0 && e.get() != null)
+            e.get().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
     }
 
     @Override
@@ -449,6 +450,24 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setBindTime(int time) {
         bind = time;
+    }
+
+    @Override
+    public int getRootTime() {
+        return root;
+    }
+
+    @Override
+    public void setRootTime(int time) {
+        EntityLivingBase elb = e.get();
+        if (elb != null)
+            if (time == 0) {
+                elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+            } else if (root == 0) {
+                elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+                elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
+            }
+        root = time;
     }
 
     @Override
@@ -513,17 +532,17 @@ public class TaoStatCapability implements ITaoStatCapability {
         elb.dismountRidingEntity();
         if (attacker != null)
             NeedyLittleThings.knockBack(elb, attacker, overflow * 0.4F);
+        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
         int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
         setDownTimer(MAXDOWNTIME);
-        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
         if (elb.isBeingRidden()) {
             for (Entity ent : elb.getPassengers())
                 if (ent instanceof EntityLivingBase) {
                     ITaoStatCapability cap = TaoCasterData.getTaoCap((EntityLivingBase) ent);
-                    cap.consumePosture(cap.getMaxPosture() + 1, true);
+                    cap.consumePosture(cap.getMaxPosture() + 1, true, true, null);
                 }
             elb.removePassengers();
         }
@@ -560,6 +579,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
         setClingDirections(new ClingData(nbt));
         setBindTime(nbt.getInteger("bind"));
+        setRootTime(nbt.getInteger("root"));
         setRecordedDamage(nbt.getFloat("recDam"));
         recording = nbt.getBoolean("reccing");
     }

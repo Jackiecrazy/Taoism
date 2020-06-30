@@ -55,15 +55,15 @@ public class Chui extends TaoWeapon {
     }
 
     @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return TaoCasterData.getTaoCap(target).getDownTimer()>0? Event.Result.ALLOW:super.critCheck(attacker, target, item, crit, vanCrit);
-    }
-
-    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("chui.leap"));
         tooltip.add(I18n.format("chui.stagger"));
         tooltip.add(I18n.format("chui.slow"));
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override

@@ -97,7 +97,7 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
-    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant) {
+    public float consumePosture(float amount, boolean canStagger, boolean force, EntityLivingBase assailant) {
         return 0;
     }
 
@@ -298,6 +298,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void setBindTime(int time) {
+
+    }
+
+    @Override
+    public int getRootTime() {
+        return 0;
+    }
+
+    @Override
+    public void setRootTime(int time) {
 
     }
 

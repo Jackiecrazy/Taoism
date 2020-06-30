@@ -139,23 +139,23 @@ public class TaoCombatHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || (!defend.isEmpty() && NeedyLittleThings.isFacingEntity(uke, seme, 120))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
+            if ((!smart || (!defend.isEmpty() && (NeedyLittleThings.isFacingEntity(uke, seme, 120) || uke.getDistanceSq(seme) < 0.25f))) && (ukeCap.consumePosture(atk * def, true, false, seme) == 0f) && smart) {
                 e.setCanceled(true);
                 uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(2, e.getAmount() * atkDef) / semeCap.getMaxPosture());
-                NeedyLittleThings.knockBack(uke, seme, Math.min(2, e.getAmount() * def) / ukeCap.getMaxPosture());
+                NeedyLittleThings.knockBack(seme, uke, Math.min(3, e.getAmount() * atkDef) / semeCap.getMaxPosture());
+                NeedyLittleThings.knockBack(uke, seme, Math.min(3, e.getAmount() * def) / ukeCap.getMaxPosture());
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).parrySkill(seme, uke, defend);
                 }
                 //reset cooldown
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f);
             }
+            TaoCasterData.forceUpdateTrackingClients(uke);
         }
-        TaoCasterData.forceUpdateTrackingClients(uke);
     }
 
     //critical hit modifier
@@ -231,9 +231,10 @@ public class TaoCombatHandler {
 
         ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
         boolean posBreak = false;
-        //if posture is broken, damage increased, ignores deflection/absorption and resets posture
+        //if posture is broken, damage increased, ignores deflection/absorption
         if (ukeCap.getDownTimer() > 0) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
+                amnt *= 1.5;
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
                 for (int i = 0; i < 5; ++i) {
                     double d0 = Taoism.unirand.nextGaussian() * 0.02D;

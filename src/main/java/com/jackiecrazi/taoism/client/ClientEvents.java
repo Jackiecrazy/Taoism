@@ -179,6 +179,11 @@ public class ClientEvents {
     public static void doju(InputUpdateEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         MovementInput mi = e.getMovementInput();
+        if (TaoCasterData.getTaoCap(mc.player).getRootTime() > 0) {
+            //no moving while you're rooted!
+            KeyBinding.unPressAllKeys();
+            return;
+        }
         if (TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
             final boolean onSprint = mc.gameSettings.keyBindSprint.isPressed();
             if (mi.leftKeyDown && (!tapped[0] || onSprint)) {

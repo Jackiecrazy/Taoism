@@ -11,6 +11,13 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     //dark souls 3: frostbite, curse, bleed, poison, toxic, hollow. Stamina and absorption are of concern
     //sekiro: burn (blocks posture regen), poison, terror, enfeeblement (weaken attacks, disable items, reduced max hp and speed),
     //poison resets posture regen. there. done.
+
+    //additional status effect compilation:
+    //shock: inflicts light damage, is spread to all entities in a 5 block radius when in water, with halved duration
+    //frostbite: a frostbitten entity gets light DoT and is dramatically slowed
+    //oil: an oiled entity takes 0.3x extra damage from fire per layer, and continues to burn until oil wears off
+    //root: a rooted entity cannot move
+    //^^these are all potions instead of capabilities, aren't they?
     default int getQiFloored() {
         return (int) Math.floor(getQi());
     }
@@ -58,7 +65,7 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     float consumePosture(float amount, boolean canStagger);
 
-    float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant);
+    float consumePosture(float amount, boolean canStagger, boolean force, EntityLivingBase assailant);
 
     int getParryCounter();
 
@@ -139,6 +146,10 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     int getBindTime();
 
     void setBindTime(int time);
+
+    int getRootTime();
+
+    void setRootTime(int time);
 
     float getRecordedDamage();
 

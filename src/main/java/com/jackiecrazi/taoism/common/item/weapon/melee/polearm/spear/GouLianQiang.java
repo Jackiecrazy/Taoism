@@ -117,7 +117,7 @@ public class GouLianQiang extends TaoWeapon {
             if (!NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) && getLastAttackedRangeSq(stack)!=0) {
                 //we're going on a trip on our favourite hooked... ship?
                 setLastAttackedRangeSq(attacker, stack, 0);
-                TaoCasterData.getTaoCap(target).consumePosture((float) Math.min(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, attacker);
+                TaoCasterData.getTaoCap(target).consumePosture((float) Math.min(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, attacker.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()), true, true, attacker);
             }else setLastAttackedRangeSq(attacker, stack, 1);
         }
     }
