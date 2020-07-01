@@ -78,11 +78,26 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public double attackDamage(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? 1 : super.attackDamage(stack);
+        return getHand(stack) == EnumHand.OFF_HAND && !isCharged(null, stack) ? 1 : super.attackDamage(stack);
     }
 
     protected double speed(ItemStack stack) {
         return getHand(stack) == EnumHand.OFF_HAND ? 0.1 - 4d : super.speed(stack);
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return isCharged(attacker, stack)?0: super.knockback(attacker, target, stack, orig);
+    }
+
+    @Override
+    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+        if (isCharged(entityLiving, stack) && !entityLiving.world.isRemote) {
+            EntityAxeCleave eac = new EntityAxeCleave(entityLiving.world, entityLiving, EnumHand.MAIN_HAND, stack);
+            eac.shoot(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0, 0.5f, 0);
+            entityLiving.world.spawnEntity(eac);
+        }
+        return super.onEntitySwing(entityLiving, stack);
     }
 
     @Override
@@ -109,11 +124,6 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? gettagfast(is).getFloat("lastDootLevel") : super.newCooldown(elb, is);
-    }
-
-    @Override
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {
         return getHand(item) == EnumHand.MAIN_HAND;
     }
@@ -136,26 +146,22 @@ public class Halberd extends TaoWeapon {
             ds.setDamageBypassesArmor();
             target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
             item.setTagInfo("lastDootLevel", new NBTTagFloat(effectiveLevel / 10f));
+            if (isCharged(attacker, item))
+                return doot + (effectiveLevel * 5f);
             return doot + (effectiveLevel * 2f);
         }
         return doot;
     }
 
     @Override
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-        if(isCharged(entityLiving, stack)&&!entityLiving.world.isRemote){
-            EntityAxeCleave eac=new EntityAxeCleave(entityLiving.world, entityLiving, EnumHand.MAIN_HAND, stack);
-            eac.shoot(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0, 0.5f, 0);
-            entityLiving.world.spawnEntity(eac);
-            dischargeWeapon(entityLiving, stack);
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.MAIN_HAND) {
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, isCharged(attacker, stack) ? 5 : 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
         }
-        return super.onEntitySwing(entityLiving, stack);
     }
 
     @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.MAIN_HAND) {
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
-        }
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? gettagfast(is).getFloat("lastDootLevel") : super.newCooldown(elb, is);
     }
 }

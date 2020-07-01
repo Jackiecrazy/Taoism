@@ -97,6 +97,11 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant) {
+        return 0;
+    }
+
+    @Override
     public float consumePosture(float amount, boolean canStagger, boolean force, EntityLivingBase assailant) {
         return 0;
     }

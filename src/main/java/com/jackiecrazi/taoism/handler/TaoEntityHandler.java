@@ -144,8 +144,10 @@ public class TaoEntityHandler {
             TaoCasterData.updateCasterData(elb);
         }
         if(itsc.getRootTime()>0){
-            elb.posX=elb.prevPosX;
-            elb.posZ=elb.prevPosZ;
+//            elb.posX=elb.prevPosX;
+//            elb.posZ=elb.prevPosZ;
+//            elb.motionX=0;
+//            elb.motionZ=0;
         }
     }
 

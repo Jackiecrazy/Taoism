@@ -179,7 +179,7 @@ public class RopeDart extends TaoWeapon {
 //                            erd.shoot(elb, pitch, yaw, 0.0F, 0.5f + (getMaxChargeTime() - getChargeTimeLeft(elb, is)) / 10f, 0.0F);
 //                        }
 //                    } else
-                        erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 0.5f + (getMaxChargeTime() - getChargeTimeLeft(elb, is)) / 10f, 0.0F);
+                        erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 0.5f + (getMaxChargeTime() - is.getItemDamage()) / 10f, 0.0F);
                 } else {
                     erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
                 }

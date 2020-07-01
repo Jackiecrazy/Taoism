@@ -54,9 +54,11 @@ public class TaoCombatUtils {
     }
 
     public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent) {
+        float temp = getHandCoolDown(elb, hand);
         target.hurtResistantTime = 0;
         rechargeHand(elb, hand, cooldownPercent);
         taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true);
+        rechargeHand(elb, hand, temp);
     }
 
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {

@@ -13,7 +13,7 @@ public interface IChargeableWeapon {
 
     boolean isCharged(EntityLivingBase elb, ItemStack item);
 
-    int getChargeTimeLeft(EntityLivingBase elb, ItemStack item);
+    int getChargedTime(EntityLivingBase elb, ItemStack item);
 
     int getMaxChargeTime();
 }

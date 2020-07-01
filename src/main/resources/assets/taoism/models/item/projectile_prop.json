@@ -20,6 +20,12 @@
         "type": 3
       },
       "model": "taoism:projectile/swordbeam"
+    },
+    {
+      "predicate": {
+        "type": 3
+      },
+      "model": "taoism:dummy"
     }],
   "display": {
     "thirdperson_righthand": {

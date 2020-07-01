@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.entity.projectile.arrows;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IDamageType;
 import com.jackiecrazi.taoism.networking.PacketUpdateProjectile;
 import net.minecraft.block.Block;
@@ -28,6 +29,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.UUID;
 
 public class EntityTaoProjectile extends EntityArrow implements IDamageType {
@@ -539,6 +541,33 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
             this.setPosition(this.posX, this.posY, this.posZ);
             this.doBlockCollisions();
         }
+    }
+
+    /**
+     * copy pasted and modified to account for large width projectiles like cleaves and javelins
+     */
+    @Nullable
+    @Override
+    protected Entity findEntityOnPath(Vec3d start, Vec3d end) {
+        Entity entity = null;
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(width, height, width), NeedyLittleThings.VALID_TARGETS);
+        double d0 = 0.0D;
+
+        for (Entity entity1 : list) {
+            if (entity1 != this.shootingEntity || getTicksInAir() >= 5) {
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(0.30000001192092896D);
+                if (axisalignedbb.intersects(getEntityBoundingBox())) {
+                    double d1 = start.squareDistanceTo(entity1.getPositionVector());
+
+                    if (d1 < d0 || d0 == 0.0D) {
+                        entity = entity1;
+                        d0 = d1;
+                    }
+                }
+            }
+        }
+
+        return entity;
     }
 
     /**

@@ -497,10 +497,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.onEntitySwing(elb, stack);
     }
 
-    public double getDurabilityForDisplay(ItemStack stack) {
-        return (double) (getMaxChargeTime() - getChargeTimeLeft(null, stack)) / (double) getMaxChargeTime();
-    }
-
     @Override
     public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
         return false;
@@ -674,33 +670,36 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-//        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
-//            if (attacker instanceof EntityPlayer)
-//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
-//            return;
-//        }
-//        if(isCharged(attacker, item)){
-//            if (attacker instanceof EntityPlayer)
-//                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
-//            return;
-//        }
+        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
+            return;
+        }
+        if(isCharged(attacker, item)){
+            if (attacker instanceof EntityPlayer)
+                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
+            return;
+        }
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
             return;
         }
         gettagfast(item).setBoolean("charge", true);
+        gettagfast(item).setLong("chargedAtTime", attacker.world.getTotalWorldTime());
     }
 
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
-        if (elb instanceof EntityPlayer)
-            ((EntityPlayer) elb).sendStatusMessage(new TextComponentTranslation("weapon.discharge"), true);
         if (isDummy(item) && elb.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             dischargeWeapon(elb, elb.getHeldItemMainhand());
+            return;
         }
+        if (elb instanceof EntityPlayer)
+            ((EntityPlayer) elb).sendStatusMessage(new TextComponentTranslation("weapon.discharge"), true);
         gettagfast(item).setBoolean("charge", false);
+        gettagfast(item).setLong("chargedAtTime", 0);
     }
 
     @Override
@@ -709,8 +708,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
-    public int getChargeTimeLeft(EntityLivingBase elb, ItemStack item) {
-        return item.getItemDamage();
+    public int getChargedTime(EntityLivingBase elb, ItemStack item) {
+        return (int) (elb.world.getTotalWorldTime() - gettagfast(item).getLong("chargedAtTime"));
     }
 
     protected void setLastAttackedRangeSq(EntityLivingBase attacker, ItemStack item, float range) {

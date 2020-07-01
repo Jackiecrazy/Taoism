@@ -192,6 +192,11 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
+    public float consumePosture(float amount, boolean canStagger, EntityLivingBase assailant) {
+        return consumePosture(amount, canStagger, false, assailant);
+    }
+
+    @Override
     public float consumePosture(float amount, boolean canStagger, boolean force, @Nullable EntityLivingBase assailant) {
         if (getDownTimer() > 0 || getPosInvulTime() > 0)
             return 0;//cancel all posture reduction when downed so you get back up with a buffer

@@ -77,7 +77,7 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, 20), false);
         }
         if (isCharged(attacker, stack)) {
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargeTimeLeft(attacker, stack)), false);
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargedTime(attacker, stack)), false);
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.RESOLUTION, 40), false);
 
         }

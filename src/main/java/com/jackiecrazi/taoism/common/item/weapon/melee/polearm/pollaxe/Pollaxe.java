@@ -202,6 +202,14 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (isCharged(attacker, stack) && getCombo(attacker, stack) == 1) {//second hit
+            return orig * (1 + (target.getMaxHealth() - target.getHealth()) / target.getMaxHealth());
+        }
+        return super.hurtStart(ds, attacker, target, stack, orig);
+    }
+
+    @Override
     public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
             return orig + Math.min(target.getMaxHealth() / 2, orig * 5);
@@ -218,6 +226,7 @@ public class Pollaxe extends TaoWeapon {
             //teleport to right in front of the entity attacked
             Vec3d end = target.getPositionVector().add(NeedyLittleThings.getThiccVec(attacker.getPositionVector(), target).scale(2));
             attacker.setPositionAndUpdate(end.x, end.y, end.z);
+
         }
     }
 
@@ -232,7 +241,7 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 0) {
-            return super.knockback(attacker, target, stack, orig) * 3;
+            return super.knockback(attacker, target, stack, orig) * 4;
         }
         TaoCasterData.getTaoCap(target).consumePosture(orig, true);
         return 0;

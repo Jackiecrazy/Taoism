@@ -139,7 +139,7 @@ public class TaoCombatHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || (!defend.isEmpty() && (NeedyLittleThings.isFacingEntity(uke, seme, 120) || uke.getDistanceSq(seme) < 0.25f))) && (ukeCap.consumePosture(atk * def, true, false, seme) == 0f) && smart) {
+            if ((!smart || (!defend.isEmpty() && (NeedyLittleThings.isFacingEntity(uke, seme, 120) || uke.getDistanceSq(seme) < 0.25f))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
                 uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);

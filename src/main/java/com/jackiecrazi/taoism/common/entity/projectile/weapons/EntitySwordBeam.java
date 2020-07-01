@@ -6,7 +6,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class EntitySwordBeam extends EntityThrownWeapon {
@@ -46,16 +45,15 @@ public class EntitySwordBeam extends EntityThrownWeapon {
     }
 
     @Override
-    protected void onHit(RayTraceResult result) {
+    protected void onHitEntity(Entity e) {
         if (!world.isRemote) {
             if (getThrower() != null) {
-                if (result.entityHit != null) {
-                    if (result.entityHit != getThrower()) {
+                if (e != null) {
+                    if (e != getThrower()) {
                         if(h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
                                 this.setDead();
                                 return;
                             }
-                        Entity e = result.entityHit;
                         TaoCombatUtils.attack(getThrower(), e, hand);
                         setDead();
                     }

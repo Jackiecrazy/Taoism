@@ -76,7 +76,7 @@ public class BanFu extends TaoWeapon {
         if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack) && getHand(stack) != null) {
             final EntityLivingBase elb = (EntityLivingBase) e;
             //it spins you right round, baby, right round
-            elb.rotationYaw += 3;
+            elb.rotationYaw += Math.min(getChargedTime(elb, stack)/5, 7);
             for (Entity a : w.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
                 double distsq = NeedyLittleThings.getDistSqCompensated(elb, a);
                 Vec3d point = elb.getPositionVector();
