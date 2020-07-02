@@ -34,7 +34,6 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -662,24 +661,14 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canCharge(EntityLivingBase wielder, ItemStack item) {
-        return true;
+        /*
+        At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
+         */
+        return (wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative()) || (TaoCasterData.getTaoCap(wielder).getQi() > 9 && !isCharged(wielder, item));
     }
 
     @Override
     public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
-        /*
-        At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
-         */
-        if (TaoCasterData.getTaoCap(attacker).getQi() < 9) {
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
-            return;
-        }
-        if(isCharged(attacker, item)){
-            if (attacker instanceof EntityPlayer)
-                ((EntityPlayer) attacker).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
-            return;
-        }
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
             chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
@@ -696,8 +685,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             dischargeWeapon(elb, elb.getHeldItemMainhand());
             return;
         }
-        if (elb instanceof EntityPlayer)
-            ((EntityPlayer) elb).sendStatusMessage(new TextComponentTranslation("weapon.discharge"), true);
         gettagfast(item).setBoolean("charge", false);
         gettagfast(item).setLong("chargedAtTime", 0);
     }

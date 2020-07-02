@@ -34,7 +34,7 @@ public class Tonfa extends TaoWeapon {
     };
 
     public Tonfa() {
-        super(0, 1.8, 5f, 1.3f);
+        super(0, 1.8, 5f, 1f);
     }
 
     @Override

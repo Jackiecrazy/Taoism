@@ -550,7 +550,9 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
     @Override
     protected Entity findEntityOnPath(Vec3d start, Vec3d end) {
         Entity entity = null;
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(width, height, width), NeedyLittleThings.VALID_TARGETS);
+        float atLeastWidth=Math.min(1,width);
+        float atLeastHeight=Math.min(1,height);
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(atLeastWidth, atLeastHeight, atLeastWidth), NeedyLittleThings.VALID_TARGETS);
         double d0 = 0.0D;
 
         for (Entity entity1 : list) {

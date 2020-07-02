@@ -95,9 +95,27 @@ public class GuanDao extends TaoWeapon {
     }
 
     @Override
+    public boolean canCharge(EntityLivingBase wielder, ItemStack item) {
+        return true;
+    }
+
+    @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         if (!isCharged(attacker, item))
             TaoCasterData.getTaoCap(attacker).addQi(0.3f);
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return isCharged(attacker, item) || getHand(item) == EnumHand.OFF_HAND ? Event.Result.DENY : Event.Result.ALLOW;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float chimult = TaoCasterData.getTaoCap(attacker).getQiFloored() / 20f;
+        boolean off = getHand(item) == EnumHand.OFF_HAND;
+        boolean charge = isCharged(attacker, item);
+        return off || charge ? 1f : 1.3f * (1 + chimult);
     }
 
     @Override
@@ -117,18 +135,5 @@ public class GuanDao extends TaoWeapon {
                 TaoCombatUtils.rechargeHand(attacker, EnumHand.MAIN_HAND, 0.8f);
             }
         }
-    }
-
-    @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isCharged(attacker, item)||getHand(item)==EnumHand.OFF_HAND ? Event.Result.DENY : Event.Result.ALLOW;
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float chimult = TaoCasterData.getTaoCap(attacker).getQiFloored() / 20f;
-        boolean off = getHand(item) == EnumHand.OFF_HAND;
-        boolean charge = isCharged(attacker, item);
-        return off || charge ? 1f : 1.3f * (1 + chimult);
     }
 }

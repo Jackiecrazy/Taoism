@@ -23,7 +23,7 @@
     },
     {
       "predicate": {
-        "type": 3
+        "type": 4
       },
       "model": "taoism:dummy"
     }],

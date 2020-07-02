@@ -67,6 +67,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
         assert is.getTagCompound() != null;
         is.getTagCompound().setBoolean("connected", true);
         TaoCombatUtils.attack(getThrower(), hit, hand);
+        onRecall();
     }
 
     protected void onRetrieveWeapon() {

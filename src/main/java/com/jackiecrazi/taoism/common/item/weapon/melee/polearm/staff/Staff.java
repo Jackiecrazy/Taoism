@@ -35,7 +35,7 @@ public class Staff extends TaoWeapon {
      */
 
     public Staff() {
-        super(0, 1.4f, 6f, 1.2f);
+        super(0, 1.4f, 6f, 0.8f);
     }
 
     @Override

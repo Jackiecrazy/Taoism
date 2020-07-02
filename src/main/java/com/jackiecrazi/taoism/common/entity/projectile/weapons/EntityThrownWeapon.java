@@ -128,8 +128,8 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
             onRetrieveWeapon();
             return;
         }
-        shoot(shootingEntity.posX - posX, shootingEntity.posY + shootingEntity.getEyeHeight() / 2 - posY, shootingEntity.posZ - posZ, 0.8f, 0);
         inGround = false;
+        shoot(shootingEntity.posX - posX, shootingEntity.posY + shootingEntity.getEyeHeight() / 2 - posY, shootingEntity.posZ - posZ, 0.8f, 0);
         velocityChanged = true;
         sync();
     }

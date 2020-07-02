@@ -181,14 +181,13 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.MAIN_HAND && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && target == attacker.getLastAttackedEntity() ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return getHand(item) == EnumHand.MAIN_HAND && getLastAttackedRangeSq(item) != 0 && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && target == attacker.getLastAttackedEntity() ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
         float crit = 1;
         if (getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
-            setLastAttackedRangeSq(attacker, stack, 0);
             crit *= 1.5f;
         }
         crit = !attacker.onGround ? crit * 1.5f : crit;

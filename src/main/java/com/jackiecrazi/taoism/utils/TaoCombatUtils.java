@@ -76,9 +76,6 @@ public class TaoCombatUtils {
         }
     }
 
-    /**
-     * copy-pasted from EntityPlayer, as-is.
-     */
     public static void taoWeaponAttack(Entity targetEntity, EntityLivingBase elb, ItemStack stack, boolean main, boolean updateOff) {
         if (elb instanceof EntityPlayer)
             taoWeaponAttack(targetEntity, (EntityPlayer) elb, stack, main, updateOff, DamageSource.causePlayerDamage((EntityPlayer) elb));

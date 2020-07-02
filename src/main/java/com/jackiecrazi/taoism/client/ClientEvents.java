@@ -89,7 +89,7 @@ public class ClientEvents {
             0xFFE000,
             0xFFFF00 //max, step by 15
     };
-    private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/spritesheet.png");
+    private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/yeet.png");
     private static final ResourceLocation hood = new ResourceLocation(Taoism.MODID, "textures/hud/icons.png");
     private static final int CHARGE = 50;
     /**
@@ -395,20 +395,32 @@ public class ClientEvents {
                         //bar
                         GlStateManager.pushMatrix();
                         GlStateManager.enableAlpha();
-                        int c = GRADIENTE[MathHelper.clamp((int) (qiExtra * (GRADIENTE.length)), 0, GRADIENTE.length - 1)];
-                        GlStateManager.color(red(c), green(c), blue(c));
-                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64) + (int) ((1 - qiExtra) * 64), 128, 128, 64, (int) (qiExtra * 64));//+(int)(qiExtra*32)
+                        //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra * (GRADIENTE.length)), 0, GRADIENTE.length - 1)];
+                        //GlStateManager.color(red(c), green(c), blue(c));
+                        GlStateManager.color(1, 1, 1, qi > 0 ? 1 : qiExtra);
+                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), 0, 0, 64, 64);//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();
 
-                        //overlay
-                        GlStateManager.pushMatrix();
-                        GlStateManager.color(1f, 1f, 1f);
-                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
-                        //GlStateManager.resetColor();
-                        //mc.renderEngine.bindTexture();
+                        if(qi>0) {
+                            //overlay
+                            GlStateManager.pushMatrix();
+                            GlStateManager.color(1f, 1f, 1f);
+                            //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
+                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                            //GlStateManager.resetColor();
+                            //mc.renderEngine.bindTexture();
+                            GlStateManager.popMatrix();
+
+                            //overlay layer 2
+                            GlStateManager.pushMatrix();
+                            GlStateManager.color(1f, 1f, 1f, qiExtra);
+                            //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
+                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), ((qi + 1) * 64) % 256, Math.floorDiv((qi + 1), 4) * 64, 64, 64);
+                            //GlStateManager.resetColor();
+                            //mc.renderEngine.bindTexture();
+                            GlStateManager.popMatrix();
+                        }
                         GlStateManager.disableAlpha();
-                        GlStateManager.popMatrix();
                         GlStateManager.popMatrix();
                     }
 
@@ -421,18 +433,6 @@ public class ClientEvents {
                     }
                 }
             }
-    }
-
-    private static float red(int a) {
-        return BinaryMachiavelli.getInteger(a, 16, 23) / 255f;
-    }
-
-    private static float green(int a) {
-        return BinaryMachiavelli.getInteger(a, 8, 15) / 255f;
-    }
-
-    private static float blue(int a) {
-        return BinaryMachiavelli.getInteger(a, 0, 7) / 255f;
     }
 
     /**
@@ -540,6 +540,18 @@ public class ClientEvents {
         }
 
         return foundEntity;
+    }
+
+    private static float red(int a) {
+        return BinaryMachiavelli.getInteger(a, 16, 23) / 255f;
+    }
+
+    private static float green(int a) {
+        return BinaryMachiavelli.getInteger(a, 8, 15) / 255f;
+    }
+
+    private static float blue(int a) {
+        return BinaryMachiavelli.getInteger(a, 0, 7) / 255f;
     }
 
 	/*@SubscribeEvent

@@ -105,21 +105,15 @@ public class QingLongJi extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? isCharged(null, is) ? 1 : 0 : 2;
     }
 
+    @Override
+    public boolean canCharge(EntityLivingBase wielder, ItemStack item) {
+        return true;
+    }
+
 //    @Override
 //    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
 //        TaoCasterData.getTaoCap(attacker).addQi(1f);
 //    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
-        if (!attacker.world.isRemote && getHand(stack) == EnumHand.OFF_HAND) {
-            if (isCharged(attacker, stack)) {
-                dischargeWeapon(attacker, stack);
-            } else chargeWeapon(attacker, stack, 100);
-        }
-        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);
-    }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
@@ -143,5 +137,16 @@ public class QingLongJi extends TaoWeapon {
                 TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 2, 0), false);
             }
         }
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
+        if (!attacker.world.isRemote && getHand(stack) == EnumHand.OFF_HAND) {
+            if (isCharged(attacker, stack)) {
+                dischargeWeapon(attacker, stack);
+            } else chargeWeapon(attacker, stack, 100);
+        }
+        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);
     }
 }

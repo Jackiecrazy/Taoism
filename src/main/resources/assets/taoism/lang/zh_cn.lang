@@ -27,7 +27,8 @@ taoism.weaponReach=攻击范围: %.2f
 taoism.weaponDefMult=防御架势倍率: %.2f
 taoism.weaponAttMult=攻击架势倍率: %.2f
 weapon.notenoughqi=需要九层气才能触发斩杀
-weapon.alreadycharged=斩杀已经触发
+weapon.alreadycharged=斩杀已蓄势待发
+weapon.discharge=斩杀触发完毕
 
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却
@@ -122,7 +123,7 @@ halberd.cleave=普攻叠加三秒破甲II
 halberd.stab=右击使用枪头引爆破甲，每层破甲造成2点无视护甲的伤害
 halberd.stab.cooldown=每层引爆的破甲使本攻击冷却减少一秒
 
-item.changchui.name=琉森锤／渡鸦喙
+item.changchui.name=立瓜锤
 changchui.leap=暴击造成双倍伤害，对击倒的目标造成双倍伤害
 changchui.armpen=被动无视3（+气层数）点护甲
 changchui.enfeeble=六层气以上时，普攻使目标在2秒内无法恢复架势

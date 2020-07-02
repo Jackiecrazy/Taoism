@@ -176,7 +176,7 @@ public class TaoEntityHandler {
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getRootTime() > 0 && cap.getQi() > 0) {
+            if (cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
@@ -213,9 +213,8 @@ public class TaoEntityHandler {
                     } else if (p.isSprinting() && p.motionY < 0) {
                         p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
                         p.motionY *= ((MathHelper.clamp(2 - (p.motionX * p.motionX + p.motionZ * p.motionZ), 1f, 2f) * 1.5f / cap.getQi()));//
-                    }
-
-                } else p.fallDistance = 0.1f;//for da critz
+                    }else p.fallDistance = 0.1f;//for da critz
+                }
             }
             TaoCasterData.updateCasterData(p);
             //recharge weapon

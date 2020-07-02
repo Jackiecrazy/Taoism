@@ -30,8 +30,14 @@ public class Cestus extends TaoWeapon {
     //Intimidating and relentless weapon fit for a pugilist. Short range, straightforward, decent at defense
     //naturally adds 2 armor points, applies slow 1 at 3 chi, and slow 2 at 6 chi. At 10 chi blindness. Damage scales with chi
     //to compensate for so many perks, is single target and short range, but no knockback
+    //execution: throw both attacker and target into the air/AOE repel other targets.
+    // Damage dealt is recorded, then instantly applied when time runs out.
+    // Overflow damage culminates in a hit down and a large explosion
+
+    //option to have projectiles pass through mounts
+    //there was something else but I forgot, it was a config option that'd influence vanilla play
     public Cestus() {
-        super(0, 2, 5d, 1.3f);
+        super(0, 2, 5d, 1f);
     }
 
     @Override
