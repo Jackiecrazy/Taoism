@@ -26,6 +26,10 @@ weapon.disshield=騰空攻擊可禁用敵方盾牌
 taoism.weaponReach=攻擊範圍: %.2f
 taoism.weaponDefMult=防禦架勢倍率: %.2f
 taoism.weaponAttMult=攻擊架勢倍率: %.2f
+weapon.notenoughqi=需要九層氣才能觸發斬殺
+weapon.alreadycharged=斬殺已蓄勢待發
+weapon.discharge=斬殺觸發完畢
+weapon.spoiler=斬殺還沒有做好哦～
 
 item.ken.name=劍
 ken.combo=普攻挽出三個劍花後才進入冷卻
@@ -37,6 +41,8 @@ ken.riposte=招架後重置連擊
 item.banfu.name=板斧
 banfu.leap=爆擊造成雙倍傷害
 banfu.cleave=攻擊附加三秒破甲，每層氣減少2點敵方護甲
+banfu.main=在主手中若無法附加更高等級的破甲，疊加一層破甲
+banfu.off=若在副手，額外造成敵方破甲層數一半的傷害
 
 item.balisong.name=蝴蝶刀
 balisong.switch=裝備時立刻重置冷卻
@@ -237,4 +243,3 @@ earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
 earth11.inscription=大花棉襖
-<Da​​mage sources>=

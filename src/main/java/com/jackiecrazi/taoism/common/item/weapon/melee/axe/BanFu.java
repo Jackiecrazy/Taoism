@@ -165,7 +165,7 @@ public class BanFu extends TaoWeapon {
     public void dischargeWeapon(EntityLivingBase elb, ItemStack stack) {
         super.dischargeWeapon(elb, stack);
         if (!elb.world.isRemote) {
-            for (Entity a : elb.world.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
+            for (Entity a : elb.world.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 5))) {
                 if (a instanceof EntityLivingBase) {
                     TaoCasterData.getTaoCap((EntityLivingBase) a).stopRecordingDamage(elb);
                 }

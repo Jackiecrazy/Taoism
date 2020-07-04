@@ -26,7 +26,7 @@ public class Chui extends TaoWeapon {
     //execution
 
     public Chui() {
-        super(0, 1.4f, 7f, 1.3f);
+        super(0, 1.2f, 8f, 1.3f);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.5f;
+        return 1.6f;
     }
 
     @Override

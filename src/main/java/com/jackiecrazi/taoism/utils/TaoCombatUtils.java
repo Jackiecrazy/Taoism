@@ -61,6 +61,17 @@ public class TaoCombatUtils {
         rechargeHand(elb, hand, temp);
     }
 
+    public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
+        if (elb instanceof EntityPlayer)
+            switch (hand) {
+                case OFF_HAND:
+                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
+                case MAIN_HAND:
+                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
+            }
+        return 1f;
+    }
+
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
         if (!(elb instanceof EntityPlayer)) return;
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
@@ -324,22 +335,16 @@ public class TaoCombatUtils {
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        return attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
+        float ret = attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
+        if (attack.isEmpty()) {//bare hand 1.5x
+            ret = CombatConfig.defaultPostureKenshiro;
+        }
+        if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
+        return ret;
     }
 
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
         return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 2f) *
                 (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
-    }
-
-    public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
-        if (elb instanceof EntityPlayer)
-            switch (hand) {
-                case OFF_HAND:
-                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
-                case MAIN_HAND:
-                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
-            }
-        return 1f;
     }
 }

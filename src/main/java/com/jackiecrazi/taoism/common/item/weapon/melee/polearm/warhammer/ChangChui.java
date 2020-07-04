@@ -1,20 +1,19 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
-import com.jackiecrazi.taoism.utils.TaoPotionUtils;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -31,6 +30,12 @@ public class ChangChui extends TaoWeapon {
      * Parry special:
      * for the next 5 seconds, opponents will always take posture damage from you and cannot recover posture
      * Sweep will instantly use up this buff to majorly knock back all targets and remove half their current posture
+     * TODO redesign to maul, focus around the aspect of hammering
+     * has high knockback
+     * right click to nail an entity down. A nailed entity is rooted up to 1 second depending on chi
+     * this can be repeated to slowly nail down a tall entity, suffocating them
+     * a normal attack on a nailed entity will uproot them for extra damage
+     * nailing an entity into another entity deals damage to both
      */
     //private final AttributeModifier
     public ChangChui() {
@@ -69,7 +74,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.5f;
+        return 1.6f;
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
@@ -84,43 +89,43 @@ public class ChangChui extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, stack, 120);
-        }
+//        if (getHand(stack) == EnumHand.OFF_HAND) {
+//            splash(attacker, stack, 120);
+//        }
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
-        tooltip.add(I18n.format("changchui.leap"));
-        tooltip.add(I18n.format("changchui.armpen"));
-        tooltip.add(I18n.format("changchui.enfeeble"));
-        tooltip.add(I18n.format("changchui.swipe"));
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
-            dischargeWeapon(elb, stack);
-        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
-    }
-
-    @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return (TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 2f : 1f) * attacker.motionY < 0 ? 2f : 1f;
+        tooltip.add(I18n.format("maul.leap"));
+        tooltip.add(I18n.format("maul.impact"));
+        tooltip.add(I18n.format("maul.nail"));
+        tooltip.add(I18n.format("maul.hardness"));
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return TaoCasterData.getTaoCap(target).getDownTimer()>0? Event.Result.ALLOW:super.critCheck(attacker, target, item, crit, vanCrit);
+        if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWall(target)) {
+            return Event.Result.ALLOW;
+        }
+        return super.critCheck(attacker, target, item, crit, vanCrit);
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        float cdmg = 1;
+        if (!attacker.onGround) cdmg *= 2;
+        return cdmg;
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1f;
-        return off;
+        if(getHand(item)==EnumHand.MAIN_HAND)
+        if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWall(target)) {
+            return 1.5f;
+        }
+        return super.damageMultiplier(attacker, target, item);
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
@@ -134,25 +139,41 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return TaoCasterData.getTaoCap(attacker).getQiFloored()+3;
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return getHand(stack) == EnumHand.OFF_HAND ? 0 : orig * 2;
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (attacker.world.isRemote) return;
+        World w = attacker.world;
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            float groundKB = attacker.onGround ? 1f : 1.3f;
-            float chargeKB = isCharged(attacker, stack) ? 2f : 1f;
-            NeedyLittleThings.knockBack(target, attacker, groundKB * chargeKB);
-        } else {
-            if (TaoCasterData.getTaoCap(attacker).getQi()>6) {
-                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 40, chi/3), false);
+            int blocksQueried = 0;
+            int airBlocks = 0;
+            if (target.posY < 2) return;//don't bonk enemies out of the world
+            for (int x = (int) (target.posX - target.width); x <= (int) (target.posX + target.width); x++) {
+                for (int z = (int) (target.posZ - target.width); z <= (int) (target.posZ + target.width); z++) {
+                    blocksQueried++;
+                    BlockPos bp = new BlockPos(x, target.posY - 1, z);
+                    if (!w.isBlockLoaded(bp)) return;
+                    IBlockState blockUnder = w.getBlockState(bp);
+                    BlockPos bp2 = bp.down();
+                    int MLUnder = blockUnder.getBlock().getHarvestLevel(blockUnder);
+                    if (MLUnder > chi / 2) return;
+                    if (w.isAirBlock(bp2)) airBlocks++;
+                }
             }
-//            for(ItemStack armor:target.getArmorInventoryList()){
-//                armor.addAttributeModifier();
-//                armor.
-//            }
+            if (airBlocks == blocksQueried) return;
+            target.setPositionAndUpdate(target.posX, target.posY - 1, target.posZ);
+            TaoCasterData.getTaoCap(target).setRootTime(chi * 2);
         }
-        //dent armor of downed targets, restricting movement
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
+        if (getHand(stack) == EnumHand.OFF_HAND)
+            dischargeWeapon(elb, stack);
+        EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }
 }

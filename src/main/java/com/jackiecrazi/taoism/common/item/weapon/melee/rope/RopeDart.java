@@ -41,19 +41,25 @@ public class RopeDart extends TaoWeapon {
      * Stores up charge when in hand, to a cap, released during an attack. Cannot block or parry.
      * Normal attack, notably, throws out a projectile instead of actually attacking, damage and velocity determined by charge.
      * This means it naturally ignores non-shield blocks.
-     * Alt attack is an arcing overhead smash. This inflicts light bonking damage and, if not blocked or parried, will bind hit target
-     *      After this, main hand will disengage the rope, and offhand is freed.
-     *      TODO:
-     *      After bind, become capable of parrying and delivers a critical punch in the main hand with range 2
-     *      If binding entity, lasso down with offhand, retrieves the rope and inflicts half max posture damage
-     *      If parried or blocked, disarm opponent until retrieved with offhand
      *
      * On the same vein:
-     * Meteor hammer: more swinging, stunning+kb hits, power+
+     * Meteor hammer: offhand is an arc attack that consumes charge at some rate
      * Flying claws: rip and grapple, pull enemies close or grapple away, speed+
      *
-     * While equipped, the dart orbits around you in a set pattern. Saves summoning and killing, and gives a passive hit aura
-     * At the same time, letting anyone get close is potentially fatal.
+     * Redesign: charge is gained by hitting enemies
+     * In hand it starts out at 0 charge, hitting an enemy allows it to gain a charge, with no cap
+     *  charge is converted into qi upon returning, with bonus based on charge (e.g. 1 = 0.25, 2 = 0.6, 3 = 1.1)
+     * Right clicking as the dart reaches the player again receives the dart and winds up a trick shot:
+     *  0+ ticks: rewind, 1x
+     *  10 ticks: foot kick, 1.10x
+     *  20 ticks: knee wrap, 1.25x
+     *  30 ticks: waist wrap, 1.45x
+     *  40 ticks: elbow wrap, 1.70x
+     *  50 ticks: neck wrap, 2.00x
+     *  60 ticks: full body wrap, 2.4x
+     *  70 ticks: retrieve
+     *  attack again to fire, dealing up to 2.4x damage and receiving
+     * Hitting a block will cause you to lose all charge, so react fast!
      */
     public RopeDart() {
         super(2, 4, 5, 0);

@@ -167,6 +167,8 @@ public class Pollaxe extends TaoWeapon {
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (getHand(item) == EnumHand.OFF_HAND && getLastMove(item).isValid() && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
             return super.postureDealtBase(attacker, defender, item, amount) * 2;
+        }else if(getHand(item)==EnumHand.MAIN_HAND){
+            return super.postureDealtBase(attacker, defender, item, amount)/2;
         }
         return super.postureDealtBase(attacker, defender, item, amount);
     }

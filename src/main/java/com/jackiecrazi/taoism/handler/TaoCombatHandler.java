@@ -68,7 +68,7 @@ public class TaoCombatHandler {
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
-                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
+                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi()/40 > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
                     ent.motionY = look.y;
@@ -234,7 +234,6 @@ public class TaoCombatHandler {
         //if posture is broken, damage increased, ignores deflection/absorption
         if (ukeCap.getDownTimer() > 0) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
-                amnt *= 1.5;
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
                 for (int i = 0; i < 5; ++i) {
                     double d0 = Taoism.unirand.nextGaussian() * 0.02D;

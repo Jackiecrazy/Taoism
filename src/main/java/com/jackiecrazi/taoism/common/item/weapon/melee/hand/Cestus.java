@@ -37,7 +37,7 @@ public class Cestus extends TaoWeapon {
     //option to have projectiles pass through mounts
     //there was something else but I forgot, it was a config option that'd influence vanilla play
     public Cestus() {
-        super(0, 2, 5d, 1f);
+        super(0, 2, 5d, 1.2f);
     }
 
     @Override

@@ -770,7 +770,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return itemPostureMultiplier * (getDamDist(item));
+        return itemPostureMultiplier * (getDamDist(item))*amount;
     }
 
     @Override

@@ -181,7 +181,7 @@ public class TaoEntityHandler {
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
                         //vertical motion enabling, and shut off attempts to run off the wall
-                        double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2;
+                        double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2.5;
                         Vec3d vec = p.getLookVec();
                         p.motionY = speed * p.getLookVec().y;
                         boolean[] faces = TaoMovementUtils.collisionStatus(p);

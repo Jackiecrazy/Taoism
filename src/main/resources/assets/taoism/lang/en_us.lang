@@ -23,12 +23,13 @@ weapon.parry=this weapon cannot block or parry
 weapon.ignore=this weapon ignores parries and shields
 weapon.projectile=this weapon ignores parries
 weapon.disshield=this weapon disables shields when launching a leaping strike
-taoism.weaponReach=attack range: %s
+taoism.weaponReach=attack range: %.1f
 taoism.weaponDefMult=defense posture multiplier: %.2f
 taoism.weaponAttMult=attack posture multiplier: %.2f
 weapon.notenoughqi=You need nine levels of chi to charge an execution
 weapon.alreadycharged=This weapon is already charged
 weapon.discharge=This weapon has discharged
+weapon.spoiler=Executions aren't done yet! No spoilers!
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before needing recharge
@@ -40,6 +41,8 @@ ken.riposte=a parry will reset the combo counter
 item.banfu.name=Sapper's Axe
 banfu.leap=crits deal double damage
 banfu.cleave=reduces enemy armor by 2 per chi level for 3 seconds
+banfu.main=if cleave will not increase from an attack, stack one more layer on main hand
+banfu.off=if on offhand, additionally deal (cleave level/2) damage
 
 item.balisong.name=Balisong
 balisong.switch=attack timer is immediately reset when switching in
@@ -123,11 +126,11 @@ halberd.cleave=chops through enemy armor, stacking armor break II for 3 seconds
 halberd.stab=right click to stab the target, detonating armor break for 2 points of armor piercing damage per level of potency
 halberd.stab.cooldown=each layer of armor break detonated will reduce the cooldown for this attack by 1 second
 
-item.changchui.name=Great Hammer
-changchui.leap=crits deal double damage, deals double damage against a downed target
-changchui.armpen=ignores 3(+chi) points of armor
-changchui.enfeeble=above 6 chi, normal attack causes target to be unable to recover posture for 2 seconds
-changchui.swipe=right click to swipe in a 120 degree sector, knocking enemies back. Has a longer cooldown
+item.changchui.name=Maul
+maul.leap=crits deal double damage
+maul.impact=normal attack has much greater knockback and deals 1.5x damage on enemies next to walls
+maul.nail=right click to hammer the entity one block into the ground, rooting it for (chi/10) seconds
+maul.hardness=blocks under the entity must have a harvest level less than (chi/2)
 
 item.staff.name=Quarterstaff
 staff.flick=a strike on a grounded target while grounded will flick them up, giving you a brief jump boost as well

@@ -4,7 +4,9 @@ import com.jackiecrazi.taoism.common.item.arrows.TaoArrow;
 import com.jackiecrazi.taoism.common.item.prop.ItemProjectileProp;
 import com.jackiecrazi.taoism.common.item.weapon.melee.ItemBlueprint;
 import com.jackiecrazi.taoism.common.item.weapon.melee.axe.BanFu;
+import com.jackiecrazi.taoism.common.item.weapon.melee.club.Bian;
 import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
+import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Balisong;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
@@ -22,7 +24,6 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangCh
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
-import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -56,7 +57,8 @@ public class TaoItems {
             yyd,
             bohear,
             nunchaku,
-            ropedart;
+            ropedart,
+            bian;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -85,7 +87,7 @@ public class TaoItems {
         chickensickle = new ChickenSickle();
         ninetail = new CatNineTails();
         pollaxe = new Pollaxe();
-        halberd=new Halberd();
+        halberd = new Halberd();
         changchui = new ChangChui();
         goulianqiang = new GouLianQiang();
         qinglongji = new QingLongJi();
@@ -94,7 +96,8 @@ public class TaoItems {
         bohear = new BohemianEarspoon();
         nunchaku = new Nunchaku();
         ropedart = new RopeDart();
-        prop=new ItemProjectileProp();
+        bian = new Bian();
+        prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
         e.getRegistry().register(geom);
@@ -116,6 +119,7 @@ public class TaoItems {
         e.getRegistry().register(bohear);
         e.getRegistry().register(nunchaku);
         e.getRegistry().register(ropedart);
+        e.getRegistry().register(bian);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

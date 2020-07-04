@@ -106,14 +106,13 @@ public class Ken extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isAoE(attacker, item) || !isAiming(attacker, item) ? Event.Result.DEFAULT : Event.Result.ALLOW;
+        return isAoE(attacker, item) || !isAiming(attacker, item) ? Event.Result.DENY : Event.Result.ALLOW;
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float air = !attacker.onGround ? 1.5f : 1f;
-        float aoe = isAoE(attacker, item) || !isAiming(attacker, item) ? 1f : 1.5f;
-        return air * aoe;
+        float aoe = isAoE(attacker, item) || !isAiming(attacker, item) ? 1f : 1.2f;
+        return aoe;
     }
 
     @Override

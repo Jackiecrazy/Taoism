@@ -47,7 +47,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         float width = Math.max(elb.width, 1f);
         float height = (float) Math.ceil(elb.height);
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
-        return Math.round(width * width * height * 5 * armor);
+        return Math.round(width * height * 5 * armor);
     }
 
     public static void syncAttackTimer(EntityLivingBase entity){

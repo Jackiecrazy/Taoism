@@ -37,6 +37,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
@@ -99,6 +100,8 @@ public class ClientEvents {
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false, sneak = false;
     private static int leftClickAt = 0, rightClickAt = 0;
+    //TODO starry effect to signal that the orb is filled, or make the lines progress instead of fade/solidify
+    private static float targetQiLevel = 0, currentQiLevel = 0;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -258,16 +261,19 @@ public class ClientEvents {
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
             Minecraft mc = Minecraft.getMinecraft();
+            if(Taoism.proxy.isBreakingBlock(mc.player))return;
             if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
                 leftClickAt++;
                 if (leftClickAt == CHARGE) {
-                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"),true);
+                    //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
             if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
                 rightClickAt++;
                 if (rightClickAt == CHARGE) {
-                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
+                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"),true);
+                    //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
                 }
             }
         }
@@ -386,8 +392,20 @@ public class ClientEvents {
                 int height = sr.getScaledHeight();
                 if (gamesettings.thirdPersonView == 0) {
                     mc.getTextureManager().bindTexture(hud);
-                    int qi = cap.getQiFloored();
-                    float qiExtra = cap.getQi() - cap.getQiFloored();
+                    targetQiLevel = cap.getQi();
+                    boolean closeEnough = true;
+                    if (targetQiLevel > currentQiLevel) {
+                        currentQiLevel += 0.01f;
+                        closeEnough = false;
+                    }
+                    if (targetQiLevel < currentQiLevel) {
+                        currentQiLevel -= 0.01f;
+                        closeEnough = !closeEnough;
+                    }
+                    if (closeEnough || currentQiLevel - targetQiLevel > 1 || currentQiLevel - targetQiLevel < -1)
+                        currentQiLevel = targetQiLevel;
+                    int qi = (int) currentQiLevel;
+                    float qiExtra = currentQiLevel - qi;
                     if (qi != 0 || qiExtra != 0f) {
                         //render qi bar
                         GlStateManager.pushMatrix();
@@ -401,21 +419,21 @@ public class ClientEvents {
                         mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), 0, 0, 64, 64);//+(int)(qiExtra*32)
                         GlStateManager.popMatrix();
 
-                        if(qi>0) {
+                        if (qi > 0) {
                             //overlay
                             GlStateManager.pushMatrix();
-                            GlStateManager.color(1f, 1f, 1f);
+                            GlStateManager.color(qiExtra, qiExtra, qiExtra, qiExtra);
                             //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), ((qi + 1) * 64) % 256, Math.floorDiv((qi + 1), 4) * 64, 64, 64);
                             //GlStateManager.resetColor();
                             //mc.renderEngine.bindTexture();
                             GlStateManager.popMatrix();
 
                             //overlay layer 2
                             GlStateManager.pushMatrix();
-                            GlStateManager.color(1f, 1f, 1f, qiExtra);
+                            GlStateManager.color(1f, 1f, 1f);
                             //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), ((qi + 1) * 64) % 256, Math.floorDiv((qi + 1), 4) * 64, 64, 64);
+                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
                             //GlStateManager.resetColor();
                             //mc.renderEngine.bindTexture();
                             GlStateManager.popMatrix();
