@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.rope;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
+import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
@@ -28,10 +29,15 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class RopeDart extends TaoWeapon {
     public static final int MAXRANGESQ = 64;
+    private final PartDefinition[] parts = {
+            StaticRefs.HANDLE,
+            StaticRefs.ROPE
+    };
 
     /*
      * A rope weapon that charges up into fast, unblockable and constricting hits. High speed and range, medium power and defense, low combo
@@ -46,28 +52,31 @@ public class RopeDart extends TaoWeapon {
      * Meteor hammer: offhand is an arc attack that consumes charge at some rate
      * Flying claws: rip and grapple, pull enemies close or grapple away, speed+
      *
-     * Redesign: charge is gained by hitting enemies
+     * Redesign: charge up in combat for trick shots
+     * charge is gained by hitting enemies
      * In hand it starts out at 0 charge, hitting an enemy allows it to gain a charge, with no cap
      *  charge is converted into qi upon returning, with bonus based on charge (e.g. 1 = 0.25, 2 = 0.6, 3 = 1.1)
-     * Right clicking as the dart reaches the player again receives the dart and winds up a trick shot:
-     *  0+ ticks: rewind, 1x
-     *  10 ticks: foot kick, 1.10x
-     *  20 ticks: knee wrap, 1.25x
-     *  30 ticks: waist wrap, 1.45x
-     *  40 ticks: elbow wrap, 1.70x
-     *  50 ticks: neck wrap, 2.00x
-     *  60 ticks: full body wrap, 2.4x
-     *  70 ticks: retrieve
-     *  attack again to fire, dealing up to 2.4x damage and receiving
+     *  charge also increases damage of the dart while it is flying
+     * A: It is no longer automatically retrieved, and will only return to hand if you shift
+     * This means it whizzes by your head very often. When it does, it'll slow down slightly for a second to facilitate B
+     * B: While the dart is out, normal attack is a punch that deals more knockback
+     * Right click is a kick that consumes 1 posture to deal full damage and 3 posture to the enemy
+     * Both of these attacks have range 3 radius 90, and if they hit the dart, the dart is sent back out with extra charge
+     * C: If the normal attack does not hit the dart, it commands the dart to fire in that direction without giving extra charge
+     * So you can, for instance, quickly turn around to fire the dart at an enemy behind you
      * Hitting a block will cause you to lose all charge, so react fast!
      */
     public RopeDart() {
-        super(2, 4, 5, 0);
-        this.addPropertyOverride(new ResourceLocation("thrown"), (stack, w, elb) -> gettagfast(stack).hasKey("dartID") || isEngaged(stack) ? 1 : 0);
+        super(2, 2, 5, 0);
+        this.addPropertyOverride(new ResourceLocation("thrown"), (stack, w, elb) -> isThrown(stack) && (w == null || w.getEntityByID(getDartID(stack)) != null) ? 1 : 0);
     }
 
-    private boolean isEngaged(ItemStack is) {
-        return gettagfast(is).hasKey("bindID") && gettagfast(is).getInteger("bindID") != gettagfast(is).getInteger("dartID");
+    private boolean isThrown(ItemStack is) {
+        return gettagfast(is).hasKey("dartID");
+    }
+
+    private int getDartID(ItemStack is) {
+        return gettagfast(is).getInteger("dartID");
     }
 
     @SideOnly(Side.CLIENT)
@@ -75,8 +84,8 @@ public class RopeDart extends TaoWeapon {
     public static void render(RenderWorldLastEvent event) {
         if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() instanceof RopeDart) {
             ItemStack is = Minecraft.getMinecraft().player.getHeldItemMainhand();
-            Entity e = Minecraft.getMinecraft().world.getEntityByID(((RopeDart) is.getItem()).getRopedTo(is));
-            EntityPlayer p=Minecraft.getMinecraft().player;
+            Entity e = Minecraft.getMinecraft().world.getEntityByID(((RopeDart) is.getItem()).getDartID(is));
+            EntityPlayer p = Minecraft.getMinecraft().player;
             if (e != null) {
                 double doubleX = p.prevPosX + (p.posX - p.prevPosX) * event.getPartialTicks();
                 double doubleY = p.prevPosY + (p.posY - p.prevPosY) * event.getPartialTicks();
@@ -116,13 +125,9 @@ public class RopeDart extends TaoWeapon {
         }
     }
 
-    private int getRopedTo(ItemStack is) {
-        return gettagfast(is).getInteger("bindID");
-    }
-
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
-        return new PartDefinition[0];
+        return parts;
     }
 
     @Override
@@ -132,19 +137,12 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 0;
-    }
-
-    @Override
-    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
+        return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 : 0;
     }
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
-        return !isEngaged(is);
+        return true;
     }
 
     @Override
@@ -157,53 +155,43 @@ public class RopeDart extends TaoWeapon {
                 gettagfast(stack).removeTag("dartID");
                 gettagfast(stack).removeTag("connected");
             }
-            if (gettagfast(stack).hasKey("bindID") && w.getEntityByID(getRopedTo(stack)) != null && onMainhand) {
-                Entity ent = w.getEntityByID(getRopedTo(stack));
-                if (ent instanceof EntityLivingBase) {
-                    TaoCasterData.getTaoCap((EntityLivingBase) ent).setBindTime(10);
-                }
-            }
-            else setRopedTo(stack, null);
         }
     }
 
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
-        if (!elb.world.isRemote) {
-            if (elb.world.getEntityByID(gettagfast(is).getInteger("dartID")) == null) {
-                EntityRopeDart erd = new EntityRopeDart(elb.world, elb, getHand(is));
-                if (getHand(is) == EnumHand.MAIN_HAND) {
-//                    if (isEngaged(is)) {
-//                        Entity e = elb.world.getEntityByID(((RopeDart) is.getItem()).getRopedTo(is));
-//                        if (e != null) {
-//                            Vec3d relativePosVec = e.getPositionVector().subtract(elb.getPositionVector());
-//                            Vec3d flatRelPosVec = new Vec3d(relativePosVec.x, 0, relativePosVec.z);
-//                            Vec3d highRelPosVec = new Vec3d(0, relativePosVec.y, 0);
-//                            float yaw = (float) Math.acos(flatRelPosVec.lengthVector());
-//                            float pitch = (float) Math.asin(highRelPosVec.lengthVector());
-//                            erd.setPositionAndRotation(e.posX, e.posY, e.posZ, yaw, pitch);
-//                            erd.shoot(elb, pitch, yaw, 0.0F, 0.5f + (getMaxChargeTime() - getChargeTimeLeft(elb, is)) / 10f, 0.0F);
-//                        }
-//                    } else
-                        erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 0.5f + (getMaxChargeTime() - is.getItemDamage()) / 10f, 0.0F);
-                } else {
-                    erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
-                }
-                elb.world.spawnEntity(erd);
-                if (getHand(is) == EnumHand.OFF_HAND) {
-                    is = elb.getHeldItemMainhand();
-                }
-                gettagfast(is).setInteger("dartID", erd.getEntityId());
-                setRopedTo(is, erd);
-            }
 
-        }
         return super.onEntitySwing(elb, is);
     }
 
     @Override
-    public double getDurabilityForDisplay(ItemStack stack) {
-        return (double) stack.getItemDamage() / (double) getMaxChargeTime();
+    protected void aoe(ItemStack is, EntityLivingBase elb, int chi) {
+        if (getHand(is) == EnumHand.MAIN_HAND || TaoCasterData.getTaoCap(elb).consumePosture(1, false) == 0)
+            splash(elb, elb, is, 360, elb.world.getEntitiesWithinAABB(EntityRopeDart.class, elb.getEntityBoundingBox().grow(2)));
+        if (!elb.world.isRemote) {
+            if (getHand(is) == EnumHand.MAIN_HAND) {
+                if (!isThrown(is)) {
+                    EntityRopeDart erd = new EntityRopeDart(elb.world, elb, getHand(is));
+                    erd.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 0.5f, 0.0F);
+                    elb.world.spawnEntity(erd);
+                    if (getHand(is) == EnumHand.OFF_HAND) {
+                        is = elb.getHeldItemMainhand();
+                    }
+                    gettagfast(is).setInteger("dartID", erd.getEntityId());
+                } else {
+                    if (elb.isSneaking()) {
+                        EntityRopeDart erd = getDartEntity(is, elb);
+                        if (erd != null) erd.setDead();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8f) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
     }
 
     @Override
@@ -221,74 +209,73 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public boolean canBlock(EntityLivingBase defender, ItemStack item) {
-        return isEngaged(item);
+        return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
     }
 
     @Override
-    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
-        super.onSwitchIn(stack, elb);
-        stack.setItemDamage(getMaxChargeTime());
-    }
-
-    @Override
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (isDartAttack(item)) {
+            return 0;
+        } else if (TaoCasterData.getTaoCap(attacker).consumePosture(1, false) == 0) {
+            return 3;
+        }
+        return 0;
     }
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return gettagfast(item).hasKey("dartID");
+        return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.MAIN_HAND && item.getItemDamage() == 0 ? Event.Result.ALLOW : Event.Result.DENY;
+        if (isDartAttack(item) && getDartEntity(item, attacker) != null)
+            return Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5 ? Event.Result.ALLOW : Event.Result.DEFAULT;
+        return Event.Result.DEFAULT;
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND && item.getItemDamage() == 0 ? 1.5f : 1;
+        return 1;
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        if (isDartAttack(item) && getDartEntity(item, attacker) != null && (Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5))
+            return 5;
+        return 0;
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND ? 1.5f - (item.getItemDamage() / 20f) : 0.5f;
+        if (isDartAttack(item) && getDartEntity(item, attacker) != null)
+            return 1 + Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() / 10f;
+        return getHand(item) == EnumHand.MAIN_HAND ? 1 : 0.5f;
     }
 
-    @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        super.attackStart(ds, attacker, target, stack, orig);
-        ds.setProjectile();
-    }
-
-    @Override
-    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (ds.isProjectile()) {
-            stack.setItemDamage(getMaxChargeTime() / 2);
-        }
-        return orig;
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            if (!isEngaged(stack))
-                setRopedTo(attacker.getHeldItemMainhand(), target);
-        } else if (isEngaged(stack)) setRopedTo(stack, null);
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 20;
-    }
-
-    private void setRopedTo(ItemStack is, Entity binder) {
-        if (binder == null) gettagfast(is).removeTag("bindID");
-        else gettagfast(is).setInteger("bindID", binder.getEntityId());
+    private boolean isDartAttack(ItemStack is) {
+        return gettagfast(is).getBoolean("dartAttack");
     }
 
     @Override
     public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
+    }
+
+    private EntityRopeDart getDartEntity(ItemStack is, EntityLivingBase elb) {
+        if (isThrown(is) && elb.world.getEntityByID(getDartID(is)) != null)
+            return (EntityRopeDart) elb.world.getEntityByID(getDartID(is));
+        return null;
+    }
+
+    @Override
+    public double getDurabilityForDisplay(ItemStack stack) {
+        return (double) stack.getItemDamage() / (double) getMaxChargeTime();
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 20;
     }
 
 }

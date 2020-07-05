@@ -29,11 +29,13 @@ public class EntityAxeCleave extends EntitySwordBeam {
     public EntityAxeCleave(World w) {
         super(w);
         setSize(3, 1);
+        isImmuneToFire=true;
     }
 
     public EntityAxeCleave(World worldIn, EntityLivingBase throwerIn, EnumHand hand, ItemStack is) {
         super(worldIn, throwerIn, hand, is);
         setSize(3, 1);
+        isImmuneToFire=true;
     }
 
     @Override

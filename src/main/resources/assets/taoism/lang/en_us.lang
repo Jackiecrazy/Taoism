@@ -170,6 +170,11 @@ ropedart.alt=right click to throw a slower projectile that deals half damage and
 ropedart.berserk=when entangled, the opponent cannot attack, you gain access to your offhand and can parry
 ropedart.disengage=attacking with the main hand will end entanglement
 
+item.bian.name=Iron Whip
+bian.stagger=deals 1.5x damage against staggered targets
+bian.armpen=ignores 1 point of armor per chi level
+bian.enfeeble=attacks reduce posture regeneration of the target for 2 seconds, reduction is greater at higher chi levels
+
 <Resources>=
 
 <Blocks>=

@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.arrows;
 
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;

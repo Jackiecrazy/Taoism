@@ -17,6 +17,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -271,6 +272,58 @@ public class NeedyLittleThings {
         }
     }
 
+    public static float getCosAngleSq(Vec3d from, Vec3d to) {
+        double top = from.dotProduct(to) * from.dotProduct(to);
+        double bot = from.lengthSquared() * to.lengthSquared();
+        return (float) (top / bot);
+    }
+
+    public static RayTraceResult raytraceAnything(World world, EntityLivingBase attacker, double range) {
+        Vec3d start = attacker.getPositionEyes(0.5f);
+        Vec3d look = attacker.getLookVec().scale(range * 2);
+        Vec3d end = start.add(look);
+        Entity entity = null;
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
+        double d0 = 0.0D;
+
+        for (Entity entity1 : list) {
+            if (entity1 != attacker) {
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
+                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+                if (raytraceresult != null) {
+                    double d1 = getDistSqCompensated(entity1, attacker);
+
+                    if ((d1 < d0 || d0 == 0.0D) && d1 < range * range) {
+                        entity = entity1;
+                        d0 = d1;
+                    }
+                }
+            }
+        }
+        if (entity != null) return new RayTraceResult(entity);
+        look = attacker.getLookVec().scale(range);
+        end = start.add(look);
+        RayTraceResult rtr = world.rayTraceBlocks(start, end, false, true, false);
+        if (rtr != null) return rtr;
+        return new RayTraceResult(end, EnumFacing.UP);
+    }
+
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, Entity to) {
+        double x = from.posX - to.posX;
+        x = Math.max(Math.abs(x) - ((from.width / 2) + (to.width / 2)), 0);
+        //stupid inconsistent game
+        double y = (from.posY + from.height / 2) - (to.posY + to.height / 2);
+        y = Math.max(Math.abs(y) - (from.height / 2 + to.height / 2), 0);
+        double z = from.posZ - to.posZ;
+        z = Math.max(Math.abs(z) - (from.width / 2 + to.width / 2), 0);
+        double me = x * x + y * y + z * z;
+        double you = from.getDistanceSq(to);
+        return Math.min(me, you);
+    }
+
     public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
         Vec3d look = attacker.getLookVec().scale(range * 2);
@@ -294,22 +347,6 @@ public class NeedyLittleThings {
             }
         }
         return entity;
-    }
-
-    /**
-     * modified getdistancesq to account for thicc mobs
-     */
-    public static double getDistSqCompensated(Entity from, Entity to) {
-        double x = from.posX - to.posX;
-        x = Math.max(Math.abs(x) - ((from.width / 2) + (to.width / 2)), 0);
-        //stupid inconsistent game
-        double y = (from.posY + from.height / 2) - (to.posY + to.height / 2);
-        y = Math.max(Math.abs(y) - (from.height / 2 + to.height / 2), 0);
-        double z = from.posZ - to.posZ;
-        z = Math.max(Math.abs(z) - (from.width / 2 + to.width / 2), 0);
-        double me = x * x + y * y + z * z;
-        double you = from.getDistanceSq(to);
-        return Math.min(me, you);
     }
 
     /**

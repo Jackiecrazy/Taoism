@@ -2,7 +2,7 @@ package com.jackiecrazi.taoism.common.item.arrows;
 
 import com.jackiecrazi.taoism.api.BinaryMachiavelli;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IDamageType;
-import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoProjectile;
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowBlunt;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowHarpoon;
 import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoArrowScream;

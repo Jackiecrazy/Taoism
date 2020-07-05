@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.entity;
 
-import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoProjectile;
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBanfu;
@@ -36,12 +36,12 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityAxeCleave.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
-        return EntityEntryBuilder.create().entity(move).name(move.getSimpleName()).tracker(64,20,false).id(move.getName(),id++).build();
+        return EntityEntryBuilder.create().entity(move).name(move.getSimpleName().toLowerCase()).tracker(64,20,false).id(move.getSimpleName().toLowerCase(),id++).build();
     }
     private static EntityEntry factoryArrow(Class<?extends EntityTaoProjectile> arr){
-        return EntityEntryBuilder.create().entity(arr).name(arr.getSimpleName()).tracker(64,20,false).id(arr.getName(),id++).build();
+        return EntityEntryBuilder.create().entity(arr).name(arr.getSimpleName().toLowerCase()).tracker(64,20,false).id(arr.getSimpleName().toLowerCase(),id++).build();
     }
     private static EntityEntry factoryProjectile(Class<?extends EntityThrowable> projectile){
-        return EntityEntryBuilder.create().entity(projectile).name(projectile.getSimpleName()).tracker(64,5,true).id(projectile.getName(),id++).build();
+        return EntityEntryBuilder.create().entity(projectile).name(projectile.getSimpleName().toLowerCase()).tracker(64,5,true).id(projectile.getSimpleName().toLowerCase(),id++).build();
     }
 }

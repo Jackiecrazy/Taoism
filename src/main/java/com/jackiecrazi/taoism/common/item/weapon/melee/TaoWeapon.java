@@ -634,11 +634,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int degrees, List<Entity> targets) {
-        if (attacker instanceof EntityPlayer) {
-            ((EntityPlayer) attacker).spawnSweepParticles();
-        }
+        boolean sweep = false;
         for (Entity target : targets) {
-
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
             if ((degrees != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, degrees)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
@@ -648,6 +645,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 EntityPlayer p = (EntityPlayer) attacker;
                 TaoCombatUtils.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
             } else attacker.attackEntityAsMob(target);
+            sweep = true;
+        }
+        if (sweep && attacker instanceof EntityPlayer) {
+            ((EntityPlayer) attacker).spawnSweepParticles();
         }
     }
 
@@ -770,7 +771,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return itemPostureMultiplier * (getDamDist(item))*amount;
+        return itemPostureMultiplier * (getDamDist(item)) * amount;
     }
 
     @Override

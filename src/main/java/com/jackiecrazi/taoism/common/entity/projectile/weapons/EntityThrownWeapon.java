@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
-import com.jackiecrazi.taoism.common.entity.projectile.arrows.EntityTaoProjectile;
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,9 +8,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public abstract class EntityThrownWeapon extends EntityTaoProjectile {
+
     /**
      * -1 for fresh release, 0 for flying, 1 for block, 2 for entity
      */
@@ -48,6 +52,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         compound.setBoolean("off", hand == EnumHand.OFF_HAND);
         if (stack != null)
             compound.setString("weapName", stack.getItem().getRegistryName().toString());
+
         //Stack is not saved or read. This is intentional.
     }
 
@@ -60,11 +65,6 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
             stack = ((EntityLivingBase) shootingEntity).getHeldItem(hand);
         }
         //Stack is not saved or read. This is intentional.
-    }
-
-    @Override
-    protected float velocityMultiplier() {
-        return 1f;
     }
 
     @Override
@@ -87,9 +87,14 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     @Override
     public void onCollideWithPlayer(EntityPlayer player) {
         super.onCollideWithPlayer(player);
-        if (shootingEntity == player && hitStatus > 0) {
+        if (shootingEntity == player && shouldRetrieve()) {
             onRetrieveWeapon();
         }
+    }
+
+    @Override
+    protected float velocityMultiplier() {
+        return 1f;
     }
 
     @Override
@@ -124,14 +129,29 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     }
 
     protected void onRecall() {
-        if (!(this.shootingEntity instanceof EntityLivingBase) || ((EntityLivingBase) shootingEntity).getHeldItem(hand).getItem() != stack.getItem()) {
+        Vec3d vec = getHomeLocation();
+        if (!(this.shootingEntity instanceof EntityLivingBase) || ((EntityLivingBase) shootingEntity).getHeldItem(hand).getItem() != stack.getItem() || vec == null) {
             onRetrieveWeapon();
             return;
         }
         inGround = false;
-        shoot(shootingEntity.posX - posX, shootingEntity.posY + shootingEntity.getEyeHeight() / 2 - posY, shootingEntity.posZ - posZ, 0.8f, 0);
+        shoot(vec.x - posX, vec.y - posY, vec.z - posZ, getReturnVelocity(), 0);
         velocityChanged = true;
         sync();
+    }
+
+    @Nullable
+    protected Vec3d getHomeLocation() {
+        if (getThrower() == null) return null;
+        return getThrower().getPositionVector().addVector(0, shootingEntity.getEyeHeight() -0.1, 0);
+    }
+
+    protected float getReturnVelocity() {
+        return 0.8f;
+    }
+
+    protected boolean shouldRetrieve() {
+        return hitStatus > 0;
     }
 
     public float xSpin() {

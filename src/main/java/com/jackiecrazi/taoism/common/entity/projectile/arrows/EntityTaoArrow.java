@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.arrows;
 
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

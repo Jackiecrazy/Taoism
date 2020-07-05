@@ -12,6 +12,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -56,6 +57,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.DARK_GREEN+I18n.format("weapon.disshield")+TextFormatting.RESET);
         tooltip.add(I18n.format("chui.leap"));
         tooltip.add(I18n.format("chui.stagger"));
         tooltip.add(I18n.format("chui.slow"));
@@ -68,10 +70,14 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        float ground = attacker.motionY < 0 ? 2f : 1f;
+        float ground = !attacker.onGround ? 2f : 1f;
         float breach = TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 1.5f : 1f;
         return ground * breach;
+    }
 
+    @Override
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return attacker.isAirBorne;
     }
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
