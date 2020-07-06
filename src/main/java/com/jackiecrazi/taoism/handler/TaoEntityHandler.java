@@ -118,9 +118,9 @@ public class TaoEntityHandler {
             return;
         }
         float qi = TaoCasterData.getTaoCap(elb).getQi();
-        if (elb.isSprinting() && qi > 0) {
+        if (itsc.isInCombatMode() && qi > 0) {
             elb.motionY *= 1 + (qi / 10);
-            if (qi > 3) {//long jump
+            if (elb.isSprinting() && qi > 3) {//long jump
                 elb.motionX *= 1 + ((qi - 3) / 14);
                 elb.motionZ *= 1 + ((qi - 3) / 14);
             }
@@ -129,8 +129,8 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
-    public static void interceptTeleport(EnderTeleportEvent e){
-        if(TaoCasterData.getTaoCap(e.getEntityLiving()).getRootTime()>0){
+    public static void interceptTeleport(EnderTeleportEvent e) {
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).getRootTime() > 0) {
             e.setCanceled(true);
         }
     }
@@ -143,7 +143,7 @@ public class TaoEntityHandler {
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(elb);
         }
-        if(itsc.getRootTime()>0){
+        if (itsc.getRootTime() > 0) {
 //            elb.posX=elb.prevPosX;
 //            elb.posZ=elb.prevPosZ;
 //            elb.motionX=0;
@@ -156,14 +156,14 @@ public class TaoEntityHandler {
         EntityPlayer p = e.player;
         ITaoStatCapability cap = TaoCasterData.getTaoCap(p);
         if (e.phase.equals(TickEvent.Phase.START)) {
-            if (p.isSprinting() && (cap.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING || cap.getJumpState() == ITaoStatCapability.JUMPSTATE.DODGING)) {
+            if (cap.isInCombatMode() && (cap.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING || cap.getJumpState() == ITaoStatCapability.JUMPSTATE.DODGING)) {
                 //spawn jump/dodge particles
                 double d0 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d1 = Taoism.unirand.nextGaussian() * 0.02D;
                 double d2 = Taoism.unirand.nextGaussian() * 0.02D;
                 p.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY + p.width / 2, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
             }
-            if (p.isSprinting() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
+            if (cap.isInCombatMode() && p.isSprinting() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.shouldStick(p)) {
@@ -176,10 +176,10 @@ public class TaoEntityHandler {
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
-            if (cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
+            if (cap.isInCombatMode() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
-                    if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {//TODO only when sprinting?
+                    if (TaoMovementUtils.isTouchingWall(p) && cap.getJumpState() == ITaoStatCapability.JUMPSTATE.CLINGING) {
                         //vertical motion enabling, and shut off attempts to run off the wall
                         double speed = p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 2.5;
                         Vec3d vec = p.getLookVec();
@@ -210,10 +210,10 @@ public class TaoEntityHandler {
                         p.motionX = vec.x * speed;
                         p.motionY = vec.y * speed;
                         p.motionZ = vec.z * speed;
-                    } else if (p.isSprinting() && p.motionY < 0) {
+                    } else if (!p.isSneaking() && p.motionY < 0) {
                         p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
                         p.motionY *= ((MathHelper.clamp(2 - (p.motionX * p.motionX + p.motionZ * p.motionZ), 1f, 2f) * 1.5f / cap.getQi()));//
-                    }else p.fallDistance = 0.1f;//for da critz
+                    } else p.fallDistance = 0.1f;//for da critz
                 }
             }
             TaoCasterData.updateCasterData(p);

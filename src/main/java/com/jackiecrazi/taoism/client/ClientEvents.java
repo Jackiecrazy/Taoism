@@ -182,12 +182,17 @@ public class ClientEvents {
     public static void doju(InputUpdateEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         MovementInput mi = e.getMovementInput();
-        if (TaoCasterData.getTaoCap(mc.player).getRootTime() > 0) {
+        final ITaoStatCapability itsc = TaoCasterData.getTaoCap(mc.player);
+        if (KeyBindOverlord.combatMode.getKeyConflictContext().isActive() && KeyBindOverlord.combatMode.isPressed()) {
+            mc.player.sendStatusMessage(new TextComponentTranslation("taoism.combat." + (itsc.isInCombatMode() ? "off" : "on")), true);
+            Taoism.net.sendToServer(new PacketToggleCombatMode());
+        }
+        if (itsc.getRootTime() > 0) {
             //no moving while you're rooted!
             KeyBinding.unPressAllKeys();
             return;
         }
-        if (TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
+        if (itsc.getQi() > 0) {
             final boolean onSprint = mc.gameSettings.keyBindSprint.isPressed();
             if (mi.leftKeyDown && (!tapped[0] || onSprint)) {
                 if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE || onSprint) {
@@ -219,12 +224,13 @@ public class ClientEvents {
             tapped[3] = mi.forwardKeyDown;
         }
 
-        if (TaoCasterData.getTaoCap(mc.player).getDownTimer() > 0) {
+        if (itsc.getDownTimer() > 0) {
             //no moving while you're down! (except for a safety roll)
             KeyBinding.unPressAllKeys();
             return;
         }
-        if (mc.player.isSprinting() && TaoCasterData.getTaoCap(mc.player).getQi() > 0) {
+
+        if (mc.player.isSprinting() && itsc.getQi() > 0) {
             if (mi.jump && !jump) {
                 //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
                 Taoism.net.sendToServer(new PacketJump());
@@ -261,18 +267,18 @@ public class ClientEvents {
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
             Minecraft mc = Minecraft.getMinecraft();
-            if(Taoism.proxy.isBreakingBlock(mc.player))return;
+            if (Taoism.proxy.isBreakingBlock(mc.player)) return;
             if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
                 leftClickAt++;
                 if (leftClickAt == CHARGE) {
-                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"),true);
+                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
                     //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
             if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
                 rightClickAt++;
                 if (rightClickAt == CHARGE) {
-                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"),true);
+                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
                     //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
                 }
             }

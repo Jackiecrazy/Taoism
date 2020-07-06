@@ -145,7 +145,6 @@ public class TaoMovementUtils {
                 elb.motionZ -= speed / 2;
             }
             if (!facingWall) elb.motionY /= 2;
-            elb.setSprinting(true);
         }
         elb.velocityChanged = true;
         TaoCasterData.forceUpdateTrackingClients(elb);
@@ -229,7 +228,6 @@ public class TaoMovementUtils {
 
             elb.addVelocity(x, y, z);
             itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-            elb.setSprinting(true);
             elb.velocityChanged = true;
             TaoCasterData.forceUpdateTrackingClients(elb);
             return true;

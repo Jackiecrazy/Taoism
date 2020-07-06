@@ -12,8 +12,12 @@ attribute.name.generic.qiGen=Chi Per Strike
 
 item.weapon.name=Weapon
 
-<Weapons>=
+<Combat stuff>=
+key.taoism.combat=Toggle Combat Mode
+taoism.combat.off=Combat Mode has been deactivated
+taoism.combat.on=Combat Mode has been activated
 
+<Weapons>=
 weapon.shift=SHIFT for stats...
 weapon.ctrl=CTRL for abilities...
 weapon.dummy=this item is only a dummy for cleaner code. It will revert back to whatever item it used to be once the two-handed weapon is unequipped

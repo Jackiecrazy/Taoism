@@ -132,6 +132,10 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     void setOffhandAttack(boolean off);
 
+    boolean isInCombatMode();
+
+    void toggleCombatMode(boolean sprint);
+
     ItemStack getOffHand();
 
     void setOffHand(ItemStack is);

@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -77,6 +78,7 @@ public class ClientProxy extends CommonProxy {
         }, TaoItems.part);
         Taoism.logger.debug("gave color to the masses");
          */
+        KeyBindOverlord.combatMode.setKeyConflictContext(KeyConflictContext.IN_GAME);
     }
 
     public EntityPlayer getPlayerEntityFromContext(MessageContext ctx) {

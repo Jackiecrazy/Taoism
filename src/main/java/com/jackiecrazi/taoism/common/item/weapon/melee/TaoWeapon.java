@@ -8,7 +8,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.*;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.client.ClientEvents;
-import com.jackiecrazi.taoism.client.KeyOverlord;
+import com.jackiecrazi.taoism.client.KeyBindOverlord;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.block.material.Material;
@@ -384,7 +384,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         super.addInformation(stack, worldIn, tooltip, flagIn);
         if (isDummy(stack)) {
             tooltip.add(I18n.format("weapon.dummy"));
-            if (KeyOverlord.isShiftDown()) {
+            if (KeyBindOverlord.isShiftDown()) {
 //            int pot = (int) getAffinities(stack)[i];
 //            //System.out.println(pot);
 //            int used = Math.round(pot / 2) * 2;
@@ -404,7 +404,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 //            }
 //        }
         //increment in 5, max is 50
-        if (KeyOverlord.isShiftDown()) {
+        if (KeyBindOverlord.isShiftDown()) {
 //            int pot = (int) getAffinities(stack)[i];
 //            //System.out.println(pot);
 //            int used = Math.round(pot / 2) * 2;
@@ -415,7 +415,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             tooltip.add(I18n.format("weapon.shift"));
         }
         //perks
-        if (KeyOverlord.isControlDown()) {
+        if (KeyBindOverlord.isControlDown()) {
             perkDesc(stack, worldIn, tooltip, flagIn);
         } else tooltip.add(TextFormatting.YELLOW + I18n.format("weapon.ctrl") + TextFormatting.RESET);
 

@@ -34,7 +34,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int lcd, pcd, scd, qcd;
     private int down, bind, root;
     private long timey;
-    private boolean swi, protecc, off, recording;
+    private boolean swi, protecc, off, recording, sprint;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private WeakReference<ItemStack> lastTickOffhand;
@@ -74,6 +74,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setTag("offhandInfo", getOffHand().writeToNBT(new NBTTagCompound()));
         nbt.setFloat("recDam", getRecordedDamage());
         nbt.setBoolean("reccing", recording);
+        nbt.setBoolean("sprintTemp", isInCombatMode());
         cd.toNBT(nbt);
         nbt.setInteger("bind", getBindTime());
         nbt.setInteger("root", getRootTime());
@@ -416,6 +417,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
+    public boolean isInCombatMode() {
+        return sprint;
+    }
+
+    @Override
+    public void toggleCombatMode(boolean sprint) {
+        this.sprint=sprint;
+    }
+
+    @Override
     public ItemStack getOffHand() {
         return lastTickOffhand == null || lastTickOffhand.get() == null ? ItemStack.EMPTY : lastTickOffhand.get();
     }
@@ -586,6 +597,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setBindTime(nbt.getInteger("bind"));
         setRootTime(nbt.getInteger("root"));
         setRecordedDamage(nbt.getFloat("recDam"));
+        toggleCombatMode(nbt.getBoolean("sprintTemp"));
         recording = nbt.getBoolean("reccing");
     }
 

@@ -267,6 +267,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public boolean isInCombatMode() {
+        return false;
+    }
+
+    @Override
+    public void toggleCombatMode(boolean sprint) {
+
+    }
+
+    @Override
     public ItemStack getOffHand() {
         return null;
     }
