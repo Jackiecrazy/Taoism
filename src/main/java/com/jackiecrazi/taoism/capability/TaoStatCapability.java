@@ -26,6 +26,7 @@ import java.util.UUID;
 public class TaoStatCapability implements ITaoStatCapability {
     public static final int MAXDOWNTIME = 100;
     private static final UUID STOPMOVING = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d77");
+    private static final UUID ARMORDOWN = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d78");
     private static final float MAXQI = 9.99f;
     private WeakReference<EntityLivingBase> e;
     private float qi, ling, posture, swing;
@@ -453,9 +454,12 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
+        EntityLivingBase elb = e.get();
+        if (elb != null && time == 0) {
+            elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
+            elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
+        }
         down = time;
-        if (time == 0 && e.get() != null)
-            e.get().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
     }
 
     @Override
@@ -481,7 +485,7 @@ public class TaoStatCapability implements ITaoStatCapability {
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
             } else if (root == 0) {
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-                elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
+                elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
             }
         root = time;
     }
@@ -549,7 +553,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (attacker != null)
             NeedyLittleThings.knockBack(elb, attacker, Math.min(overflow, 2f));
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
+        elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
+        elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
+        elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(ARMORDOWN, "downed", -9, 0));
         setDownTimer(MAXDOWNTIME);
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
