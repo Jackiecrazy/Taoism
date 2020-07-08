@@ -111,9 +111,8 @@ public class NeedyLittleThings {
         zRatio = event.getRatioZ();
         if (strength != 0f) {
             to.isAirBorne = true;
-            float pythagora = 0;
+            float pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
             if (to.onGround) {
-                pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
                 to.motionY /= 2.0D;
                 to.motionY += strength;
 
