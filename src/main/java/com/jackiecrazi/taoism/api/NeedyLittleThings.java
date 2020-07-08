@@ -193,6 +193,30 @@ public class NeedyLittleThings {
     }
 
     /**
+     * returns true if entity2 is within a (horAngle) degree sector in front of entity1, and within (vertAngle)
+     */
+    public static boolean isFacingEntity(Entity entity1, Entity entity2, int horAngle, int vertAngle) {
+        Vec3d posVecTop = entity2.getPositionVector().addVector(0, entity2.height, 0);
+        Vec3d posVecBot = entity2.getPositionVector();
+        Vec3d lookVec = entity1.getLook(1.0F);
+        Vec3d fromPosVec = entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0);
+        //tan=opp/adj
+        double y = entity2.posY - entity1.posY;
+        double x = entity2.posX - entity1.posX;
+        double z = entity2.posZ - entity1.posZ;
+        double dist = MathHelper.sqrt(x * x + z * z);
+        lookVec = lookVec.subtract(0, lookVec.y, 0);//necessary because vertAngle check has been done already
+        Vec3d relativePosVecTop = posVecTop.subtractReverse(fromPosVec).normalize();
+        Vec3d relativePosVecBot = posVecBot.subtractReverse(fromPosVec).normalize();
+        //relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
+
+        double dotSqTop = ((relativePosVecTop.dotProduct(lookVec) * Math.abs(relativePosVecTop.dotProduct(lookVec))) / (relativePosVecTop.lengthSquared() * lookVec.lengthSquared()));
+        double dotSqBot = ((relativePosVecBot.dotProduct(lookVec) * Math.abs(relativePosVecBot.dotProduct(lookVec))) / (relativePosVecBot.lengthSquared() * lookVec.lengthSquared()));
+        double cos = MathHelper.cos(rad(horAngle / 2));
+        return dotSqTop < -(cos * cos) || dotSqBot < -(cos * cos);
+    }
+
+    /**
      * returns true if entity is within a 90 degree sector behind the target
      */
     public static boolean isBehindEntity(Entity entity, Entity target) {

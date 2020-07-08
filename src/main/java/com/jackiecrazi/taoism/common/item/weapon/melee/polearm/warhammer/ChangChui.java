@@ -106,7 +106,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWall(target)) {
+        if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWallFrom(target, attacker)) {
             return Event.Result.ALLOW;
         }
         return super.critCheck(attacker, target, item, crit, vanCrit);
@@ -115,16 +115,13 @@ public class ChangChui extends TaoWeapon {
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float cdmg = 1;
+        if (getHand(item) == EnumHand.MAIN_HAND && TaoMovementUtils.willHitWallFrom(target, attacker)) cdmg *= 1.5;
         if (!attacker.onGround) cdmg *= 2;
         return cdmg;
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if(getHand(item)==EnumHand.MAIN_HAND)
-        if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWall(target)) {
-            return 1.5f;
-        }
         return super.damageMultiplier(attacker, target, item);
     }
 

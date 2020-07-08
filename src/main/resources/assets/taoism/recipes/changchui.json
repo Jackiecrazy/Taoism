@@ -15,7 +15,8 @@
     },
     "a":
     {
-      "item": "taoism:chui"
+      "type": "forge:ore_dict",
+      "ore": "blockIron"
     }
   },
   "result":

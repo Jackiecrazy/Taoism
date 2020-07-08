@@ -203,11 +203,6 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker, target, item, orig);
-    }
-
-    @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return getHand(stack) == EnumHand.OFF_HAND && TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) >= TaoCasterData.getTaoCap(attacker).getQiFloored() - 1 ?
                 orig + (TaoCasterData.getTaoCap(attacker).getQiFloored() / 2f) : orig;

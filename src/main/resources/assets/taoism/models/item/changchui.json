@@ -1,7 +1,7 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "taoism:weapon/whole/changchui"
+    "layer0": "taoism:weapon/whole/maul"
   },
   "overrides": [
     {

@@ -230,7 +230,7 @@ public class ClientEvents {
             return;
         }
 
-        if (mc.player.isSprinting() && itsc.getQi() > 0) {
+        if (itsc.getQi() > 0) {
             if (mi.jump && !jump) {
                 //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
                 Taoism.net.sendToServer(new PacketJump());
@@ -238,7 +238,7 @@ public class ClientEvents {
             }
             jump = mi.jump;
 
-            if (mi.sneak && !sneak) {
+            if (mc.player.isSprinting() && mi.sneak && !sneak) {
                 //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
                 Taoism.net.sendToServer(new PacketSlide());
                 //}
@@ -267,7 +267,11 @@ public class ClientEvents {
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
             Minecraft mc = Minecraft.getMinecraft();
-            if (Taoism.proxy.isBreakingBlock(mc.player)) return;
+            if (Taoism.proxy.isBreakingBlock(mc.player)){
+                leftClickAt=0;
+                rightClickAt=0;
+                return;
+            }
             if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
                 leftClickAt++;
                 if (leftClickAt == CHARGE) {
@@ -401,14 +405,14 @@ public class ClientEvents {
                     targetQiLevel = cap.getQi();
                     boolean closeEnough = true;
                     if (targetQiLevel > currentQiLevel) {
-                        currentQiLevel += 0.01f;
+                        currentQiLevel +=  Math.min(0.1, (targetQiLevel-currentQiLevel)/10);
                         closeEnough = false;
                     }
                     if (targetQiLevel < currentQiLevel) {
-                        currentQiLevel -= 0.01f;
+                        currentQiLevel -= Math.min(0.1, (currentQiLevel-targetQiLevel)/10);
                         closeEnough = !closeEnough;
                     }
-                    if (closeEnough || currentQiLevel - targetQiLevel > 1 || currentQiLevel - targetQiLevel < -1)
+                    if (closeEnough)
                         currentQiLevel = targetQiLevel;
                     int qi = (int) currentQiLevel;
                     float qiExtra = currentQiLevel - qi;
@@ -419,7 +423,7 @@ public class ClientEvents {
                         //bar
                         GlStateManager.pushMatrix();
                         GlStateManager.enableAlpha();
-                        //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra * (GRADIENTE.length)), 0, GRADIENTE.length - 1)];
+                        //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra *(GRADIENTE.length)), 0, GRADIENTE.length - 1)];
                         //GlStateManager.color(red(c), green(c), blue(c));
                         GlStateManager.color(1, 1, 1, qi > 0 ? 1 : qiExtra);
                         mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), 0, 0, 64, 64);//+(int)(qiExtra*32)

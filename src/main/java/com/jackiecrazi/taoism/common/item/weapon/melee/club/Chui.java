@@ -11,7 +11,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -78,10 +77,6 @@ public class Chui extends TaoWeapon {
     @Override
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
         return attacker.isAirBorne;
-    }
-
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        super.attackStart(ds, attacker, target, item, orig);
     }
 
     @Override

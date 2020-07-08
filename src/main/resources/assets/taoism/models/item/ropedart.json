@@ -6,15 +6,15 @@
   "overrides": [
     {
       "predicate": {
-        "offhand": 1
-      },
-      "model": "taoism:dummy"
-    },
-    {
-      "predicate": {
         "thrown": 1
       },
       "model": "taoism:item/rope"
+    },
+    {
+      "predicate": {
+        "offhand": 1
+      },
+      "model": "taoism:dummy"
     }],
   "display": {
     "thirdperson_righthand": {

@@ -36,7 +36,7 @@ weapon.discharge=This weapon has discharged
 weapon.spoiler=Executions aren't done yet! No spoilers!
 
 item.ken.name=Jian
-ken.combo=normal attack chains up to 3 times before needing recharge
+ken.combo=normal attack chains up to 3 times before recharging
 ken.qi=+3%% damage per chi level
 ken.aoe=strikes all enemies in a 90 degree sector
 ken.stab=if only one target was attacked, deal an extra 20%% damage
@@ -178,6 +178,12 @@ item.bian.name=Iron Whip
 bian.stagger=deals 1.5x damage against staggered targets
 bian.armpen=ignores 1 point of armor per chi level
 bian.enfeeble=attacks reduce posture regeneration of the target for 2 seconds, reduction is greater at higher chi levels
+
+item.rapier.name=Rapier
+rapier.combo=normal attack chains up to 3 times before recharging
+rapier.riposte=inflicts a critical hit if you recently dodged or parried, or if the enemy recently attacked
+
+item.projectile_prop.name=just a prop, don't mind me...
 
 <Resources>=
 

@@ -36,12 +36,15 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityAxeCleave.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
-        return EntityEntryBuilder.create().entity(move).name(move.getSimpleName().toLowerCase()).tracker(64,20,false).id(move.getSimpleName().toLowerCase(),id++).build();
+        String name = move.getSimpleName().toLowerCase().substring(6);
+        return EntityEntryBuilder.create().entity(move).name(name).tracker(64,20,false).id(name,id++).build();
     }
     private static EntityEntry factoryArrow(Class<?extends EntityTaoProjectile> arr){
-        return EntityEntryBuilder.create().entity(arr).name(arr.getSimpleName().toLowerCase()).tracker(64,20,false).id(arr.getSimpleName().toLowerCase(),id++).build();
+        String name = arr.getSimpleName().toLowerCase().substring(6);
+        return EntityEntryBuilder.create().entity(arr).name(name).tracker(64,20,false).id(name,id++).build();
     }
     private static EntityEntry factoryProjectile(Class<?extends EntityThrowable> projectile){
-        return EntityEntryBuilder.create().entity(projectile).name(projectile.getSimpleName().toLowerCase()).tracker(64,5,true).id(projectile.getSimpleName().toLowerCase(),id++).build();
+        String name = projectile.getSimpleName().toLowerCase().substring(6);
+        return EntityEntryBuilder.create().entity(projectile).name(name).tracker(64,5,true).id(name,id++).build();
     }
 }

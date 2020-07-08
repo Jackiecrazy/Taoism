@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.item.weapon.melee.whip;
+package com.jackiecrazi.taoism.common.item.weapon.melee.hand;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
@@ -10,9 +10,13 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Snakewhip extends TaoWeapon {
-    public Snakewhip(int damageType, double swingSpeed, double damage, float attackPostureMultiplier) {
-        super(damageType, swingSpeed, damage, attackPostureMultiplier);
+public class Emeici extends TaoWeapon {
+    /*
+    A spinning weapon used to attack pressure points. High speed, medium power and combo, low defense and range
+    Keywords: spin, pressure points
+     */
+    public Emeici() {
+        super(2, 2, 5, 0);
     }
 
     @Override

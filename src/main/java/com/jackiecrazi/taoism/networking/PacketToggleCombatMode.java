@@ -29,7 +29,7 @@ public class PacketToggleCombatMode implements IMessage {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
                 final EntityPlayer p = Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
-                TaoCasterData.getTaoCap(p).toggleCombatMode(TaoCasterData.getTaoCap(p).isInCombatMode());
+                TaoCasterData.getTaoCap(p).toggleCombatMode(!TaoCasterData.getTaoCap(p).isInCombatMode());
             });
             return null;
         }

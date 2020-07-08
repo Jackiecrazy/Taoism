@@ -63,7 +63,7 @@ public class Nunchaku extends TaoWeapon {
     }
 
     public boolean isTwoHanded(ItemStack is) {
-        return isOffhandEmpty(is) || isDummy(is);
+        return false;//isOffhandEmpty(is) || isDummy(is);
     }
 
     @Override

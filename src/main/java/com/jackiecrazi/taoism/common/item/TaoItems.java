@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Balisong;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
+import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Rapier;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Halberd;
@@ -25,16 +26,11 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
-import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class TaoItems {
-    public static final ItemArmor.ArmorMaterial TAO = EnumHelper.addArmorMaterial("tao", "tao", 15, new int[]{1, 4, 5, 2}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0F);
-    public static final Item.ToolMaterial TAOW = EnumHelper.addToolMaterial("tao", 0, 1, 1f, 0f, 1);
     public static Item prop;
     public static Item
             kampilan,
@@ -58,7 +54,8 @@ public class TaoItems {
             bohear,
             nunchaku,
             ropedart,
-            bian;
+            bian,
+            rapier;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -97,6 +94,7 @@ public class TaoItems {
         nunchaku = new Nunchaku();
         ropedart = new RopeDart();
         bian = new Bian();
+        rapier=new Rapier();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -120,6 +118,7 @@ public class TaoItems {
         e.getRegistry().register(nunchaku);
         e.getRegistry().register(ropedart);
         e.getRegistry().register(bian);
+        e.getRegistry().register(rapier);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

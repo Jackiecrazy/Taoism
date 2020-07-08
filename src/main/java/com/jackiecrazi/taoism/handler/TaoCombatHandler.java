@@ -41,7 +41,7 @@ public class TaoCombatHandler {
     private static boolean abort = false;
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void pleasedontkillme(LivingAttackEvent e) {
         if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
@@ -68,7 +68,7 @@ public class TaoCombatHandler {
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
-                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi()/40 > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
+                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 40 > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
                     ent.motionY = look.y;
@@ -108,6 +108,11 @@ public class TaoCombatHandler {
                 e.setCanceled(true);
                 return;
             }
+            ItemStack attack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
+            if (attack.getItem() instanceof ICombatManipulator) {
+                ICombatManipulator icm = (ICombatManipulator) attack.getItem();
+                icm.attackStart(ds, seme, uke, attack, e.getAmount());
+            }
             if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
             if (ukeCap.isRecordingDamage()) return;//prevent parries when being executed, and makes it look better
             //slime, I despise thee.
@@ -118,11 +123,6 @@ public class TaoCombatHandler {
                     return;
                 } else
                     semeCap.setSwing(0);
-            }
-            ItemStack attack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
-            if (attack.getItem() instanceof ICombatManipulator) {
-                ICombatManipulator icm = (ICombatManipulator) attack.getItem();
-                icm.attackStart(ds, seme, uke, attack, e.getAmount());
             }
             //if(seme.world.isRemote)return;
             /*
@@ -220,12 +220,10 @@ public class TaoCombatHandler {
                 amnt = (((ICombatManipulator) stack.getItem()).hurtStart(ds, seme, uke, stack, amnt * (((ICombatManipulator) stack.getItem()).damageMultiplier(seme, uke, stack))));
             }
             if (seme instanceof EntityLiving)
-                if (CombatConfig.taoWeaponHitEntity) {
-                    if (stack.getItem() instanceof TaoWeapon) {
-                        stack.getItem().hitEntity(stack, uke, seme);
-                    } else if (CombatConfig.weaponHitEntity) {
-                        stack.getItem().hitEntity(stack, uke, seme);
-                    }
+                if (CombatConfig.taoWeaponHitEntity && stack.getItem() instanceof TaoWeapon) {
+                    stack.getItem().hitEntity(stack, uke, seme);
+                } else if (CombatConfig.weaponHitEntity) {
+                    stack.getItem().hitEntity(stack, uke, seme);
                 }
         }
 
