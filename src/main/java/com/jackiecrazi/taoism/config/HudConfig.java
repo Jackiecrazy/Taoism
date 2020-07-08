@@ -18,8 +18,8 @@ public class HudConfig {
 		@Config.Comment("Whether to display enemy posture")
 		public boolean displayEnemyPosture = true;
 
-		public final HUDPos posture = new HUDPos(427, 240);
-		public final HUDPos enemyPosture = new HUDPos(0, 240);
+		//public final HUDPos posture = new HUDPos(427, 240);
+		//public final HUDPos enemyPosture = new HUDPos(0, 240);
 		public final HUDPos qi = new HUDPos(0, 0);
 
 		public static class HUDPos {

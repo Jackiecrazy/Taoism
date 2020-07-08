@@ -159,12 +159,6 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
-
-        return super.onEntitySwing(elb, is);
-    }
-
-    @Override
     protected void aoe(ItemStack is, EntityLivingBase elb, int chi) {
         if (getHand(is) == EnumHand.MAIN_HAND || TaoCasterData.getTaoCap(elb).consumePosture(1, false) == 0)
             splash(elb, elb, is, 360, elb.world.getEntitiesWithinAABB(EntityRopeDart.class, elb.getEntityBoundingBox().grow(2)));
@@ -192,19 +186,22 @@ public class RopeDart extends TaoWeapon {
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8f) + TextFormatting.RESET);
         tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", 0) + TextFormatting.RESET);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("ropedart.parry") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.projectile") + TextFormatting.RESET);
         tooltip.add(I18n.format("ropedart.projectile"));
-        tooltip.add(I18n.format("ropedart.damage"));
-        tooltip.add(I18n.format("ropedart.recharge"));
+        tooltip.add(I18n.format("ropedart.attack"));
+        tooltip.add(I18n.format("ropedart.pain"));
+        tooltip.add(I18n.format("ropedart.loss"));
+        tooltip.add(I18n.format("ropedart.punch"));
         tooltip.add(I18n.format("ropedart.alt"));
-        tooltip.add(I18n.format("ropedart.berserk"));
-        tooltip.add(I18n.format("ropedart.disengage"));
+        tooltip.add(I18n.format("ropedart.trick"));
+        tooltip.add(I18n.format("ropedart.accel"));
     }
 
     @Override
@@ -217,7 +214,7 @@ public class RopeDart extends TaoWeapon {
         if (isDartAttack(item)) {
             return 0;
         } else if (TaoCasterData.getTaoCap(attacker).consumePosture(1, false) == 0) {
-            return 3;
+            return 4;
         }
         return 0;
     }
@@ -230,7 +227,7 @@ public class RopeDart extends TaoWeapon {
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         if (isDartAttack(item) && getDartEntity(item, attacker) != null)
-            return Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5 ? Event.Result.ALLOW : Event.Result.DEFAULT;
+            return Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5 ? Event.Result.ALLOW : Event.Result.DENY;
         return Event.Result.DEFAULT;
     }
 
@@ -240,17 +237,22 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        if (isDartAttack(item) && getDartEntity(item, attacker) != null && (Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5))
-            return 5;
-        return 0;
-    }
-
-    @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         if (isDartAttack(item) && getDartEntity(item, attacker) != null)
             return 1 + Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() / 10f;
         return getHand(item) == EnumHand.MAIN_HAND ? 1 : 0.5f;
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return !isDartAttack(stack) && getHand(stack) == EnumHand.MAIN_HAND ? orig * 1.5f : orig;
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        if (isDartAttack(item) && getDartEntity(item, attacker) != null && (Objects.requireNonNull(getDartEntity(item, attacker)).getCharge() > 5))
+            return 5;
+        return 0;
     }
 
     private boolean isDartAttack(ItemStack is) {
@@ -266,11 +268,6 @@ public class RopeDart extends TaoWeapon {
         if (isThrown(is) && elb.world.getEntityByID(getDartID(is)) != null)
             return (EntityRopeDart) elb.world.getEntityByID(getDartID(is));
         return null;
-    }
-
-    @Override
-    public double getDurabilityForDisplay(ItemStack stack) {
-        return (double) stack.getItemDamage() / (double) getMaxChargeTime();
     }
 
     @Override

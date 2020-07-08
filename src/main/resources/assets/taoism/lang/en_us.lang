@@ -55,14 +55,12 @@ balisong.initiative=the first strike on a target ignores all armor
 balisong.stance=has two forms, hammer stance and reverse stance; offhand balisong are held in reverse stance
 balisong.hammer=in hammer stance, combo limit extends by 1 per chi level, up to 6 at level 10
 balisong.reverse=in reverse stance, pierces 1 armor for every level of chi
-balisong.riposte=a successful parry is counted as a dodge forwards
 
 item.karambit.name=Karambit
 karambit.switch=attack timer is immediately reset when switching in
 karambit.backstab=backstabs deal 1.5x damage
 karambit.initiative=the first strike on a target ignores all armor
 karambit.bleed=stack a layer of bleed if target is unarmored, bleed stacking ignores 6 points of armor per chi level
-karambit.riposte=a successful parry is counted as a dodge forwards
 karambit.harvest=can also be used to harvest shearable blocks
 
 item.chui.name=Spherical Mace
@@ -148,8 +146,8 @@ staff.oscillate=the two attacks have separate cooldowns; normal attack can be ch
 item.guandao.name=Guan Dao
 guandao.alt=right click to switch between guard and strike forms, resetting normal attack cooldown
 guandao.alt.attack=this counts as a frontal attack when switching to strike and a backwards stab when switching to guard
-guandao.guard=in guard form, range 4, 90 degree sweep, deals 1.3(+chi/20)x damage, gains 0.3 chi when parrying
-guandao.strike=in strike form, range 7, 180 degree sweep, deals base damage
+guandao.guard=in guard form, range 3, 90 degree sweep, deals 1.3(+chi/20)x damage, gains 0.3 chi when parrying
+guandao.strike=in strike form, range 5, 180 degree sweep, deals base damage
 
 item.bohemianearspoon.name=Ghiavarina
 bohear.dist=normal attack damage scales according to distance between you and the target between two attacks, up to 1.5x
@@ -158,7 +156,6 @@ bohear.rip=if they do so anyway and reach halfway in, rip out their innards for 
 bohear.bash=right click to consume this buff and sweep in a 120 degree sector, pushing enemies back
 
 item.nunchaku.name=Nunchaku
-nunchaku.dual=when held in two hands, attack cooldown on one side is reset when attacking from the other
 nunchaku.stance=after a given move the nunchaku will land on either the high (H) or low (L) side
 nunchaku.moves=a high attack can then be issued by normal attack, or a low one executed by sneak-attack
 nunchaku.flick=H-H: flick, very low cooldown
@@ -167,12 +164,15 @@ nunchaku.sweep=L-L: sweep, sweep 90 degree
 nunchaku.spin=L-H: 8-spin, hits 3 times for 0.4x damage each
 
 item.ropedart.name=Rope Dart
-ropedart.projectile=normal attack throws out a projectile
-ropedart.damage=its damage is increased up to 1.5x from charge, with full charge also giving 1.5x crit
-ropedart.recharge=missing refunds all charge, hitting an entity refunds half charge, hitting a block expends all charge
-ropedart.alt=right click to throw a slower projectile that deals half damage and entangles the target
-ropedart.berserk=when entangled, the opponent cannot attack, you gain access to your offhand and can parry
-ropedart.disengage=attacking with the main hand will end entanglement
+ropedart.parry=main hand cannot parry until dart is thrown
+ropedart.projectile=normal attack throws out the dart at base speed
+ropedart.attack=each successful attack with the dart increases its speed
+ropedart.pain=each level increases damage by 10%%, and above speed level 5 dart attacks ignore 5 armor
+ropedart.loss=hitting a block, or retrieving the dart via sneaking, resets its speed
+ropedart.punch=while the dart is out, normal attack is a punch that deals more knockback
+ropedart.alt=right click to do a kick that consumes 1 posture to deal 4 posture damage to the target
+ropedart.trick=attacking while the dart is near the player additionally shoots it out in that direction
+ropedart.accel=kicks will additionally speed up the dart by 1 level
 
 item.bian.name=Iron Whip
 bian.stagger=deals 1.5x damage against staggered targets

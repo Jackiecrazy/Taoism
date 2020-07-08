@@ -12,8 +12,12 @@ attribute.name.generic.qiGen=攻击增加气
 
 item.weapon.name=武器
 
-<Weapons>=
+<Combat stuff>=
+key.taoism.combat=切换战斗模式
+taoism.combat.off=战斗模式已开启
+taoism.combat.on=战斗模式已关闭
 
+<Weapons>=
 weapon.shift=SHIFT查看数据...
 weapon.ctrl=CTRL查看能力...
 weapon.dummy=此物品仅占位用，停止装备双手兵器时会自动变回原来物品
@@ -34,8 +38,8 @@ weapon.spoiler=斩杀还没有做好哦～
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却
 ken.qi=每层气增伤3%%
-ken.aoe=若没有对准敌人，横扫身前90度的扇形区域
-ken.stab=若对准敌人，造成120%%伤害
+ken.aoe=横扫身前90度的扇形区域
+ken.stab=若只有一个敌人，造成120%%伤害
 ken.riposte=招架后重置连击
 
 item.banfu.name=板斧
@@ -51,14 +55,12 @@ balisong.initiative=第一次攻击无视所有护甲
 balisong.stance=主手的蝴蝶刀为正握，副手的蝴蝶刀为反握
 balisong.hammer=正握时连击上限每两层气增加一，最多连击五次
 balisong.reverse=反握时每层气使攻击无视一点护甲
-balisong.riposte=招架时闪避到攻击者身后
 
 item.karambit.name=爪刀
 karambit.switch=装备时立刻重置冷却
 karambit.backstab=背刺造成1.5倍伤害
 karambit.initiative=第一次攻击无视所有护甲
 karambit.bleed=对无护甲的目标叠加一层持续一秒的流血，每层气使触发条件无视6点护甲
-karambit.riposte=招架时闪避到攻击者身后
 karambit.harvest=可以采集剪刀能采集的方块
 
 item.chui.name=博浪锤
@@ -120,17 +122,17 @@ pollaxe.stab=右击使用斧柄戳击，连续第二次戳击时造成双倍架�
 pollaxe.escape=若敌人在两次攻击之间离开攻击范围，连续攻击将被打断
 pollaxe.oscillate=使用攻击会重置另一种攻击的一半冷却，招架后另一只手立刻刷新
 
-item.halberd.name=日华斧
+item.halberd.name=静燕斧
 halberd.leap=暴击造成双倍伤害
 halberd.cleave=普攻叠加三秒破甲II
 halberd.stab=右击使用枪头引爆破甲，每层破甲造成2点无视护甲的伤害
 halberd.stab.cooldown=每层引爆的破甲使本攻击冷却减少一秒
 
-item.changchui.name=立瓜锤
-changchui.leap=暴击造成双倍伤害，对击倒的目标造成双倍伤害
-changchui.armpen=被动无视3（+气层数）点护甲
-changchui.enfeeble=六层气以上时，普攻使目标在2秒内无法恢复架势
-changchui.swipe=右击击退120度的扇形区域内所有目标，此攻击冷却较长
+item.changchui.name=大槌
+maul.leap=暴击造成双倍伤害
+maul.impact=普攻击退翻倍，对墙边的敌人造成1.5倍伤害
+maul.nail=右击将敌人打入地面，造成最多一秒的禁锢效果
+maul.hardness=敌人脚下方块的采掘等级不能超过自己气的一半
 
 item.staff.name=齐眉棍
 staff.flick=在地上时，普攻根据气挑飞地上的敌人，为自己附加短暂的跳跃效果
@@ -144,8 +146,8 @@ staff.oscillate=两种攻击冷却独立，主手攻击可连击一次
 item.guandao.name=偃月刀
 guandao.alt=右击切换新月与血月模式，并立即重置普攻
 guandao.alt.attack=切换至血月模式时攻击身前的敌人，切换回新月模式时攻击身后的敌人
-guandao.guard=新月模式：范围4，横扫90度，造成1.3倍(+气*5%%)伤害，招架后获得0.3层气
-guandao.strike=血月模式：范围7，横扫180度，无伤害加成
+guandao.guard=新月模式：范围3，横扫90度，造成1.3倍(+气*5%%)伤害，招架后获得0.3层气
+guandao.strike=血月模式：范围5，横扫180度，无伤害加成
 
 item.bohemianearspoon.name=狩猎枪
 bohear.dist=普攻根据上次攻击的距离而增伤，最多增上50%%
@@ -154,7 +156,6 @@ bohear.rip=若它强行接近，刺穿该目标造成双倍流血伤害
 bohear.bash=右击消耗此强化击退120度扇形区域内的敌人
 
 item.nunchaku.name=双截棍
-nunchaku.dual=若双手使用，一手的攻击会立刻刷新另一手的冷却
 nunchaku.stance=攻击后双截棍会处于上位或下位
 nunchaku.moves=普攻使其从当前位置移动到上位，或潜行攻击使其移动到下位
 nunchaku.flick=上-上: 抽，攻速极高
@@ -163,12 +164,26 @@ nunchaku.sweep=下-下: 扫，攻击身前90度扇形区域
 nunchaku.spin=下-上: 旋，造成三次攻击40%%的伤害
 
 item.ropedart.name=绳镖
-ropedart.projectile=普攻丢出镖头，在击中物体或飞过八个方块后收回
-ropedart.damage=伤害根据蓄力时间增加，最多造成1.5倍伤害，满蓄力额外造成1.5倍暴击伤害
-ropedart.recharge=打空不消耗蓄力，打中目标消耗一半蓄力，打中方块消耗所有蓄力
-ropedart.alt=右击丢出镖头束缚第一个击中的敌人，造成一半伤害
-ropedart.berserk=束缚时，敌人无法攻击；你的副手重新启用且主手可招架
-ropedart.disengage=再次使用普攻将会结束此状态
+ropedart.parry=在镖头未丢出的情况下主手无法招架
+ropedart.projectile=普攻以基础速度丢出镖头
+ropedart.attack=每次使用镖头攻击均可为其加速
+ropedart.pain=每层速度增伤10%%，五层以上时额外无视五点护甲
+ropedart.loss=镖头击中方块或潜行收回后会重置速度
+ropedart.punch=镖头丢出后，普攻为高击退的一拳
+ropedart.alt=右击踢敌人一下，消耗一点架势造成四点架势伤害
+ropedart.trick=当镖头在附近时两种攻击均可使其向指定方向射出
+ropedart.accel=脚打会额外加速一层
+
+item.bian.name=铁节鞭
+bian.stagger=对击倒的目标造成1.5倍伤害
+bian.armpen=每层气无视一点护甲
+bian.enfeeble=攻击使目标的架势恢复速度减缓两秒，效果随气而增加
+
+item.rapier.name=刺剑
+rapier.combo=普攻可连击三次
+rapier.riposte=在敌人攻击后或你招架或闪避后造成暴击伤害
+
+item.projectile_prop.name=舞台道具不要在意
 
 <Resources>=
 

@@ -12,7 +12,6 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -82,8 +81,6 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.YELLOW+I18n.format("weapon.half")+TextFormatting.RESET);
-        tooltip.add(I18n.format("nunchaku.dual"));
         tooltip.add(I18n.format("nunchaku.stance"));
         tooltip.add(I18n.format("nunchaku.moves"));
         tooltip.add(I18n.format("nunchaku.flick"));
