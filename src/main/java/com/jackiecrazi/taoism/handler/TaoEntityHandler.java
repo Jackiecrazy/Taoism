@@ -113,14 +113,15 @@ public class TaoEntityHandler {
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
         EntityLivingBase elb = e.getEntityLiving();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        //...or not
         if (itsc.getDownTimer() > 0 || itsc.getRootTime() > 0) {
             elb.motionY = 0;
             return;
         }
         float qi = TaoCasterData.getTaoCap(elb).getQi();
         if (itsc.isInCombatMode() && qi > 0) {
-            elb.motionY *= 1 + (qi / 10);
-            if (elb.isSprinting() && qi > 3) {//long jump
+            elb.motionY *= 1 + (qi / 15);
+            if (qi > 3) {//long jump
                 elb.motionX *= 1 + ((qi - 3) / 14);
                 elb.motionZ *= 1 + ((qi - 3) / 14);
             }

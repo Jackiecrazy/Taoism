@@ -83,6 +83,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
             }
             //System.out.println(posX + " " + posY + " " + posZ);
             if (this.getDistanceSq(getThrower()) > RopeDart.MAXRANGESQ) {
+                onRecallTriggered = false;
                 updateHitStatus(3);
             } else if ((getThrower().getDistanceSq(this) > 4 && hitStatus == -1)) {
                 updateHitStatus(0);

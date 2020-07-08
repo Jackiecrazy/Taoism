@@ -186,7 +186,7 @@ public class RopeDart extends TaoWeapon {
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8f) + TextFormatting.RESET);
         tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", 0) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", 0f) + TextFormatting.RESET);
     }
 
     @Override
@@ -221,7 +221,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
+        return attacker != target && (isThrown(item) || getHand(item) == EnumHand.OFF_HAND);
     }
 
     @Override

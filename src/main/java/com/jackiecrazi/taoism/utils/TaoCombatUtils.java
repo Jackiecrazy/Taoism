@@ -18,7 +18,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
@@ -331,7 +330,7 @@ public class TaoCombatUtils {
         for (String s : CombatConfig.parryCapableItems) {
             if (s.equals(i.getItem().getRegistryName().toString())) return true;
         }
-        return i.getItem().isShield(i, e) || i.getItem().getItemUseAction(i) == EnumAction.BLOCK;
+        return false;
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {

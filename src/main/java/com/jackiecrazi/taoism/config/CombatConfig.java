@@ -20,7 +20,7 @@ public class CombatConfig {
     @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
     public static float defaultMultiplierPostureAttack = 0.15f;
     @Config.Comment("Posture damage from punching with an empty hand.")
-    public static float defaultPostureKenshiro = 1f;
+    public static float defaultPostureKenshiro = 0.5f;
     @Config.Comment("Posture multiplier for mobs and NPCs, as they don't deal much per hit.")
     public static float basePostureMob = 2f;
     @Config.Comment("Cooldown after using spirit power before it starts recharging, currently unused.")
