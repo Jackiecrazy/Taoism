@@ -61,7 +61,7 @@ karambit.switch=attack timer is immediately reset when switching in
 karambit.backstab=backstabs deal 1.5x damage
 karambit.initiative=the first strike on a target ignores all armor
 karambit.bleed=stack a layer of bleed if target is unarmored, bleed stacking ignores 6 points of armor per chi level
-karambit.harvest=can also be used to harvest shearable blocks
+karambit.harvest=functions as shears
 
 item.chui.name=Spherical Mace
 chui.leap=crits deal double damage

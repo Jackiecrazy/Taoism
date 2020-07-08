@@ -146,8 +146,8 @@ public class TaoCombatHandler {
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(3, e.getAmount() * atkDef) / semeCap.getMaxPosture());
-                NeedyLittleThings.knockBack(uke, seme, Math.min(3, e.getAmount() * def) / ukeCap.getMaxPosture());
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, e.getAmount() * atkDef) / semeCap.getMaxPosture());
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, e.getAmount() * def) / ukeCap.getMaxPosture());
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).parrySkill(seme, uke, defend);
                 }
@@ -184,7 +184,7 @@ public class TaoCombatHandler {
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
         if (!modCall && CombatConfig.modifyKnockBackCode) {
             e.setCanceled(true);
-            NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), e.getOriginalRatioZ());
+            NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ());
             return;
         }
 

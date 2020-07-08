@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Karambit extends TaoWeapon {
+public class Karambit extends TaoWeapon{
     //A slashing dagger that is fast and relentless, but short in reach.
     //has no switch in cooldown, and can be switched from hand to hand without cooldown as well.
     //backstabs deal 1.5x damage, inflicts a layer of bleed if target is unarmored.

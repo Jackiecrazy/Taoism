@@ -11,6 +11,7 @@ import com.jackiecrazi.taoism.client.ClientEvents;
 import com.jackiecrazi.taoism.client.KeyBindOverlord;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -289,6 +290,34 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.hitEntity(stack, target, attacker);
     }
 
+    @Override
+    public boolean itemInteractionForEntity(ItemStack itemstack, EntityPlayer player, EntityLivingBase entity, EnumHand hand) {
+        if (harvestable(itemstack)[3]) {
+            if (entity.world.isRemote) {
+                return false;
+            }
+            if (entity instanceof net.minecraftforge.common.IShearable) {
+                net.minecraftforge.common.IShearable target = (net.minecraftforge.common.IShearable) entity;
+                BlockPos pos = new BlockPos(entity.posX, entity.posY, entity.posZ);
+                if (target.isShearable(itemstack, entity.world, pos)) {
+                    java.util.List<ItemStack> drops = target.onSheared(itemstack, entity.world, pos,
+                            net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.init.Enchantments.FORTUNE, itemstack));
+
+                    java.util.Random rand = new java.util.Random();
+                    for (ItemStack stack : drops) {
+                        net.minecraft.entity.item.EntityItem ent = entity.entityDropItem(stack, 1.0F);
+                        ent.motionY += rand.nextFloat() * 0.05F;
+                        ent.motionX += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
+                        ent.motionZ += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
+                    }
+                    itemstack.damageItem(1, entity);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SideOnly(Side.CLIENT)
     public boolean isFull3D() {
         return true;
@@ -436,16 +465,36 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return multimap;
     }
 
-    public double attackDamage(ItemStack stack) {
-        return dmg;
-    }
+    @Override
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player) {
+        if (harvestable(itemstack)[3]) {
+            if (player.world.isRemote || player.capabilities.isCreativeMode) {
+                return false;
+            }
+            Block block = player.world.getBlockState(pos).getBlock();
+            if (block instanceof net.minecraftforge.common.IShearable) {
+                net.minecraftforge.common.IShearable target = (net.minecraftforge.common.IShearable) block;
+                if (target.isShearable(itemstack, player.world, pos)) {
+                    java.util.List<ItemStack> drops = target.onSheared(itemstack, player.world, pos,
+                            net.minecraft.enchantment.EnchantmentHelper.getEnchantmentLevel(net.minecraft.init.Enchantments.FORTUNE, itemstack));
+                    java.util.Random rand = new java.util.Random();
 
-    protected double speed(ItemStack stack) {
-        return speed - 4d;
-    }
-
-    protected float getQiAccumulationRate(ItemStack is) {
-        return isCharged(null, is) ? 0 : qiRate;
+                    for (ItemStack stack : drops) {
+                        float f = 0.7F;
+                        double d = (double) (rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+                        double d1 = (double) (rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+                        double d2 = (double) (rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+                        net.minecraft.entity.item.EntityItem entityitem = new net.minecraft.entity.item.EntityItem(player.world, (double) pos.getX() + d, (double) pos.getY() + d1, (double) pos.getZ() + d2, stack);
+                        entityitem.setDefaultPickupDelay();
+                        player.world.spawnEntity(entityitem);
+                    }
+                    player.addStat(net.minecraft.stats.StatList.getBlockStats(block));
+                    player.world.setBlockState(pos, Blocks.AIR.getDefaultState(), 11);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -564,6 +613,18 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      */
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
 
+    }
+
+    public double attackDamage(ItemStack stack) {
+        return dmg;
+    }
+
+    protected double speed(ItemStack stack) {
+        return speed - 4d;
+    }
+
+    protected float getQiAccumulationRate(ItemStack is) {
+        return isCharged(null, is) ? 0 : qiRate;
     }
 
     /**
@@ -783,7 +844,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return attacker!=target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
+        return attacker != target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
     }
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {

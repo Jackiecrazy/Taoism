@@ -87,7 +87,7 @@ public class NeedyLittleThings {
      * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
     public static void knockBack(Entity to, Entity from, float strength) {
-        Vec3d distVec = to.getPositionVector().subtractReverse(from.getPositionVector()).normalize();
+        Vec3d distVec = to.getPositionVector().addVector(0, to.getEyeHeight(), 0).subtractReverse(from.getPositionVector().addVector(0, from.getEyeHeight(), 0)).normalize();
         if (to instanceof EntityLivingBase) {
             knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
         } else {
@@ -97,7 +97,6 @@ public class NeedyLittleThings {
             to.motionZ = distVec.z * strength;
             to.velocityChanged = true;
         }
-        //knockBack(to, from, strength, MathHelper.sin(rad(from.rotationYaw)), -MathHelper.cos(rad(from.rotationYaw)));
     }
 
     /**
@@ -112,13 +111,9 @@ public class NeedyLittleThings {
         zRatio = event.getRatioZ();
         if (strength != 0f) {
             to.isAirBorne = true;
-            float pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
-            to.motionX /= 2.0D;
-            to.motionZ /= 2.0D;
-            to.motionX -= xRatio / (double) pythagora * (double) strength;
-            to.motionZ -= zRatio / (double) pythagora * (double) strength;
-
+            float pythagora = 0;
             if (to.onGround) {
+                pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
                 to.motionY /= 2.0D;
                 to.motionY += strength;
 
@@ -126,9 +121,14 @@ public class NeedyLittleThings {
                     to.motionY = 0.4000000059604645D;
                 }
             } else if (yRatio != 0) {
+                pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio + yRatio * yRatio);
                 to.motionY /= 2.0D;
                 to.motionY -= yRatio / (double) pythagora * (double) strength;
             }
+            to.motionX /= 2.0D;
+            to.motionZ /= 2.0D;
+            to.motionX -= xRatio / (double) pythagora * (double) strength;
+            to.motionZ -= zRatio / (double) pythagora * (double) strength;
             to.velocityChanged = true;
         }
     }
@@ -240,13 +240,6 @@ public class NeedyLittleThings {
 
     public static float getCooldownPeriodOff(EntityLivingBase elb) {
         return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
-    }
-
-    /**
-     * knockback in EntityLivingBase except it makes sense and the resist is factored into the event
-     */
-    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double zRatio) {
-        knockBack(to, from, strength, xRatio, 0, zRatio);
     }
 
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {

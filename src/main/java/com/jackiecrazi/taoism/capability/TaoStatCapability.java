@@ -423,7 +423,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void toggleCombatMode(boolean sprint) {
-        this.sprint=sprint;
+        this.sprint = sprint;
     }
 
     @Override
@@ -547,10 +547,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (elb == null) return;
         elb.dismountRidingEntity();
         if (attacker != null)
-            NeedyLittleThings.knockBack(elb, attacker, overflow * 0.4F);
+            NeedyLittleThings.knockBack(elb, attacker, Math.min(overflow, 2f));
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
-        int downtimer = MathHelper.clamp((int) (overflow * 40f), 40, MAXDOWNTIME);
         setDownTimer(MAXDOWNTIME);
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
