@@ -59,7 +59,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
                 this.setDead();
                 return;
             }
-            if(NeedyLittleThings.getSpeedSq(this)==0){
+            if (NeedyLittleThings.getSpeedSq(this) == 0) {
                 onRetrieveWeapon();
                 return;
             }
@@ -88,7 +88,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
             } else if ((getThrower().getDistanceSq(this) > 4 && hitStatus == -1)) {
                 updateHitStatus(0);
             }
-            if ((hitStatus > 0 && !onRecallTriggered)||inGround) {
+            if ((hitStatus > 0 && !onRecallTriggered) || inGround) {
                 onRecall();
             }
         }
@@ -100,8 +100,17 @@ public class EntityRopeDart extends EntityThrownWeapon {
         return 0;//(float) (1.69-NeedyLittleThings.getSpeedSq(this))/20f;
     }
 
+    @Override
+    protected void onHitBlock(RayTraceResult rtr) {
+        super.onHitBlock(rtr);
+        charge = 0;
+        inGround = false;
+        sync();
+    }
+
     protected void onHitEntity(Entity hit) {
-        if (hitStatus > 0 || world.isRemote) return;
+        if (hitStatus > 0 || world.isRemote || getThrower() == null) return;
+        if (hit == getThrower() && !getThrower().isSneaking()) return;
         super.onHitEntity(hit);
         ItemStack is = getThrower().getHeldItem(hand);
         if (is.getItem() != stack.getItem() || !is.hasTagCompound()) onRetrieveWeapon();
@@ -115,12 +124,6 @@ public class EntityRopeDart extends EntityThrownWeapon {
 
     protected void onRetrieveWeapon() {
         super.onRetrieveWeapon();
-    }
-
-    @Override
-    //you can't ground me!
-    protected void checkInGround() {
-
     }
 
     @Override
@@ -141,6 +144,12 @@ public class EntityRopeDart extends EntityThrownWeapon {
     }
 
     @Override
+    //you can't ground me!
+    protected void checkInGround() {
+
+    }
+
+    @Override
     public boolean hitByEntity(Entity seme) {
         if (getThrower() != null && seme == getThrower()) {
             Vec3d newDir = getThrower().getLookVec();
@@ -148,20 +157,12 @@ public class EntityRopeDart extends EntityThrownWeapon {
             shoot(newDir, Math.min(5, charge) * 0.1f + 0.5f, 0);//speed increases over 5 hits
             updateHitStatus(0);
             if (TaoCasterData.getTaoCap((EntityLivingBase) seme).isOffhandAttack()) {
-                charge ++;
+                charge++;
             }
             velocityChanged = true;
             onRecallTriggered = false;
             sync();
         }
         return true;
-    }
-
-    @Override
-    protected void onHitBlock(RayTraceResult rtr) {
-        super.onHitBlock(rtr);
-        charge=0;
-        inGround=false;
-        sync();
     }
 }

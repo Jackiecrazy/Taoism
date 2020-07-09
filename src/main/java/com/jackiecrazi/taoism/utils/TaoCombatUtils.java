@@ -343,7 +343,7 @@ public class TaoCombatUtils {
     }
 
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
-        return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 2f) *
+        return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
                 (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
     }
 }

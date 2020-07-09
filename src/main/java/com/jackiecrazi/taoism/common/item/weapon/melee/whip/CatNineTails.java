@@ -86,9 +86,9 @@ public class CatNineTails extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         int armor = target.getTotalArmorValue();
         int potency, duration;
-        if (armor >= 15) return;//15 armor and above means no laceration, can't rip a guy in full iron...
+        if (armor >= 10) return;//10 armor and above means no laceration, can't rip a guy in full iron...
         else {
-            potency = 2 - (Math.floorDiv(armor, 5));
+            potency = (int) (2 - (Math.ceil(armor/5f)));
             duration = 100 - (armor * 10);
         }
         TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.LACERATION, duration, potency), false);

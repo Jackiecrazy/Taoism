@@ -219,7 +219,7 @@ public class BanFu extends TaoWeapon {
             if (TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) < chi - 1 || getHand(stack) == EnumHand.OFF_HAND)
                 TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1), false);
             else
-                TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), false);
+                TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD), false);
         }
     }
 }

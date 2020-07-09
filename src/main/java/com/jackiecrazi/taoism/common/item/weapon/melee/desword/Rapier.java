@@ -37,7 +37,7 @@ public class Rapier extends TaoWeapon {
 
     @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        gettagfast(item).setInteger("lastParryTime", attacker.ticksExisted);
+        gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
     }
 
     @Override

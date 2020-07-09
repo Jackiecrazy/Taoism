@@ -68,7 +68,7 @@ public class TaoCombatHandler {
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
-                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi()/2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
+                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
                     ent.motionY = look.y;
@@ -146,8 +146,8 @@ public class TaoCombatHandler {
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, e.getAmount() * atkDef) / semeCap.getMaxPosture());
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, e.getAmount() * def) / ukeCap.getMaxPosture());
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3*atk * atkDef / semeCap.getMaxPosture()));
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3*atk * def / ukeCap.getMaxPosture()));
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).parrySkill(seme, uke, defend);
                 }

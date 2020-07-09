@@ -551,7 +551,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (elb == null) return;
         elb.dismountRidingEntity();
         if (attacker != null)
-            NeedyLittleThings.knockBack(elb, attacker, Math.min(overflow, 2f));
+            NeedyLittleThings.knockBack(elb, attacker, 1.5f);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
         elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
