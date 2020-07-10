@@ -423,8 +423,8 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
-    public void toggleCombatMode(boolean sprint) {
-        this.sprint = sprint;
+    public void toggleCombatMode(boolean on) {
+        this.sprint = on;
     }
 
     @Override
@@ -524,10 +524,13 @@ public class TaoStatCapability implements ITaoStatCapability {
         sync();
         if (target != null) {
             float damage = getRecordedDamage();
-            ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);
             DamageSource ds = NeedyLittleThings.causeLivingDamage(elb);
-            if (is != null && is.getItem() instanceof ICombatManipulator) {
-                damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
+            if (elb != null) {
+                if(elb==target)return;//bootleg invulnerability!
+                ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);
+                if (is != null && is.getItem() instanceof ICombatManipulator) {
+                    damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
+                }
             }
             target.hurtResistantTime = 0;
             target.attackEntityFrom(ds, damage);

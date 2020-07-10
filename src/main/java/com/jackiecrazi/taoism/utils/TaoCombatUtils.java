@@ -304,12 +304,19 @@ public class TaoCombatUtils {
         boolean mainRec = NeedyLittleThings.getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
-        //shield and sword block
-        if (isParryCapable(main, elb) && mainRec) {
+        //shields
+        if (isShield(off) && offRec) {
+            return off;
+        }
+        if (isShield(main) && mainRec) {
+            return main;
+        }
+        //parries
+        if (isParryCapable(main) && mainRec) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (isParryCapable(off, elb) && offRec) {
+        if (isParryCapable(off) && offRec) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
@@ -325,7 +332,15 @@ public class TaoCombatUtils {
         return ret;
     }
 
-    public static boolean isParryCapable(ItemStack i, EntityLivingBase e) {
+    public static boolean isShield(ItemStack i) {
+        if (i.getItem().getRegistryName() == null) return false;
+        for (String s : CombatConfig.shieldItems) {
+            if (s.equals(i.getItem().getRegistryName().toString())) return true;
+        }
+        return false;
+    }
+
+    public static boolean isParryCapable(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.parryCapableItems) {
             if (s.equals(i.getItem().getRegistryName().toString())) return true;
@@ -344,6 +359,6 @@ public class TaoCombatUtils {
 
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
         return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
-                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : CombatConfig.defaultMultiplierPostureDefend);
+                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : isShield(defend) ? CombatConfig.defaultMultiplierPostureShield : CombatConfig.defaultMultiplierPostureDefend);
     }
 }

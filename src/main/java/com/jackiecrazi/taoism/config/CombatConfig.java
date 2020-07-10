@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.config;
 import com.jackiecrazi.taoism.Taoism;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemShield;
 import net.minecraft.item.ItemSword;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -17,7 +18,9 @@ public class CombatConfig {
     public static float posturePerProjectile = 0.5f;
     @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
     public static float defaultMultiplierPostureDefend = 1.4f;
-    @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
+    @Config.Comment("Posture multiplier when using a shield as defined in shieldItems.")
+    public static float defaultMultiplierPostureShield = 1f;
+    @Config.Comment("Posture multiplier when using a weapon not from Taoism. This is multiplied by the weapon's attack damage.")
     public static float defaultMultiplierPostureAttack = 0.15f;
     @Config.Comment("Posture damage from punching with an empty hand.")
     public static float defaultPostureKenshiro = 0.5f;
@@ -43,6 +46,8 @@ public class CombatConfig {
     public static int qiGrace = 10;
     @Config.Comment("Additional items eligible for parrying. See printParryList for easy registration.")
     public static String[] parryCapableItems = {"example:thing1", "example:thing2"};
+    @Config.Comment("Shields. Shields are prioritized over other items when parrying. See printShieldList for easy registration.")
+    public static String[] shieldItems = {"example:thing1", "example:thing2"};
     @Config.Comment("Changes chance based knockback resist to percentage based knockback resist, which I think makes more sense.")
     public static boolean modifyKnockBackCode = true;
     @Config.Comment("Whether being hit by a staggering attack while your posture is above a quarter would protect you from sudden stagger.")
@@ -51,13 +56,23 @@ public class CombatConfig {
     public static boolean taoWeaponHitEntity = true;
     @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disabled by default because some mods expect the hitter to be a player.")
     public static boolean weaponHitEntity = false;
-    @Config.Comment("Toggling this option will print the list of parry eligible items based on items registered as swords and axes into the console, ready to copy-paste. It's a little expensive, so remember to turn it off again!")
+    @Config.Comment("Toggling this option will print the list of parry eligible items based on items registered as swords and axes. It's a little expensive, so remember to turn it off again!")
     public static boolean printParryList = true;
+    @Config.Comment("Toggling this option will print the list of parry eligible shields. It's a little expensive, so remember to turn it off again!")
+    public static boolean printShieldList = true;
 
     public static void printParryList() {
-        Taoism.logger.info("beginning generation of the parry list:");
+        if (printParryList)
+            Taoism.logger.info("beginning generation of the parry list:");
         for (Item item : Item.REGISTRY) {
             if (item instanceof ItemSword || item instanceof ItemAxe) {
+                System.out.println(item.getRegistryName().toString());
+            }
+        }
+        if (printShieldList)
+            Taoism.logger.info("beginning generation of the shield list:");
+        for (Item item : Item.REGISTRY) {
+            if (item instanceof ItemShield) {
                 System.out.println(item.getRegistryName().toString());
             }
         }

@@ -228,6 +228,7 @@ public class NeedyLittleThings {
     }
 
     public static DamageSource causeLivingDamage(EntityLivingBase elb) {
+        if (elb == null) return DamageSource.GENERIC;
         if (elb instanceof EntityPlayer)
             return DamageSource.causePlayerDamage((EntityPlayer) elb);
         else return DamageSource.causeMobDamage(elb);

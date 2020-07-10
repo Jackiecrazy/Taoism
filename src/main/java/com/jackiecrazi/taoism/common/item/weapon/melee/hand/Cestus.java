@@ -8,6 +8,9 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -51,6 +54,17 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+        super.onUpdate(stack, w, e, slot, onMainhand);
+        if (e instanceof EntityLivingBase) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            if (getChargedTime(elb, stack) > getMaxChargeTime()*2) {
+                dischargeWeapon(elb, stack);
+            }
+        }
+    }
+
+    @Override
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
         Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot, stack);
         if (equipmentSlot == EntityEquipmentSlot.MAINHAND || equipmentSlot == EntityEquipmentSlot.OFFHAND)
@@ -67,7 +81,7 @@ public class Cestus extends TaoWeapon {
     @Override
     public double attackDamage(ItemStack stack) {
         double ret = 3;
-        int level = gettagfast(stack).getInteger("qifloor");
+        int level = getQiFromStack(stack);
         int stuff = Math.floorDiv(level, 3);
         ret += (level - stuff);
         if (level > 7) {
@@ -85,8 +99,20 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        TaoCasterData.getTaoCap(elb).setQi(5);
+        TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+        TaoCasterData.getTaoCap(elb).toggleCombatMode(true);
+    }
+
+    @Override
+    public int getChargedTime(EntityLivingBase elb, ItemStack item) {
+        return (int) (elb.world.getTotalWorldTime() - gettagfast(item).getLong("startAt"));
+    }
+
+    @Override
     public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //TODO buff me
         TaoCasterData.getTaoCap(defender).addQi(0.3f);
         super.parrySkill(attacker, defender, item);
     }
@@ -101,10 +127,28 @@ public class Cestus extends TaoWeapon {
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item)) {
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker);
-            ds.setDamageIsAbsolute();
+            if (gettagfast(item).getLong("startAt") == 0) {
+                target.motionY += 1;
+                attacker.motionY += 1;
+                target.velocityChanged = true;
+                attacker.velocityChanged = true;
+                TaoCasterData.getTaoCap(target).startRecordingDamage();
+                TaoCasterData.getTaoCap(attacker).startRecordingDamage();
+                TaoCasterData.getTaoCap(target).setRootTime(getMaxChargeTime());
+                TaoCasterData.getTaoCap(attacker).setRootTime(getMaxChargeTime());
+                gettagfast(item).setLong("startAt", attacker.world.getTotalWorldTime());
+            }else if(getChargedTime(attacker, item)>getMaxChargeTime()){
+                target.motionY -= 1;
+                target.velocityChanged = true;
+                dischargeWeapon(attacker, item);
+            }
         }
-        dischargeWeapon(attacker, item);
+    }
+
+    @Override
+    public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        target.world.newExplosion(attacker, target.posX, target.posY, target.posZ, Math.abs(orig - target.getHealth()), EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("fire_aspect"), item) > 0, true);
+        return orig;
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int qi) {
@@ -112,21 +156,18 @@ public class Cestus extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1), false);
         }
         if (qi >= 9) {
-            TaoPotionUtils.attemptAddPot(target,new PotionEffect(MobEffects.BLINDNESS, 40, 0), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.BLINDNESS, 40, 0), false);
         }
-        if (isCharged(attacker, stack)) {
-            TaoCasterData.getTaoCap(target).consumePosture(3.5f, true, attacker);
-        }
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 100;
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 40;
     }
 
     @Override

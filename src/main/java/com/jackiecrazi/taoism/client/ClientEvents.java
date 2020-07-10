@@ -267,23 +267,23 @@ public class ClientEvents {
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
             Minecraft mc = Minecraft.getMinecraft();
-            if (Taoism.proxy.isBreakingBlock(mc.player)){
-                leftClickAt=0;
-                rightClickAt=0;
+            if (Taoism.proxy.isBreakingBlock(mc.player)) {
+                leftClickAt = 0;
+                rightClickAt = 0;
                 return;
             }
             if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
                 leftClickAt++;
                 if (leftClickAt == CHARGE) {
-                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-                    //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
             if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
                 rightClickAt++;
                 if (rightClickAt == CHARGE) {
-                    mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-                    //Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
+                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
                 }
             }
         }
@@ -302,7 +302,7 @@ public class ClientEvents {
             }
         }
         //force offhand to have some semblance of cooldown
-        if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isParryCapable(e.getItemStack(), p))
+        if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isParryCapable(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()))
             return;
         e.setCanceled(true);
         ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();
@@ -405,11 +405,11 @@ public class ClientEvents {
                     targetQiLevel = cap.getQi();
                     boolean closeEnough = true;
                     if (targetQiLevel > currentQiLevel) {
-                        currentQiLevel +=  Math.min(0.1, (targetQiLevel-currentQiLevel)/10);
+                        currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 10);
                         closeEnough = false;
                     }
                     if (targetQiLevel < currentQiLevel) {
-                        currentQiLevel -= Math.min(0.1, (currentQiLevel-targetQiLevel)/10);
+                        currentQiLevel -= Math.min(0.1, (currentQiLevel - targetQiLevel) / 10);
                         closeEnough = !closeEnough;
                     }
                     if (closeEnough)

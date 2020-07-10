@@ -749,6 +749,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         gettagfast(item).setBoolean("charge", false);
         gettagfast(item).setLong("chargedAtTime", 0);
+        gettagfast(item).setLong("startAt", 0);
     }
 
     @Override

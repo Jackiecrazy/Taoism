@@ -118,9 +118,7 @@ public class Taoism {
 
     @EventHandler
     public void postinit(FMLPostInitializationEvent event) {
-        if(CombatConfig.printParryList){
             CombatConfig.printParryList();
-        }
         proxy.postinit(event);
     }
 

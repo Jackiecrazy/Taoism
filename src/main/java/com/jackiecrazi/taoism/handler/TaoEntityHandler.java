@@ -33,6 +33,7 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -137,6 +138,13 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
+    public static void dramatic(LivingFallEvent e){
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
+            TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
+        }
+    }
+
+    @SubscribeEvent
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
         final EntityLivingBase elb = e.getEntityLiving();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
@@ -145,10 +153,10 @@ public class TaoEntityHandler {
             TaoCasterData.updateCasterData(elb);
         }
         if (itsc.getRootTime() > 0) {
-//            elb.posX=elb.prevPosX;
-//            elb.posZ=elb.prevPosZ;
-//            elb.motionX=0;
-//            elb.motionZ=0;
+            elb.setVelocity(0, 0, 0);
+            if(elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ) {
+                elb.setPositionAndUpdate(elb.prevPosX, elb.prevPosY, elb.prevPosZ);
+            }
         }
     }
 

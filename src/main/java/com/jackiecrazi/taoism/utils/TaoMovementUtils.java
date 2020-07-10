@@ -25,7 +25,8 @@ public class TaoMovementUtils {
     public static boolean shouldStick(EntityLivingBase elb) {
         return (TaoCasterData.getTaoCap(elb).getQi() > 3
                 && willHitWall(elb))
-                && elb.isSprinting();
+                && !elb.isSneaking()
+                && (elb.isSprinting() || TaoCasterData.getTaoCap(elb).getJumpState() == ITaoStatCapability.JUMPSTATE.DODGING);
     }
 
     /**
@@ -50,7 +51,7 @@ public class TaoMovementUtils {
     public static boolean willHitWallFrom(Entity elb, Entity from) {
         double allowance = 1;
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        Vec3d fromToElb=elb.getPositionVector().subtract(from.getPositionVector()).normalize();
+        Vec3d fromToElb = elb.getPositionVector().subtract(from.getPositionVector()).normalize();
         List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.expand(fromToElb.x, fromToElb.y, fromToElb.z));
         for (AxisAlignedBB a : boxes) {
             if (aabb.calculateXOffset(a, allowance) != allowance) return true;
@@ -80,14 +81,14 @@ public class TaoMovementUtils {
     public static boolean attemptSlide(EntityLivingBase elb) {
         if (!elb.onGround) return false;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if(!itsc.isInCombatMode())return false;
+        if (!itsc.isInCombatMode()) return false;
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
         itsc.setRollCounter(0);
         itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-        Vec3d v=elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
-        elb.motionX = (1+itsc.getQi()/4) * v.x;
-        elb.motionZ = (1+itsc.getQi()/4) * v.z;
+        Vec3d v = elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
+        elb.motionX = (1 + itsc.getQi() / 4) * v.x;
+        elb.motionZ = (1 + itsc.getQi() / 4) * v.z;
         elb.velocityChanged = true;
         return true;
     }
@@ -96,7 +97,7 @@ public class TaoMovementUtils {
         //if you're on the ground, I'll let vanilla handle you
         if (elb.onGround) return false;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if(!itsc.isInCombatMode())return false;
+        if (!itsc.isInCombatMode()) return false;
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
@@ -210,7 +211,7 @@ public class TaoMovementUtils {
 
     public static boolean attemptDodge(EntityLivingBase elb, int side) {
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        if(!itsc.isInCombatMode())return false;
+        if (!itsc.isInCombatMode()) return false;
         if (itsc.getRollCounter() > CombatConfig.rollCooldown && itsc.getJumpState() != ITaoStatCapability.JUMPSTATE.DODGING && (elb.onGround || itsc.getQi() > 2) && (side != 3 || !elb.onGround) && !elb.isSneaking() && (!(elb instanceof EntityPlayer) || !((EntityPlayer) elb).capabilities.isFlying)) {//
             //System.out.println("execute roll to side " + side);
             itsc.setRollCounter(0);

@@ -89,7 +89,6 @@ public class TaoCombatHandler {
             return;
         }
         EntityLivingBase uke = e.getEntityLiving();
-        TaoCasterData.updateCasterData(uke);
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase && !uke.world.isRemote) {
@@ -146,8 +145,8 @@ public class TaoCombatHandler {
 //                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3*atk * atkDef / semeCap.getMaxPosture()));
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3*atk * def / ukeCap.getMaxPosture()));
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).parrySkill(seme, uke, defend);
                 }
@@ -182,12 +181,15 @@ public class TaoCombatHandler {
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
+        if(TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
+            e.setCanceled(true);
+            return;
+        }
         if (!modCall && CombatConfig.modifyKnockBackCode) {
             e.setCanceled(true);
             NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ());
             return;
         }
-
         if (e.getOriginalAttacker() instanceof EntityLivingBase) {
             EntityLivingBase seme = (EntityLivingBase) e.getOriginalAttacker();
             EntityLivingBase uke = e.getEntityLiving();
