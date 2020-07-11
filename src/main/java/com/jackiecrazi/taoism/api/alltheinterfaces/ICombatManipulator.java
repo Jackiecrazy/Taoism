@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.api.alltheinterfaces;
 
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -57,7 +58,7 @@ public interface ICombatManipulator {
 
     /**
      * This is called by TaoStatCapability when an entity is no longer "immune" to damage after a cinematic execution sequence
-     * @param ds a DamageSource as dictated by {@link com.jackiecrazi.taoism.api.NeedyLittleThings#causeLivingDamage(EntityLivingBase)}
+     * @param ds a DamageSource as dictated by {@link TaoCombatUtils#causeLivingDamage(EntityLivingBase)}
      * @param orig the recorded damage
      * @return a new damage if necessary
      */

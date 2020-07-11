@@ -99,7 +99,7 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
 
     }
 

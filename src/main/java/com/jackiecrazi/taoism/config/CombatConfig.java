@@ -37,7 +37,7 @@ public class CombatConfig {
     @Config.Comment("Number of ticks one should be protected for after sudden stagger prevention activates.")
     public static int ssptime = 20;
     @Config.Comment("Maximum number of ticks between two attacks for it to be considered as part of the same combo.")
-    public static int timeBetweenAttacks = 50;
+    public static int timeBetweenAttacks = 20;
     @Config.Comment("Number of ticks between each forced client update of the entity's various stats.")
     public static int mobUpdateInterval = 100;
     @Config.Comment("Number of enforced ticks between each mob attack, because slimes.")

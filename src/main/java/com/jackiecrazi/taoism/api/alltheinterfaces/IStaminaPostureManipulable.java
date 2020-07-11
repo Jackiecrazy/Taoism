@@ -38,9 +38,9 @@ public interface IStaminaPostureManipulable {
      */
     boolean canBlock(EntityLivingBase defender, ItemStack item);
 
-    void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
+    void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
 
-    void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
+    void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
 
     float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount);
 

@@ -84,7 +84,7 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //TaoCasterData.getTaoCap(defender).setRollCounter(0);
 //        defender.rotationYaw = attacker.rotationYaw;
 //        defender.rotationPitch = attacker.rotationPitch;
@@ -94,7 +94,7 @@ public class Balisong extends TaoWeapon {
 //        defender.motionY=-look.y;
 //        defender.motionZ=-look.z;
 //        defender.velocityChanged = true;
-        super.parrySkill(attacker, defender, item);
+        super.onParry(attacker, defender, item);
     }
 
     @Override

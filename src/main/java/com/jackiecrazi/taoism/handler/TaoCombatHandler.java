@@ -54,7 +54,7 @@ public class TaoCombatHandler {
             }
         }
         //rolling inv frames for projectiles and melee damage
-        if (NeedyLittleThings.isPhysicalDamage(e.getSource()) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
+        if (TaoCombatUtils.isPhysicalDamage(e.getSource()) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
             e.setCanceled(true);
     }
 
@@ -92,7 +92,7 @@ public class TaoCombatHandler {
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase && !uke.world.isRemote) {
-            if (ds.getImmediateSource() != ds.getTrueSource() || !NeedyLittleThings.isMeleeDamage(ds))//
+            if (ds.getImmediateSource() != ds.getTrueSource() || !TaoCombatUtils.isMeleeDamage(ds))//
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
             TaoCasterData.updateCasterData(seme);
@@ -148,7 +148,11 @@ public class TaoCombatHandler {
                 NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) defend.getItem()).parrySkill(seme, uke, defend);
+                    ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend);
+                }
+                EnumHand other = uke.getHeldItemMainhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+                if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {
+                    ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other));
                 }
                 //reset cooldown
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f);
@@ -181,7 +185,7 @@ public class TaoCombatHandler {
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
-        if(TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
             e.setCanceled(true);
             return;
         }
@@ -252,7 +256,7 @@ public class TaoCombatHandler {
             return;//to prevent loops
         }
         //deflect projectile damage
-        if (NeedyLittleThings.isPhysicalDamage(ds) && ds.getImmediateSource() != null && !posBreak) {
+        if (TaoCombatUtils.isPhysicalDamage(ds) && ds.getImmediateSource() != null && !posBreak) {
             double dp = ds.getImmediateSource().getLookVec().dotProduct(uke.getLookVec());
             double dist = ds.getImmediateSource().getLookVec().lengthVector() * uke.getLookVec().lengthVector();
             double cos = dp / dist;
@@ -312,16 +316,20 @@ public class TaoCombatHandler {
                 e.setAmount(((ICombatManipulator) stack.getItem()).finalDamageMods(e.getSource(), seme, uke, stack, e.getAmount()));
             }
         }
-        if (TaoCasterData.getTaoCap(uke).isRecordingDamage()) {//record damage for rainy days
-            TaoCasterData.getTaoCap(uke).addRecordedDamage(e.getAmount());
+        ITaoStatCapability ukecap = TaoCasterData.getTaoCap(uke);
+        if (ukecap.isRecordingDamage()) {//record damage for rainy days
+            ukecap.addRecordedDamage(e.getAmount());
             e.setAmount(0);
             e.setCanceled(true);
         }
         uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
-        if (!e.isCanceled() && TaoCasterData.getTaoCap(uke).getDownTimer() <= 0) {//do not reset when a person's downed, otherwise it gets out of hand fast
+        if (!e.isCanceled()) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows
-            if (!NeedyLittleThings.isMeleeDamage(e.getSource())) return;
-            TaoCasterData.getTaoCap(uke).setPostureRechargeCD(CombatConfig.postureCD);
+            if (!TaoCombatUtils.isMeleeDamage(e.getSource())) return;
+            if (ukecap.getDownTimer() <= 0)
+                ukecap.setPostureRechargeCD(CombatConfig.postureCD);
+//            else
+//                ukecap.setDownTimer(ukecap.getDownTimer()-(int)(e.getAmount()*5));
         }
         TaoCasterData.forceUpdateTrackingClients(uke);
     }

@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.config;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MaterialStatWrapper;
 import com.jackiecrazi.taoism.api.MaterialType;
 import com.jackiecrazi.taoism.api.MaterialWrapper;
@@ -8,19 +7,18 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
-import org.apache.logging.log4j.LogManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 public class MaterialsConfig {
     public static final String MATHEADER = "All enabled material parts";
     public static final MaterialWrapper FALLBACK=new MaterialWrapper(MaterialStatWrapper.FALLBACK,1);
     public static MaterialStatWrapper lightest, heaviest, sharpest, dullest;
-    //TODO material traits
     private static final String[] defaultmatshard = {
             "metal",//human
             "stone",//hell
@@ -60,7 +58,7 @@ public class MaterialsConfig {
             new MaterialStatWrapper("ingotBrass", 853, 6, 2, 15, 1.5, 1, 1, 1, 1, 181, 166, 66, 2, 1, 40, 4.9),//fix
             new MaterialStatWrapper("ingotSteel", 872, 6.75, 4, 750, 1.8, 0.9, 0.9, 0.9, 0.9, 67, 70, 75, 4, 1, 60, 5.5),},
             {
-                    //stone, TODO a perk for stone
+                    //stone,
 
                     new MaterialStatWrapper("stone", 277, 5, 1, 132, 1, 1, 1, 1, 1.5, 128, 128, 128, 1, 2, 90, 1.0),
                     new MaterialStatWrapper("netherrack", 277, 5, 1, 132, 1, 1, 1, 1, 1.5, 178, 34, 34, 1, 3, 90, 1.0),
@@ -108,7 +106,7 @@ public class MaterialsConfig {
             {new MaterialStatWrapper("intestine", 144, 6, 131, 1, 1, 1, 1, 1, 228, 217, 111, 1, 7)},
 
 
-            {new MaterialStatWrapper("feather", 144, 6, 131, 1, 1, 1, 1, 1, 228, 217, 111, 1, 7)},//feather, TODO fill in values
+            {new MaterialStatWrapper("feather", 144, 6, 131, 1, 1, 1, 1, 1, 228, 217, 111, 1, 7)},//feather,
             */
             //Open this to item registration in case someone wants to add something one-off, with subdivision stick and ingot/plate, which are worth different quantities (1 and 2 materials to not use doubles). A certain material can have both or only one.
             //this allows you to do more crazy things, like blaze rod shafts (arrow shafts are worth 1). When rendering armor if you made it out of something that only has sticks then it'll portray itself as bundled sticks for plates ,>
@@ -419,7 +417,7 @@ public class MaterialsConfig {
                     MaterialStatWrapper msw = new MaterialStatWrapper(s, MaterialType.FLETCH, mass, hard, flex, new float[]{meta, wood, wate, fire, eart}, new Color(r, g, b), d, sp, 0, 0);
                     for (String st : material.get(s, "The list of items that I apply to, and how much each item counts for the purpose (double it, e.g. 1 ingot is actually 2 here, for arrow shafts)", getApplicableItems(s)).getStringList()) {
                         //System.out.println(st);
-                        MaterialWrapper ms = new MaterialWrapper(msw, Integer.valueOf(st.split("\\,")[1]));//FIXME this only gets the front part, the back number doesn't count for some infernal reason
+                        MaterialWrapper ms = new MaterialWrapper(msw, Integer.valueOf(st.split("\\,")[1]));
                         loggedItems.put(st.split("\\,")[0], ms);
 
                     }

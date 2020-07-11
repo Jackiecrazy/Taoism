@@ -1,7 +1,6 @@
 package com.jackiecrazi.taoism.common.block.special;
 
 import com.jackiecrazi.taoism.common.tile.TilePedestal;
-import com.jackiecrazi.taoism.common.tile.TileWorkstation;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -47,6 +46,6 @@ public class BlockWorkstation extends BlockContainer {
 	
 	public TileEntity createNewTileEntity(World worldIn, int meta)
     {
-		return new TileWorkstation();
+		return null;
     }
 }

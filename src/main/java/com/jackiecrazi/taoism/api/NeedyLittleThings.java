@@ -3,7 +3,6 @@ package com.jackiecrazi.taoism.api;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.handler.TaoCombatHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -12,10 +11,8 @@ import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -32,14 +29,6 @@ public class NeedyLittleThings {
      * Copied from EntityArrow, because kek.
      */
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
-
-    public static boolean isMeleeDamage(DamageSource ds) {
-        return isPhysicalDamage(ds) && !ds.isProjectile();
-    }
-
-    public static boolean isPhysicalDamage(DamageSource ds) {
-        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
-    }
 
     public static double getSpeedSq(Entity e) {
         return e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ;
@@ -133,10 +122,59 @@ public class NeedyLittleThings {
     }
 
     /**
-     * returns the position closest to pos at which compensated distance to e is 0
+     * returns the coordinate closest to the end point of the vector that fits the entity
+     * From and To should be from the feet and at the center.
+     * After that, it performs 4 ray casts: one from the bottom, one at the top, and two at the sides.
+     * Two sides are omitted if you're 1 block wide or less, another ray cast is done for every block of height you have
+     * So a player will be casted 3 times: once at the foot, once at the midriff, and once at the head
+     * The closest RayTraceResult will be used, with compensation if it didn't hit the top of a block
      */
-    public static Vec3d getThiccVec(Vec3d pos, Entity e) {
-        return pos.subtract(e.getPositionVector()).normalize().scale(Math.max(e.width, e.height));
+    public static Vec3d getClosestAirSpot(Vec3d from, Vec3d to, Entity e) {
+        Vec3d ret = to;
+        double widthParse=e.width / 2;
+        double heightParse=e.height;
+        if(widthParse<0.5)widthParse=0;
+        if(heightParse<1)heightParse=0;
+        for (double addX = -widthParse; addX < widthParse; addX++) {
+            for (double addZ = -widthParse; addZ < widthParse; addZ++) {
+                for (double addY = 0; addY < heightParse; addY++) {
+                    Vec3d mod = new Vec3d(addX, addY, addZ);
+                    RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
+                    if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK) {
+                        Vec3d hit = r.hitVec.subtract(mod);
+                        switch (r.sideHit) {
+                            case NORTH:
+                                hit.addVector(0, 0, 1);
+                                break;
+                            case SOUTH:
+                                hit.addVector(0, 0, -1);
+                                break;
+                            case EAST:
+                                hit.addVector(-1, 0, 0);
+                                break;
+                            case WEST:
+                                hit.addVector(1, 0, 0);
+                                break;
+                            case UP:
+                                hit.addVector(0, -1, 0);
+                                break;
+                            case DOWN:
+                                hit.addVector(0, 1, 0);
+                                break;
+                        }
+                        if (from.squareDistanceTo(hit) < from.squareDistanceTo(ret)) {
+                            ret = hit;
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static Vec3d getPointInFrontOf(Entity target, Entity from, double distance){
+        Vec3d end=target.getPositionVector().add(from.getPositionVector().subtract(target.getPositionVector()).normalize().scale(distance));
+        return getClosestAirSpot(from.getPositionVector(), end, from);
     }
 
     public static void swapItemInHands(EntityLivingBase elb) {
@@ -145,15 +183,6 @@ public class NeedyLittleThings {
         elb.setHeldItem(EnumHand.MAIN_HAND, off);
         TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND));
         TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND));
-    }
-
-    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
-        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
-        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
-    }
-
-    public static float getCooldownPeriod(EntityLivingBase elb) {
-        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND) * 20.0D);
     }
 
     public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
@@ -225,21 +254,6 @@ public class NeedyLittleThings {
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         return dotsq > 0.5D;
-    }
-
-    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
-        if (elb == null) return DamageSource.GENERIC;
-        if (elb instanceof EntityPlayer)
-            return DamageSource.causePlayerDamage((EntityPlayer) elb);
-        else return DamageSource.causeMobDamage(elb);
-    }
-
-    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
-        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
-    }
-
-    public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {

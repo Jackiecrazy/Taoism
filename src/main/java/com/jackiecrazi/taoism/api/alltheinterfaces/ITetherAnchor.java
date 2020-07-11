@@ -29,7 +29,6 @@ public interface ITetherAnchor {
                 //update the entity's relative position to the point
                 //if the distance is below tether length, do nothing
                 //if the distance is above tether length, apply centripetal force to the point
-                //TODO Fiddle with this until it's pretty
                 if (getTetherLength() * getTetherLength() < distsq && point != null) {
                     e.motionX += (point.x - e.posX) * 0.02;
                     e.motionY += (point.y - e.posY) * 0.02;

@@ -26,7 +26,7 @@ public class Chui extends TaoWeapon {
     //execution
 
     public Chui() {
-        super(0, 1.2f, 8f, 1.3f);
+        super(0, 1.2f, 8f, 1f);
     }
 
     @Override

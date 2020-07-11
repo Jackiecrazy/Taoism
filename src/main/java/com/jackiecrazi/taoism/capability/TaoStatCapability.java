@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -454,6 +455,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setDownTimer(int time) {
+        if (time < 0) time = 0;
         EntityLivingBase elb = e.get();
         if (elb != null && time == 0) {
             elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
@@ -483,7 +485,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (elb != null)
             if (time == 0) {
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-            } else if (root == 0) {
+            } else if (root == 0 && !(elb instanceof EntityPlayer)) {
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
             }
@@ -524,11 +526,11 @@ public class TaoStatCapability implements ITaoStatCapability {
         sync();
         if (target != null) {
             float damage = getRecordedDamage();
-            DamageSource ds = NeedyLittleThings.causeLivingDamage(elb);
+            DamageSource ds = TaoCombatUtils.causeLivingDamage(elb);
             if (elb != null) {
-                if(elb==target)return;//bootleg invulnerability!
-                ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);
-                if (is != null && is.getItem() instanceof ICombatManipulator) {
+                if (elb == target) return;//bootleg invulnerability!
+                ItemStack is = elb.getHeldItemMainhand();
+                if (is.getItem() instanceof ICombatManipulator) {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }
             }

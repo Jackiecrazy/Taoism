@@ -64,9 +64,9 @@ public class TaoCombatUtils {
         if (elb instanceof EntityPlayer)
             switch (hand) {
                 case OFF_HAND:
-                    return NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f);
+                    return getCooledAttackStrengthOff(elb, 0.5f);
                 case MAIN_HAND:
-                    return NeedyLittleThings.getCooledAttackStrength(elb, 0.5f);
+                    return getCooledAttackStrength(elb, 0.5f);
             }
         return 1f;
     }
@@ -126,7 +126,7 @@ public class TaoCombatUtils {
 
                     float cooldown = main ?
                             player.getCooledAttackStrength(0.5F) :
-                            NeedyLittleThings.getCooledAttackStrengthOff(player, 0.5f);
+                            getCooledAttackStrengthOff(player, 0.5f);
                     //System.out.println(cooldown+String.valueOf(player.world.isRemote));
                     damage = damage * (0.2F + cooldown * cooldown * 0.8F);
                     damageMods = damageMods * cooldown;
@@ -301,7 +301,7 @@ public class TaoCombatUtils {
 
     public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
-        boolean mainRec = NeedyLittleThings.getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = NeedyLittleThings.getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shields
@@ -332,6 +332,15 @@ public class TaoCombatUtils {
         return ret;
     }
 
+    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
+        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+    }
+
+    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
+    }
+
     public static boolean isShield(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.shieldItems) {
@@ -348,6 +357,14 @@ public class TaoCombatUtils {
         return false;
     }
 
+    public static float getCooldownPeriod(EntityLivingBase elb) {
+        return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
+    }
+
+    public static float getCooldownPeriodOff(EntityLivingBase elb) {
+        return (float) (1.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
+    }
+
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
         float ret = attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
         if (attack.isEmpty()) {//bare hand 1.5x
@@ -360,5 +377,20 @@ public class TaoCombatUtils {
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
         return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
                 (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : isShield(defend) ? CombatConfig.defaultMultiplierPostureShield : CombatConfig.defaultMultiplierPostureDefend);
+    }
+
+    public static boolean isMeleeDamage(DamageSource ds) {
+        return isPhysicalDamage(ds) && !ds.isProjectile();
+    }
+
+    public static boolean isPhysicalDamage(DamageSource ds) {
+        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
+    }
+
+    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
+        if (elb == null) return DamageSource.GENERIC;
+        if (elb instanceof EntityPlayer)
+            return DamageSource.causePlayerDamage((EntityPlayer) elb);
+        else return DamageSource.causeMobDamage(elb);
     }
 }

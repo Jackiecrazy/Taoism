@@ -185,11 +185,11 @@ public class BanFu extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //trap the opponent's weapon, resetting attack timer.
         //the next attack in 5 seconds deals 0.35*damage posture regardless of block.
         //Taoism.setAtk(defender, 0);
-        super.parrySkill(attacker, defender, item);
+        super.onParry(attacker, defender, item);
     }
 
     @Override

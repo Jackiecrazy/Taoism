@@ -156,7 +156,7 @@ public class Pollaxe extends TaoWeapon {
         return getHand(item) == EnumHand.OFF_HAND ? 0 : 3;
     }
 
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
         if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
             TaoCombatUtils.rechargeHand(defender, other, 0.9f);
@@ -224,10 +224,8 @@ public class Pollaxe extends TaoWeapon {
             setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         else setLastAttackedRangeSq(attacker, stack, 0);
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 1) {//second hit
-            //teleport to right in front of the entity attacked
-            Vec3d end = target.getPositionVector().add(NeedyLittleThings.getThiccVec(attacker.getPositionVector(), target).scale(2));
-            attacker.setPositionAndUpdate(end.x, end.y, end.z);
-
+            Vec3d tpTo = NeedyLittleThings.getPointInFrontOf(target, attacker, 2.5);
+            attacker.setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
         }
     }
 

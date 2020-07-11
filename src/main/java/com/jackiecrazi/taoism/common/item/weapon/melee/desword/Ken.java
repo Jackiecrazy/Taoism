@@ -98,10 +98,10 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         //combo limit is raised to 9 for the next 9 seconds
         setCombo(defender, item, 0);
-        super.parrySkill(attacker, defender, item);
+        super.onParry(attacker, defender, item);
     }
 
     @Override

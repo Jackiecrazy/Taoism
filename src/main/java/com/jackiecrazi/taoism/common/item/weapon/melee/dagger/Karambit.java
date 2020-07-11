@@ -83,7 +83,7 @@ public class Karambit extends TaoWeapon{
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
 //        TaoCasterData.getTaoCap(defender).setRollCounter(0);
 //        defender.rotationYaw = attacker.rotationYaw;
 //        defender.rotationPitch = attacker.rotationPitch;
@@ -92,7 +92,7 @@ public class Karambit extends TaoWeapon{
 //        defender.motionY = -look.y;
 //        defender.motionZ = -look.z;
 //        defender.velocityChanged = true;
-        super.parrySkill(attacker, defender, item);
+        super.onParry(attacker, defender, item);
     }
 
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {

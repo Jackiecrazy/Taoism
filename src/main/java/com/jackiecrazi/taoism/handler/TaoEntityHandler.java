@@ -27,7 +27,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -138,7 +137,7 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
-    public static void dramatic(LivingFallEvent e){
+    public static void dramatic(LivingFallEvent e) {
         if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
             TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
         }
@@ -154,9 +153,10 @@ public class TaoEntityHandler {
         }
         if (itsc.getRootTime() > 0) {
             elb.setVelocity(0, 0, 0);
-            if(elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ) {
+            if (elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ) {
                 elb.setPositionAndUpdate(elb.prevPosX, elb.prevPosY, elb.prevPosZ);
             }
+            elb.velocityChanged = true;
         }
     }
 
@@ -172,7 +172,7 @@ public class TaoEntityHandler {
                 double d2 = Taoism.unirand.nextGaussian() * 0.02D;
                 p.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, p.posX + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, p.posY + p.width / 2, p.posZ + (double) (Taoism.unirand.nextFloat() * p.width * 2.0F) - (double) p.width, d0, d1, d2);
             }
-            if (cap.isInCombatMode() && p.isSprinting() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
+            if (cap.isInCombatMode() && cap.getDownTimer() <= 0 && cap.getRootTime() <= 0 && cap.getQi() > 0) {
                 //fall speed is slowed by a factor from 0.9 to 0.4, depending on qi and movement speed
                 if (cap.getQi() > 3) {
                     if (TaoMovementUtils.shouldStick(p)) {
@@ -221,7 +221,7 @@ public class TaoEntityHandler {
                         p.motionZ = vec.z * speed;
                     } else if (!p.isSneaking() && p.motionY < 0) {
                         p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
-                        p.motionY *= ((MathHelper.clamp(2 - (p.motionX * p.motionX + p.motionZ * p.motionZ), 1f, 2f) * 1.5f / cap.getQi()));//
+                        p.motionY *= 3 / cap.getQi();//standardized!
                     } else p.fallDistance = 0.1f;//for da critz
                 }
             }

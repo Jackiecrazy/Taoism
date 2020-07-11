@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
@@ -36,17 +37,28 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+        gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
+    }
+
+    @Override
+    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        if(gettagfast(item).getInteger("lastParryTime")>attacker.ticksExisted){
+            gettagfast(item).setInteger("lastParryTime", 0);
+        }
         //just dodged or parried
-        if (TaoCasterData.getTaoCap(attacker).getRollCounter() < CombatConfig.rollThreshold * 3 || attacker.ticksExisted - gettagfast(item).getInteger("lastParryTime") < 20)
+        if (TaoCasterData.getTaoCap(attacker).getRollCounter() < CombatConfig.rollThreshold * 2 || attacker.ticksExisted - gettagfast(item).getInteger("lastParryTime") < 20)
             return Event.Result.ALLOW;
         //enemy isn't ready
         if (TaoCombatUtils.getHandCoolDown(target, EnumHand.MAIN_HAND) < 1 || TaoCombatUtils.getHandCoolDown(target, EnumHand.OFF_HAND) < 1)
+            return Event.Result.ALLOW;
+        //mob just attacked
+        if (!(target instanceof EntityPlayer) && TaoCasterData.getTaoCap(target).getSwing() < CombatConfig.mobForcedCooldown)
             return Event.Result.ALLOW;
         return Event.Result.DENY;
     }

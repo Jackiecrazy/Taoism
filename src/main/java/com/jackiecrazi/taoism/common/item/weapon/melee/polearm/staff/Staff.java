@@ -27,7 +27,7 @@ public class Staff extends TaoWeapon {
      * Leap attacks deal 1.5x damage
      * Left click is a downward smash that knocks back airborne targets and a flick up that sends standing targets flying
      * Right click is a standard sweep, range 4, with small knockback
-     * Block (not parry) is a continuous whirl, deflecting projectiles with speed less than qi*2 TODO integrate with idle parry
+     * Block (not parry) is a continuous whirl, deflecting projectiles with speed less than qi*2
      * After ground-ground, gain small jump boost. Hitting grounded enemy while airborne will launch you further, while air-air will hit them up and away.
      * ^^^aerial duel test.
      * Riposte: combo extended to 2,

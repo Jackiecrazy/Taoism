@@ -100,7 +100,6 @@ public class ClientEvents {
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false, sneak = false;
     private static int leftClickAt = 0, rightClickAt = 0;
-    //TODO starry effect to signal that the orb is filled, or make the lines progress instead of fade/solidify
     private static float targetQiLevel = 0, currentQiLevel = 0;
 
     @SubscribeEvent
@@ -135,7 +134,6 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void down(RenderLivingEvent.Pre event) {
-        //TODO display posture above entity in a chinesy HUD, give clear indication when they're downed
         //I say, two stone lions on the sides of the screen wrapping a bar in the middle, glowing red when downed, would be nice?
         //Or, say, a 华表 for your own posture?
         Tuple<Float, Float> sizes = new Tuple<>(event.getEntity().width, event.getEntity().height);//TaoCasterData.getTaoCap(event.getEntity()).getPrevSizes();
@@ -279,13 +277,6 @@ public class ClientEvents {
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
-            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
-                rightClickAt++;
-                if (rightClickAt == CHARGE) {
-                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
-                }
-            }
         }
     }
 
@@ -308,7 +299,7 @@ public class ClientEvents {
         ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();
         float f1 = p.prevRotationPitch + (p.rotationPitch - p.prevRotationPitch) * e.getPartialTicks();
         //MathHelper.clamp((!requipM ? f * f * f : 0.0F) - this.equippedProgressMainHand, -0.4F, 0.4F);//mainhand add per
-        float cd = NeedyLittleThings.getCooledAttackStrengthOff(p, e.getPartialTicks());
+        float cd = TaoCombatUtils.getCooledAttackStrengthOff(p, e.getPartialTicks());
         float f6 = 1 - (cd * cd * cd);
         ir.renderItemInFirstPerson(p, e.getPartialTicks(), f1, EnumHand.OFF_HAND, e.getSwingProgress(), p.getHeldItemOffhand(), f6);
     }
@@ -330,11 +321,11 @@ public class ClientEvents {
                     if (!gamesettings.showDebugInfo || gamesettings.hideGUI || player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
                         if (mc.gameSettings.attackIndicator == 1) {
                             GlStateManager.enableAlpha();
-                            float cooldown = NeedyLittleThings.getCooledAttackStrengthOff(player, 0f);
+                            float cooldown = TaoCombatUtils.getCooledAttackStrengthOff(player, 0f);
                             boolean hyperspeed = false;
 
                             if (mc.pointedEntity instanceof EntityLivingBase && cooldown >= 1.0F) {
-                                hyperspeed = NeedyLittleThings.getCooldownPeriodOff(player) > 5.0F;
+                                hyperspeed = TaoCombatUtils.getCooldownPeriodOff(player) > 5.0F;
                                 hyperspeed = hyperspeed & (mc.pointedEntity).isEntityAlive();
                             }
 
@@ -368,7 +359,7 @@ public class ClientEvents {
                 RenderHelper.enableGUIStandardItemLighting();
 
                 if (mc.gameSettings.attackIndicator == 2) {
-                    float strength = NeedyLittleThings.getCooledAttackStrengthOff(p, 0);
+                    float strength = TaoCombatUtils.getCooledAttackStrengthOff(p, 0);
 
                     if (strength < 1.0F) {
                         int y = sr.getScaledHeight() - 20;

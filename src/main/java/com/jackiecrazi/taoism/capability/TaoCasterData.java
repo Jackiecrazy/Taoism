@@ -50,16 +50,6 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         return Math.round(width * height * 10 * armor);
     }
 
-    public static void syncAttackTimer(EntityLivingBase entity){
-        if (!entity.world.isRemote) {
-            PacketUpdateAttackTimer puat=new PacketUpdateAttackTimer(entity);
-            Taoism.net.sendToAllTracking(puat, entity);
-            if (entity instanceof EntityPlayerMP) {
-                Taoism.net.sendTo(puat, (EntityPlayerMP) entity);
-            }
-        }
-    }
-
     /**
      * ticks the caster for however many ticks dictated by the second argument.
      */
@@ -92,7 +82,7 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         } else itsc.setPostureRechargeCD(itsc.getPostureRechargeCD() - ticks);
         diff = ticks;
         //value updating
-        if(ticks>0) {//so apparently time can randomly run backwards. Hmm.
+        if (ticks > 0) {//so apparently time can randomly run backwards. Hmm.
             itsc.setPosInvulTime(itsc.getPosInvulTime() - diff);
             itsc.addParryCounter(diff);
             itsc.addRollCounter(diff);
@@ -119,9 +109,12 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
-        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float armorMod = 1f ;//- ((float) elb.getTotalArmorValue() / 60f);
-        return ticks * armorMod * 0.05f * posMult * (float)(Math.sqrt(elb.getHealth()) / Math.sqrt(elb.getMaxHealth()));
+        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue()*2;
+        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
+        float healthMod = (float) ((elb.getHealth()/elb.getMaxHealth()));
+        float downedBonus = TaoCasterData.getTaoCap(elb).getDownTimer() > 0 ? TaoCasterData.getTaoCap(elb).getMaxPosture() / 120 : 0;
+
+        return (downedBonus + ticks * 0.05f) * armorMod * posMult * healthMod;
     }
 
     /**
@@ -148,6 +141,16 @@ public class TaoCasterData implements ICapabilitySerializable<NBTTagCompound> {
         ITaoStatCapability cap = entity.getCapability(CAP, null);
         assert cap != null;
         return cap;
+    }
+
+    public static void syncAttackTimer(EntityLivingBase entity) {
+        if (!entity.world.isRemote) {
+            PacketUpdateAttackTimer puat = new PacketUpdateAttackTimer(entity);
+            Taoism.net.sendToAllTracking(puat, entity);
+            if (entity instanceof EntityPlayerMP) {
+                Taoism.net.sendTo(puat, (EntityPlayerMP) entity);
+            }
+        }
     }
 
     /**

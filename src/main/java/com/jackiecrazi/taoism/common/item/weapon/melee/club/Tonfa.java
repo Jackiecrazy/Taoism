@@ -26,7 +26,9 @@ public class Tonfa extends TaoWeapon {
     Chi increases by 1 per parry. Parry charges apply to both hands.
     At 3 chi and above, both blocks and parries reset attack cooldown;
     at 7 chi, defense break is inflicted on block and fatigue is added on a parry
-    Charge special: next attack in 1 second add resistance I to self for the amount of time elapsed since parry, immune to stagger for 2 sec
+    Execution:
+    attacks temporarily knock down, parries become omnidirectional, free, and projectile-stopping, and you attack anyone you collide into.
+    Net effect should be you using parries to bounce between multiple enemies, slowly wearing them down to KO, like arkham asylum
      */
 
     private final PartDefinition[] parts = {
@@ -47,7 +49,7 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         TaoCasterData.getTaoCap(defender).addQi(0.3f);
         int qi = TaoCasterData.getTaoCap(attacker).getQiFloored();
         if (qi >= 3) {
@@ -60,7 +62,7 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public void onBlock(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         int qi = TaoCasterData.getTaoCap(defender).getQiFloored();
         if (qi >= 3) {//reset cooldown
             Taoism.setAtk(attacker, 0);

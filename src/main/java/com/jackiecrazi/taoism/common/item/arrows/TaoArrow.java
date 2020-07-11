@@ -85,7 +85,6 @@ public class TaoArrow extends ItemArrow implements IDamageType {
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        //TODO list stats like draw strength and durability
 
     }
 
