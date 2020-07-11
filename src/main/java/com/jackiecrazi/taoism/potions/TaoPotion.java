@@ -3,6 +3,8 @@ package com.jackiecrazi.taoism.potions;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
+import com.jackiecrazi.taoism.config.CombatConfig;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
@@ -97,6 +99,10 @@ public class TaoPotion extends Potion {
             PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
             elb.removeActivePotionEffect(HEMORRHAGE);
             current.combine(new PotionEffect(current.getPotion(), current.getDuration() + (pe.getDuration() * (pe.getAmplifier() + 1) / 4), current.getAmplifier()));
+        }
+        if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
+            ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
+            ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
         }
     }
 

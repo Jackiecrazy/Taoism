@@ -60,6 +60,8 @@ public class CombatConfig {
     public static boolean printParryList = true;
     @Config.Comment("Toggling this option will print the list of parry eligible shields. It's a little expensive, so remember to turn it off again!")
     public static boolean printShieldList = true;
+    @Config.Comment("Whether mobs lose their attack target and planned path when blinded")
+    public static boolean blindMobs = true;
 
     public static void printParryList() {
         if (printParryList)

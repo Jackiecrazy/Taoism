@@ -234,6 +234,7 @@ public class Pollaxe extends TaoWeapon {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
             splash(attacker, stack, 360);
             dischargeWeapon(attacker, stack);
+            TaoCasterData.getTaoCap(attacker).setQi(5);
         }
     }
 

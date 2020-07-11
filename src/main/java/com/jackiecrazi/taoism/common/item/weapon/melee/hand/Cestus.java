@@ -172,7 +172,7 @@ public class Cestus extends TaoWeapon {
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int qi) {
         if (qi >= 3) {
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 40, Math.floorDiv(qi, 3) - 1), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 30, Math.floorDiv(qi, 3) - 1), false);
         }
         if (qi >= 9) {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.BLINDNESS, 40, 0), false);
