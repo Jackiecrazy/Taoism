@@ -52,6 +52,7 @@ import java.util.UUID;
 public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded, IMove {
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     protected static final UUID QI_MODIFIER = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130003");
+    private static final UUID QI_EXECUTION = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130013");
     //booleans only used when attacking to determine what type of attack it is
     //0
     private static final List<Material> pickList = Arrays.asList(
@@ -736,6 +737,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         gettagfast(item).setBoolean("charge", true);
         gettagfast(item).setLong("chargedAtTime", attacker.world.getTotalWorldTime());
+        attacker.getEntityAttribute(TaoEntities.QIRATE).removeModifier(QI_EXECUTION);
+        attacker.getEntityAttribute(TaoEntities.QIRATE).applyModifier(new AttributeModifier(QI_EXECUTION, "executing", -1, 2));
     }
 
     @Override
@@ -748,6 +751,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         gettagfast(item).setBoolean("charge", false);
         gettagfast(item).setLong("chargedAtTime", 0);
         gettagfast(item).setLong("startAt", 0);
+        elb.getEntityAttribute(TaoEntities.QIRATE).removeModifier(QI_EXECUTION);
     }
 
     @Override

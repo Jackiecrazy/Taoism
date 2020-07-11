@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,13 +20,25 @@ public class EntitySwordBeam extends EntityThrownWeapon {
 
     public EntitySwordBeam(World worldIn, EntityLivingBase throwerIn, EnumHand hand, ItemStack is) {
         super(worldIn, throwerIn, hand);
-        s=is.getUnlocalizedName();
+        s = is.getUnlocalizedName();
         h = hand;
     }
 
-    public EntitySwordBeam setRenderRotation(float amnt){
-        this.zSpin =amnt;
+    public EntitySwordBeam setRenderRotation(float amnt) {
+        this.zSpin = amnt;
         return this;
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setFloat("spin", zSpin);
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        zSpin = compound.getFloat("spin");
     }
 
     @Override
@@ -50,28 +63,17 @@ public class EntitySwordBeam extends EntityThrownWeapon {
             if (getThrower() != null) {
                 if (e != null) {
                     if (e != getThrower()) {
-                        if(h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
-                                this.setDead();
-                                return;
-                            }
+                        if (h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
+                            this.setDead();
+                            return;
+                        }
                         TaoCombatUtils.attack(getThrower(), e, hand);
+                        TaoCasterData.getTaoCap(getThrower()).addQi(0.18f);
                         setDead();
                     }
-                }else setDead();
+                } else setDead();
             }
         }
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setFloat("spin", zSpin);
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        zSpin =compound.getFloat("spin");
     }
 
     @Override

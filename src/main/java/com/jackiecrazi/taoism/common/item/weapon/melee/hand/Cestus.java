@@ -9,8 +9,6 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -67,6 +65,7 @@ public class Cestus extends TaoWeapon {
                     EntityLivingBase uke = (EntityLivingBase) getLastAttackedEntity(w, stack);
                     if (TaoCasterData.getTaoCap(uke).isRecordingDamage() && uke.motionY < 0) {
                         TaoCasterData.getTaoCap(uke).setRootTime(500);
+                        TaoCasterData.getTaoCap(uke).setBindTime(500);
                         if (!NeedyLittleThings.isFacingEntity(elb, uke, 30)) {
                             //move you up by force
                             Vec3d reprimand = NeedyLittleThings.getPointInFrontOf(elb, uke, 2);
@@ -167,7 +166,7 @@ public class Cestus extends TaoWeapon {
 
     @Override
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        target.world.newExplosion(attacker, target.posX, target.posY, target.posZ, (float) Math.sqrt(Math.abs(orig - target.getHealth())), EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("fire_aspect"), item) > 0, false);
+        target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, (float) Math.log(Math.abs(orig - target.getHealth())), false);
         return orig;
     }
 
