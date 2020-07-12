@@ -146,8 +146,8 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
-        super.onUpdate(stack, w, e, slot, onMainhand);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
         if (!w.isRemote) {
             if (gettagfast(stack).hasKey("dartID")
                     && e.world.getEntityByID(
@@ -205,7 +205,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
         return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
     }
 
@@ -260,7 +260,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
 

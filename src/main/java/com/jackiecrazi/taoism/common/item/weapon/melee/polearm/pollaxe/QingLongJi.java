@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
@@ -61,7 +62,7 @@ public class QingLongJi extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
 

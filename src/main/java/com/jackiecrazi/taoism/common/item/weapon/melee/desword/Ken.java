@@ -45,7 +45,7 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
 

@@ -59,7 +59,7 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.8f;
     }
 
@@ -69,8 +69,8 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
-        super.onUpdate(stack, w, e, slot, onMainhand);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
 //        if (onHand && e instanceof EntityLivingBase) {
 //            EntityLivingBase elb = (EntityLivingBase) e;
 ////            if (e.ticksExisted % 20 == 1)

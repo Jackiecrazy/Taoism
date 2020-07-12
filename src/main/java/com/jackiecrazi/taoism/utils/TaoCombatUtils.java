@@ -299,7 +299,7 @@ public class TaoCombatUtils {
         return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
     }
 
-    public static ItemStack getParryingItemStack(EntityLivingBase attacker, EntityLivingBase elb, float amount) {
+    public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         float defMult = 42;//meaning of life, the universe and everything
@@ -320,14 +320,14 @@ public class TaoCombatUtils {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        //offhand
-        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, off) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
-            defMult = ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount);
-            ret = off;
-        }
         //mainhand
-        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, main) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, attacker, main) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+            defMult = ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
             ret = main;
+        }
+        //offhand
+        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, attacker, off) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+            ret = off;
         }
         return ret;
     }

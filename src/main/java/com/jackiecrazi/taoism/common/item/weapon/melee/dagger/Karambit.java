@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -54,7 +55,7 @@ public class Karambit extends TaoWeapon{
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;//not all that good at defense now is it...
     }
 

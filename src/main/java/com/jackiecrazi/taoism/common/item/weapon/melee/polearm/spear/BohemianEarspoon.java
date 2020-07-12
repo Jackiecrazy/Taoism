@@ -59,7 +59,7 @@ public class BohemianEarspoon extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
 
@@ -68,9 +68,9 @@ public class BohemianEarspoon extends TaoWeapon {
         return true;
     }
 
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
-        super.onUpdate(stack, w, e, slot, onMainhand);
-        if (e instanceof EntityLivingBase && !w.isRemote && onMainhand) {
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && !w.isRemote && onHand) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) != 0) {
                 EntityLivingBase target = elb.getLastAttackedEntity();

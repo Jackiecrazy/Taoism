@@ -327,7 +327,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * gradually discharges the weapon
      */
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onMainhand) {
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             ItemStack offhand = elb.getHeldItemOffhand();
@@ -820,8 +820,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
-    public boolean canBlock(EntityLivingBase defender, ItemStack item) {
-        return true;
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
+        return NeedyLittleThings.isFacingEntity(defender, attacker, 120);
     }
 
     @Override

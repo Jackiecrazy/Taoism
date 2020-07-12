@@ -62,12 +62,13 @@ public class TaoCombatHandler {
     public static void projectileParry(ProjectileImpactEvent e) {
         Entity ent = e.getEntity();
         if (ent == null) return;
-        if (EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)) return;//derp derp derp
+        if (EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID))
+            return;//derp derp derp
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && (uke.getHeldItemMainhand().getItem() instanceof TaoWeapon || uke.getHeldItemOffhand().getItem() instanceof TaoWeapon)) {
+            if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !TaoCombatUtils.getParryingItemStack(ent, uke, 1).isEmpty()) {
                 if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
@@ -138,7 +139,7 @@ public class TaoCombatHandler {
             //some entities just can't parry.
             //suck it, wither.
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || (!defend.isEmpty() && (NeedyLittleThings.isFacingEntity(uke, seme, 120) || uke.getDistanceSq(seme) < 0.25f))) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
+            if ((!smart || !defend.isEmpty()) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
                 uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
 //                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);

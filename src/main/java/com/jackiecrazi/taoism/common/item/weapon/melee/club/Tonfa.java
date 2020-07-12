@@ -6,9 +6,12 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
@@ -26,7 +29,7 @@ public class Tonfa extends TaoWeapon {
     Chi increases by 1 per parry. Parry charges apply to both hands.
     At 3 chi and above, both blocks and parries reset attack cooldown;
     at 7 chi, defense break is inflicted on block and fatigue is added on a parry
-    Execution:
+    Execution: 20 seconds of batman
     attacks temporarily knock down, parries become omnidirectional, free, and projectile-stopping, and you attack anyone you collide into.
     Net effect should be you using parries to bounce between multiple enemies, slowly wearing them down to KO, like arkham asylum
      */
@@ -40,12 +43,37 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && onHand && isCharged((EntityLivingBase) e, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            Entity target = TaoMovementUtils.collidingEntity(elb);
+            if (target != null && getLastAttackedEntity(w, stack) != target) {
+                TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
+                TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
+            }
+        }
+    }
+
+    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("tonfa.main"));
         tooltip.add(I18n.format("tonfa.off"));
         tooltip.add(I18n.format("tonfa.parry"));
         tooltip.add(I18n.format("tonfa.reset"));
         tooltip.add(I18n.format("tonfa.defbreak"));
+    }
+
+    @Override
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+        super.chargeWeapon(attacker, item, ticks);
+        attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 400));
+    }
+
+    @Override
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
+        if (isCharged(defender, item)) return true;
+        return super.canBlock(defender, attacker, item);
     }
 
     @Override
@@ -79,9 +107,8 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, 20), false);
         }
         if (isCharged(attacker, stack)) {
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.RESISTANCE, getChargedTime(attacker, stack)), false);
-            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.RESOLUTION, 40), false);
-
+            TaoCasterData.getTaoCap(target).setDownTimer(10);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 20, 4), false);
         }
     }
 
@@ -112,7 +139,8 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (isCharged(defender, item)) return 2f;
         return 0.7f;
     }
 }

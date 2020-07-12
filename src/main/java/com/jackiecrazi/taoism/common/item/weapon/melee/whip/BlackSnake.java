@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.whip;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -53,7 +54,7 @@ public class BlackSnake extends TaoWeapon {
     }
 
     @Override
-    public float postureMultiplierDefend(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0;
     }
 }
