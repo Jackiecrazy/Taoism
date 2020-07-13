@@ -52,6 +52,7 @@ public class Tonfa extends TaoWeapon {
                 TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
                 TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
             }
+            if (getChargedTime(elb, stack) > getMaxChargeTime()) dischargeWeapon(elb, stack);
         }
     }
 
@@ -71,6 +72,12 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
+    }
+
+    @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
         if (isCharged(defender, item)) return true;
         return super.canBlock(defender, attacker, item);
@@ -87,6 +94,8 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7), false);
         }
+        if(isCharged(defender, item))
+            TaoCombatUtils.rechargeHand(defender, getHand(item),1);
     }
 
     @Override
@@ -98,6 +107,8 @@ public class Tonfa extends TaoWeapon {
         if (qi >= 7) {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
         }
+        if(isCharged(defender, item))
+            TaoCombatUtils.rechargeHand(defender, getHand(item),1);
     }
 
     @Override
@@ -108,7 +119,7 @@ public class Tonfa extends TaoWeapon {
         }
         if (isCharged(attacker, stack)) {
             TaoCasterData.getTaoCap(target).setDownTimer(10);
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 20, 4), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.FATIGUE, 20, 4), false);
         }
     }
 
@@ -116,6 +127,11 @@ public class Tonfa extends TaoWeapon {
     protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND)
             multiHit(attacker, stack, target, 3, 3);
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 400;
     }
 
     @Override
@@ -131,11 +147,6 @@ public class Tonfa extends TaoWeapon {
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         return 2f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 20;
     }
 
     @Override

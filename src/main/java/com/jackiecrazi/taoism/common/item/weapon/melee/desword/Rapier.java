@@ -26,6 +26,9 @@ public class Rapier extends TaoWeapon {
      * The smallsword is what you're looking at if you want a quick dueling blade.
      * 3-hit combo as per sword standards
      * Leaping does not crit. Instead, if the enemy is in cooldown or you parried/dodged in the last second, crit for 1.5x damage
+     * execution: attacks taunt the enemy, increasing its damage dealt and taken and fatiguing it more and more.
+     * On the 9th hit the enemy is dealt great posture damage (with cap), some wearing down beforehand is necessary if you want a down
+     * an attack will now pierce their heart and end the state (with cap)
      */
     public Rapier() {
         super(2, 1.6, 5, 0.5f);

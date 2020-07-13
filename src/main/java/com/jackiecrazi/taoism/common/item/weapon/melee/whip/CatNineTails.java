@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.whip;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -24,6 +25,8 @@ public class CatNineTails extends TaoWeapon {
     //whips around shields, cannot block
     //inflicts laceration
     //that's all. Better find something to cleave that armor off first...
+    //execution: continuously whip the target regardless of their armor, each hit lowering their max posture,
+    // until they're left as a bleeding heap on the floor
     private final PartDefinition[] parts = {
             StaticRefs.HANDLE,
             new PartDefinition("handlewrap", false, StaticRefs.STRING)
@@ -87,9 +90,13 @@ public class CatNineTails extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         int armor = target.getTotalArmorValue();
         int potency, duration;
-        if (armor >= 10) return;//10 armor and above means no laceration, can't rip a guy in full iron...
-        else {
-            potency = (int) (2 - (Math.ceil(armor/5f)));
+        if (armor >= 10) return;//10 armor and above means no laceration, can't rip a guy in full chain+...
+        else if (isCharged(attacker, stack)&& TaoCasterData.getTaoCap(attacker).consumeQi(0.3f,5)) {
+            potency = 2;
+            duration = 100;
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ENFEEBLE, duration, potency), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
+        } else {
+            potency = (int) (2 - (Math.ceil(armor / 5f)));
             duration = 100 - (armor * 10);
         }
         TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.LACERATION, duration, potency), false);

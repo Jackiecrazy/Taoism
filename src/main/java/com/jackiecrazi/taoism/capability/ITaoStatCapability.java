@@ -21,6 +21,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
         return (int) Math.floor(getQi());
     }
 
+    void update(final int ticks);
+
     float getQi();
 
     void setQi(float amount);
@@ -156,6 +158,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     void setRootTime(int time);
 
+    int getRecordingTime();
+
     float getRecordedDamage();
 
     void setRecordedDamage(float amount);
@@ -229,4 +233,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
             return cd.e == e && cd.n == n && cd.s == s && cd.w == w;
         }
     }
+
+    int getCannonballTime();
+
+    void setCannonballTime(int duration);
 }

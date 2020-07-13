@@ -20,6 +20,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +122,11 @@ public class NeedyLittleThings {
         }
     }
 
+    public static Vec3d getPointInFrontOf(Entity target, Entity from, double distance) {
+        Vec3d end = target.getPositionVector().add(from.getPositionVector().subtract(target.getPositionVector()).normalize().scale(distance));
+        return getClosestAirSpot(from.getPositionVector(), end, from);
+    }
+
     /**
      * returns the coordinate closest to the end point of the vector that fits the entity
      * From and To should be from the feet and at the center.
@@ -131,13 +137,13 @@ public class NeedyLittleThings {
      */
     public static Vec3d getClosestAirSpot(Vec3d from, Vec3d to, Entity e) {
         Vec3d ret = to;
-        double widthParse=e.width / 2;
-        double heightParse=e.height;
-        if(widthParse<0.5)widthParse=0;
-        if(heightParse<1)heightParse=0;
-        for (double addX = -widthParse; addX < widthParse; addX++) {
-            for (double addZ = -widthParse; addZ < widthParse; addZ++) {
-                for (double addY = 0; addY < heightParse; addY++) {
+        double widthParse = e.width / 2;
+        double heightParse = e.height;
+        if (widthParse <= 0.5) widthParse = 0;
+        if (heightParse <= 1) heightParse = 0;
+        for (double addX = -widthParse; addX <= widthParse; addX++) {
+            for (double addZ = -widthParse; addZ <= widthParse; addZ++) {
+                for (double addY = 0; addY <= heightParse; addY++) {
                     Vec3d mod = new Vec3d(addX, addY, addZ);
                     RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
                     if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -170,11 +176,6 @@ public class NeedyLittleThings {
             }
         }
         return ret;
-    }
-
-    public static Vec3d getPointInFrontOf(Entity target, Entity from, double distance){
-        Vec3d end=target.getPositionVector().add(from.getPositionVector().subtract(target.getPositionVector()).normalize().scale(distance));
-        return getClosestAirSpot(from.getPositionVector(), end, from);
     }
 
     public static void swapItemInHands(EntityLivingBase elb) {
@@ -309,6 +310,7 @@ public class NeedyLittleThings {
         return (float) (top / bot);
     }
 
+    @Nonnull
     public static RayTraceResult raytraceAnything(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
         Vec3d look = attacker.getLookVec().scale(range * 2);

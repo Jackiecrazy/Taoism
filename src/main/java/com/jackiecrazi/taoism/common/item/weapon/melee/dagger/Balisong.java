@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
@@ -13,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -26,6 +29,8 @@ public class Balisong extends TaoWeapon {
     //has 2 stances: hammer and reverse.
     //combos up to 6 times, increasing every other chi level, if in hammer grip
     //pierces 1 point of armor every chi level in reverse grip
+    //execution:gain flash dodges that damage anyone on the path for full attack effects and backstab,
+    // each enemy killed lengthens duration or makes the attack more potent
 
 
     public Balisong() {
@@ -44,33 +49,32 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? 3f : 1f;
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
+        if (isCharged(elb, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
+            RayTraceResult r = NeedyLittleThings.raytraceAnything(elb.world, elb, 16);
+            Vec3d tpTo = NeedyLittleThings.getClosestAirSpot(elb.getPositionVector(), r.hitVec, elb);
+            gettagfast(stack).setInteger("flashesWithoutHit", gettagfast(stack).getInteger("flashesWithoutHit") + 1);
+            if (r.entityHit != null) {
+                tpTo = NeedyLittleThings.getPointInFrontOf(r.entityHit, elb, -5);
+                TaoCombatUtils.attack(elb, r.entityHit, EnumHand.MAIN_HAND);
+                TaoCasterData.getTaoCap(elb).addQi(0.5f);
+                gettagfast(stack).setInteger("flashesWithoutHit", 0);
+            }
+            for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
+                TaoCasterData.getTaoCap(e).setRootTime(0);
+            elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
+            for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
+                TaoCasterData.getTaoCap(e).setRootTime(200);
+            if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
+                dischargeWeapon(elb, stack);
+            }
+        }
+        return super.onEntitySwing(elb, stack);
     }
 
 //    @Override
 //    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
 //        return 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;
-//    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 60;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 2f;
-    }
-
-//    @Override
-//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
 //    }
 
     @Override
@@ -85,25 +89,58 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+        super.chargeWeapon(attacker, item, ticks);
+        for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(16)))
+            TaoCasterData.getTaoCap(e).setRootTime(200);
+        TaoCasterData.getTaoCap(attacker).startRecordingDamage();
+    }
+
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        TaoCasterData.getTaoCap(elb).setRootTime(0);
+        TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+    }
+
+    @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        //TaoCasterData.getTaoCap(defender).setRollCounter(0);
-//        defender.rotationYaw = attacker.rotationYaw;
-//        defender.rotationPitch = attacker.rotationPitch;
-//        setCombo(defender, item, 0);
-//        Vec3d look = attacker.getLookVec();
-//        defender.motionX=-look.x;
-//        defender.motionY=-look.y;
-//        defender.motionZ=-look.z;
-//        defender.velocityChanged = true;
         super.onParry(attacker, defender, item);
     }
 
     @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
-            EnumHand hand=elb.getHeldItemOffhand()==stack?EnumHand.OFF_HAND:EnumHand.MAIN_HAND;
-            TaoCombatUtils.rechargeHand(elb, hand,1);
+            EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand, 1);
         }
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+//    @Override
+//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+//    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? 3f : 1f;
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if ((target.getLastDamageSource() == null || target.getCombatTracker().getBestAttacker() != attacker) || isCharged(attacker, stack)) {
+            return target.getTotalArmorValue();
+        }
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            //ignore 1 point of armor every chi level
+            return getQiFromStack(stack);
+        }
+        return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
@@ -111,19 +148,17 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? Event.Result.ALLOW : Event.Result.DENY;
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
     }
 
     @Override
-    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            //ignore 1 point of armor every chi level
-            return getQiFromStack(stack);
-        }
-        if ((target.getCombatTracker().getBestAttacker() != attacker)) {
-            return target.getTotalArmorValue();
-        }
-        return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
+    public int getMaxChargeTime() {
+        return 400;
+    }
+
+    @Override
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 2f;
     }
 }

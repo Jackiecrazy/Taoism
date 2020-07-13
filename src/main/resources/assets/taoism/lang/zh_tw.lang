@@ -176,7 +176,7 @@ ropedart.accel=腳打會額外加速一層
 
 item.bian.name=鐵節鞭
 bian.stagger=對擊倒的目標造成1.5倍傷害
-bian.armpen=每層氣無視一點護甲
+bian.armpen=每兩層氣無視一點護甲
 bian.enfeeble=攻擊使目標的架勢恢復速度減緩兩秒，效果隨氣而增加
 
 item.rapier.name=刺劍

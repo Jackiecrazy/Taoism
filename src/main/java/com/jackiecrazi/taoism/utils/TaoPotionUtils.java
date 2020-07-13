@@ -82,6 +82,7 @@ public class TaoPotionUtils {
                     }
                 }
             }
+            elb.getActivePotionMap().put(pot.getPotion(), pot);
             return false;
         }
         return true;

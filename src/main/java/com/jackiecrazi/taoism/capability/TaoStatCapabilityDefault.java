@@ -7,6 +7,11 @@ import net.minecraft.nbt.NBTTagCompound;
 public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
+    public void update(int ticks) {
+
+    }
+
+    @Override
     public float getQi() {
         return 0;
     }
@@ -327,6 +332,11 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public int getRecordingTime() {
+        return 0;
+    }
+
+    @Override
     public float getRecordedDamage() {
         return 0;
     }
@@ -358,6 +368,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void sync() {
+
+    }
+
+    @Override
+    public int getCannonballTime() {
+        return 0;
+    }
+
+    @Override
+    public void setCannonballTime(int duration) {
 
     }
 

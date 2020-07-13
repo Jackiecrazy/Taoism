@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.handler;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICombo;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ISpecialSwitchIn;
@@ -52,6 +53,7 @@ public class TaoEntityHandler {
             elb.getAttributeMap().registerAttribute(TaoEntities.LINGREGEN);
             elb.getAttributeMap().registerAttribute(TaoEntities.POSREGEN);
             elb.getAttributeMap().registerAttribute(TaoEntities.HEAL);
+            elb.getAttributeMap().registerAttribute(TaoEntities.MAXPOSTURE);
             for (int i = 0; i < IElemental.ATTRIBUTES.length; i++) {
                 elb.getAttributeMap().registerAttribute(IElemental.ATTRIBUTES[i]);
             }
@@ -85,6 +87,7 @@ public class TaoEntityHandler {
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
             TaoCasterData.updateCasterData(elb);
+            elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
             if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
                 if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
@@ -105,7 +108,10 @@ public class TaoEntityHandler {
     @SubscribeEvent
     public static void sike(LivingHealEvent e) {
         e.setAmount((float) (e.getEntityLiving().getEntityAttribute(TaoEntities.HEAL).getAttributeValue() * e.getAmount()));
-        if (e.getAmount() == 0) e.setCanceled(true);
+        if (e.getAmount() <= 0) e.setCanceled(true);
+        if (e.getAmount() < 0) {
+            e.getEntityLiving().attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), -e.getAmount());
+        }
     }
 
 
@@ -147,16 +153,20 @@ public class TaoEntityHandler {
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
         final EntityLivingBase elb = e.getEntityLiving();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
-        if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
-            TaoCasterData.updateCasterData(elb);
-        }
         if (itsc.getRootTime() > 0) {
             elb.setVelocity(0, 0, 0);
             if (elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ) {
                 elb.setPositionAndUpdate(elb.prevPosX, elb.prevPosY, elb.prevPosZ);
             }
             elb.velocityChanged = true;
+        }
+        if (itsc.isRecordingDamage()) {
+            if (itsc.getCannonballTime() > 0 && TaoMovementUtils.willCollide(elb) && itsc.getRecordingTime() > 1)
+                TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
+        }
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
+            TaoCasterData.updateCasterData(elb);
         }
     }
 

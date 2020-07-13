@@ -28,7 +28,7 @@ public interface ICombatManipulator {
     float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item);
 
     /**
-     * this is called on LivingAttackEvent, before parries
+     * this is called on LivingAttackEvent, before parries. It returns void because LAE doesn't support modifying amounts
      */
     void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 

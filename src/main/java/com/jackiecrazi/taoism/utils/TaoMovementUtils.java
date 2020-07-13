@@ -48,6 +48,31 @@ public class TaoMovementUtils {
         return false;
     }
 
+    public static boolean willCollide(Entity elb) {
+        double allowance = 0.1;
+        return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().grow(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance)) || collidingEntity(elb) != null;
+    }
+
+    /**
+     * Checks the +x, -x, +y, -y, +z, -z, in that order
+     *
+     * @param elb
+     * @return
+     */
+    public static Entity collidingEntity(Entity elb) {
+        AxisAlignedBB aabb = elb.getEntityBoundingBox();
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 6, elb.motionY * 6, elb.motionZ * 6), EntitySelectors.NOT_SPECTATING);
+        double dist = 0;
+        Entity pick = null;
+        for (Entity e : entities) {
+            if (e.getDistanceSq(elb) < dist || dist == 0) {
+                pick = e;
+                dist = e.getDistanceSq(elb);
+            }
+        }
+        return pick;
+    }
+
     public static boolean willHitWallFrom(Entity elb, Entity from) {
         double allowance = 1;
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
@@ -166,26 +191,6 @@ public class TaoMovementUtils {
         elb.velocityChanged = true;
         TaoCasterData.forceUpdateTrackingClients(elb);
         return true;
-    }
-
-    /**
-     * Checks the +x, -x, +y, -y, +z, -z, in that order
-     *
-     * @param elb
-     * @return
-     */
-    public static Entity collidingEntity(Entity elb) {
-        AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 6, elb.motionY * 6, elb.motionZ * 6), EntitySelectors.NOT_SPECTATING);
-        double dist = 0;
-        Entity pick = null;
-        for (Entity e : entities) {
-            if (e.getDistanceSq(elb) < dist || dist == 0) {
-                pick = e;
-                dist = e.getDistanceSq(elb);
-            }
-        }
-        return pick;
     }
 
     public static boolean isTouchingWall(Entity elb) {

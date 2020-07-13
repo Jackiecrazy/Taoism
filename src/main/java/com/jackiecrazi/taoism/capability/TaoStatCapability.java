@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.capability;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICombatManipulator;
+import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -42,9 +43,38 @@ public class TaoStatCapability implements ITaoStatCapability {
     private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
+    private int recordTimer = 0, ms=0;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = new WeakReference<>(elb);
+    }
+
+    /**
+     * @return the entity's width multiplied by its height, multiplied by 5 and added armor%, and finally rounded
+     */
+    private static float getMaxPosture(EntityLivingBase elb) {
+        double maxPosBeforeArmor=elb.getEntityAttribute(TaoEntities.MAXPOSTURE).getAttributeValue();
+        float armor = 1 + (elb.getTotalArmorValue() / 20f);
+        return Math.round(maxPosBeforeArmor * armor);
+    }
+
+    /**
+     * unified to prevent discrepancy and allow easy tweaking in the future
+     */
+    private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
+        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() * 2;
+        float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
+        float healthMod = (float) ((elb.getHealth() / elb.getMaxHealth()));
+        float downedBonus = TaoCasterData.getTaoCap(elb).getDownTimer() > 0 ? TaoCasterData.getTaoCap(elb).getMaxPosture() / 120 : 0;
+
+        return (downedBonus + ticks * 0.05f) * armorMod * posMult * healthMod;
+    }
+
+    /**
+     * unified to prevent discrepancy and allow easy tweaking in the future
+     */
+    private static float getQiDecayAmount(float currentQi, int ticks) {
+        return 0.005f * ticks * (currentQi + 1) / 8;
     }
 
     @Override
@@ -80,7 +110,122 @@ public class TaoStatCapability implements ITaoStatCapability {
         cd.toNBT(nbt);
         nbt.setInteger("bind", getBindTime());
         nbt.setInteger("root", getRootTime());
+        nbt.setInteger("recordTimer", recordTimer);
+        nbt.setInteger("spinny", ms);
         return nbt;
+    }
+
+    private Tuple<Float, Float> getPrevSizes() {
+        return new Tuple<>(prevWidth, prevHeight);
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound nbt) {
+        setQi(nbt.getFloat("qi"));
+        setLing(nbt.getFloat("ling"));
+        setSwing(nbt.getFloat("swing"));
+        setPosture(nbt.getFloat("posture"));
+        setParryCounter(nbt.getInteger("parry"));
+        setComboSequence((nbt.getInteger("combo")));
+        setMaxLing(nbt.getFloat("maxling"));
+        setMaxPosture(nbt.getFloat("maxposture"));
+        setLingRechargeCD(nbt.getInteger("lcd"));
+        setPostureRechargeCD(nbt.getInteger("pcd"));
+        setStaminaRechargeCD(nbt.getInteger("scd"));
+        setQiGracePeriod(nbt.getInteger("qcd"));
+        setLastUpdatedTime(nbt.getLong("lastupdate"));
+        setSwitchIn(nbt.getBoolean("switch"));
+        setOffhandCool(nbt.getInteger("ohcool"));
+        setProtected(nbt.getBoolean("protecc"));
+        setDownTimer(nbt.getInteger("down"));
+        setRollCounter(nbt.getInteger("dodge"));
+        setPrevSizes(nbt.getFloat("prevWidth"), nbt.getFloat("prevHeight"));
+        setPosInvulTime(nbt.getInteger("protec"));
+        setOffHand(new ItemStack(nbt.getCompoundTag("offhandInfo")));
+        setOffhandAttack(nbt.getBoolean("off"));
+        setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
+        setClingDirections(new ClingData(nbt));
+        setBindTime(nbt.getInteger("bind"));
+        setRootTime(nbt.getInteger("root"));
+        setRecordedDamage(nbt.getFloat("recDam"));
+        toggleCombatMode(nbt.getBoolean("sprintTemp"));
+        recording = nbt.getBoolean("reccing");
+        recordTimer = nbt.getInteger("recordTimer");
+        ms=nbt.getInteger("spinny");
+    }
+
+    private void setPrevSizes(float width, float height) {
+        prevWidth = width;
+        prevHeight = height;
+    }
+
+    @Override
+    public void update(final int ticks) {
+        EntityLivingBase elb = e.get();
+        if (elb == null) return;
+        if (!elb.isEntityAlive() || elb.world.isRemote) return;
+
+        recordTimer++;
+        ms--;
+        if (isRecordingDamage() && recordTimer > 1000) {
+            stopRecordingDamage(elb.getRevengeTarget());
+        }
+        float percentage = getPosture() / getMaxPosture();
+        setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
+        setPosture(getMaxPosture() * percentage);
+        //brings it to a tidy sum of 10 for the player, 20 with full armor.
+        setMaxLing(10f);
+        if (elb.onGround && getJumpState() != ITaoStatCapability.JUMPSTATE.GROUNDED) {
+            //elb.setSprinting(false);
+            setJumpState(ITaoStatCapability.JUMPSTATE.GROUNDED);
+        }
+        float lingMult = (float) elb.getEntityAttribute(TaoEntities.LINGREGEN).getAttributeValue();
+        int diff = ticks;
+        //spirit power recharge
+        if (getLingRechargeCD() >= diff) setLingRechargeCD(getLingRechargeCD() - diff);
+        else {
+            diff -= getLingRechargeCD();
+            addLing(diff * lingMult);
+            setLingRechargeCD(0);
+        }
+        if (getDownTimer() > 0) {
+            setDownTimer(getDownTimer() - ticks);
+            if (getDownTimer() <= 0) {
+                int overflow = -getDownTimer();
+                setDownTimer(0);
+                addPosture(getPostureRegenAmount(elb, overflow));
+            }
+        }
+        diff = ticks;
+        if (getPostureRechargeCD() <= diff || !isProtected()) {
+            if (isProtected())
+                diff -= getPostureRechargeCD();
+            setPostureRechargeCD(0);
+            addPosture(getPostureRegenAmount(elb, diff));
+        } else setPostureRechargeCD(getPostureRechargeCD() - ticks);
+        diff = ticks;
+        //value updating
+        if (ticks > 0) {//so apparently time can randomly run backwards. Hmm.
+            setPosInvulTime(getPosInvulTime() - diff);
+            addParryCounter(diff);
+            addRollCounter(diff);
+        }
+        if (getBindTime() > 0)
+            setBindTime(getBindTime() - 1);
+        if (getRootTime() > 0)
+            setRootTime(getRootTime() - 1);
+        setOffhandCool(getOffhandCool() + ticks);
+        diff = ticks - getQiGracePeriod();
+        //qi decay
+        if (diff > 0) {
+            if (!consumeQi(getQiDecayAmount(getQi(), diff), 0))
+                setQi(0);
+        } else setQiGracePeriod(-diff);
+
+        if (!(elb instanceof EntityPlayer))
+            setSwing(getSwing() + ticks);
+        setLastUpdatedTime(elb.world.getTotalWorldTime());
+        sync();
     }
 
     @Override
@@ -493,6 +638,11 @@ public class TaoStatCapability implements ITaoStatCapability {
     }
 
     @Override
+    public int getRecordingTime() {
+        return recordTimer;
+    }
+
+    @Override
     public float getRecordedDamage() {
         return recordedDamage;
     }
@@ -515,17 +665,21 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void startRecordingDamage() {
         recording = true;
+        recordedDamage = 0;
+        recordTimer = 0;
         sync();
     }
 
     @Override
     public void stopRecordingDamage(EntityLivingBase elb) {
-        if (!recording || getRecordedDamage() <= 0) return;
+        if (!recording) return;
         final EntityLivingBase target = e.get();
         recording = false;
+        recordTimer = 0;
         sync();
         if (target != null) {
             float damage = getRecordedDamage();
+            setRecordedDamage(0);
             DamageSource ds = TaoCombatUtils.causeLivingDamage(elb);
             if (elb != null) {
                 if (elb == target) return;//bootleg invulnerability!
@@ -534,6 +688,7 @@ public class TaoStatCapability implements ITaoStatCapability {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }
             }
+            if (damage < 0) return;
             target.hurtResistantTime = 0;
             target.attackEntityFrom(ds, damage);
         }
@@ -551,12 +706,23 @@ public class TaoStatCapability implements ITaoStatCapability {
         Taoism.net.sendToAllTracking(pucp, elb);
     }
 
+    @Override
+    public int getCannonballTime() {
+        return ms;
+    }
+
+    @Override
+    public void setCannonballTime(int duration) {
+        ms=duration;
+    }
+
     private void beatDown(EntityLivingBase attacker, float overflow) {
         EntityLivingBase elb = e.get();
         if (elb == null) return;
         elb.dismountRidingEntity();
-        if (attacker != null)
+        if (attacker != null) {
             NeedyLittleThings.knockBack(elb, attacker, 1.5f);
+        }
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
         elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
@@ -572,47 +738,5 @@ public class TaoStatCapability implements ITaoStatCapability {
                 }
             elb.removePassengers();
         }
-    }
-
-    private Tuple<Float, Float> getPrevSizes() {
-        return new Tuple<>(prevWidth, prevHeight);
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
-        setQi(nbt.getFloat("qi"));
-        setLing(nbt.getFloat("ling"));
-        setSwing(nbt.getFloat("swing"));
-        setPosture(nbt.getFloat("posture"));
-        setParryCounter(nbt.getInteger("parry"));
-        setComboSequence((nbt.getInteger("combo")));
-        setMaxLing(nbt.getFloat("maxling"));
-        setMaxPosture(nbt.getFloat("maxposture"));
-        setLingRechargeCD(nbt.getInteger("lcd"));
-        setPostureRechargeCD(nbt.getInteger("pcd"));
-        setStaminaRechargeCD(nbt.getInteger("scd"));
-        setQiGracePeriod(nbt.getInteger("qcd"));
-        setLastUpdatedTime(nbt.getLong("lastupdate"));
-        setSwitchIn(nbt.getBoolean("switch"));
-        setOffhandCool(nbt.getInteger("ohcool"));
-        setProtected(nbt.getBoolean("protecc"));
-        setDownTimer(nbt.getInteger("down"));
-        setRollCounter(nbt.getInteger("dodge"));
-        setPrevSizes(nbt.getFloat("prevWidth"), nbt.getFloat("prevHeight"));
-        setPosInvulTime(nbt.getInteger("protec"));
-        setOffHand(new ItemStack(nbt.getCompoundTag("offhandInfo")));
-        setOffhandAttack(nbt.getBoolean("off"));
-        setJumpState(ITaoStatCapability.JUMPSTATE.values()[nbt.getInteger("jump")]);
-        setClingDirections(new ClingData(nbt));
-        setBindTime(nbt.getInteger("bind"));
-        setRootTime(nbt.getInteger("root"));
-        setRecordedDamage(nbt.getFloat("recDam"));
-        toggleCombatMode(nbt.getBoolean("sprintTemp"));
-        recording = nbt.getBoolean("reccing");
-    }
-
-    private void setPrevSizes(float width, float height) {
-        prevWidth = width;
-        prevHeight = height;
     }
 }

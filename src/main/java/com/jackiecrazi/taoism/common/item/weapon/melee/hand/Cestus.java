@@ -66,9 +66,9 @@ public class Cestus extends TaoWeapon {
                     if (TaoCasterData.getTaoCap(uke).isRecordingDamage() && uke.motionY < 0) {
                         TaoCasterData.getTaoCap(uke).setRootTime(500);
                         TaoCasterData.getTaoCap(uke).setBindTime(500);
-                        if (!NeedyLittleThings.isFacingEntity(elb, uke, 30)) {
+                        if (!NeedyLittleThings.isFacingEntity(elb, uke, 30) && TaoCasterData.getTaoCap(elb).getRootTime()==498) {
                             //move you up by force
-                            Vec3d reprimand = NeedyLittleThings.getPointInFrontOf(elb, uke, 2);
+                            Vec3d reprimand = NeedyLittleThings.getClosestAirSpot(elb.getPositionVector(), elb.getPositionVector().add(elb.getLookVec().scale(2)), uke);
                             uke.setPositionAndUpdate(reprimand.x, reprimand.y, reprimand.z);
                         }
                     }

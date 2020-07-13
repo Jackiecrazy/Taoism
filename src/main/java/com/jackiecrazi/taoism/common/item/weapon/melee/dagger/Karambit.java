@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -14,13 +15,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Karambit extends TaoWeapon{
+public class Karambit extends TaoWeapon {
     //A slashing dagger that is fast and relentless, but short in reach.
     //has no switch in cooldown, and can be switched from hand to hand without cooldown as well.
     //backstabs deal 1.5x damage, inflicts a layer of bleed if target is unarmored.
@@ -51,7 +54,7 @@ public class Karambit extends TaoWeapon{
 
     @Override
     public int getMaxChargeTime() {
-        return 60;
+        return 400;
     }
 
     @Override
@@ -59,10 +62,27 @@ public class Karambit extends TaoWeapon{
         return 2f;//not all that good at defense now is it...
     }
 
-//    @Override
-//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
-//    }
+    @Override
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
+        if (isCharged(elb, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
+            RayTraceResult r = NeedyLittleThings.raytraceAnything(elb.world, elb, 16);
+            Vec3d tpTo = NeedyLittleThings.getClosestAirSpot(elb.getPositionVector(), r.hitVec, elb);
+            gettagfast(stack).setInteger("flashesWithoutHit", gettagfast(stack).getInteger("flashesWithoutHit") + 1);
+            if (r.entityHit != null) {
+                tpTo = NeedyLittleThings.getPointInFrontOf(r.entityHit, elb, -5);
+                TaoCombatUtils.attack(elb, r.entityHit, EnumHand.MAIN_HAND);
+                TaoCasterData.getTaoCap(elb).addQi(0.5f);
+                gettagfast(stack).setInteger("flashesWithoutHit", 0);
+            }
+            TaoCasterData.getTaoCap(elb).setRootTime(0);
+            elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
+            TaoCasterData.getTaoCap(elb).setRootTime(400);
+            if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
+                dischargeWeapon(elb, stack);
+            }
+        }
+        return super.onEntitySwing(elb, stack);
+    }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
@@ -84,18 +104,26 @@ public class Karambit extends TaoWeapon{
     }
 
     @Override
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+        super.chargeWeapon(attacker, item, ticks);
+        for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(32)))
+            TaoCasterData.getTaoCap(e).setRootTime(400);
+        TaoCasterData.getTaoCap(attacker).startRecordingDamage();
+    }
+
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        TaoCasterData.getTaoCap(elb).setRootTime(0);
+        TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+    }
+
+    @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-//        TaoCasterData.getTaoCap(defender).setRollCounter(0);
-//        defender.rotationYaw = attacker.rotationYaw;
-//        defender.rotationPitch = attacker.rotationPitch;
-//        Vec3d look = attacker.getLookVec();
-//        defender.motionX = -look.x;
-//        defender.motionY = -look.y;
-//        defender.motionZ = -look.z;
-//        defender.velocityChanged = true;
         super.onParry(attacker, defender, item);
     }
 
+    @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
             EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
@@ -105,12 +133,17 @@ public class Karambit extends TaoWeapon{
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? Event.Result.ALLOW : Event.Result.DENY;
+        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
     }
+
+//    @Override
+//    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+//        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
+//    }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) ? 2f : 1f;
+        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? 2f : 1f;
     }
 
 //    @Override
@@ -120,7 +153,7 @@ public class Karambit extends TaoWeapon{
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker)) {
+        if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker) || isCharged(attacker, stack)) {
             return target.getTotalArmorValue();
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
@@ -128,7 +161,7 @@ public class Karambit extends TaoWeapon{
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (target.getTotalArmorValue() - chi * 6d <= 0 || (target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker))
+        if (target.getTotalArmorValue() - chi * 6d <= 0 || isCharged(attacker, stack) || (target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker))
             TaoPotionUtils.forceBleed(target, attacker, 20, 1, TaoPotionUtils.POTSTACKINGMETHOD.NONE);
     }
 }

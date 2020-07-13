@@ -176,7 +176,7 @@ ropedart.accel=kicks will additionally speed up the dart by 1 level
 
 item.bian.name=Iron Whip
 bian.stagger=deals 1.5x damage against staggered targets
-bian.armpen=ignores 1 point of armor per chi level
+bian.armpen=ignores 1 point of armor every other chi level
 bian.enfeeble=attacks reduce posture regeneration of the target for 2 seconds, reduction is greater at higher chi levels
 
 item.rapier.name=Rapier

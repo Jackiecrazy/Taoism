@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -28,18 +29,32 @@ public class Bian extends TaoWeapon {
     essentially a blunt sword, yeah.
     ignores some armor
     attacking and being parried disables opponent weapon briefly (this might be finicky)
-    low posture per damage, but inflicts enfeeble, to play into its "continuous" nature
+    low posture per damage, but inflicts exhaustion, to play into its "continuous" nature
+
+    execution:
+    If the opponent's posture regen can't go any lower, break their bones for max hp and posture damage.
+    Upon attacking a downed enemy this state ends in a cloud of dust that blind and fatigue in an area,
+    dealing remaining hp damage to the target
      */
     public Bian() {
-        super(0, 1.4, 6, 1f);
+        super(0, 1.4, 6, 0.7f);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_GREEN+I18n.format("weapon.disshield")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("bian.stagger"));
         tooltip.add(I18n.format("bian.armpen"));
         tooltip.add(I18n.format("bian.enfeeble"));
+    }
+
+    @Override
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        float base = super.postureDealtBase(attacker, defender, item, amount);
+        if (isCharged(attacker, item) && defender.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() < 0) {
+            base += TaoCasterData.getTaoCap(defender).getMaxPosture() / 10;
+        }
+        return base;
     }
 
     @Override
@@ -55,13 +70,38 @@ public class Bian extends TaoWeapon {
     }
 
     @Override
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        super.attackStart(ds, attacker, target, stack, orig);
+        if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
+            gettagfast(stack).setBoolean("ouches", true);
+        }
+    }
+
+    @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        float base = super.hurtStart(ds, attacker, target, item, orig);
+        if (isCharged(attacker, item)) {
+            if (target.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() < 0) {
+                if (TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5))
+                    base += TaoCasterData.getTaoCap(target).getMaxPosture();
+            }
+            if (TaoCasterData.getTaoCap(target).getDownTimer() > 0 && gettagfast(item).getBoolean("ouches")) {
+
+            }
+        }
+        return base;
+    }
+
+    @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return TaoCasterData.getTaoCap(attacker).getQiFloored();
+        return TaoCasterData.getTaoCap(attacker).getQiFloored() / 2;
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENFEEBLE, 40, chi / 3), false);
+        if (isCharged(attacker, stack))
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), TaoPotionUtils.POTSTACKINGMETHOD.ADD), false);
+        else TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), false);
     }
 
     @Override

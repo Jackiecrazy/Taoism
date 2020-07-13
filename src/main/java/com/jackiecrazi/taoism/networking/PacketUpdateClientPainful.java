@@ -29,7 +29,7 @@ public class PacketUpdateClientPainful implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         entityID = buf.readInt();
-        nbt=ByteBufUtils.readTag(buf);
+        nbt = ByteBufUtils.readTag(buf);
     }
 
     @Override

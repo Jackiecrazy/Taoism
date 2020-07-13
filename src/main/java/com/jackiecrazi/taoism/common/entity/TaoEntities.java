@@ -17,10 +17,11 @@ public class TaoEntities {
     //TODO change these to taoism.xxx once 1.16+ rolls out
     public static final IAttribute DEFLECT = (new RangedAttribute(null, "generic.armorDeflect", 0.0D, 0, 1.0D)).setDescription("Deflection").setShouldWatch(true);
     public static final IAttribute ABLATION = (new RangedAttribute(null, "generic.armorAbsorption", 0.0D, 0, 10D)).setDescription("Hard Absorption").setShouldWatch(true);
-    public static final IAttribute POSREGEN = (new RangedAttribute(null, "generic.postureRegen", 1.0D, 0, 10D)).setDescription("Posture Regeneration").setShouldWatch(true);
-    public static final IAttribute HEAL = (new RangedAttribute(null, "generic.healRate", 1.0D, 0, 10D)).setDescription("Health Regeneration Multiplier").setShouldWatch(true);
-    public static final IAttribute LINGREGEN = (new RangedAttribute(null, "generic.lingRegen", 1.0D, 0, 10D)).setDescription("Ling Regeneration").setShouldWatch(true);
-    public static final IAttribute QIRATE = (new RangedAttribute(null, "generic.qiGen", 0.0D, -10D, 10D)).setDescription("Qi Accumulation Rate").setShouldWatch(true);
+    public static final IAttribute POSREGEN = (new RangedAttribute(null, "generic.postureRegen", 1.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Posture Regeneration").setShouldWatch(true);
+    public static final IAttribute HEAL = (new RangedAttribute(null, "generic.healRate", 1.0D, 0, Double.MAX_VALUE)).setDescription("Health Regeneration Multiplier").setShouldWatch(true);
+    public static final IAttribute LINGREGEN = (new RangedAttribute(null, "generic.lingRegen", 1.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Ling Regeneration").setShouldWatch(true);
+    public static final IAttribute QIRATE = (new RangedAttribute(null, "generic.qiGen", 0.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Qi Accumulation Rate").setShouldWatch(true);
+    public static final IAttribute MAXPOSTURE = (new RangedAttribute(null, "taoism.maxPosture", 10.0D, 0, Double.MAX_VALUE)).setDescription("Max Posture").setShouldWatch(true);
     private static int id=0;
     @SubscribeEvent
     public static void init(RegistryEvent.Register<EntityEntry> e){

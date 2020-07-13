@@ -15,6 +15,8 @@ public class Emeici extends TaoWeapon {
     /*
     A spinning weapon used to attack pressure points. High speed, medium power and combo, low defense and range
     Keywords: spin, pressure points
+    If the current target's relative facing to you is different from the last (4 cardinal directions):
+        deal extra health and posture damage
      */
     public Emeici() {
         super(2, 2, 5, 0);

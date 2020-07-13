@@ -20,12 +20,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaoPotion extends Potion {
 
+    /**
+     * adds constant spin to your yaw
+     */
+    public static Potion DISORIENT = null;
 
     public static Potion HIDE = null;
     /**
@@ -33,9 +38,13 @@ public class TaoPotion extends Potion {
      */
     public static Potion BLEED = null;
     /**
-     * prevents posture regeneration
+     * decreases max posture
      */
     public static Potion ENFEEBLE = null;
+    /**
+     * prevents posture regeneration
+     */
+    public static Potion FATIGUE = null;
     /**
      * prevents stagger
      */
@@ -63,13 +72,16 @@ public class TaoPotion extends Potion {
         HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
         BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed")
                 .registerPotionAttributeModifier(TaoEntities.HEAL, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 0);
-        ENFEEBLE = new TaoPotion(true, new Color(255, 255, 0).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
+        FATIGUE = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("fatigue")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
+        ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
+                .registerPotionAttributeModifier(TaoEntities.MAXPOSTURE, "CC5AF142-2BD2-4215-B636-2605AED11727", -3, 0);
         RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
         ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("armorBreak")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0);
         HEMORRHAGE = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
         LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
+        DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("disorient");
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
         event.getRegistry().register(BLEED);
@@ -78,7 +90,9 @@ public class TaoPotion extends Potion {
         event.getRegistry().register(RESOLUTION);
         event.getRegistry().register(HEMORRHAGE);
         event.getRegistry().register(LACERATION);
+        event.getRegistry().register(FATIGUE);
         event.getRegistry().register(ENFEEBLE);
+        event.getRegistry().register(DISORIENT);
     }
 
     private TaoPotion procInterval(int interval) {
@@ -119,6 +133,7 @@ public class TaoPotion extends Potion {
     }
 
     @Override
+    @ParametersAreNonnullByDefault
     public void performEffect(EntityLivingBase l, int amplifier) {
         if (this == BLEED) {
             l.hurtResistantTime = 0;
@@ -133,7 +148,7 @@ public class TaoPotion extends Potion {
 
     @Override
     public boolean isReady(int duration, int amplifier) {
-        return interval != 0 && duration % interval == 1;
+        return interval != 0 && duration % interval == 0;
     }
 
     public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {

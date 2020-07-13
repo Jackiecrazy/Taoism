@@ -134,38 +134,51 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void down(RenderLivingEvent.Pre event) {
-        //I say, two stone lions on the sides of the screen wrapping a bar in the middle, glowing red when downed, would be nice?
-        //Or, say, a 华表 for your own posture?
         Tuple<Float, Float> sizes = new Tuple<>(event.getEntity().width, event.getEntity().height);//TaoCasterData.getTaoCap(event.getEntity()).getPrevSizes();
-        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive()) {
-            GlStateManager.pushMatrix();
-            //tall bois become flat bois
-            if (sizes.getFirst() < sizes.getSecond()) {
-                GlStateManager.translate(event.getX(), event.getY(), event.getZ());
-                GlStateManager.rotate(180f, 0, 0, 0);
-                GlStateManager.rotate(90f, 1, 0, 0);
-                GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
-                GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+        if (event.getEntity().isEntityAlive()) {
+            if(TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {
+                GlStateManager.pushMatrix();
+                //tall bois become flat bois
+                if (sizes.getFirst() < sizes.getSecond()) {
+                    GlStateManager.translate(event.getX(), event.getY(), event.getZ());
+                    GlStateManager.rotate(180f, 0, 0, 0);
+                    GlStateManager.rotate(90f, 1, 0, 0);
+                    GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
+                    GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+                    GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
+                }
+                //cube bois become side bois
+                //flat bois become flatter bois
+                else {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
+                    GlStateManager.translate(event.getX(), event.getY(), event.getZ());
+                    //GlStateManager.rotate(180f, 0, 0, 0);
+                    //GlStateManager.rotate(180f, 0, 1, 0);
+                    //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
+                    //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
+                    GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
+                }
+                //multi bois do nothing
+            }
+            if(TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+                int screw=TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime();
+                float angle=NeedyLittleThings.rad(screw);
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(event.getX(), event.getY() + event.getEntity().height / 2, event.getZ());
+                GlStateManager.rotate(screw*7+event.getPartialRenderTick(), MathHelper.sin((float) (event.getEntity().posX)), MathHelper.sin((float) (event.getEntity().posY)), MathHelper.sin((float) (-event.getEntity().posZ)));
                 GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
             }
-            //cube bois become side bois
-            //flat bois become flatter bois
-            else {//sizes.getFirst().equals(sizes.getSecond())&&sizes.getFirst()==0 //this means it didn't update, which happens when there's nothing to change, i.e. you're flat already
-                GlStateManager.translate(event.getX(), event.getY(), event.getZ());
-                //GlStateManager.rotate(180f, 0, 0, 0);
-                //GlStateManager.rotate(180f, 0, 1, 0);
-                //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 0, 1);
-                //GlStateManager.rotate(event.getEntity().renderYawOffset, 0, 1, 0);
-                GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
-            }
-            //multi bois do nothing
         }
     }
 
     @SubscribeEvent
     public static void downEnd(RenderLivingEvent.Post event) {
-        if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0 && event.getEntity().isEntityAlive()) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
-            GlStateManager.popMatrix();
+        if(event.getEntity().isEntityAlive()) {
+            if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
+                GlStateManager.popMatrix();
+            }
+            if(TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+                GlStateManager.popMatrix();
+            }
         }
     }
 

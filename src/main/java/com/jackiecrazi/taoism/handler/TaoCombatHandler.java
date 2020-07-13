@@ -148,6 +148,8 @@ public class TaoCombatHandler {
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
                 NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
+                //reset cooldown
+                TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend);
                 }
@@ -155,8 +157,6 @@ public class TaoCombatHandler {
                 if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other));
                 }
-                //reset cooldown
-                TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f);
             }
             TaoCasterData.forceUpdateTrackingClients(uke);
         }
