@@ -43,7 +43,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
-    private int recordTimer = 0, ms=0;
+    private int recordTimer = 0, ms = 0;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = new WeakReference<>(elb);
@@ -53,7 +53,7 @@ public class TaoStatCapability implements ITaoStatCapability {
      * @return the entity's width multiplied by its height, multiplied by 5 and added armor%, and finally rounded
      */
     private static float getMaxPosture(EntityLivingBase elb) {
-        double maxPosBeforeArmor=elb.getEntityAttribute(TaoEntities.MAXPOSTURE).getAttributeValue();
+        double maxPosBeforeArmor = elb.getEntityAttribute(TaoEntities.MAXPOSTURE).getAttributeValue();
         float armor = 1 + (elb.getTotalArmorValue() / 20f);
         return Math.round(maxPosBeforeArmor * armor);
     }
@@ -62,12 +62,13 @@ public class TaoStatCapability implements ITaoStatCapability {
      * unified to prevent discrepancy and allow easy tweaking in the future
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
-        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() * 2;
+        float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
         float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
-        float healthMod = (float) ((elb.getHealth() / elb.getMaxHealth()));
-        float downedBonus = TaoCasterData.getTaoCap(elb).getDownTimer() > 0 ? TaoCasterData.getTaoCap(elb).getMaxPosture() / 120 : 0;
-
-        return (downedBonus + ticks * 0.05f) * armorMod * posMult * healthMod;
+        float healthMod = elb.getHealth() / elb.getMaxHealth();
+        if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
+            return TaoCasterData.getTaoCap(elb).getMaxPosture() * armorMod * posMult * healthMod / (1.5f * MAXDOWNTIME);
+        }
+        return (ticks * 0.05f) * armorMod * posMult * healthMod;
     }
 
     /**
@@ -151,7 +152,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         toggleCombatMode(nbt.getBoolean("sprintTemp"));
         recording = nbt.getBoolean("reccing");
         recordTimer = nbt.getInteger("recordTimer");
-        ms=nbt.getInteger("spinny");
+        ms = nbt.getInteger("spinny");
     }
 
     private void setPrevSizes(float width, float height) {
@@ -167,7 +168,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
         recordTimer++;
         ms--;
-        if (isRecordingDamage() && recordTimer > 1000) {
+        if (isRecordingDamage() && recordTimer > 400) {
             stopRecordingDamage(elb.getRevengeTarget());
         }
         float percentage = getPosture() / getMaxPosture();
@@ -713,7 +714,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setCannonballTime(int duration) {
-        ms=duration;
+        ms = duration;
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

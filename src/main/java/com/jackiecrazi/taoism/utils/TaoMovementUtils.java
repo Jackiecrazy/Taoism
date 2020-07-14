@@ -44,6 +44,7 @@ public class TaoMovementUtils {
             if (aabb.calculateXOffset(a, -allowance) != -allowance) return true;
             if (aabb.calculateZOffset(a, allowance) != allowance) return true;
             if (aabb.calculateZOffset(a, -allowance) != -allowance) return true;
+            if (aabb.calculateYOffset(a, allowance) != allowance) return true;
         }
         return false;
     }

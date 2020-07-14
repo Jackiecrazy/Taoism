@@ -13,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
@@ -138,17 +140,16 @@ public class TaoPotion extends Potion {
         if (this == BLEED) {
             l.hurtResistantTime = 0;
             l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 1 + (amplifier / 2f));
+            if (l.world instanceof WorldServer) {
+                ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width/4, l.height/4, l.width/4, 0.5f);
+            }
             l.hurtResistantTime = 0;
-//			if (amplifier >= 5) {
-//				l.attackEntityFrom(DamageSource.GENERIC, l.getMaxHealth() / 10);
-//				l.removePotionEffect(TaoPotions.Bleed);
-//			}//essentially useless so archived for now
         }
     }
 
     @Override
     public boolean isReady(int duration, int amplifier) {
-        return interval != 0 && duration % interval == 0;
+        return interval != 0 && duration % interval == 1;
     }
 
     public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {

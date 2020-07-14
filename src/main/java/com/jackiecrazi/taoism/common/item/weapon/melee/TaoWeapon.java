@@ -18,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -35,6 +36,7 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -654,8 +656,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return new boolean[]{false, false, false, false};
     }
 
-    protected boolean isBeingHeld(EntityLivingBase elb, ItemStack stack) {
-        return elb.getHeldItemMainhand() == stack || elb.getHeldItemOffhand() == stack;
+    protected double getDamageAgainst(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
+        return NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, attacker, getHand(stack)) + EnchantmentHelper.getModifierForCreature(stack, target.getCreatureAttribute());
     }
 
     private void setHandState(ItemStack is, @Nullable EnumHand hand) {
@@ -725,7 +727,20 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-        return (wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative()) || (TaoCasterData.getTaoCap(wielder).getQi() > 9 && !isCharged(wielder, item));
+        if((wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative())){
+            return true;
+        }
+        if((TaoCasterData.getTaoCap(wielder).getQi() < 9)){
+            if(wielder instanceof EntityPlayer)
+                ((EntityPlayer) wielder).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
+            return false;
+        }
+        if(isCharged(wielder, item)){
+            if(wielder instanceof EntityPlayer)
+                ((EntityPlayer) wielder).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
+            return false;
+        }
+        return true ;
     }
 
     @Override

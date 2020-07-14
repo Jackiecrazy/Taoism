@@ -63,10 +63,11 @@ public class Balisong extends TaoWeapon {
             for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
                 TaoCasterData.getTaoCap(e).setRootTime(0);
             elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
-            for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
-                TaoCasterData.getTaoCap(e).setRootTime(200);
             if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
                 dischargeWeapon(elb, stack);
+            } else {
+                for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
+                    TaoCasterData.getTaoCap(e).setRootTime(200);
             }
         }
         return super.onEntitySwing(elb, stack);
@@ -101,6 +102,8 @@ public class Balisong extends TaoWeapon {
         super.dischargeWeapon(elb, item);
         TaoCasterData.getTaoCap(elb).setRootTime(0);
         TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+        gettagfast(item).setInteger("flashesWithoutHit",0);
+        gettagfast(item).setInteger("flashes",0);
     }
 
     @Override

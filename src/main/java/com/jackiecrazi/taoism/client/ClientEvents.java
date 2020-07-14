@@ -136,7 +136,7 @@ public class ClientEvents {
     public static void down(RenderLivingEvent.Pre event) {
         Tuple<Float, Float> sizes = new Tuple<>(event.getEntity().width, event.getEntity().height);//TaoCasterData.getTaoCap(event.getEntity()).getPrevSizes();
         if (event.getEntity().isEntityAlive()) {
-            if(TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {
+            if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {
                 GlStateManager.pushMatrix();
                 //tall bois become flat bois
                 if (sizes.getFirst() < sizes.getSecond()) {
@@ -159,12 +159,12 @@ public class ClientEvents {
                 }
                 //multi bois do nothing
             }
-            if(TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
-                int screw=TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime();
-                float angle=NeedyLittleThings.rad(screw);
+            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+                int screw = TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime();
+                float angle = NeedyLittleThings.rad(screw);
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(event.getX(), event.getY() + event.getEntity().height / 2, event.getZ());
-                GlStateManager.rotate(screw*7+event.getPartialRenderTick(), MathHelper.sin((float) (event.getEntity().posX)), MathHelper.sin((float) (event.getEntity().posY)), MathHelper.sin((float) (-event.getEntity().posZ)));
+                GlStateManager.rotate(screw * 7 + event.getPartialRenderTick(), MathHelper.sin((float) (event.getEntity().posX)), MathHelper.sin((float) (event.getEntity().posY)), MathHelper.sin((float) (-event.getEntity().posZ)));
                 GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
             }
         }
@@ -172,11 +172,11 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void downEnd(RenderLivingEvent.Post event) {
-        if(event.getEntity().isEntityAlive()) {
+        if (event.getEntity().isEntityAlive()) {
             if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
                 GlStateManager.popMatrix();
             }
-            if(TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
                 GlStateManager.popMatrix();
             }
         }
@@ -409,23 +409,26 @@ public class ClientEvents {
                     targetQiLevel = cap.getQi();
                     boolean closeEnough = true;
                     if (targetQiLevel > currentQiLevel) {
-                        currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 10);
+                        currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 20);
                         closeEnough = false;
                     }
                     if (targetQiLevel < currentQiLevel) {
-                        currentQiLevel -= Math.min(0.1, (currentQiLevel - targetQiLevel) / 10);
+                        currentQiLevel -= Math.min(0.1, (currentQiLevel - targetQiLevel) / 20);
                         closeEnough = !closeEnough;
                     }
                     if (closeEnough)
                         currentQiLevel = targetQiLevel;
-                    int qi = (int) currentQiLevel;
+                    int qi = (int) (currentQiLevel);
                     float qiExtra = currentQiLevel - qi;
+                    //System.out.println(currentQiLevel);
+                    //System.out.println(qi);
                     if (qi != 0 || qiExtra != 0f) {
                         //render qi bar
                         GlStateManager.pushMatrix();
                         //GlStateManager.bindTexture(mc.renderEngine.getTexture(qibar).getGlTextureId());
                         //bar
                         GlStateManager.pushMatrix();
+                        GlStateManager.enableBlend();
                         GlStateManager.enableAlpha();
                         //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra *(GRADIENTE.length)), 0, GRADIENTE.length - 1)];
                         //GlStateManager.color(red(c), green(c), blue(c));
@@ -453,14 +456,15 @@ public class ClientEvents {
                             GlStateManager.popMatrix();
                         }
                         GlStateManager.disableAlpha();
+                        GlStateManager.disableBlend();
                         GlStateManager.popMatrix();
                     }
 
                     //render posture bar if not full
-                    if (cap.getPosture() < cap.getMaxPosture())
+                    if (cap.getPosture() < cap.getMaxPosture() || cap.getDownTimer() > 0)
                         drawPostureBarreAt(player, width / 2, height - 57);
                     Entity look = getEntityLookedAt(player);
-                    if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture()) {
+                    if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && (TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() || TaoCasterData.getTaoCap((EntityLivingBase) look).getDownTimer() > 0)) {
                         drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                     }
                 }
@@ -478,7 +482,8 @@ public class ClientEvents {
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager().bindTexture(hood);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.disableBlend();
+        GlStateManager.enableBlend();
+        GlStateManager.enableAlpha();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
         mc.mcProfiler.startSection("postureBar");
         float cap = itsc.getMaxPosture();
@@ -521,7 +526,8 @@ public class ClientEvents {
 //        mc.fontRenderer.drawString(text, x, y, c.getRGB());
 //        mc.mcProfiler.endSection();
         mc.getTextureManager().bindTexture(Gui.ICONS);
-        GlStateManager.enableBlend();
+        GlStateManager.disableBlend();
+        GlStateManager.disableAlpha();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 

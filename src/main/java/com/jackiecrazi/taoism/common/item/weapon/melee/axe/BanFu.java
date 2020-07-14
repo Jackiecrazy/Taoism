@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.axe;
 
-import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
@@ -24,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -89,28 +89,30 @@ public class BanFu extends TaoWeapon {
                         dischargeWeapon(elb, stack);
                         return;
                     }
-                    for (Entity a : w.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
-                        double distsq = NeedyLittleThings.getDistSqCompensated(elb, a);
-                        Vec3d point = elb.getPositionVector();
-                        //update the entity's relative position to the point
-                        //if the distance is below expected, add outwards velocity
-                        //if the distance is above expected, add inwards velocity
-                        //otherwise do nothing
-                        if (distsq > getReach(elb, stack) * getReach(elb, stack)) {
-                            a.motionX += (point.x - a.posX) * 0.02;
-                            a.motionY = 0.01;
-                            a.motionZ += (point.z - a.posZ) * 0.02;
-                        } else if (distsq < getReach(elb, stack) * getReach(elb, stack)) {
-                            a.motionX -= (point.x - a.posX) * 0.02;
-                            a.motionY = 0.01;
-                            a.motionZ -= (point.z - a.posZ) * 0.02;
-                        }
-                        a.motionX += (a.posZ - elb.posZ) * 0.01;
-                        a.motionZ -= (a.posX - elb.posX) * 0.01;
-                        a.velocityChanged = true;
+                }
+                for (Entity a : w.getEntitiesWithinAABBExcludingEntity(elb, elb.getEntityBoundingBox().grow(getReach(elb, stack) * 3))) {
+                    double distsq = NeedyLittleThings.getDistSqCompensated(elb, a);
+                    Vec3d point = elb.getPositionVector();
+                    //update the entity's relative position to the point
+                    //if the distance is below expected, add outwards velocity
+                    //if the distance is above expected, add inwards velocity
+                    //otherwise do nothing
+                    if (distsq > getReach(elb, stack) * getReach(elb, stack)) {
+                        a.motionX += (point.x - a.posX) * 0.02;
+                        a.motionZ += (point.z - a.posZ) * 0.02;
+                    } else if (distsq < getReach(elb, stack) * getReach(elb, stack)) {
+                        a.motionX -= (point.x - a.posX) * 0.02;
+                        a.motionZ -= (point.z - a.posZ) * 0.02;
+                    }
+                    a.motionY = 0.03;
+                    a.motionX += (a.posZ - elb.posZ) * 0.01;
+                    a.motionZ -= (a.posX - elb.posX) * 0.01;
+                    a.velocityChanged = true;
+                    if (elb.ticksExisted % 10 == 0) {
                         if (a instanceof EntityLivingBase) {
                             ITaoStatCapability itsc = TaoCasterData.getTaoCap((EntityLivingBase) a);
-                            itsc.startRecordingDamage();
+                            if (!itsc.isRecordingDamage())
+                                itsc.startRecordingDamage();
                         }
                         if (elb.ticksExisted % 20 == 0) {
                             TaoCombatUtils.attack(elb, a, getHand(stack));
@@ -174,14 +176,18 @@ public class BanFu extends TaoWeapon {
                 a.motionZ = -(point.z - a.posZ) * 0.05;
                 a.velocityChanged = true;
             }
-        } else {
-            for (int i = (int) elb.posX - 6; i < (int) elb.posX + 6; ++i) {
-                for (int j = (int) elb.posZ - 6; j < (int) elb.posZ + 6; ++j) {
-                    double speed = Taoism.unirand.nextGaussian() * 0.05D;
-                    elb.world.spawnParticle(EnumParticleTypes.DRIP_LAVA, i + (double) (Taoism.unirand.nextFloat() * 2.0F), elb.posY + 10.0D + (Taoism.unirand.nextFloat() * 5), j + (double) (Taoism.unirand.nextFloat()), 0, speed, 0);
-                }
+            if (elb.world instanceof WorldServer) {
+                ((WorldServer) elb.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, elb.posX, elb.posY + 7, elb.posZ, 200, 3, 0, 3, 0.5f);
             }
         }
+//        else {
+//            for (int i = (int) elb.posX - 6; i < (int) elb.posX + 6; ++i) {
+//                for (int j = (int) elb.posZ - 6; j < (int) elb.posZ + 6; ++j) {
+//                    double speed = Taoism.unirand.nextGaussian() * 0.05D;
+//                    elb.world.spawnParticle(EnumParticleTypes.REDSTONE, i + (double) (Taoism.unirand.nextFloat() * 2.0F), elb.posY + 10.0D + (Taoism.unirand.nextFloat() * 5), j + (double) (Taoism.unirand.nextFloat()), 0, speed, 0, 1, 0, 0);
+//                }
+//            }
+//        }
     }
 
     @Override

@@ -9,7 +9,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
@@ -78,7 +77,7 @@ public class BohemianEarspoon extends TaoWeapon {
                     if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
                             //too close! Rip out innards for double damage
-                            target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                            target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) getDamageAgainst(elb, target, stack));
                             setLastAttackedRangeSq(elb, stack, 0);
                         }
                         //a new challenger is approaching!

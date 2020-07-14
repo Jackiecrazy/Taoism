@@ -11,11 +11,14 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
@@ -37,22 +40,23 @@ public class Bian extends TaoWeapon {
     dealing remaining hp damage to the target
      */
     public Bian() {
-        super(0, 1.4, 6, 0.7f);
+        super(0, 1.4, 6, 0.9f);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("bian.stagger"));
-        tooltip.add(I18n.format("bian.armpen"));
+        //tooltip.add(I18n.format("bian.armpen"));
         tooltip.add(I18n.format("bian.enfeeble"));
     }
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         float base = super.postureDealtBase(attacker, defender, item, amount);
+        if (defender == null || attacker == null) return base;
         if (isCharged(attacker, item) && defender.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() < 0) {
-            base += TaoCasterData.getTaoCap(defender).getMaxPosture() / 10;
+            base += TaoCasterData.getTaoCap(defender).getMaxPosture() / 5;
         }
         return base;
     }
@@ -81,26 +85,33 @@ public class Bian extends TaoWeapon {
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         float base = super.hurtStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item)) {
+            boolean detonate = !TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5);
             if (target.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue() < 0) {
-                if (TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5))
-                    base += TaoCasterData.getTaoCap(target).getMaxPosture();
+                base += TaoCasterData.getTaoCap(target).getMaxPosture() / 5f;
             }
-            if (TaoCasterData.getTaoCap(target).getDownTimer() > 0 && gettagfast(item).getBoolean("ouches")) {
-
+            if (detonate || (TaoCasterData.getTaoCap(target).getDownTimer() > 0 && gettagfast(item).getBoolean("ouches"))) {
+                //deal triple damage, summon a dust cloud that applies fatigue and blindness
+                base *= 3;
+                if (attacker.world instanceof WorldServer) {
+                    ((WorldServer) attacker.world).spawnParticle(EnumParticleTypes.SMOKE_LARGE, target.posX, target.posY + target.height / 2, target.posZ, 50, 0, 0, 0, 0.5f);
+                }
+                for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(16))) {
+                    if (e != attacker) {
+                        TaoPotionUtils.attemptAddPot(e, new PotionEffect(TaoPotion.FATIGUE, 200, 1), false);
+                        TaoPotionUtils.attemptAddPot(e, new PotionEffect(MobEffects.BLINDNESS, 200, 1), false);
+                    }
+                }
+                gettagfast(item).setBoolean("ouches", false);
+                dischargeWeapon(attacker, item);
             }
         }
         return base;
     }
 
     @Override
-    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return TaoCasterData.getTaoCap(attacker).getQiFloored() / 2;
-    }
-
-    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack))
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), TaoPotionUtils.POTSTACKINGMETHOD.ADD), false);
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
         else TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), false);
     }
 

@@ -161,6 +161,7 @@ public class TaoEntityHandler {
             elb.velocityChanged = true;
         }
         if (itsc.isRecordingDamage()) {
+            //TODO turn recording time restriction into speed restriction that allows them to break through thin walls
             if (itsc.getCannonballTime() > 0 && TaoMovementUtils.willCollide(elb) && itsc.getRecordingTime() > 1)
                 TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
         }

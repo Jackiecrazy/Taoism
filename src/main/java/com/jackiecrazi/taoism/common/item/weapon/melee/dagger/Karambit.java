@@ -71,14 +71,17 @@ public class Karambit extends TaoWeapon {
             if (r.entityHit != null) {
                 tpTo = NeedyLittleThings.getPointInFrontOf(r.entityHit, elb, -5);
                 TaoCombatUtils.attack(elb, r.entityHit, EnumHand.MAIN_HAND);
-                TaoCasterData.getTaoCap(elb).addQi(0.5f);
                 gettagfast(stack).setInteger("flashesWithoutHit", 0);
+                gettagfast(stack).setInteger("flashes", gettagfast(stack).getInteger("flashes") + 1);
             }
             TaoCasterData.getTaoCap(elb).setRootTime(0);
             elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
             TaoCasterData.getTaoCap(elb).setRootTime(400);
             if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
                 dischargeWeapon(elb, stack);
+            } else {
+                for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
+                    TaoCasterData.getTaoCap(e).setRootTime(200);
             }
         }
         return super.onEntitySwing(elb, stack);
@@ -116,6 +119,8 @@ public class Karambit extends TaoWeapon {
         super.dischargeWeapon(elb, item);
         TaoCasterData.getTaoCap(elb).setRootTime(0);
         TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+        gettagfast(item).setInteger("flashesWithoutHit", 0);
+        gettagfast(item).setInteger("flashes", 0);
     }
 
     @Override
@@ -152,6 +157,11 @@ public class Karambit extends TaoWeapon {
 //    }
 
     @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return super.hurtStart(ds, attacker, target, stack, orig) * (1 + gettagfast(stack).getInteger("flashes") * 0.5f);
+    }
+
+    @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if ((target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker) || isCharged(attacker, stack)) {
             return target.getTotalArmorValue();
@@ -162,6 +172,6 @@ public class Karambit extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (target.getTotalArmorValue() - chi * 6d <= 0 || isCharged(attacker, stack) || (target.getLastDamageSource() == null || target.getLastDamageSource().getTrueSource() != attacker))
-            TaoPotionUtils.forceBleed(target, attacker, 20, 1, TaoPotionUtils.POTSTACKINGMETHOD.NONE);
+            TaoPotionUtils.forceBleed(target, attacker, 40, 1, TaoPotionUtils.POTSTACKINGMETHOD.NONE);
     }
 }

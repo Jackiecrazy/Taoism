@@ -90,12 +90,17 @@ public class CatNineTails extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         int armor = target.getTotalArmorValue();
         int potency, duration;
-        if (armor >= 10) return;//10 armor and above means no laceration, can't rip a guy in full chain+...
-        else if (isCharged(attacker, stack)&& TaoCasterData.getTaoCap(attacker).consumeQi(0.3f,5)) {
+        if (isCharged(attacker, stack)) {
             potency = 2;
             duration = 100;
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ENFEEBLE, duration, potency), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
-        } else {
+            if (TaoCasterData.getTaoCap(attacker).consumeQi(0.3f, 5)) {
+                TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ENFEEBLE, duration, potency), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
+            } else {
+                dischargeWeapon(attacker, stack);
+            }
+        }
+        else if (armor >= 10) return;//10 armor and above means no laceration, can't rip a guy in full chain+...
+        else {
             potency = (int) (2 - (Math.ceil(armor / 5f)));
             duration = 100 - (armor * 10);
         }

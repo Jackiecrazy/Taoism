@@ -21,6 +21,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -240,12 +241,8 @@ public class TaoCombatHandler {
         if (ukeCap.getDownTimer() > 0) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
-                for (int i = 0; i < 5; ++i) {
-                    double d0 = Taoism.unirand.nextGaussian() * 0.02D;
-                    double d1 = Taoism.unirand.nextGaussian() * 0.02D;
-                    double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                    seme.world.spawnParticle(EnumParticleTypes.VILLAGER_ANGRY, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
-                    //fixme doesn't work because this is server only
+                if(seme.world instanceof WorldServer){
+                    ((WorldServer) seme.world).spawnParticle(EnumParticleTypes.VILLAGER_ANGRY, uke.posX, uke.posY, uke.posZ, 5, uke.width, uke.height, uke.width, 0.5f);
                 }
                 seme.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_GENERIC_BIG_FALL, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
             }

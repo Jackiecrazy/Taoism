@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -48,9 +49,14 @@ public class Tonfa extends TaoWeapon {
         if (e instanceof EntityLivingBase && onHand && isCharged((EntityLivingBase) e, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
             EntityLivingBase elb = (EntityLivingBase) e;
             Entity target = TaoMovementUtils.collidingEntity(elb);
-            if (target != null && getLastAttackedEntity(w, stack) != target) {
+            if (!w.isRemote&&target != null && getLastAttackedEntity(w, stack) != target) {
                 TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
                 TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
+                NeedyLittleThings.knockBack(elb, target, 1f);
+                if(elb.motionY>0.1){
+                    elb.motionY=0.1;
+                    elb.velocityChanged=true;
+                }
             }
             if (getChargedTime(elb, stack) > getMaxChargeTime()) dischargeWeapon(elb, stack);
         }
@@ -69,12 +75,14 @@ public class Tonfa extends TaoWeapon {
     public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
         super.chargeWeapon(attacker, item, ticks);
         attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 400));
+        TaoCasterData.getTaoCap(attacker).startRecordingDamage();
     }
 
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
         super.dischargeWeapon(elb, item);
         TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
+        TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
     }
 
     @Override
@@ -151,7 +159,7 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        if (isCharged(defender, item)) return 2f;
+        if (isCharged(defender, item)) return 0f;
         return 0.7f;
     }
 }
