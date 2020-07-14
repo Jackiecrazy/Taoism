@@ -237,4 +237,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     int getCannonballTime();
 
     void setCannonballTime(int duration);
+
+    int getTauntID();
+
+    void tauntedBy(EntityLivingBase elb);
 }

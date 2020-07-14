@@ -46,6 +46,10 @@ public class TaoCombatHandler {
     public static void pleasedontkillme(LivingAttackEvent e) {
         if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
+            if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
+                //you may only attack the target that taunted you
+                e.setCanceled(true);
+            }
             //cancel attack
             ItemStack i = TaoCombatUtils.getAttackingItemStackSensitive(p);
             if (i.getItem() instanceof ICombatManipulator) {
@@ -241,7 +245,7 @@ public class TaoCombatHandler {
         if (ukeCap.getDownTimer() > 0) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
-                if(seme.world instanceof WorldServer){
+                if (seme.world instanceof WorldServer) {
                     ((WorldServer) seme.world).spawnParticle(EnumParticleTypes.VILLAGER_ANGRY, uke.posX, uke.posY, uke.posZ, 5, uke.width, uke.height, uke.width, 0.5f);
                 }
                 seme.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_GENERIC_BIG_FALL, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);

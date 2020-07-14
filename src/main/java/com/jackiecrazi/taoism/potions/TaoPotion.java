@@ -4,10 +4,11 @@ import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
@@ -17,6 +18,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -63,6 +65,10 @@ public class TaoPotion extends Potion {
      * increases incoming posture and non-magical damage, generally paired with bleed
      */
     public static Potion LACERATION = null;
+    /**
+     * adds 20% per level to incoming and outgoing damage
+     */
+    public static Potion ENRAGE = null;
     private int interval = 0;
 
     private TaoPotion(boolean isBad, int colour) {
@@ -81,9 +87,11 @@ public class TaoPotion extends Potion {
         RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
         ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("armorBreak")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0);
-        HEMORRHAGE = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
+        HEMORRHAGE = new TaoPotion(true, new Color(100, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
         LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
         DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("disorient");
+        ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("enrage")
+                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -1.3, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
         event.getRegistry().register(BLEED);
@@ -125,13 +133,29 @@ public class TaoPotion extends Potion {
     @SubscribeEvent
     public static void pain(LivingHurtEvent e) {
         DamageSource ds = e.getSource();
-        if (e.getEntityLiving().getActivePotionEffect(LACERATION) != null && !isSpecialDamage(ds)) {
-            e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(LACERATION).getAmplifier() + 1) * 0.2f));
+        if (!isSpecialDamage(ds)) {
+            if (e.getEntityLiving().getActivePotionEffect(LACERATION) != null)
+                e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(LACERATION).getAmplifier() + 1) * 0.2f));
+            if (e.getEntityLiving().getActivePotionEffect(ENRAGE) != null)
+                e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(ENRAGE).getAmplifier() + 1) * 0.2f));
+            if (ds.getTrueSource() instanceof EntityLivingBase && ((EntityLivingBase) ds.getTrueSource()).getActivePotionEffect(ENRAGE) != null)
+                e.setAmount(e.getAmount() * 1 + (((EntityLivingBase) ds.getTrueSource()).getActivePotionEffect(ENRAGE).getAmplifier() + 1) * 0.2f);
         }
     }
 
     private static boolean isSpecialDamage(DamageSource ds) {
         return !ds.damageType.equals("bleed") && (ds.isMagicDamage() || ds.isUnblockable() || ds.isDamageAbsolute());
+    }
+
+    @SubscribeEvent
+    public static void taunt(LivingSetAttackTargetEvent e) {
+        if (e.getEntityLiving() instanceof EntityLiving) {
+            EntityLiving el = (EntityLiving) e.getEntityLiving();
+            Entity taunter = el.world.getEntityByID(TaoCasterData.getTaoCap(el).getTauntID());
+            if (taunter instanceof EntityLivingBase && taunter != e.getTarget()) {
+                el.setAttackTarget((EntityLivingBase) taunter);
+            }
+        }
     }
 
     @Override
@@ -141,9 +165,12 @@ public class TaoPotion extends Potion {
             l.hurtResistantTime = 0;
             l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 1 + (amplifier / 2f));
             if (l.world instanceof WorldServer) {
-                ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width/4, l.height/4, l.width/4, 0.5f);
+                ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
             l.hurtResistantTime = 0;
+        }
+        if (this == ENRAGE) {
+            TaoCasterData.getTaoCap(l).tauntedBy(null);
         }
     }
 
@@ -152,8 +179,11 @@ public class TaoPotion extends Potion {
         return interval != 0 && duration % interval == 1;
     }
 
-    public void applyAttributesModifiersToEntity(EntityLivingBase elb, AbstractAttributeMap am, int amp) {
-        super.applyAttributesModifiersToEntity(elb, am, amp);
+    public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier)
+    {
+        if(this==ENRAGE)
+            return modifier.getAmount();
+        return modifier.getAmount() * (double)(amplifier + 1);
     }
 
     @SideOnly(Side.CLIENT)

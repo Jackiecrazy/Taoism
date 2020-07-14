@@ -382,6 +382,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public int getTauntID() {
+        return 0;
+    }
+
+    @Override
+    public void tauntedBy(EntityLivingBase elb) {
+
+    }
+
+    @Override
     public NBTTagCompound serializeNBT() {
         return null;
     }

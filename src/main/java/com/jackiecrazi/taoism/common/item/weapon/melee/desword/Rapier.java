@@ -5,13 +5,17 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -52,7 +56,7 @@ public class Rapier extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        if(gettagfast(item).getInteger("lastParryTime")>attacker.ticksExisted){
+        if (gettagfast(item).getInteger("lastParryTime") > attacker.ticksExisted) {
             gettagfast(item).setInteger("lastParryTime", 0);
         }
         //just dodged or parried
@@ -65,6 +69,30 @@ public class Rapier extends TaoWeapon {
         if (!(target instanceof EntityPlayer) && TaoCasterData.getTaoCap(target).getSwing() < CombatConfig.mobForcedCooldown)
             return Event.Result.ALLOW;
         return Event.Result.DENY;
+    }
+
+    @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (gettagfast(stack).getInteger("tauntStrikes") >= 9) {
+            //heart stab!
+            gettagfast(stack).setInteger("tauntStrikes", 0);
+            return Math.min(target.getMaxHealth() / 2, orig * 6);
+        }
+        return super.hurtStart(ds, attacker, target, stack, orig);
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (isCharged(attacker, stack)) {
+            //apply enrage and taunt the enemy
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENRAGE, 6000, gettagfast(stack).getInteger("tauntStrikes") - 1), false);
+            TaoCasterData.getTaoCap(target).tauntedBy(attacker);
+            gettagfast(stack).setInteger("tauntStrikes", gettagfast(stack).getInteger("tauntStrikes") + 1);
+            if (gettagfast(stack).getInteger("tauntStrikes") == 9) {
+                //deal great posture damage
+                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2, true, true, attacker);
+            }
+        }
     }
 
     @Override

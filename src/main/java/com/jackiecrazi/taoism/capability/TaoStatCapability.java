@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.networking.PacketUpdateClientPainful;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -43,7 +44,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
-    private int recordTimer = 0, ms = 0;
+    private int recordTimer = 0, ms = 0, taunt = -1;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = new WeakReference<>(elb);
@@ -715,6 +716,22 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setCannonballTime(int duration) {
         ms = duration;
+    }
+
+    @Override
+    public int getTauntID() {
+        return taunt;
+    }
+
+    @Override
+    public void tauntedBy(EntityLivingBase elb) {
+        if (elb == null) {
+            taunt = -1;
+        } else {
+            taunt = elb.getEntityId();
+            if (e.get() instanceof EntityLiving)
+                ((EntityLiving) e.get()).setAttackTarget(elb);
+        }
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {
