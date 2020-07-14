@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.tile;
+package com.jackiecrazi.taoism.common.block.tile;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;

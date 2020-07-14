@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.common.block.special;
 
-import com.jackiecrazi.taoism.common.tile.TilePedestal;
+import com.jackiecrazi.taoism.common.block.tile.TilePedestal;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;

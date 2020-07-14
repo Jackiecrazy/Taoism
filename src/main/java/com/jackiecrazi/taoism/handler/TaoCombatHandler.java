@@ -28,6 +28,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -41,12 +42,23 @@ public class TaoCombatHandler {
     public static boolean modCall;
     private static boolean abort = false;
 
+    //offhand handler for puny mod weapons that don't have it already
+    //"puny" here defined as weapons that can't attack from offhand
+    @SubscribeEvent
+    public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
+        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon) && TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
+            TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
+            TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
+        }
+    }
+
+
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void pleasedontkillme(LivingAttackEvent e) {
+    public static void iHaveAWifeAndChildren(LivingAttackEvent e) {
         if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
-            if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
+            if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
                 //you may only attack the target that taunted you
                 e.setCanceled(true);
             }

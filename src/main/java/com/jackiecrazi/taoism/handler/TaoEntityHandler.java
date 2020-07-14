@@ -1,12 +1,14 @@
 package com.jackiecrazi.taoism.handler;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICombo;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IElemental;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ISpecialSwitchIn;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.block.tile.TileTempExplosion;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
@@ -28,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -35,10 +38,14 @@ import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.Iterator;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = Taoism.MODID)
 public class TaoEntityHandler {
@@ -114,6 +121,24 @@ public class TaoEntityHandler {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void cannonball(ExplosionEvent.Detonate e) {
+        if (e.getWorld().isRemote) return;
+        EntityLivingBase detonator = e.getExplosion().getExplosivePlacedBy();
+        if (detonator != null) {
+            if (TaoCasterData.getTaoCap(detonator).getCannonballTime() > 0) {
+                e.getAffectedEntities().remove(detonator);
+                List<BlockPos> hitList = e.getAffectedBlocks();
+                for (Iterator<BlockPos> iter = hitList.iterator(); iter.hasNext(); ) {
+                    BlockPos pos = iter.next();
+                    if (e.getWorld().getTileEntity(pos) == null)
+                        TileTempExplosion.replaceBlockAndBackup(e.getWorld(), pos, 500 - (int) (5 * detonator.getDistanceSq(pos)));
+                    iter.remove();
+                }
+            }
+        }
+
+    }
 
     @SubscribeEvent
     public static void youJumpIJump(LivingEvent.LivingJumpEvent e) {
@@ -160,10 +185,14 @@ public class TaoEntityHandler {
             }
             elb.velocityChanged = true;
         }
+        if (elb.world.isRemote) return;
         if (itsc.isRecordingDamage()) {
             //TODO turn recording time restriction into speed restriction that allows them to break through thin walls
-            if (itsc.getCannonballTime() > 0 && TaoMovementUtils.willCollide(elb) && itsc.getRecordingTime() > 1)
-                TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
+            if (itsc.getCannonballTime() > 0 && TaoMovementUtils.willCollide(elb)) {
+                if (NeedyLittleThings.getSpeedSq(elb) > 1)
+                    elb.world.newExplosion(elb, elb.posX, elb.posY, elb.posZ, 3, false, false);
+                else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
+            }
         }
         boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {

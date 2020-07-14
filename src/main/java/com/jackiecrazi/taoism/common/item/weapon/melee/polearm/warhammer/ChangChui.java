@@ -137,7 +137,7 @@ public class ChangChui extends TaoWeapon {
             target.velocityChanged = true;
             TaoCasterData.getTaoCap(target).startRecordingDamage();
             TaoCasterData.getTaoCap(target).setCannonballTime(100);
-            dischargeWeapon(attacker, item);
+            //dischargeWeapon(attacker, item);
         }
     }
 
@@ -182,8 +182,6 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
-        if (getHand(stack) == EnumHand.OFF_HAND)
-            dischargeWeapon(elb, stack);
         EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
         TaoCombatUtils.rechargeHand(elb, other, 0.5f);
     }

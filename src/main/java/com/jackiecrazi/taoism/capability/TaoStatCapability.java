@@ -69,6 +69,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
             return TaoCasterData.getTaoCap(elb).getMaxPosture() * armorMod * posMult * healthMod / (1.5f * MAXDOWNTIME);
         }
+        if (posMult < 0)
+            return (ticks * 0.05f) * posMult / (armorMod * healthMod);
         return (ticks * 0.05f) * armorMod * posMult * healthMod;
     }
 

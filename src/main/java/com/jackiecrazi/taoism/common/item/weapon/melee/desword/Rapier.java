@@ -45,6 +45,12 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        gettagfast(item).setInteger("tauntStrikes", 0);
+    }
+
+    @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
         gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
     }
@@ -72,11 +78,11 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (gettagfast(stack).getInteger("tauntStrikes") >= 9) {
+    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             //heart stab!
-            gettagfast(stack).setInteger("tauntStrikes", 0);
-            return Math.min(target.getMaxHealth() / 2, orig * 6);
+            dischargeWeapon(attacker, stack);
+            return Math.min(target.getHealth(), orig * 10);
         }
         return super.hurtStart(ds, attacker, target, stack, orig);
     }
@@ -88,10 +94,10 @@ public class Rapier extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ENRAGE, 6000, gettagfast(stack).getInteger("tauntStrikes") - 1), false);
             TaoCasterData.getTaoCap(target).tauntedBy(attacker);
             gettagfast(stack).setInteger("tauntStrikes", gettagfast(stack).getInteger("tauntStrikes") + 1);
-            if (gettagfast(stack).getInteger("tauntStrikes") == 9) {
-                //deal great posture damage
-                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2, true, true, attacker);
-            }
+//            if (gettagfast(stack).getInteger("tauntStrikes") == 10) {
+//                //deal great posture damage
+//                TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture() / 2, true, true, attacker);
+//            }
         }
     }
 

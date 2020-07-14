@@ -18,6 +18,8 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static com.jackiecrazi.taoism.api.NeedyLittleThings.VALID_TARGETS;
+
 public class TaoMovementUtils {
     private static Method jump = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70664_aZ", Void.TYPE);
     private static EnumFacing[] intToFacing = {EnumFacing.EAST, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN, EnumFacing.SOUTH, EnumFacing.NORTH};
@@ -44,14 +46,15 @@ public class TaoMovementUtils {
             if (aabb.calculateXOffset(a, -allowance) != -allowance) return true;
             if (aabb.calculateZOffset(a, allowance) != allowance) return true;
             if (aabb.calculateZOffset(a, -allowance) != -allowance) return true;
-            if (aabb.calculateYOffset(a, allowance) != allowance) return true;
+            //if (aabb.calculateYOffset(a, allowance) != allowance) return true;
         }
         return false;
     }
 
     public static boolean willCollide(Entity elb) {
         double allowance = 0.1;
-        return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().grow(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance)) || collidingEntity(elb) != null;
+        return willHitWall(elb) || collidingEntity(elb) != null;
+        //return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().grow(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance)) || collidingEntity(elb) != null;
     }
 
     /**
@@ -62,7 +65,7 @@ public class TaoMovementUtils {
      */
     public static Entity collidingEntity(Entity elb) {
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 6, elb.motionY * 6, elb.motionZ * 6), EntitySelectors.NOT_SPECTATING);
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 6, elb.motionY * 6, elb.motionZ * 6), VALID_TARGETS::test);
         double dist = 0;
         Entity pick = null;
         for (Entity e : entities) {

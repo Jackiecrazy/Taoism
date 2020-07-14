@@ -312,11 +312,11 @@ public class TaoCombatUtils {
             return main;
         }
         //parries
-        if (isParryCapable(main) && mainRec) {
+        if (isValidWeapon(main) && mainRec) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (isParryCapable(off) && offRec) {
+        if (isValidWeapon(off) && offRec) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
@@ -349,7 +349,7 @@ public class TaoCombatUtils {
         return false;
     }
 
-    public static boolean isParryCapable(ItemStack i) {
+    public static boolean isValidWeapon(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.parryCapableItems) {
             if (s.equals(i.getItem().getRegistryName().toString())) return true;

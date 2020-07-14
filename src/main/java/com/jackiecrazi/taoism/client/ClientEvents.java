@@ -161,7 +161,6 @@ public class ClientEvents {
             }
             if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
                 int screw = TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime();
-                float angle = NeedyLittleThings.rad(screw);
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(event.getX(), event.getY() + event.getEntity().height / 2, event.getZ());
                 GlStateManager.rotate(screw * 7 + event.getPartialRenderTick(), MathHelper.sin((float) (event.getEntity().posX)), MathHelper.sin((float) (event.getEntity().posY)), MathHelper.sin((float) (-event.getEntity().posZ)));
@@ -180,13 +179,6 @@ public class ClientEvents {
                 GlStateManager.popMatrix();
             }
         }
-    }
-
-    @SubscribeEvent
-    public static void modelThePlayer(RenderPlayerEvent.Pre e) {
-//        EntityPlayer p = e.getEntityPlayer();
-//        e.getRenderer().getMainModel().bipedRightArm.rotateAngleX += 37;
-        //what was I doing? I can't remember...
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -306,7 +298,7 @@ public class ClientEvents {
             }
         }
         //force offhand to have some semblance of cooldown
-        if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isParryCapable(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()))
+        if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isValidWeapon(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()))
             return;
         e.setCanceled(true);
         ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();

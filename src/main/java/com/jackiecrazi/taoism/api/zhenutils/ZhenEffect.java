@@ -4,7 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
 import com.jackiecrazi.taoism.api.TaoistPosition;
-import com.jackiecrazi.taoism.common.tile.TileZhenJiao;
+import com.jackiecrazi.taoism.common.block.tile.TileZhenJiao;
 
 public class ZhenEffect {
 	private ZhenEffectShape zes;

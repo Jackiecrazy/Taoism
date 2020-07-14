@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
@@ -91,7 +92,7 @@ public class TaoPotion extends Potion {
         LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
         DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("disorient");
         ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("enrage")
-                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -1.3, 2);
+                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.3, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
         event.getRegistry().register(BLEED);
@@ -179,11 +180,17 @@ public class TaoPotion extends Potion {
         return interval != 0 && duration % interval == 1;
     }
 
-    public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier)
-    {
-        if(this==ENRAGE)
-            return modifier.getAmount();
-        return modifier.getAmount() * (double)(amplifier + 1);
+    @Override
+    public void removeAttributesModifiersFromEntity(EntityLivingBase entityLivingBaseIn, AbstractAttributeMap attributeMapIn, int amplifier) {
+        super.removeAttributesModifiersFromEntity(entityLivingBaseIn, attributeMapIn, amplifier);
+        if (this == ENRAGE)
+            TaoCasterData.getTaoCap(entityLivingBaseIn).tauntedBy(null);
+    }
+
+    public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier) {
+        if (this == ENRAGE)
+            return -1 + modifier.getAmount();
+        return modifier.getAmount() * (double) (amplifier + 1);
     }
 
     @SideOnly(Side.CLIENT)

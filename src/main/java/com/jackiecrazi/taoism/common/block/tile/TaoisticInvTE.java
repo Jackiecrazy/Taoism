@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.common.tile;
+package com.jackiecrazi.taoism.common.block.tile;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
