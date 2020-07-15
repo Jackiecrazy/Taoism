@@ -128,11 +128,12 @@ public class TaoEntityHandler {
         if (detonator != null) {
             if (TaoCasterData.getTaoCap(detonator).getCannonballTime() > 0) {
                 e.getAffectedEntities().remove(detonator);
+                e.getAffectedEntities().remove(detonator.getRevengeTarget());
                 List<BlockPos> hitList = e.getAffectedBlocks();
                 for (Iterator<BlockPos> iter = hitList.iterator(); iter.hasNext(); ) {
                     BlockPos pos = iter.next();
                     if (e.getWorld().getTileEntity(pos) == null)
-                        TileTempExplosion.replaceBlockAndBackup(e.getWorld(), pos, 500 - (int) (5 * detonator.getDistanceSq(pos)));
+                        TileTempExplosion.replaceBlockAndBackup(e.getWorld(), pos, Math.max(20, 200 + Taoism.unirand.nextInt(20) - (int) (5 * detonator.getDistanceSq(pos))));
                     iter.remove();
                 }
             }
@@ -187,10 +188,9 @@ public class TaoEntityHandler {
         }
         if (elb.world.isRemote) return;
         if (itsc.isRecordingDamage()) {
-            //TODO turn recording time restriction into speed restriction that allows them to break through thin walls
-            if (itsc.getCannonballTime() > 0 && TaoMovementUtils.willCollide(elb)) {
-                if (NeedyLittleThings.getSpeedSq(elb) > 1)
-                    elb.world.newExplosion(elb, elb.posX, elb.posY, elb.posZ, 3, false, false);
+            if (itsc.getCannonballTime() > 0 && (TaoMovementUtils.willCollide(elb)||(elb.collidedHorizontally&&!elb.collidedVertically))) {
+                if (NeedyLittleThings.getSpeedSq(elb) > 0.5)
+                    elb.world.newExplosion(elb, elb.posX, elb.posY, elb.posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(elb) * 3), false, false);
                 else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
             }
         }

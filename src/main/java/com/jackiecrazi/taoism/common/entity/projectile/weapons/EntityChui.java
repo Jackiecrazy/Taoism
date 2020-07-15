@@ -27,17 +27,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityBanfu extends EntityThrownWeapon implements ITetherAnchor {
+public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
     private Entity target;
     private List<WeakReference<Entity>> hitList = new ArrayList<>();
     private Vec3d offset;
 
-    public EntityBanfu(World worldIn) {
+    public EntityChui(World worldIn) {
         super(worldIn);
         setSize(1.1f, 1.1f);
     }
 
-    public EntityBanfu(World worldIn, EntityLivingBase dude, EnumHand main) {
+    public EntityChui(World worldIn, EntityLivingBase dude, EnumHand main) {
         super(worldIn, dude, main);
         setSize(1.1f, 1.1f);
     }

@@ -28,32 +28,17 @@ public class TileTempExplosion extends TileEntity implements ITickable {
     public void updateScheduledTick()
     {
         if (!world.isRemote) {
-
-            //if for some reason data is invalid, remove block
             if (orig_blockState == null || orig_blockState == this.getBlockType().getDefaultState()) {
                 Taoism.logger.warn("invalid state for repairing block, removing, orig_blockState: " + orig_blockState + " vs " + this.getBlockType().getDefaultState());
                 getWorld().setBlockState(this.getPos(), Blocks.AIR.getDefaultState());
-
-                //temp
-                //setBlockData(Blocks.STONE.getDefaultState());
             } else {
-
-
-                //System.out.println("ticksRepairCount = " + ticksRepairCount);
-
-                //AxisAlignedBB aabb = new AxisAlignedBB(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(), this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-
-                //System.out.println(listTest.size());
-
                 if (world.getTotalWorldTime() > timeToRepairAt) {
                     AxisAlignedBB aabb = this.getBlockType().getDefaultState().getBoundingBox(this.getWorld(), this.getPos());
-                    //i think its using no collide AABB so this fixes it
                     aabb = Block.FULL_BLOCK_AABB;
                     aabb = aabb.offset(this.getPos());
                     List<EntityLivingBase> listTest = this.getWorld().getEntitiesWithinAABB(EntityLivingBase.class, aabb);
                     if (listTest.size() == 0)
                     {
-                        //System.out.println("restoring: " + orig_blockState);
                         restoreBlock();
                     }
                 }

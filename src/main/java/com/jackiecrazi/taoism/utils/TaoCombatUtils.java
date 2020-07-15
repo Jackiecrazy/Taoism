@@ -28,6 +28,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
 public class TaoCombatUtils {
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
@@ -93,6 +95,12 @@ public class TaoCombatUtils {
             targetEntity.attackEntityFrom(DamageSource.causeMobDamage(elb), (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
     }
 
+    private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
+        if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, target))) return false;
+        ItemStack stack = player.getHeldItem(hand);
+        return stack.isEmpty() || !stack.getItem().onLeftClickEntity(stack, player, target);
+    }
+
     /**
      * copy-pasted from EntityPlayer, as-is.
      */
@@ -102,7 +110,7 @@ public class TaoCombatUtils {
             if (updateOff) {
                 TaoCasterData.getTaoCap(player).setOffhandAttack(!main);
             }
-            if (!net.minecraftforge.common.ForgeHooks.onPlayerAttackTarget(player, targetEntity)) return;
+            if (!onPlayerAttackTarget(player, targetEntity, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND)) return;
             if (targetEntity.canBeAttackedWithItem()) {
                 if (!targetEntity.hitByEntity(player)) {
                     IAttributeInstance toUse = new AttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);

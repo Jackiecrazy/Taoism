@@ -46,15 +46,15 @@ public class TaoMovementUtils {
             if (aabb.calculateXOffset(a, -allowance) != -allowance) return true;
             if (aabb.calculateZOffset(a, allowance) != allowance) return true;
             if (aabb.calculateZOffset(a, -allowance) != -allowance) return true;
-            //if (aabb.calculateYOffset(a, allowance) != allowance) return true;
+            if (aabb.calculateYOffset(a, allowance) != allowance) return true;
         }
         return false;
     }
 
     public static boolean willCollide(Entity elb) {
-        double allowance = 0.1;
-        return willHitWall(elb) || collidingEntity(elb) != null;
-        //return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().grow(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance)) || collidingEntity(elb) != null;
+        double allowance = 1;
+        //return willHitWall(elb) || collidingEntity(elb) != null;
+        return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().expand(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance));// || collidingEntity(elb) != null;
     }
 
     /**
