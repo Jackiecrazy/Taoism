@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -131,13 +130,13 @@ public class ChangChui extends TaoWeapon {
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item)) {
-            target.motionY += 1;
+            target.motionY += 1.5;
             target.motionX -= MathHelper.sin(-attacker.rotationYaw * 0.017453292F - (float) Math.PI) * 5;
             target.motionZ -= MathHelper.cos(-attacker.rotationYaw * 0.017453292F - (float) Math.PI) * 5;
             target.velocityChanged = true;
             TaoCasterData.getTaoCap(target).startRecordingDamage();
             TaoCasterData.getTaoCap(target).setCannonballTime(100);
-            //dischargeWeapon(attacker, item);
+            dischargeWeapon(attacker, item);
         }
     }
 
@@ -148,10 +147,10 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f), false);
-        TaoCasterData.getTaoCap(target).setCannonballTime(0);
+        //target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f), false);
+        //TaoCasterData.getTaoCap(target).setCannonballTime(0);
         TaoCasterData.getTaoCap(target).consumePosture(Float.MAX_VALUE, true, true, null);
-        return orig * 2;
+        return orig * 4;
     }
 
     @Override

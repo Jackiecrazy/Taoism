@@ -159,7 +159,7 @@ public class ClientEvents {
                 }
                 //multi bois do nothing
             }
-            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0 && !event.getEntity().onGround) {
                 int screw = TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime();
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(event.getX(), event.getY() + event.getEntity().height / 2, event.getZ());
@@ -175,7 +175,7 @@ public class ClientEvents {
             if (TaoCasterData.getTaoCap(event.getEntity()).getDownTimer() > 0) {//TaoCasterData.getTaoCap(event.getEntity()).getDownTimer()>0
                 GlStateManager.popMatrix();
             }
-            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0) {
+            if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0 && !event.getEntity().onGround) {
                 GlStateManager.popMatrix();
             }
         }
@@ -493,7 +493,7 @@ public class ClientEvents {
                 mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, filled, 5);
             }
             if (itsc.getDownTimer() > 0) {
-                invulTime = (int) ((float) itsc.getDownTimer() / (float) TaoStatCapability.MAXDOWNTIME * (float) (barWidth));
+                invulTime = (int) (MathHelper.clamp((float) itsc.getDownTimer() / (float) TaoStatCapability.MAXDOWNTIME, 0, 1) * (float) (barWidth));
                 GlStateManager.color(0, 0, 0);//, ((float) itsc.getPosInvulTime()) / (float) CombatConfig.ssptime);
                 mc.ingameGUI.drawTexturedModalRect(left, atY, 0, 69, invulTime, 5);
             } else {

@@ -92,7 +92,7 @@ public class TaoMovementUtils {
     }
 
     public static boolean[] collisionStatusVelocitySensitive(EntityLivingBase elb) {
-        double allowance = 0.1;
+        double allowance = 1.1;
         boolean[] ret = {false, false, false, false, false, false};
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
         List<AxisAlignedBB> boxes = elb.world.getCollisionBoxes(elb, aabb.expand(elb.motionX, elb.motionY, elb.motionZ));

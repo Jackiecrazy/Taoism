@@ -178,6 +178,13 @@ public class NeedyLittleThings {
         return ret;
     }
 
+    /**
+     * returns the BlockPos at the center of an AABB
+     */
+    public static BlockPos posFromAABB(AxisAlignedBB aabb) {
+        return new BlockPos((aabb.maxX + aabb.minX) / 2, (aabb.maxY + aabb.minY) / 2, (aabb.maxZ + aabb.minZ) / 2);
+    }
+
     public static void swapItemInHands(EntityLivingBase elb) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         elb.setHeldItem(EnumHand.OFF_HAND, main);

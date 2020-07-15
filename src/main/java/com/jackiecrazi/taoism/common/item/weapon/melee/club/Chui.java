@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.club;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
@@ -12,6 +13,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -56,8 +58,41 @@ public class Chui extends TaoWeapon {
     }
 
     @Override
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return attacker.isAirBorne;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (gettagfast(stack).hasKey("projID") && getThrownEntity(stack, w) == null) {
+            gettagfast(stack).removeTag("projID");
+        }
+    }
+
+    @Override
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
+        if (!elb.world.isRemote && isCharged(elb, stack)) {
+            if (isThrown(stack) && getThrownEntity(stack, elb.world) != null) {
+                getThrownEntity(stack, elb.world).onRecall();
+            } else {
+                EntityChui ec = new EntityChui(elb.world, elb, getHand(stack));
+                ec.shoot(elb.getLookVec(), 1.6f, 0);
+                elb.world.spawnEntity(ec);
+                gettagfast(stack).setInteger("projID", ec.getEntityId());
+            }
+        }
+        return super.onEntitySwing(elb, stack);
+    }
+
+    @Override
+    public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return orig * 4;
+    }
+
+    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_GREEN+I18n.format("weapon.disshield")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("chui.leap"));
         tooltip.add(I18n.format("chui.stagger"));
         tooltip.add(I18n.format("chui.slow"));
@@ -65,7 +100,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, item) ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
@@ -76,13 +111,21 @@ public class Chui extends TaoWeapon {
     }
 
     @Override
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return attacker.isAirBorne;
-    }
-
-    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3), false);
     }
 
+    private EntityChui getThrownEntity(ItemStack is, World w) {
+        if (isThrown(is) && w.getEntityByID(getProjID(is)) != null)
+            return (EntityChui) w.getEntityByID(getProjID(is));
+        return null;
+    }
+
+    private boolean isThrown(ItemStack is) {
+        return gettagfast(is).hasKey("projID");
+    }
+
+    private int getProjID(ItemStack is) {
+        return gettagfast(is).getInteger("projID");
+    }
 }

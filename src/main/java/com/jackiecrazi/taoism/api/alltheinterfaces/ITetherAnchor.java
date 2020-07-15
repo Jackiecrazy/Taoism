@@ -30,9 +30,9 @@ public interface ITetherAnchor {
                 //if the distance is below tether length, do nothing
                 //if the distance is above tether length, apply centripetal force to the point
                 if (getTetherLength() * getTetherLength() < distsq && point != null) {
-                    e.motionX += (point.x - e.posX) * 0.02;
-                    e.motionY += (point.y - e.posY) * 0.02;
-                    e.motionZ += (point.z - e.posZ) * 0.02;
+                    e.motionX += (point.x - e.posX) * 0.05;
+                    e.motionY += (point.y - e.posY) * 0.05;
+                    e.motionZ += (point.z - e.posZ) * 0.05;
                 }
                 else if (getTetherLength() == 0 && target != null) {//special case to help with catching up to entities
                     e.motionX = target.motionX;
