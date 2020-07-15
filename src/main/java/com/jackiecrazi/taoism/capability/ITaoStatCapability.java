@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.capability;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -241,4 +242,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     int getTauntID();
 
     void tauntedBy(EntityLivingBase elb);
+
+    Entity getForcedLookAt();
+
+    void setForcedLookAt(Entity e);
 }

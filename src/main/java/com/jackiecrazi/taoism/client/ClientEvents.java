@@ -397,6 +397,14 @@ public class ClientEvents {
                 int width = sr.getScaledWidth();
                 int height = sr.getScaledHeight();
                 if (gamesettings.thirdPersonView == 0) {
+                    if (cap.getForcedLookAt() != null) {
+                        Entity e = cap.getForcedLookAt();
+                        double toY = e.posY + e.getEyeHeight();
+                        double veX = e.posX - player.posX;
+                        double veZ = e.posZ - player.posZ;
+                        double targetYaw = MathHelper.atan2(veX, veZ);
+                        double targetPitch = MathHelper.atan2(Math.sqrt(veX * veX + veZ * veZ), toY);
+                    }
                     mc.getTextureManager().bindTexture(hud);
                     targetQiLevel = cap.getQi();
                     boolean closeEnough = true;

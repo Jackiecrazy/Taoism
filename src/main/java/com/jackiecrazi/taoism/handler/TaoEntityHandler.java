@@ -99,6 +99,7 @@ public class TaoEntityHandler {
             TaoCasterData.updateCasterData(elb);
             elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
+            TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
             if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
                 if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
                     Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));

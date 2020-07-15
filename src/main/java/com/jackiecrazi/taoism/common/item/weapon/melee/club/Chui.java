@@ -75,6 +75,8 @@ public class Chui extends TaoWeapon {
         if (!elb.world.isRemote && isCharged(elb, stack)) {
             if (isThrown(stack) && getThrownEntity(stack, elb.world) != null) {
                 getThrownEntity(stack, elb.world).onRecall();
+                dischargeWeapon(elb, stack);
+                TaoCasterData.getTaoCap(elb).consumeQi(4, 0);
             } else {
                 EntityChui ec = new EntityChui(elb.world, elb, getHand(stack));
                 ec.shoot(elb.getLookVec(), 1.6f, 0);

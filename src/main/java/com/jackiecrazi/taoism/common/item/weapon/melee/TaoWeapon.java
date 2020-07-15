@@ -209,6 +209,14 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return w.getEntityByID(gettagfast(stack).getInteger("lastAttackedID"));
     }
 
+    /**
+     * use sparingly.
+     */
+    protected void setLastAttackedEntity(ItemStack stack, @Nullable Entity e) {
+        if(e==null) gettagfast(stack).removeTag("lastAttackedID");
+        else gettagfast(stack).setInteger("lastAttackedID", e.getEntityId());
+    }
+
     @Override
     public float getDestroySpeed(ItemStack stack, IBlockState state) {
         if (canHarvestBlock(state, stack)) {
@@ -727,20 +735,20 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         /*
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
-        if((wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative())){
+        if ((wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative())) {
             return true;
         }
-        if((TaoCasterData.getTaoCap(wielder).getQi() < 9)){
-            if(wielder instanceof EntityPlayer)
+        if ((TaoCasterData.getTaoCap(wielder).getQi() < 9)) {
+            if (wielder instanceof EntityPlayer)
                 ((EntityPlayer) wielder).sendStatusMessage(new TextComponentTranslation("weapon.notenoughqi"), true);
             return false;
         }
-        if(isCharged(wielder, item)){
-            if(wielder instanceof EntityPlayer)
+        if (isCharged(wielder, item)) {
+            if (wielder instanceof EntityPlayer)
                 ((EntityPlayer) wielder).sendStatusMessage(new TextComponentTranslation("weapon.alreadycharged"), true);
             return false;
         }
-        return true ;
+        return true;
     }
 
     @Override

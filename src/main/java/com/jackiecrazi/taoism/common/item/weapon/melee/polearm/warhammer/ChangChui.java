@@ -107,7 +107,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        if(getHand(item)==EnumHand.OFF_HAND)return Event.Result.DENY;
+        if (getHand(item) == EnumHand.OFF_HAND) return Event.Result.DENY;
         if (attacker.world.collidesWithAnyBlock(target.getEntityBoundingBox()) || TaoMovementUtils.willHitWallFrom(target, attacker)) {
             return Event.Result.ALLOW;
         }
@@ -137,6 +137,7 @@ public class ChangChui extends TaoWeapon {
             TaoCasterData.getTaoCap(target).startRecordingDamage();
             TaoCasterData.getTaoCap(target).setCannonballTime(100);
             dischargeWeapon(attacker, item);
+            TaoCasterData.getTaoCap(attacker).consumeQi(4, 0);
         }
     }
 
@@ -149,7 +150,7 @@ public class ChangChui extends TaoWeapon {
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         //target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f), false);
         //TaoCasterData.getTaoCap(target).setCannonballTime(0);
-        TaoCasterData.getTaoCap(target).consumePosture(Float.MAX_VALUE, true, true, null);
+        TaoCasterData.getTaoCap(target).consumePosture(orig * 2, true, true, null);
         return orig * 4;
     }
 

@@ -32,6 +32,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private static final UUID ARMORDOWN = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d78");
     private static final float MAXQI = 9.99f;
     private WeakReference<EntityLivingBase> e;
+    private int zTarget;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
     private float maxLing, maxPosture, recordedDamage;
@@ -116,6 +117,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setInteger("root", getRootTime());
         nbt.setInteger("recordTimer", recordTimer);
         nbt.setInteger("spinny", ms);
+        nbt.setInteger("lookingAt", zTarget);
         return nbt;
     }
 
@@ -155,6 +157,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         toggleCombatMode(nbt.getBoolean("sprintTemp"));
         recording = nbt.getBoolean("reccing");
         recordTimer = nbt.getInteger("recordTimer");
+        //only happens on the client
+        zTarget = nbt.getInteger("lookingAt");
         ms = nbt.getInteger("spinny");
     }
 
@@ -257,13 +261,15 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public boolean consumeQi(float amount, float above) {
-        if (qi < amount + above) return false;
+        boolean ret = true;
+        if (qi < amount + above) ret = false;
         int qibefore = (int) qi;
         qi -= amount;
+        if (qi < 0) qi = 0;
         if (getQiFloored() < qibefore)
             setQiGracePeriod(CombatConfig.qiGrace * 20);
         sync();
-        return true;
+        return ret;
     }
 
     @Override
@@ -734,6 +740,20 @@ public class TaoStatCapability implements ITaoStatCapability {
             if (e.get() instanceof EntityLiving)
                 ((EntityLiving) e.get()).setAttackTarget(elb);
         }
+    }
+
+    @Override
+    public Entity getForcedLookAt() {
+        if (e.get() != null) {
+            return e.get().world.getEntityByID(zTarget);
+        }
+        return null;
+    }
+
+    @Override
+    public void setForcedLookAt(Entity e) {
+        if (e == null) zTarget = -1;
+        zTarget = e.getEntityId();
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

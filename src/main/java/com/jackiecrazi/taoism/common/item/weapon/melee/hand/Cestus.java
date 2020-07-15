@@ -117,7 +117,7 @@ public class Cestus extends TaoWeapon {
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
         super.dischargeWeapon(elb, item);
         TaoCasterData.getTaoCap(elb).setRootTime(0);
-        TaoCasterData.getTaoCap(elb).setQi(5);
+        TaoCasterData.getTaoCap(elb).consumeQi(4, 0);
         TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
         TaoCasterData.getTaoCap(elb).toggleCombatMode(true);
     }

@@ -225,7 +225,11 @@ public class NeedyLittleThings {
     }
 
     public static float rad(float angle) {
-        return angle * (float) Math.PI / 180;
+        return (float) (angle * Math.PI / 180d);
+    }
+
+    public static float deg(float rad) {
+        return (float) (rad * 180d / Math.PI);
     }
 
     /**

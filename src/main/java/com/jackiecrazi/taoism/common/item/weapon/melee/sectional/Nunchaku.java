@@ -1,8 +1,10 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.sectional;
 
 import com.jackiecrazi.taoism.api.MoveCode;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
@@ -12,7 +14,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -67,7 +71,32 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && e.ticksExisted % 10 == 0) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            Entity target = getLastAttackedEntity(w, stack);
+            if (isCharged(elb, stack) && target != null) {
+                if (target instanceof EntityLivingBase && NeedyLittleThings.getDistSqCompensated(target, elb) < getReach(elb, stack) * getReach(elb, stack)) {
+                    EntityLivingBase targ = (EntityLivingBase) target;
+                    target.setAir(target.getAir() - 1);
+                    target.attackEntityFrom(DamageSource.DROWN, (float) getDamageAgainst(elb, targ, stack)/5);
+                    TaoCasterData.getTaoCap(elb).setRootTime(20);
+                    TaoCasterData.getTaoCap(targ).setRootTime(20);
+                    TaoCasterData.getTaoCap(targ).setBindTime(20);
+                    return;
+                }
+                dischargeWeapon(elb, stack);
+            }
+        }
+    }
+
+    @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
+        if(isCharged(elb, is)){
+            dischargeWeapon(elb, is);
+            return true;
+        }
         updateStanceSide(is);
         return super.onEntitySwing(elb, is);
     }
@@ -91,17 +120,30 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
-            //flick!
-            return 0.8f;
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+        super.chargeWeapon(attacker, item, ticks);
+        setLastAttackedEntity(item, null);
+    }
+
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        Entity target = getLastAttackedEntity(elb.world, item);
+        if (target instanceof EntityLivingBase) {
+            TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+            TaoCasterData.getTaoCap((EntityLivingBase) target).consumePosture((float) (getDamageAgainst(elb, (EntityLivingBase) target, item) * 2), true, true, elb);
         }
-        return 0f;
     }
 
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-
+        if (isCharged(defender, item)) {
+            setLastAttackedEntity(item, attacker);
+            Vec3d pos = NeedyLittleThings.getPointInFrontOf(attacker, defender, -2);
+            defender.attemptTeleport(pos.x, pos.y, pos.z);
+            defender.rotationYaw=-defender.rotationYaw;
+            TaoCasterData.getTaoCap(defender).startRecordingDamage();
+        }
     }
 
     @Override
@@ -143,9 +185,23 @@ public class Nunchaku extends TaoWeapon {
         }
     }
 
+    @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
+            //flick!
+            return 0.8f;
+        }
+        return 0f;
+    }
+
     private void updateStanceSide(ItemStack is) {
         MoveCode mc = getCurrentMove(is);
         gettagfast(is).setBoolean("onOtherSide", mc.isValid() && !gettagfast(is).getBoolean("onOtherSide"));
+    }
+
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
     }
 
     @Override
@@ -156,11 +212,6 @@ public class Nunchaku extends TaoWeapon {
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
     }
 
     @Override

@@ -124,11 +124,6 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-        super.onParry(attacker, defender, item);
-    }
-
-    @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
             EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
