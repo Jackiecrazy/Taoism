@@ -38,7 +38,11 @@ public class QingLongJi extends TaoWeapon {
      */
     public QingLongJi() {
         super(2, 1.2, 5.5d, 1f);
-        this.addPropertyOverride(new ResourceLocation("invert"), (stack, world, ent) -> isCharged(null, stack) ? 1 : 0);
+        this.addPropertyOverride(new ResourceLocation("invert"), (stack, world, ent) -> isReversed(stack) ? 1 : 0);
+    }
+
+    private boolean isReversed(ItemStack is) {
+        return gettagfast(is).getBoolean("longForm");
     }
 
     @Override
@@ -71,6 +75,10 @@ public class QingLongJi extends TaoWeapon {
         return true;
     }
 
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60 + chi * 6);
+    }
+
     protected double speed(ItemStack stack) {
         return (1.4d + (getQiFromStack(stack) / 20d)) - 4d;
     }
@@ -83,10 +91,6 @@ public class QingLongJi extends TaoWeapon {
         if (lastIsNormalAtk ^ onMainhand) {
             return super.getQiAccumulationRate(is);
         } else return 0f;
-    }
-
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60 + chi * 6);
     }
 
     @Override
@@ -103,22 +107,12 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public int getDamageType(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? isCharged(null, is) ? 1 : 0 : 2;
+        return getHand(is) == EnumHand.OFF_HAND ? isReversed(is) ? 1 : 0 : 2;
     }
-
-    @Override
-    public boolean canCharge(EntityLivingBase wielder, ItemStack item) {
-        return true;
-    }
-
-//    @Override
-//    public void parrySkill(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
-//        TaoCasterData.getTaoCap(attacker).addQi(1f);
-//    }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return isCharged(attacker, item) ^ getHand(item) == EnumHand.MAIN_HAND ? Event.Result.ALLOW : Event.Result.DENY;
+        return isReversed(item) ^ getHand(item) == EnumHand.MAIN_HAND ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
@@ -130,7 +124,7 @@ public class QingLongJi extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             NeedyLittleThings.knockBack(target, attacker, 0.3f);
-            if (isCharged(attacker, stack)) {
+            if (isReversed(stack)) {
                 //crescent cut!
                 TaoPotionUtils.forceBleed(target, attacker, chi * 4, 0, TaoPotionUtils.POTSTACKINGMETHOD.ADD);
             } else {
@@ -143,11 +137,15 @@ public class QingLongJi extends TaoWeapon {
     @Override
     protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
         if (!attacker.world.isRemote && getHand(stack) == EnumHand.OFF_HAND) {
-            if (isCharged(attacker, stack)) {
-                dischargeWeapon(attacker, stack);
-            } else chargeWeapon(attacker, stack, 100);
+            if (isReversed(stack)) {
+                setReversed(stack, false);
+            } else setReversed(stack, true);
         }
         EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
         TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);
+    }
+
+    private void setReversed(ItemStack is, boolean to) {
+        gettagfast(is).setBoolean("longForm", to);
     }
 }

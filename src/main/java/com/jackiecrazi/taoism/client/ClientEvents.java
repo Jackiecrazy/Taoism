@@ -100,7 +100,8 @@ public class ClientEvents {
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false, sneak = false;
     private static int leftClickAt = 0, rightClickAt = 0;
-    private static float targetQiLevel = 0, currentQiLevel = 0;
+    private static float currentQiLevel = 0;
+    private static float currentRotation = 0;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -310,6 +311,33 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
+    public static void zTarget(TickEvent.RenderTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            EntityPlayerSP player = Minecraft.getMinecraft().player;
+            if (player == null) return;
+            ITaoStatCapability cap = TaoCasterData.getTaoCap(player);
+            if (cap.getForcedLookAt() != null) {
+                Entity e = cap.getForcedLookAt();
+                double dx = player.posX - e.posX;
+                double dz = player.posZ - e.posZ;
+                double angle = Math.atan2(dz, dx) * 180 / Math.PI;
+                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.getEyeHeight())), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+                double distance = player.getDistance(e);
+                float rYaw = (float) (angle - player.rotationYaw);
+                while (rYaw > 180) {
+                    rYaw -= 360;
+                }
+                while (rYaw < -180) {
+                    rYaw += 360;
+                }
+                rYaw += 90F;
+                float rPitch = (float) pitch - (float) (10.0F / Math.sqrt(distance)) + (float) (distance * Math.PI / 90);
+                player.turn(rYaw, -(rPitch - player.rotationPitch));
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void displayCoolie(RenderGameOverlayEvent.Post event) {
         ScaledResolution sr = event.getResolution();
         final Minecraft mc = Minecraft.getMinecraft();
@@ -397,16 +425,8 @@ public class ClientEvents {
                 int width = sr.getScaledWidth();
                 int height = sr.getScaledHeight();
                 if (gamesettings.thirdPersonView == 0) {
-                    if (cap.getForcedLookAt() != null) {
-                        Entity e = cap.getForcedLookAt();
-                        double toY = e.posY + e.getEyeHeight();
-                        double veX = e.posX - player.posX;
-                        double veZ = e.posZ - player.posZ;
-                        double targetYaw = MathHelper.atan2(veX, veZ);
-                        double targetPitch = MathHelper.atan2(Math.sqrt(veX * veX + veZ * veZ), toY);
-                    }
                     mc.getTextureManager().bindTexture(hud);
-                    targetQiLevel = cap.getQi();
+                    float targetQiLevel = cap.getQi();
                     boolean closeEnough = true;
                     if (targetQiLevel > currentQiLevel) {
                         currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 20);

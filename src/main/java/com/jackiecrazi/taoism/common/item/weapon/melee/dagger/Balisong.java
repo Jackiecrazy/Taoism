@@ -116,7 +116,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
 //    @Override
@@ -126,7 +126,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target) || isCharged(attacker, item) ? 3f : 1f;
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? 3f : 1f;
     }
 
     @Override

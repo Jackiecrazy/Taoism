@@ -13,8 +13,10 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -23,10 +25,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -61,6 +60,7 @@ public class TaoCombatHandler {
             if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
                 //you may only attack the target that taunted you
                 e.setCanceled(true);
+                return;
             }
             //cancel attack
             ItemStack i = TaoCombatUtils.getAttackingItemStackSensitive(p);
@@ -68,7 +68,11 @@ public class TaoCombatHandler {
                 ICombatManipulator icm = (ICombatManipulator) i.getItem();
                 if (!icm.canAttack(e.getSource(), p, e.getEntityLiving(), i, e.getAmount()))
                     e.setCanceled(true);
+                return;
             }
+            //reset mustDropHead tag every attack, so only the killing blow's head status is counted
+            if (TaoCombatUtils.isMeleeDamage(e.getSource()))
+                TaoCasterData.getTaoCap(e.getEntityLiving()).setMustDropHead(false);
         }
         //rolling inv frames for projectiles and melee damage
         if (TaoCombatUtils.isPhysicalDamage(e.getSource()) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
@@ -346,6 +350,29 @@ public class TaoCombatHandler {
 //                ukecap.setDownTimer(ukecap.getDownTimer()-(int)(e.getAmount()*5));
         }
         TaoCasterData.forceUpdateTrackingClients(uke);
+    }
+
+    @SubscribeEvent
+    public static void thief(LootingLevelEvent e) {
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead() && NeedyLittleThings.dropSkull(e.getEntityLiving()) == null) {
+            e.setLootingLevel(e.getLootingLevel() + 3);
+        }
+    }
+
+    @SubscribeEvent
+    public static void dropHead(LivingDropsEvent e) {
+        if (e.isRecentlyHit()) {
+            if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead()) {
+                for (EntityItem i : e.getDrops()) {
+                    if (i.getItem().getItem() instanceof ItemSkull) return;
+                }
+                ItemStack drop = NeedyLittleThings.dropSkull(e.getEntityLiving());
+                if (drop == null) return;
+                EntityItem forceSkull = new EntityItem(e.getEntityLiving().world, e.getEntityLiving().posX, e.getEntityLiving().posY, e.getEntityLiving().posZ, drop);
+                forceSkull.setDefaultPickupDelay();
+                e.getDrops().add(forceSkull);
+            }
+        }
     }
 
 }

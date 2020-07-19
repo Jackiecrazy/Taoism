@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.capability;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -388,6 +389,26 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
 
     @Override
     public void tauntedBy(EntityLivingBase elb) {
+
+    }
+
+    @Override
+    public Entity getForcedLookAt() {
+        return null;
+    }
+
+    @Override
+    public void setForcedLookAt(Entity e) {
+
+    }
+
+    @Override
+    public boolean willDropHead() {
+        return false;
+    }
+
+    @Override
+    public void setMustDropHead(boolean toggle) {
 
     }
 

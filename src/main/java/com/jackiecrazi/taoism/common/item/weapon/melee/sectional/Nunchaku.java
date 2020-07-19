@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.sectional;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
@@ -11,6 +12,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -58,7 +60,7 @@ public class Nunchaku extends TaoWeapon {
     };
 
     public Nunchaku() {
-        super(0, 1.6, 5f, 0.6f);
+        super(0, 1.6, 6f, 0.6f);
         this.addPropertyOverride(new ResourceLocation("nuns"), (stack, w, elb) -> {
             int low = getCurrentMove(stack).isSneakPressed() ? 1 : 0;
             int dual = isTwoHanded(stack) ? 2 : 0;
@@ -80,10 +82,14 @@ public class Nunchaku extends TaoWeapon {
                 if (target instanceof EntityLivingBase && NeedyLittleThings.getDistSqCompensated(target, elb) < getReach(elb, stack) * getReach(elb, stack)) {
                     EntityLivingBase targ = (EntityLivingBase) target;
                     target.setAir(target.getAir() - 1);
-                    target.attackEntityFrom(DamageSource.DROWN, (float) getDamageAgainst(elb, targ, stack)/5);
-                    TaoCasterData.getTaoCap(elb).setRootTime(20);
-                    TaoCasterData.getTaoCap(targ).setRootTime(20);
-                    TaoCasterData.getTaoCap(targ).setBindTime(20);
+                    target.attackEntityFrom(DamageSource.DROWN, (float) getDamageAgainst(elb, targ, stack) / 5);
+                    if (elb.onGround)
+                        TaoCasterData.getTaoCap(elb).setRootTime(200);
+                    if (targ.onGround)
+                        TaoCasterData.getTaoCap(targ).setRootTime(200);
+                    TaoCasterData.getTaoCap(targ).setBindTime(200);
+                    targ.rotationYaw=elb.rotationYaw;
+                    targ.rotationYawHead=elb.rotationYawHead;
                     return;
                 }
                 dischargeWeapon(elb, stack);
@@ -93,11 +99,12 @@ public class Nunchaku extends TaoWeapon {
 
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
-        if(isCharged(elb, is)){
+        if (isCharged(elb, is)) {
             dischargeWeapon(elb, is);
             return true;
         }
-        updateStanceSide(is);
+        if (elb instanceof EntityPlayer && !Taoism.proxy.isBreakingBlock((EntityPlayer) elb))
+            updateStanceSide(is);
         return super.onEntitySwing(elb, is);
     }
 
@@ -131,6 +138,7 @@ public class Nunchaku extends TaoWeapon {
         Entity target = getLastAttackedEntity(elb.world, item);
         if (target instanceof EntityLivingBase) {
             TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
+            TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
             TaoCasterData.getTaoCap((EntityLivingBase) target).consumePosture((float) (getDamageAgainst(elb, (EntityLivingBase) target, item) * 2), true, true, elb);
         }
     }
@@ -141,8 +149,8 @@ public class Nunchaku extends TaoWeapon {
             setLastAttackedEntity(item, attacker);
             Vec3d pos = NeedyLittleThings.getPointInFrontOf(attacker, defender, -2);
             defender.attemptTeleport(pos.x, pos.y, pos.z);
-            defender.rotationYaw=-defender.rotationYaw;
             TaoCasterData.getTaoCap(defender).startRecordingDamage();
+            TaoCasterData.getTaoCap(defender).setForcedLookAt(attacker);
         }
     }
 
@@ -189,7 +197,7 @@ public class Nunchaku extends TaoWeapon {
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
         if (!getCurrentMove(is).isSneakPressed() && !getLastMove(is).isSneakPressed()) {//high high
             //flick!
-            return 0.8f;
+            return 0.7f;
         }
         return 0f;
     }

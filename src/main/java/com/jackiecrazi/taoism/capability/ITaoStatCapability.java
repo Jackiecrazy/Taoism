@@ -246,4 +246,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     Entity getForcedLookAt();
 
     void setForcedLookAt(Entity e);
+
+    boolean willDropHead();
+
+    void setMustDropHead(boolean toggle);
 }

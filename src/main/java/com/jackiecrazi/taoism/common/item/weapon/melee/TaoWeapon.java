@@ -179,6 +179,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         //ntc.setByte("lastMove", new MoveCode(true, ).toByte());
     }
 
+    protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is){
+
+    }
+
     private void updateWielderDataEnd(ItemStack stack, EntityLivingBase attacker, EntityLivingBase target) {
         if (isDummy(stack) && attacker.getHeldItemMainhand() != stack) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
@@ -213,7 +217,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      * use sparingly.
      */
     protected void setLastAttackedEntity(ItemStack stack, @Nullable Entity e) {
-        if(e==null) gettagfast(stack).removeTag("lastAttackedID");
+        if (e == null) gettagfast(stack).removeTag("lastAttackedID");
         else gettagfast(stack).setInteger("lastAttackedID", e.getEntityId());
     }
 
@@ -283,6 +287,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 if (getHand(stack) != null && !attacker.world.isRemote) {
                     float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
                     itsc.addQi(baseQi);
+                    oncePerHit(attacker, target, stack);
                     TaoCasterData.forceUpdateTrackingClients(attacker);
                 }
             }
@@ -704,11 +709,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int degrees, List<Entity> targets) {
+        splash(attacker, ignored, is, degrees, degrees, targets);
+    }
+
+    protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int horDeg, int vertDeg, List<Entity> targets) {
         boolean sweep = false;
         for (Entity target : targets) {
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if ((degrees != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, degrees)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
+            if ((horDeg != 360 && vertDeg != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
                 continue;
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {

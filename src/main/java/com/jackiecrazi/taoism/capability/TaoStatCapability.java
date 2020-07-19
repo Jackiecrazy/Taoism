@@ -32,6 +32,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private static final UUID ARMORDOWN = UUID.fromString("ba89f1ca-e8a4-47a2-ad79-eb06a9bd0d78");
     private static final float MAXQI = 9.99f;
     private WeakReference<EntityLivingBase> e;
+    private Entity target;//cached for faster lookup
     private int zTarget;
     private float qi, ling, posture, swing;
     private int combo, ohcool;
@@ -39,13 +40,13 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int lcd, pcd, scd, qcd;
     private int down, bind, root;
     private long timey;
-    private boolean swi, protecc, off, recording, sprint;
+    private boolean swi, protecc, off, recording, sprint, head;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
-    private int recordTimer = 0, ms = 0, taunt = -1;
+    private int recordTimer = 0, cannonball = 0, taunt = -1;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = new WeakReference<>(elb);
@@ -116,8 +117,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setInteger("bind", getBindTime());
         nbt.setInteger("root", getRootTime());
         nbt.setInteger("recordTimer", recordTimer);
-        nbt.setInteger("spinny", ms);
+        nbt.setInteger("spinny", cannonball);
         nbt.setInteger("lookingAt", zTarget);
+        nbt.setBoolean("head", head);
         return nbt;
     }
 
@@ -159,7 +161,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         recordTimer = nbt.getInteger("recordTimer");
         //only happens on the client
         zTarget = nbt.getInteger("lookingAt");
-        ms = nbt.getInteger("spinny");
+        cannonball = nbt.getInteger("spinny");
+        head=nbt.getBoolean("head");
     }
 
     private void setPrevSizes(float width, float height) {
@@ -174,9 +177,12 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (!elb.isEntityAlive() || elb.world.isRemote) return;
 
         recordTimer++;
-        ms--;
+        cannonball--;
         if (isRecordingDamage() && recordTimer > 400) {
             stopRecordingDamage(elb.getRevengeTarget());
+        }
+        if (getForcedLookAt() != null && getForcedLookAt().isDead) {
+            setForcedLookAt(null);
         }
         float percentage = getPosture() / getMaxPosture();
         setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
@@ -457,6 +463,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setRootTime(from.getRootTime());
         setRecordedDamage(from.getRecordedDamage());
         recording = from.isRecordingDamage();
+        head=from.willDropHead();
     }
 
     @Override
@@ -718,12 +725,12 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public int getCannonballTime() {
-        return ms;
+        return cannonball;
     }
 
     @Override
     public void setCannonballTime(int duration) {
-        ms = duration;
+        cannonball = duration;
     }
 
     @Override
@@ -745,7 +752,10 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public Entity getForcedLookAt() {
         if (e.get() != null) {
-            return e.get().world.getEntityByID(zTarget);
+            //if (target != e.get()) return target;
+            Entity targ = e.get().world.getEntityByID(zTarget);
+            //target = targ;
+            return targ;
         }
         return null;
     }
@@ -753,7 +763,18 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setForcedLookAt(Entity e) {
         if (e == null) zTarget = -1;
-        zTarget = e.getEntityId();
+        else zTarget = e.getEntityId();
+        target = this.e.get();
+    }
+
+    @Override
+    public boolean willDropHead() {
+        return head;
+    }
+
+    @Override
+    public void setMustDropHead(boolean toggle) {
+        head=toggle;
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

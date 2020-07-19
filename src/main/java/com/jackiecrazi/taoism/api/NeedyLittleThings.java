@@ -11,8 +11,16 @@ import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.monster.AbstractSkeleton;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityWitherSkeleton;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -143,7 +151,7 @@ public class NeedyLittleThings {
         if (heightParse <= 1) heightParse = 0;
         for (double addX = -widthParse; addX <= widthParse; addX++) {
             for (double addZ = -widthParse; addZ <= widthParse; addZ++) {
-                for (double addY = 0; addY <= heightParse; addY++) {
+                for (double addY = e.height / 2; addY <= heightParse; addY++) {
                     Vec3d mod = new Vec3d(addX, addY, addZ);
                     RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
                     if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -214,6 +222,7 @@ public class NeedyLittleThings {
      * returns true if entity2 is within a (angle) degree sector in front of entity1
      */
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int angle) {
+        if(angle<0)return isBehindEntity(entity2, entity1, -angle);
         Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0)).normalize();
@@ -234,38 +243,89 @@ public class NeedyLittleThings {
 
     /**
      * returns true if entity2 is within a (horAngle) degree sector in front of entity1, and within (vertAngle)
+     * if horAngle is negative, it'll invoke isBehindEntity instead.
      */
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int horAngle, int vertAngle) {
-        Vec3d posVecTop = entity2.getPositionVector().addVector(0, entity2.height, 0);
-        Vec3d posVecBot = entity2.getPositionVector();
+        if (horAngle < 0) return isBehindEntity(entity2, entity1, -horAngle, Math.abs(vertAngle));
+        Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
         Vec3d lookVec = entity1.getLook(1.0F);
-        Vec3d fromPosVec = entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0);
-        //tan=opp/adj
-        double y = entity2.posY - entity1.posY;
-        double x = entity2.posX - entity1.posX;
-        double z = entity2.posZ - entity1.posZ;
-        double dist = MathHelper.sqrt(x * x + z * z);
-        lookVec = lookVec.subtract(0, lookVec.y, 0);//necessary because vertAngle check has been done already
-        Vec3d relativePosVecTop = posVecTop.subtractReverse(fromPosVec).normalize();
-        Vec3d relativePosVecBot = posVecBot.subtractReverse(fromPosVec).normalize();
-        //relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
-
-        double dotSqTop = ((relativePosVecTop.dotProduct(lookVec) * Math.abs(relativePosVecTop.dotProduct(lookVec))) / (relativePosVecTop.lengthSquared() * lookVec.lengthSquared()));
-        double dotSqBot = ((relativePosVecBot.dotProduct(lookVec) * Math.abs(relativePosVecBot.dotProduct(lookVec))) / (relativePosVecBot.lengthSquared() * lookVec.lengthSquared()));
+        //y calculations
+        double xDiff = entity1.posX - entity2.posX, zDiff = entity1.posZ - entity2.posZ;
+        double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+        double relativeHeadVec = entity2.posY - entity1.posY - entity1.getEyeHeight() + entity2.height;
+        double relativeFootVec = entity2.posY - entity1.posY - entity1.getEyeHeight();
+        double angleHead = -MathHelper.atan2(relativeHeadVec, distIgnoreY);
+        double angleFoot = -MathHelper.atan2(relativeFootVec, distIgnoreY);
+        //straight up is -90 and straight down is 90
+        double maxRot = rad(entity1.rotationPitch + vertAngle / 2);
+        double minRot = rad(entity1.rotationPitch - vertAngle / 2);
+        if (angleHead > maxRot || angleFoot < minRot) return false;
+        //xz begins
+        //subtract half of width from calculations in the xz plane so wide mobs that are barely in frame still get lambasted
+        double xDiffCompensated;
+        if (xDiff < 0) {
+            xDiffCompensated = Math.min(-0.1, xDiff + entity1.width / 2 + entity2.width / 2);
+        } else {
+            xDiffCompensated = Math.max(0.1, xDiff - entity1.width / 2 - entity2.width / 2);
+        }
+        double zDiffCompensated;
+        if (zDiff < 0) {
+            zDiffCompensated = Math.min(-0.1, zDiff + entity1.width / 2 + entity2.width / 2);
+        } else {
+            zDiffCompensated = Math.max(0.1, zDiff - entity1.width / 2 - entity2.width / 2);
+        }
+        Vec3d relativePosVec = new Vec3d(xDiffCompensated, 0, zDiffCompensated);
+        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         double cos = MathHelper.cos(rad(horAngle / 2));
-        return dotSqTop < -(cos * cos) || dotSqBot < -(cos * cos);
+        return dotsq < -(cos * cos);
     }
 
     /**
-     * returns true if entity is within a 90 degree sector behind the target
+     * returns true if entity is within a 90 degree sector behind the reference
      */
-    public static boolean isBehindEntity(Entity entity, Entity target) {
+    public static boolean isBehindEntity(Entity entity, Entity reference, int angle) {
         Vec3d posVec = entity.getPositionVector().addVector(0, entity.getEyeHeight(), 0);
-        Vec3d lookVec = target.getLook(1.0F);
-        Vec3d relativePosVec = posVec.subtractReverse(target.getPositionVector().addVector(0, target.getEyeHeight(), 0)).normalize();
+        Vec3d lookVec = reference.getLook(1.0F);
+        Vec3d relativePosVec = posVec.subtractReverse(reference.getPositionVector().addVector(0, reference.getEyeHeight(), 0)).normalize();
         relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
         double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
-        return dotsq > 0.5D;
+        double cos = MathHelper.cos(rad(angle / 2));
+        return dotsq > cos * cos;
+    }
+
+    public static boolean isBehindEntity(Entity entity, Entity reference, int horAngle, int vertAngle) {
+        if (horAngle < 0) return isBehindEntity(reference, entity, -horAngle, Math.abs(vertAngle));
+        Vec3d posVec = reference.getPositionVector().addVector(0, reference.getEyeHeight(), 0);
+        Vec3d lookVec = entity.getLook(1.0F);
+        //y calculations
+        double xDiff = entity.posX - reference.posX, zDiff = entity.posZ - reference.posZ;
+        double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+        double relativeHeadVec = reference.posY - entity.posY - entity.getEyeHeight() + reference.height;
+        double relativeFootVec = reference.posY - entity.posY - entity.getEyeHeight();
+        double angleHead = -MathHelper.atan2(relativeHeadVec, distIgnoreY);
+        double angleFoot = -MathHelper.atan2(relativeFootVec, distIgnoreY);
+        //straight up is -90 and straight down is 90
+        double maxRot = rad(entity.rotationPitch + vertAngle / 2);
+        double minRot = rad(entity.rotationPitch - vertAngle / 2);
+        if (angleHead > maxRot || angleFoot < minRot) return false;
+        //xz begins
+        //subtract half of width from calculations in the xz plane so wide mobs that are barely in frame still get lambasted
+        double xDiffCompensated;
+        if (xDiff < 0) {
+            xDiffCompensated = Math.min(-0.1, xDiff + entity.width / 2 + reference.width / 2);
+        } else {
+            xDiffCompensated = Math.max(0.1, xDiff - entity.width / 2 - reference.width / 2);
+        }
+        double zDiffCompensated;
+        if (zDiff < 0) {
+            zDiffCompensated = Math.min(-0.1, zDiff + entity.width / 2 + reference.width / 2);
+        } else {
+            zDiffCompensated = Math.max(0.1, zDiff - entity.width / 2 - reference.width / 2);
+        }
+        Vec3d relativePosVec = new Vec3d(xDiffCompensated, 0, zDiffCompensated);
+        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double cos = MathHelper.cos(rad(horAngle / 2));
+        return dotsq > cos * cos;
     }
 
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -319,6 +379,30 @@ public class NeedyLittleThings {
         double top = from.dotProduct(to) * from.dotProduct(to);
         double bot = from.lengthSquared() * to.lengthSquared();
         return (float) (top / bot);
+    }
+
+    /**
+     * drops a skull of the given type. For players it will retrieve their skin
+     */
+    public static ItemStack dropSkull(EntityLivingBase elb) {
+        ItemStack ret = null;
+        if (elb instanceof AbstractSkeleton) {
+            if (elb instanceof EntityWitherSkeleton)
+                ret = new ItemStack(Items.SKULL, 1, 1);
+            else ret = new ItemStack(Items.SKULL, 1, 0);
+        } else if (elb instanceof EntityZombie)
+            ret = new ItemStack(Items.SKULL, 1, 2);
+        else if (elb instanceof EntityCreeper)
+            ret = new ItemStack(Items.SKULL, 1, 4);
+        else if (elb instanceof EntityDragon)
+            ret = new ItemStack(Items.SKULL, 1, 5);
+        else if (elb instanceof EntityPlayer) {
+            EntityPlayer p = (EntityPlayer) elb;
+            ret = new ItemStack(Items.SKULL, 1, 3);
+            ret.setTagCompound(new NBTTagCompound());
+            ret.getTagCompound().setString("SkullOwner", p.getDisplayNameString());
+        }
+        return ret;
     }
 
     @Nonnull
@@ -438,23 +522,5 @@ public class NeedyLittleThings {
             }
         }
         return ret;
-    }
-
-    public static class HitResult {
-        private RayTraceResult blockHit;
-
-        private List<EntityLivingBase> entities = new ArrayList<>();
-
-        public RayTraceResult getBlockHit() {
-            return blockHit;
-        }
-
-        public void setBlockHit(RayTraceResult blockHit) {
-            this.blockHit = blockHit;
-        }
-
-        public void addEntityHit(EntityLivingBase entity) {
-            entities.add(entity);
-        }
     }
 }

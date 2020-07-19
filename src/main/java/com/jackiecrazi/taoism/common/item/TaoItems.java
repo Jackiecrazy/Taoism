@@ -22,6 +22,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
+import com.jackiecrazi.taoism.common.item.weapon.melee.rope.Kusarigama;
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
@@ -55,7 +56,8 @@ public class TaoItems {
             nunchaku,
             ropedart,
             bian,
-            rapier;
+            rapier,
+    kusarigama;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -95,6 +97,7 @@ public class TaoItems {
         ropedart = new RopeDart();
         bian = new Bian();
         rapier=new Rapier();
+        kusarigama=new Kusarigama();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -119,6 +122,7 @@ public class TaoItems {
         e.getRegistry().register(ropedart);
         e.getRegistry().register(bian);
         e.getRegistry().register(rapier);
+        e.getRegistry().register(kusarigama);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

@@ -144,10 +144,10 @@ staff.swipe=右击横扫并击退身前120度扇形区域的敌人
 staff.oscillate=两种攻击冷却独立，主手攻击可连击一次
 
 item.guandao.name=偃月刀
-guandao.alt=右击切换新月与血月模式，并立即重置普攻
-guandao.alt.attack=切换至血月模式时攻击身前的敌人，切换回新月模式时攻击身后的敌人
+guandao.alt=右击切换新月与满月模式，并立即重置普攻
+guandao.alt.attack=切换至满月模式时攻击身前的敌人，切换回新月模式时攻击身后的敌人
 guandao.guard=新月模式：范围3，横扫90度，造成1.3倍(+气*5%%)伤害，招架后获得0.3层气
-guandao.strike=血月模式：范围5，横扫180度，无伤害加成
+guandao.strike=满月模式：范围5，横扫180度，无伤害加成
 
 item.bohemianearspoon.name=狩猎枪
 bohear.dist=普攻根据上次攻击的距离而增伤，最多增上50%%

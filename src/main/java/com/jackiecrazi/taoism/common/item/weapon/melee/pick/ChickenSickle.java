@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.pick;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -26,7 +27,7 @@ public class ChickenSickle extends TaoWeapon {
      * while hemorrhage is active, receiving a negative buff will add hemorrhage's duration and potency to it, consuming hemorrhage in the process
      */
     public ChickenSickle() {
-        super(2, 1.6, 6, 1f);
+        super(2, 1.6, 4, 1f);
     }
 
     @Override
@@ -38,18 +39,40 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        if (getCombo(attacker, item) == 4) {
+            TaoCasterData.getTaoCap(target).setMustDropHead(true);
+            return Event.Result.ALLOW;
+        }
         final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
         return hemorrhage != null && hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue() ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (isCharged(attacker, item) && getCombo(attacker, item) == 4) return 3;
+        return 1;
+    }
+
+    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         PotionEffect hemorrhage = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
+        if (isCharged(attacker, stack)) {
+            PotionEffect amputate = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.AMPUTATION, 1000, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION);
+            TaoPotionUtils.attemptAddPot(target, amputate, true);
+        }
         if (!TaoPotionUtils.attemptAddPot(target, hemorrhage, false) || hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue()) {//isCharged(attacker,stack)
             target.hurtResistantTime = 0;
             target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), Math.min(target.getMaxHealth() / (20 - 2 * (hemorrhage.getAmplifier())), 2 * (float) getDamageAgainst(attacker, target, stack)));
             TaoPotionUtils.forceBleed(target, attacker, hemorrhage.getDuration(), hemorrhage.getAmplifier(), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
         }
+    }
+
+    @Override
+    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
+        //last guy didn't make it
+        if (getLastAttackedEntity(elb.world, is) == null || getLastAttackedEntity(elb.world, is).isDead || !elb.getLastAttackedEntity().isEntityAlive())
+            setCombo(elb, is, -1);//deception 100
+        super.afterSwing(elb, is);
     }
 
     @Override
@@ -59,6 +82,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        if (isCharged(wielder, is)) return 5;
         return 1;
     }
 

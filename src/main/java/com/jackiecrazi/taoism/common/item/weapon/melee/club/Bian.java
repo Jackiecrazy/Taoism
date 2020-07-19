@@ -76,7 +76,7 @@ public class Bian extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         super.attackStart(ds, attacker, target, stack, orig);
-        if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
+        if (isCharged(attacker, stack) && TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             gettagfast(stack).setBoolean("ouches", true);
         }
     }

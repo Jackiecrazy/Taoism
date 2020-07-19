@@ -70,6 +70,19 @@ public class TaoPotion extends Potion {
      * adds 20% per level to incoming and outgoing damage
      */
     public static Potion ENRAGE = null;
+    /**
+     * records all dealt damage to the entity without negating them, then reapply 20%(*level) when it runs out
+     */
+    public static Potion DEATHMARK = null;
+    /**
+     * when time up, deal double its potency squared in magic damage
+     * Discretion is advised.
+     */
+    public static Potion REFLUENCE = null;
+    /**
+     * reduces max health. Automatically cured if you somehow over-heal (e.g. healing/regen pot)
+     */
+    public static Potion AMPUTATION = null;
     private int interval = 0;
 
     private TaoPotion(boolean isBad, int colour) {
@@ -93,6 +106,11 @@ public class TaoPotion extends Potion {
         DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("disorient");
         ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("enrage")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.3, 2);
+        DEATHMARK = new TaoPotion(true, new Color(10, 10, 10).getRGB()).setRegistryName("deathmark").setPotionName("deathmark");
+        REFLUENCE = new TaoPotion(true, new Color(70, 90, 240).getRGB()).setRegistryName("refluence").setPotionName("refluence");
+        AMPUTATION = new TaoPotion(true, new Color(200, 0, 50).getRGB()).setRegistryName("amputation").setPotionName("amputation")
+                .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0)
+                .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.1, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
         event.getRegistry().register(BLEED);
@@ -104,6 +122,10 @@ public class TaoPotion extends Potion {
         event.getRegistry().register(FATIGUE);
         event.getRegistry().register(ENFEEBLE);
         event.getRegistry().register(DISORIENT);
+        event.getRegistry().register(ENRAGE);
+        event.getRegistry().register(DEATHMARK);
+        event.getRegistry().register(REFLUENCE);
+        event.getRegistry().register(AMPUTATION);
     }
 
     private TaoPotion procInterval(int interval) {
