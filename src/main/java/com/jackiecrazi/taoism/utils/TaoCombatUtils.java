@@ -329,12 +329,12 @@ public class TaoCombatUtils {
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
         //mainhand
-        if (mainRec && main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, attacker, main) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+        if (main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
             defMult = ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
             ret = main;
         }
         //offhand
-        if (offRec && off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, attacker, off) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+        if (off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, attacker, off, offRec) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
             ret = off;
         }
         return ret;

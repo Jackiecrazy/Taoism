@@ -144,10 +144,11 @@ staff.swipe=右擊橫掃並擊退身前120度扇形區域的敵人
 staff.oscillate=兩種攻擊冷卻獨立，主手攻擊可連擊一次
 
 item.guandao.name=偃月刀
-guandao.alt=右擊切換新月與滿月模式，並立即重置普攻
-guandao.alt.attack=切換至滿月模式時攻擊身前的敵人，切換回新月模式時攻擊身後的敵人
-guandao.guard=新月模式：範圍3，橫掃90度，造成1.3倍(+氣*5%%)傷害，招架後獲得0.3層氣
-guandao.strike=滿月模式：範圍5，橫掃180度，無傷害加成
+guandao.crit=暴擊冷卻減半並劈砍身前120度扇形區域
+guandao.attack=普攻橫掃身前90度扇形區域
+guandao.alt=右擊橫掃身後120度扇形區域
+guandao.stack=交替使用攻擊疊加一層月光，最多12層
+guandao.moonlight=每層附帶0.1攻速和10%%傷害，持續五秒，疊加時重置持續時間
 
 item.bohemianearspoon.name=狩獵槍
 bohear.dist=普攻根據上次攻擊的距離而增傷，最多增上50%%

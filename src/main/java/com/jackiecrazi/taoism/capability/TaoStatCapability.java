@@ -178,7 +178,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
         recordTimer++;
         cannonball--;
-        if (isRecordingDamage() && recordTimer > 400) {
+        if (isRecordingDamage() && recordTimer > 200) {
             stopRecordingDamage(elb.getRevengeTarget());
         }
         if (getForcedLookAt() != null && getForcedLookAt().isDead) {
@@ -646,8 +646,10 @@ public class TaoStatCapability implements ITaoStatCapability {
         EntityLivingBase elb = e.get();
         if (elb != null)
             if (time == 0) {
+                //elb.setNoGravity(false);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
             } else if (root == 0 && !(elb instanceof EntityPlayer)) {
+                //elb.setNoGravity(true);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
             }

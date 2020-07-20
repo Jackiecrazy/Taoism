@@ -39,8 +39,14 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        if (getCombo(attacker, item) == 4) {
+        if (isCharged(attacker, item)) {
+            float percent = target.getHealth() / target.getMaxHealth();
+            PotionEffect amputate = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.AMPUTATION, 1000, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION);
+            TaoPotionUtils.attemptAddPot(target, amputate, true);
             TaoCasterData.getTaoCap(target).setMustDropHead(true);
+            target.setHealth(percent * target.getMaxHealth());
+        }
+        if (getCombo(attacker, item) == 4) {
             return Event.Result.ALLOW;
         }
         final PotionEffect hemorrhage = target.getActivePotionEffect(TaoPotion.HEMORRHAGE);
@@ -49,29 +55,32 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if (isCharged(attacker, item) && getCombo(attacker, item) == 4) return 3;
+        if (isCharged(attacker, item) && getCombo(attacker, item) == 4) {
+            dischargeWeapon(attacker, item);
+            return 3;
+        }
         return 1;
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         PotionEffect hemorrhage = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
-        if (isCharged(attacker, stack)) {
-            PotionEffect amputate = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.AMPUTATION, 1000, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION);
-            TaoPotionUtils.attemptAddPot(target, amputate, true);
-        }
-        if (!TaoPotionUtils.attemptAddPot(target, hemorrhage, false) || hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue()) {//isCharged(attacker,stack)
+        if (hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue() || !TaoPotionUtils.attemptAddPot(target, hemorrhage, false)) {//isCharged(attacker,stack)
             target.hurtResistantTime = 0;
+            target.removeActivePotionEffect(TaoPotion.HEMORRHAGE);
             target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), Math.min(target.getMaxHealth() / (20 - 2 * (hemorrhage.getAmplifier())), 2 * (float) getDamageAgainst(attacker, target, stack)));
-            TaoPotionUtils.forceBleed(target, attacker, hemorrhage.getDuration(), hemorrhage.getAmplifier(), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
+            TaoPotionUtils.forceBleed(target, attacker, hemorrhage.getDuration(), hemorrhage.getAmplifier(), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION);
         }
     }
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         //last guy didn't make it
-        if (getLastAttackedEntity(elb.world, is) == null || getLastAttackedEntity(elb.world, is).isDead || !elb.getLastAttackedEntity().isEntityAlive())
-            setCombo(elb, is, -1);//deception 100
+        if (!elb.world.isRemote)
+            if (getLastAttackedEntity(elb.world, is) == null || getLastAttackedEntity(elb.world, is).isDead || elb.getLastAttackedEntity() == null || !elb.getLastAttackedEntity().isEntityAlive()) {
+                dischargeWeapon(elb, is);
+                setCombo(elb, is, -1);//deception 100
+            }
         super.afterSwing(elb, is);
     }
 

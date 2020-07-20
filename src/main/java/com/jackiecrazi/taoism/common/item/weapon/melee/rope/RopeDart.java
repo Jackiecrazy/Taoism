@@ -205,7 +205,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
         return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
     }
 

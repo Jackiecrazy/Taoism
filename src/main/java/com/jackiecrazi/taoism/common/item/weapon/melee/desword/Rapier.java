@@ -78,6 +78,11 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
+    public long lastAttackTime(EntityLivingBase elb, ItemStack is) {
+        return gettagfast(is).getLong("lastAttack");
+    }
+
+    @Override
     public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             //heart stab!

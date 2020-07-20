@@ -63,17 +63,19 @@ public class Cestus extends TaoWeapon {
                     dischargeWeapon(elb, stack);
                 else if (getLastAttackedEntity(w, stack) instanceof EntityLivingBase) {
                     EntityLivingBase uke = (EntityLivingBase) getLastAttackedEntity(w, stack);
-                    if (TaoCasterData.getTaoCap(uke).isRecordingDamage() && uke.motionY < 0) {
+                    if (TaoCasterData.getTaoCap(uke).isRecordingDamage() && NeedyLittleThings.getDistSqCompensated(uke, elb) <= 2 && TaoCasterData.getTaoCap(elb).getRootTime() > 0) {
                         TaoCasterData.getTaoCap(uke).setRootTime(500);
                         TaoCasterData.getTaoCap(uke).setBindTime(500);
-                        if (!NeedyLittleThings.isFacingEntity(elb, uke, 30) && TaoCasterData.getTaoCap(elb).getRootTime()==498) {
+                    }
+                    if (TaoCasterData.getTaoCap(elb).isRecordingDamage() && elb.motionY < 0) {
+                        TaoCasterData.getTaoCap(elb).setRootTime(500);
+                        if (!NeedyLittleThings.isFacingEntity(elb, uke, 30)) {
                             //move you up by force
                             Vec3d reprimand = NeedyLittleThings.getClosestAirSpot(elb.getPositionVector(), elb.getPositionVector().add(elb.getLookVec().scale(2)), uke);
                             uke.setPositionAndUpdate(reprimand.x, reprimand.y, reprimand.z);
+                            uke.velocityChanged = true;
                         }
                     }
-                    if (TaoCasterData.getTaoCap(elb).isRecordingDamage() && elb.motionY < 0)
-                        TaoCasterData.getTaoCap(elb).setRootTime(500);
                 }
             }
         }

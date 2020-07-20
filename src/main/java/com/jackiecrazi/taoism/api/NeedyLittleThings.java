@@ -154,7 +154,7 @@ public class NeedyLittleThings {
                 for (double addY = e.height / 2; addY <= heightParse; addY++) {
                     Vec3d mod = new Vec3d(addX, addY, addZ);
                     RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
-                    if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK) {
+                    if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK && !r.hitVec.equals(from.add(mod))) {
                         Vec3d hit = r.hitVec.subtract(mod);
                         switch (r.sideHit) {
                             case NORTH:
@@ -222,7 +222,7 @@ public class NeedyLittleThings {
      * returns true if entity2 is within a (angle) degree sector in front of entity1
      */
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int angle) {
-        if(angle<0)return isBehindEntity(entity2, entity1, -angle);
+        if (angle < 0) return isBehindEntity(entity2, entity1, -angle);
         Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d relativePosVec = posVec.subtractReverse(entity1.getPositionVector().addVector(0, entity1.getEyeHeight(), 0)).normalize();
@@ -233,8 +233,35 @@ public class NeedyLittleThings {
         return dotsq < -(cos * cos);
     }
 
+    /**
+     * returns true if entity is within a 90 degree sector behind the reference
+     */
+    public static boolean isBehindEntity(Entity entity, Entity reference, int angle) {
+        Vec3d posVec = entity.getPositionVector().addVector(0, entity.getEyeHeight(), 0);
+        Vec3d lookVec = getBodyOrientation(reference);
+        Vec3d relativePosVec = posVec.subtractReverse(reference.getPositionVector().addVector(0, reference.getEyeHeight(), 0)).normalize();
+        relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
+        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double cos = MathHelper.cos(rad(angle / 2));
+        return dotsq > cos * cos;
+    }
+
     public static float rad(float angle) {
         return (float) (angle * Math.PI / 180d);
+    }
+
+    /**
+     * literally a copy-paste of {@link Entity#getLookVec()} for {@link EntityLivingBase}, since they calculate from their head instead
+     *
+     * @param e
+     * @return
+     */
+    public static Vec3d getBodyOrientation(Entity e) {
+        float f = MathHelper.cos(-e.rotationYaw * 0.017453292F - (float) Math.PI);
+        float f1 = MathHelper.sin(-e.rotationYaw * 0.017453292F - (float) Math.PI);
+        float f2 = -MathHelper.cos(-e.rotationPitch * 0.017453292F);
+        float f3 = MathHelper.sin(-e.rotationPitch * 0.017453292F);
+        return new Vec3d((double) (f1 * f2), (double) f3, (double) (f * f2));
     }
 
     public static float deg(float rad) {
@@ -248,7 +275,6 @@ public class NeedyLittleThings {
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int horAngle, int vertAngle) {
         if (horAngle < 0) return isBehindEntity(entity2, entity1, -horAngle, Math.abs(vertAngle));
         Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
-        Vec3d lookVec = entity1.getLook(1.0F);
         //y calculations
         double xDiff = entity1.posX - entity2.posX, zDiff = entity1.posZ - entity2.posZ;
         double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
@@ -274,39 +300,28 @@ public class NeedyLittleThings {
         } else {
             zDiffCompensated = Math.max(0.1, zDiff - entity1.width / 2 - entity2.width / 2);
         }
+        Vec3d lookVec = entity1.getLook(1.0F);
+        Vec3d bodyVec = getBodyOrientation(entity1);
         Vec3d relativePosVec = new Vec3d(xDiffCompensated, 0, zDiffCompensated);
-        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double dotsqLook = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double dotsqBody = ((relativePosVec.dotProduct(bodyVec) * Math.abs(relativePosVec.dotProduct(bodyVec))) / (relativePosVec.lengthSquared() * bodyVec.lengthSquared()));
         double cos = MathHelper.cos(rad(horAngle / 2));
-        return dotsq < -(cos * cos);
-    }
-
-    /**
-     * returns true if entity is within a 90 degree sector behind the reference
-     */
-    public static boolean isBehindEntity(Entity entity, Entity reference, int angle) {
-        Vec3d posVec = entity.getPositionVector().addVector(0, entity.getEyeHeight(), 0);
-        Vec3d lookVec = reference.getLook(1.0F);
-        Vec3d relativePosVec = posVec.subtractReverse(reference.getPositionVector().addVector(0, reference.getEyeHeight(), 0)).normalize();
-        relativePosVec = new Vec3d(relativePosVec.x, 0.0D, relativePosVec.z);
-        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
-        double cos = MathHelper.cos(rad(angle / 2));
-        return dotsq > cos * cos;
+        return dotsqBody < -(cos * cos) || dotsqLook < -(cos * cos);
     }
 
     public static boolean isBehindEntity(Entity entity, Entity reference, int horAngle, int vertAngle) {
-        if (horAngle < 0) return isBehindEntity(reference, entity, -horAngle, Math.abs(vertAngle));
+        if (horAngle < 0) return isFacingEntity(reference, entity, -horAngle, Math.abs(vertAngle));
         Vec3d posVec = reference.getPositionVector().addVector(0, reference.getEyeHeight(), 0);
-        Vec3d lookVec = entity.getLook(1.0F);
         //y calculations
-        double xDiff = entity.posX - reference.posX, zDiff = entity.posZ - reference.posZ;
+        double xDiff = reference.posX - entity.posX, zDiff = reference.posZ - entity.posZ;
         double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
         double relativeHeadVec = reference.posY - entity.posY - entity.getEyeHeight() + reference.height;
         double relativeFootVec = reference.posY - entity.posY - entity.getEyeHeight();
         double angleHead = -MathHelper.atan2(relativeHeadVec, distIgnoreY);
         double angleFoot = -MathHelper.atan2(relativeFootVec, distIgnoreY);
         //straight up is -90 and straight down is 90
-        double maxRot = rad(entity.rotationPitch + vertAngle / 2);
-        double minRot = rad(entity.rotationPitch - vertAngle / 2);
+        double maxRot = rad(reference.rotationPitch + vertAngle / 2);
+        double minRot = rad(reference.rotationPitch - vertAngle / 2);
         if (angleHead > maxRot || angleFoot < minRot) return false;
         //xz begins
         //subtract half of width from calculations in the xz plane so wide mobs that are barely in frame still get lambasted
@@ -322,10 +337,13 @@ public class NeedyLittleThings {
         } else {
             zDiffCompensated = Math.max(0.1, zDiff - entity.width / 2 - reference.width / 2);
         }
+        Vec3d bodyVec = getBodyOrientation(reference);
+        Vec3d lookVec = reference.getLook(1f);
         Vec3d relativePosVec = new Vec3d(xDiffCompensated, 0, zDiffCompensated);
-        double dotsq = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double dotsqLook = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
+        double dotsqBody = ((relativePosVec.dotProduct(bodyVec) * Math.abs(relativePosVec.dotProduct(bodyVec))) / (relativePosVec.lengthSquared() * bodyVec.lengthSquared()));
         double cos = MathHelper.cos(rad(horAngle / 2));
-        return dotsq > cos * cos;
+        return dotsqBody > cos * cos || dotsqLook > cos * cos;
     }
 
     public static TaoistPosition[] bresenham(double x1, double y1, double z1, double x2, double y2, double z2) {

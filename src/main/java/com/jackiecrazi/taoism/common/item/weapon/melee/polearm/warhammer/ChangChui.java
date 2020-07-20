@@ -32,7 +32,7 @@ public class ChangChui extends TaoWeapon {
      * Parry special:
      * for the next 5 seconds, opponents will always take posture damage from you and cannot recover posture
      * Sweep will instantly use up this buff to majorly knock back all targets and remove half their current posture
-     * has high knockback
+     * Redesign: has high knockback
      * right click to nail an entity down. A nailed entity is rooted up to 1 second depending on chi
      * this can be repeated to slowly nail down a tall entity, suffocating them
      * a normal attack on a nailed entity will uproot them for extra damage
@@ -176,7 +176,7 @@ public class ChangChui extends TaoWeapon {
             }
             if (airBlocks == blocksQueried) return;
             target.setPositionAndUpdate(target.posX, target.posY - 1, target.posZ);
-            TaoCasterData.getTaoCap(target).setRootTime(chi * 2);
+            //TaoCasterData.getTaoCap(target).setRootTime(chi * 2);
         }
     }
 

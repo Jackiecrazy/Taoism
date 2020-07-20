@@ -137,10 +137,10 @@ public class TaoEntityHandler {
         float qi = TaoCasterData.getTaoCap(elb).getQi();
         if (itsc.isInCombatMode() && qi > 0) {
             elb.motionY *= 1 + (qi / 15);
-            if (qi > 3) {//long jump
-                elb.motionX *= 1 + ((qi - 3) / 14);
-                elb.motionZ *= 1 + ((qi - 3) / 14);
-            }
+//            if (qi > 3) {//long jump
+//                elb.motionX *= 1 + ((qi - 3) / 14);
+//                elb.motionZ *= 1 + ((qi - 3) / 14);
+//            }
             elb.velocityChanged = true;
         }
     }
@@ -203,14 +203,20 @@ public class TaoEntityHandler {
     public static void ugh(LivingEvent.LivingUpdateEvent e) {
         final EntityLivingBase elb = e.getEntityLiving();
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
+        boolean flag = false;
         if (itsc.getRootTime() > 0) {
-            elb.setVelocity(0, 0, 0);
-            if (elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ) {
+            elb.motionX = elb.motionY = elb.motionZ = 0;
+            if (!elb.world.isRemote && (elb.posX != elb.prevPosX || elb.posY != elb.prevPosY || elb.posZ != elb.prevPosZ)) {
                 elb.setPositionAndUpdate(elb.prevPosX, elb.prevPosY, elb.prevPosZ);
             }
-            elb.velocityChanged = true;
+            flag = true;
         }
-        if(elb.world.isRemote)return;
+        if (itsc.getCannonballTime() > 0 && !elb.noClip && elb.motionY < 0 && elb.motionY > -0.1) {
+            elb.motionY -= 0.1;
+            flag = true;
+        }
+        if (flag) elb.velocityChanged = true;
+        if (elb.world.isRemote) return;
         if (itsc.getCannonballTime() > 0 && (TaoMovementUtils.willCollide(elb))) {
             if (TaoMovementUtils.collisionStatusVelocitySensitive(elb)[3] || elb.onGround || elb.collidedVertically) {
                 TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());

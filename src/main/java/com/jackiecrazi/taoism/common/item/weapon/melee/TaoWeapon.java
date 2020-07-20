@@ -179,7 +179,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         //ntc.setByte("lastMove", new MoveCode(true, ).toByte());
     }
 
-    protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is){
+    protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is) {
 
     }
 
@@ -549,7 +549,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (hand == null) {
             hand = elb.swingingHand;
         }
-        if (hand != null && (TaoCombatUtils.getHandCoolDown(elb, hand) > 0.9f || NeedyLittleThings.raytraceEntity(elb.world, elb, getReach(elb, stack)) != null)) {
+        float range = getReach(elb, stack);
+        Entity rte = NeedyLittleThings.raytraceEntity(elb.world, elb, range);
+        if (hand != null && (TaoCombatUtils.getHandCoolDown(elb, hand) > 0.9f || rte != null)) {
             //Well, ya got me. By all accounts, it doesn't make sense.
             TaoCasterData.getTaoCap(elb).setOffhandAttack(hand == EnumHand.OFF_HAND);
             //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
@@ -705,7 +707,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void splash(EntityLivingBase attacker, ItemStack is, int angleAllowance) {
-        splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, angleAllowance, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test));
+        splash(attacker, is, angleAllowance, angleAllowance);
+    }
+
+    protected void splash(EntityLivingBase attacker, ItemStack is, int horAngle, int vertAngle) {
+        splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, horAngle, vertAngle, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test));
     }
 
     protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int degrees, List<Entity> targets) {
@@ -717,7 +723,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         for (Entity target : targets) {
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if ((horDeg != 360 && vertDeg != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
+            if ((horDeg != 360 && vertDeg != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg, vertDeg)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
                 continue;
             TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
             if (attacker instanceof EntityPlayer) {
@@ -745,6 +751,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         At 9+ qi, long press attack to charge weapon. Once charged, attack (swing) to begin the sequence.
          */
         if ((wielder instanceof EntityPlayer && ((EntityPlayer) wielder).isCreative())) {
+            TaoCasterData.getTaoCap(wielder).setQi(10);
             return true;
         }
         if ((TaoCasterData.getTaoCap(wielder).getQi() < 9)) {
@@ -852,8 +859,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
-        return NeedyLittleThings.isFacingEntity(defender, attacker, 120);
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
+        return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
     }
 
     @Override

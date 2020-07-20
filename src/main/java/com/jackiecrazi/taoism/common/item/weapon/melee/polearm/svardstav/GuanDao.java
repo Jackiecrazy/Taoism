@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
@@ -69,18 +70,20 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is) {
-        if (getLastMove(is).isValid() && ((getLastMove(is).isLeftClick() && getHand(is) == EnumHand.OFF_HAND)||(!getLastMove(is).isLeftClick() && getHand(is) == EnumHand.MAIN_HAND))) {
+        if (getLastMove(is).isValid() && ((getLastMove(is).isLeftClick() && getHand(is) == EnumHand.OFF_HAND) || (!getLastMove(is).isLeftClick() && getHand(is) == EnumHand.MAIN_HAND))) {
             setBuff(attacker.getHeldItemMainhand(), getBuff(is) + 1);
         }
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            //if (getBuff(stack) < 1) return;
-            //setBuff(attacker.getHeldItemMainhand(), getBuff(stack) - 1);
+            if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode()))
+                splash(attacker, stack, -20, 120);
             splash(attacker, stack, -120);
         } else {
-            splash(attacker, stack, 90);
+            if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode()))
+                splash(attacker, stack, 20, 120);
+            else splash(attacker, stack, 90);
         }
     }
 
@@ -95,10 +98,11 @@ public class GuanDao extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(I18n.format("guandao.crit"));
+        tooltip.add(I18n.format("guandao.attack"));
         tooltip.add(I18n.format("guandao.alt"));
-        tooltip.add(I18n.format("guandao.alt.attack"));
-        tooltip.add(I18n.format("guandao.guard"));
-        tooltip.add(I18n.format("guandao.strike"));
+        tooltip.add(I18n.format("guandao.stack"));
+        tooltip.add(I18n.format("guandao.moonlight"));
     }
 
 //    @Override
@@ -123,6 +127,13 @@ public class GuanDao extends TaoWeapon {
     }
 
     @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        if (!elb.onGround && (elb.isSneaking() || !TaoCasterData.getTaoCap(elb).isInCombatMode()))
+            return 0.6f;
+        return super.newCooldown(elb, is);
+    }
+
+    @Override
     protected void afterSwing(EntityLivingBase attacker, ItemStack stack) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //offhand attack
@@ -135,8 +146,7 @@ public class GuanDao extends TaoWeapon {
     }
 
     private void setBuff(ItemStack is, int phase) {
-        System.out.println("setting moonlight to "+phase);
-        gettagfast(is).setInteger("phase", MathHelper.clamp(phase, 0, 4));
+        gettagfast(is).setInteger("phase", MathHelper.clamp(phase, 0, 8));
     }
 
     private int getBuff(ItemStack is) {

@@ -70,7 +70,7 @@ public class CatNineTails extends TaoWeapon {
         tooltip.add(TextFormatting.ITALIC + I18n.format("catninetails.armorp") + TextFormatting.RESET);
     }
 
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
         return false;
     }
 

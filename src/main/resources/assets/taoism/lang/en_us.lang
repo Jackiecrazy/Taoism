@@ -102,8 +102,8 @@ item.tonfa.name=Tonfa
 tonfa.main=flips forwards and backwards, striking twice in quick succession, in the main hand
 tonfa.off=punches with great force, inflicting brief slowness and weakness, in the off hand
 tonfa.parry=chi will increase by 0.3 per parry
-tonfa.reset=at 3 chi and above, blocks and parries reset attack cooldown
-tonfa.defbreak=at 7 chi and above, blocks inflict defense break and parries additionally add fatigue
+tonfa.reset=at 3 chi and above, parries reset attack cooldown
+tonfa.defbreak=at 7 chi and above, parries inflict armor break and mining fatigue
 
 item.chickensickle.name=Chicken Sickle
 chickensickle.normal=attacks stack hemorrhage I for 5 seconds
@@ -144,10 +144,11 @@ staff.swipe=right click to swing in a 120 degree sector, knocking enemies back s
 staff.oscillate=the two attacks have separate cooldowns; normal attack can be chained twice
 
 item.guandao.name=Guan Dao
-guandao.alt=right click to switch between guard and strike forms, resetting normal attack cooldown
-guandao.alt.attack=this counts as a frontal attack when switching to strike and a backwards stab when switching to guard
-guandao.guard=in guard form, range 3, 90 degree sweep, deals 1.3(+chi/20)x damage, gains 0.3 chi when parrying
-guandao.strike=in strike form, range 5, 180 degree sweep, deals base damage
+guandao.crit=critical strikes only hit 10 degrees to either side, but have a vertical reach of 120 degrees and halved cooldown
+guandao.attack=normal attack sweeps in a 90 degree area in front of you
+guandao.alt=alt attack sweeps in a 120 degree area behind you
+guandao.stack=alternating the two successfully will stack a layer of moonlight, maximum 8
+guandao.moonlight=each layer gives 0.1 attack speed and 10%% damage, lasting up to 5 seconds
 
 item.bohemianearspoon.name=Ghiavarina
 bohear.dist=normal attack damage scales according to distance between you and the target between two attacks, up to 1.5x

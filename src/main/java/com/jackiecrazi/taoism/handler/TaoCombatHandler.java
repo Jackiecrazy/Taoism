@@ -362,7 +362,7 @@ public class TaoCombatHandler {
     @SubscribeEvent
     public static void dropHead(LivingDropsEvent e) {
         if (e.isRecentlyHit()) {
-            if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead()) {
+            if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead()&&e.getEntityLiving().world.getGameRules().getBoolean("doMobLoot")) {
                 for (EntityItem i : e.getDrops()) {
                     if (i.getItem().getItem() instanceof ItemSkull) return;
                 }

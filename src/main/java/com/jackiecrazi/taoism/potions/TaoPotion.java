@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -91,24 +92,24 @@ public class TaoPotion extends Potion {
 
     @SubscribeEvent
     public static void init(RegistryEvent.Register<Potion> event) {
-        HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("hiding");
-        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("bleed")
+        HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("effect.hiding");
+        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("effect.bleed")
                 .registerPotionAttributeModifier(TaoEntities.HEAL, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 0);
-        FATIGUE = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("fatigue")
+        FATIGUE = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("effect.fatigue")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
-        ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("enfeeble")
+        ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("effect.enfeeble")
                 .registerPotionAttributeModifier(TaoEntities.MAXPOSTURE, "CC5AF142-2BD2-4215-B636-2605AED11727", -3, 0);
-        RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("resolution");
-        ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("armorBreak")
+        RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("effect.resolution");
+        ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("effect.armorBreak")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0);
-        HEMORRHAGE = new TaoPotion(true, new Color(100, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("internalBleed");
-        LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("laceration");
-        DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("disorient");
-        ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("enrage")
+        HEMORRHAGE = new TaoPotion(true, new Color(100, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("effect.internalBleed");
+        LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("effect.laceration");
+        DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("effect.disorient");
+        ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("effect.enrage")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.3, 2);
-        DEATHMARK = new TaoPotion(true, new Color(10, 10, 10).getRGB()).setRegistryName("deathmark").setPotionName("deathmark");
-        REFLUENCE = new TaoPotion(true, new Color(70, 90, 240).getRGB()).setRegistryName("refluence").setPotionName("refluence");
-        AMPUTATION = new TaoPotion(true, new Color(200, 0, 50).getRGB()).setRegistryName("amputation").setPotionName("amputation")
+        DEATHMARK = new TaoPotion(true, new Color(10, 10, 10).getRGB()).setRegistryName("deathmark").setPotionName("effect.deathmark");
+        REFLUENCE = new TaoPotion(true, new Color(70, 90, 240).getRGB()).setRegistryName("refluence").setPotionName("effect.refluence");
+        AMPUTATION = new TaoPotion(true, new Color(200, 0, 50).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("amputation").setPotionName("effect.amputation")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0)
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.1, 2);
         MobEffects.POISON
@@ -191,9 +192,11 @@ public class TaoPotion extends Potion {
                 ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
             l.hurtResistantTime = 0;
-        }
-        if (this == ENRAGE) {
+        } else if (this == ENRAGE) {
             TaoCasterData.getTaoCap(l).tauntedBy(null);
+        } else if (this == AMPUTATION && amplifier != 0) {
+            l.removeActivePotionEffect(this);
+            TaoPotionUtils.attemptAddPot(l, new PotionEffect(this, 200, amplifier - 1), false);
         }
     }
 

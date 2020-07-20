@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
@@ -12,9 +13,12 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -49,6 +53,7 @@ public class Karambit extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
+        if (isCharged(p, is)) return 16;
         return 2f;
     }
 
@@ -60,6 +65,15 @@ public class Karambit extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;//not all that good at defense now is it...
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack)) {
+            for (int ignored = 0; ignored < 3; ignored++)
+                w.spawnParticle(EnumParticleTypes.END_ROD, e.posX - 4 + Taoism.unirand.nextFloat() * 8, e.posY - 4 + Taoism.unirand.nextFloat() * 8, e.posZ - 4 + Taoism.unirand.nextFloat() * 8, 0, -0.1f, 0);
+        }
     }
 
     @Override
@@ -75,7 +89,8 @@ public class Karambit extends TaoWeapon {
                 gettagfast(stack).setInteger("flashes", gettagfast(stack).getInteger("flashes") + 1);
             }
             TaoCasterData.getTaoCap(elb).setRootTime(0);
-            elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
+            elb.setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
+            elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_SHULKER_TELEPORT, SoundCategory.PLAYERS, 1f, 0.5f + Taoism.unirand.nextFloat() / 2);
             TaoCasterData.getTaoCap(elb).setRootTime(400);
             if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
                 dischargeWeapon(elb, stack);
@@ -131,25 +146,25 @@ public class Karambit extends TaoWeapon {
         }
     }
 
-    @Override
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
-    }
-
 //    @Override
 //    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
 //        return oldStack.isEmpty() || super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
 //    }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? 2f : 1f;
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90, 90) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
 //    @Override
 //    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
 //        return 1 + (15f - attacker.world.getLight(attacker.getPosition())) / 15f;//light bonus
 //    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90, 90) || isCharged(attacker, item) ? 2f : 1f;
+    }
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {

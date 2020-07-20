@@ -49,16 +49,17 @@ public class Tonfa extends TaoWeapon {
         if (e instanceof EntityLivingBase && onHand && isCharged((EntityLivingBase) e, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
             EntityLivingBase elb = (EntityLivingBase) e;
             Entity target = TaoMovementUtils.collidingEntity(elb);
-            if (!w.isRemote&&target != null && getLastAttackedEntity(w, stack) != target) {
+            if (!w.isRemote && target != null && getLastAttackedEntity(w, stack) != target) {
                 TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
                 TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
                 NeedyLittleThings.knockBack(elb, target, 1f);
-                if(elb.motionY>0.1){
-                    elb.motionY=0.1;
-                    elb.velocityChanged=true;
+                if (elb.motionY > 0.1) {
+                    elb.motionY = 0.1;
+                    elb.velocityChanged = true;
                 }
             }
-            if (getChargedTime(elb, stack) > getMaxChargeTime()) dischargeWeapon(elb, stack);
+            if (getChargedTime(elb, stack) > getMaxChargeTime())
+                dischargeWeapon(elb, stack);
         }
     }
 
@@ -86,9 +87,9 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
         if (isCharged(defender, item)) return true;
-        return super.canBlock(defender, attacker, item);
+        return super.canBlock(defender, attacker, item, recharged);
     }
 
     @Override
@@ -102,8 +103,8 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7), false);
         }
-        if(isCharged(defender, item))
-            TaoCombatUtils.rechargeHand(defender, getHand(item),1);
+        if (isCharged(defender, item))
+            TaoCombatUtils.rechargeHand(defender, getHand(item), 1);
     }
 
     @Override
@@ -115,8 +116,8 @@ public class Tonfa extends TaoWeapon {
         if (qi >= 7) {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
         }
-        if(isCharged(defender, item))
-            TaoCombatUtils.rechargeHand(defender, getHand(item),1);
+        if (isCharged(defender, item))
+            TaoCombatUtils.rechargeHand(defender, getHand(item), 1);
     }
 
     @Override

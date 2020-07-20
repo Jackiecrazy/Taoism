@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 
+import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
@@ -11,9 +12,12 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -49,6 +53,15 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack)) {
+            for (int ignored = 0; ignored < 3; ignored++)
+                w.spawnParticle(EnumParticleTypes.END_ROD, e.posX - 4 + Taoism.unirand.nextFloat() * 8, e.posY - 4 + Taoism.unirand.nextFloat() * 8, e.posZ - 4 + Taoism.unirand.nextFloat() * 8, 0, -0.1f, 0);
+        }
+    }
+
+    @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
         if (isCharged(elb, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
             RayTraceResult r = NeedyLittleThings.raytraceAnything(elb.world, elb, 16);
@@ -62,7 +75,8 @@ public class Balisong extends TaoWeapon {
             }
             for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
                 TaoCasterData.getTaoCap(e).setRootTime(0);
-            elb.attemptTeleport(tpTo.x, tpTo.y, tpTo.z);
+            elb.setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
+            elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_SHULKER_TELEPORT, SoundCategory.PLAYERS, 1f, 0.5f + Taoism.unirand.nextFloat() / 2);
             if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
                 dischargeWeapon(elb, stack);
             } else {
@@ -73,7 +87,7 @@ public class Balisong extends TaoWeapon {
         return super.onEntitySwing(elb, stack);
     }
 
-//    @Override
+    //    @Override
 //    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
 //        return 1 + (15 - attacker.world.getLight(attacker.getPosition())) / 15;
 //    }
@@ -102,8 +116,8 @@ public class Balisong extends TaoWeapon {
         super.dischargeWeapon(elb, item);
         TaoCasterData.getTaoCap(elb).setRootTime(0);
         TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
-        gettagfast(item).setInteger("flashesWithoutHit",0);
-        gettagfast(item).setInteger("flashes",0);
+        gettagfast(item).setInteger("flashesWithoutHit", 0);
+        gettagfast(item).setInteger("flashes", 0);
     }
 
     @Override
@@ -116,7 +130,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90, 90) || isCharged(attacker, item) ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
 //    @Override
@@ -126,7 +140,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return NeedyLittleThings.isBehindEntity(attacker, target, 90) || isCharged(attacker, item) ? 3f : 1f;
+        return NeedyLittleThings.isBehindEntity(attacker, target, 90, 90) || isCharged(attacker, item) ? 3f : 1f;
     }
 
     @Override
@@ -147,6 +161,7 @@ public class Balisong extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
+        if (isCharged(p, is)) return 16;
         return 2f;
     }
 
