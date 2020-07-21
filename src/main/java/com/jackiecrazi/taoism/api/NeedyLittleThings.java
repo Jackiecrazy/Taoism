@@ -476,7 +476,7 @@ public class NeedyLittleThings {
         Vec3d end = start.add(look);
         Entity entity = null;
         List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
-        double d0 = 0.0D;
+        double d0 = -1.0D;//necessary to prevent small derps
 
         for (Entity entity1 : list) {
             if (entity1 != attacker) {
@@ -485,7 +485,7 @@ public class NeedyLittleThings {
                 if (raytraceresult != null) {
                     double d1 = getDistSqCompensated(entity1, attacker);
 
-                    if ((d1 < d0 || d0 == 0.0D) && d1 < range * range) {
+                    if ((d1 < d0 || d0 == -1.0D) && d1 < range * range) {
                         entity = entity1;
                         d0 = d1;
                     }

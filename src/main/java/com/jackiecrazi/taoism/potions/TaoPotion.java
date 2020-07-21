@@ -187,7 +187,7 @@ public class TaoPotion extends Potion {
     public void performEffect(EntityLivingBase l, int amplifier) {
         if (this == BLEED) {
             l.hurtResistantTime = 0;
-            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), 1 + (amplifier / 2f));
+            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), (1 + amplifier) / 2f);
             if (l.world instanceof WorldServer) {
                 ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
@@ -202,7 +202,7 @@ public class TaoPotion extends Potion {
 
     @Override
     public boolean isReady(int duration, int amplifier) {
-        return interval != 0 && duration % interval == 1;
+        return interval != 0 && (duration % interval == 1 || duration % interval == -1);
     }
 
     @Override

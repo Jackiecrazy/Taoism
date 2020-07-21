@@ -155,14 +155,10 @@ public class Balisong extends TaoWeapon {
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 
-    protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-
-    }
-
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) return 16;
-        return 2f;
+        return 2f + getExtraReach(p);
     }
 
     @Override

@@ -19,6 +19,10 @@ public class Zanbato extends TaoWeapon {
     Left click is a high damage chop that additionally hits all entities riding or being ridden by the target
     Right click is a 120 degree slash at half damage
     Consecutive alternating attacks crit
+
+    execution: bakusaiga!
+    Heavy attack an opponent. The opponent's HP will now begin to decrease at an alarming rate.
+    Upon their death, this spreads all around EXCEPT to the mobs you've recently attacked
      */
 
     public Zanbato() {
@@ -47,7 +51,7 @@ public class Zanbato extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 0;
+        return 4 + getExtraReach(p);
     }
 
     @Override

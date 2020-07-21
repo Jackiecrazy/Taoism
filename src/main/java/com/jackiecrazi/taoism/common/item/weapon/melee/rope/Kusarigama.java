@@ -20,13 +20,16 @@ import java.util.List;
 
 public class Kusarigama extends TaoWeapon {
     /*
-     * A sickle attached to a weighted chain. High power and speed, medium defense and combo, low range
+     * A sickle attached to a weighted chain. High defense and speed, medium power and range, low combo
      * Two handed, you hold the sickle in the offhand by default. Chain cannot block, but will store up charge by being held.
-     * By default:
-     * Left clicking once will throw the ball, bind charge/2; another click will drag them in
-     * Right click will throw sickle if target's far, expending charge, and if less than 2
+     * Charge reaches maximum after 40 ticks
      *
-     * throw a skillshot to gain a stacking buff
+     * Right click to throw the weighted chain with range 6. This operates off charge rather than attack speed, so it'll always be ready at varying speeds
+     * If this were to strike an opponent, following up with the sickle (range 2) within (charge) ticks deals 1.5x damage
+     * If the chain is in between you two when the enemy attacks, the chain will entangle the opponent's weapon
+     * The opponent is now bound for (charge) ticks
+     * Following up with the sickle will crit for double damage and decent posture damage
+     * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
         super(1, 1.3, 5, 1);

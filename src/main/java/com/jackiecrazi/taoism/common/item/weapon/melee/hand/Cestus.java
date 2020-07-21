@@ -50,7 +50,7 @@ public class Cestus extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
+        return 2f + getExtraReach(p);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class Cestus extends TaoWeapon {
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack stack) {
         Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot, stack);
         if (equipmentSlot == EntityEquipmentSlot.MAINHAND || equipmentSlot == EntityEquipmentSlot.OFFHAND)
-            multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", 2, 0));
+            multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", 2, 0));
         return multimap;
     }
 

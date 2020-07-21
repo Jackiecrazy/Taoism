@@ -33,10 +33,12 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Taoism.MODID)
 public class TaoCombatHandler {
+    public static final HashMap<EntityPlayer, Long> lastRightClickTime = new HashMap<>();
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
     public static boolean modCall;
     private static boolean abort = false;
@@ -45,9 +47,14 @@ public class TaoCombatHandler {
     //"puny" here defined as weapons that can't attack from offhand
     @SubscribeEvent
     public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
-        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon) && TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
-            TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
-            TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
+        if(e.getEntityPlayer().world.isRemote)return;
+        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
+            if (lastRightClickTime.getOrDefault(e.getEntityPlayer(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
+                if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
+                    TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
+                    TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
+                }
+            lastRightClickTime.put(e.getEntityPlayer(), e.getEntityPlayer().world.getTotalWorldTime());
         }
     }
 
@@ -359,10 +366,17 @@ public class TaoCombatHandler {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void vengeance(LivingDeathEvent e) {
+        if (CombatConfig.revengePreventDespawn && e.getEntityLiving() instanceof EntityPlayer && e.getSource().getTrueSource() instanceof EntityLiving) {
+            ((EntityLiving) e.getSource().getTrueSource()).enablePersistence();
+        }
+    }
+
     @SubscribeEvent
     public static void dropHead(LivingDropsEvent e) {
         if (e.isRecentlyHit()) {
-            if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead()&&e.getEntityLiving().world.getGameRules().getBoolean("doMobLoot")) {
+            if (TaoCasterData.getTaoCap(e.getEntityLiving()).willDropHead() && e.getEntityLiving().world.getGameRules().getBoolean("doMobLoot")) {
                 for (EntityItem i : e.getDrops()) {
                     if (i.getItem().getItem() instanceof ItemSkull) return;
                 }

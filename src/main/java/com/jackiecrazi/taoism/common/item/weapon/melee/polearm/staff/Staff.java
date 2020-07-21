@@ -50,7 +50,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5f;
+        return 5f + getExtraReach(p);
     }
 
     @Override

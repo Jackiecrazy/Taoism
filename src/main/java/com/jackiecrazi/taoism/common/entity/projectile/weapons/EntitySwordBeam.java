@@ -7,7 +7,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 public class EntitySwordBeam extends EntityThrownWeapon {
     protected EnumHand h;
@@ -48,6 +51,8 @@ public class EntitySwordBeam extends EntityThrownWeapon {
                 this.setDead();
                 return;
             }
+        } else {
+            world.spawnParticle(EnumParticleTypes.CRIT_MAGIC, posX + rand.nextFloat() - 0.5, posY + rand.nextFloat() - 0.5, posZ + rand.nextFloat() - 0.5, 0, -0.1, 0);
         }
         super.onUpdate();
     }
@@ -79,5 +84,13 @@ public class EntitySwordBeam extends EntityThrownWeapon {
     @Override
     public float zSpin() {
         return zSpin;
+    }
+
+    @Override
+    protected void onHit(RayTraceResult raytraceResultIn) {
+        if (world instanceof WorldServer) {
+            ((WorldServer) world).spawnParticle(EnumParticleTypes.CRIT_MAGIC, posX, posY, posZ, 5, 0.3d, 0.3d, 0.3d, 0.1d);
+        }
+        super.onHit(raytraceResultIn);
     }
 }

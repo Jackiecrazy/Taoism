@@ -137,7 +137,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 : 0;
+        return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 + getExtraReach(p) : 0;
     }
 
     @Override
@@ -206,7 +206,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
-        return isThrown(item) || getHand(item) == EnumHand.OFF_HAND;
+        return (isThrown(item) || getHand(item) == EnumHand.OFF_HAND) && recharged;
     }
 
     @Override

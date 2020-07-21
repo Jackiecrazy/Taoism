@@ -65,7 +65,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4;
+        return 4 + getExtraReach(p);
     }
 
     @Override

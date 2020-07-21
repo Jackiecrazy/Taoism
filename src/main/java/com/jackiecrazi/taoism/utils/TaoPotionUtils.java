@@ -20,9 +20,13 @@ public class TaoPotionUtils {
      */
     public static void forceBleed(EntityLivingBase elb, Entity attacker, int duration, int potency, POTSTACKINGMETHOD method) {
         PotionEffect pe = stackPot(elb, new PotionEffect(TaoPotion.BLEED, duration, potency, true, false), method);
+        if (pe.getDuration() > 6000) {
+            elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), pe.getAmplifier() * 2 * Math.max((pe.getDuration() - 6000) / 20, 1));
+            pe = new PotionEffect(TaoPotion.BLEED, 6000, pe.getAmplifier(), true, false);
+        }
         if (!attemptAddPot(elb, pe, true)) {
             elb.hurtResistantTime = 0;
-            elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), (1 + potency));
+            elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), potency);
             elb.hurtResistantTime = 0;
         }
     }

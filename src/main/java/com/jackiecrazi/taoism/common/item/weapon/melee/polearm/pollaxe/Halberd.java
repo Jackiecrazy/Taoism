@@ -55,7 +55,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5;
+        return 5 + getExtraReach(p);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
-        return getHand(item) == EnumHand.MAIN_HAND;
+        return getHand(item) == EnumHand.MAIN_HAND&&recharged;
     }
 
     @Override

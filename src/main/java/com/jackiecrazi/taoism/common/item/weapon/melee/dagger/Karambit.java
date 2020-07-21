@@ -54,7 +54,7 @@ public class Karambit extends TaoWeapon {
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) return 16;
-        return 2f;
+        return 2f + getExtraReach(p);
     }
 
     @Override

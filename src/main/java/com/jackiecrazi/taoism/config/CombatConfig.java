@@ -62,6 +62,8 @@ public class CombatConfig {
     public static boolean printShieldList = true;
     @Config.Comment("Whether mobs lose their attack target and planned path when blinded")
     public static boolean blindMobs = true;
+    @Config.Comment("Whether mobs that kill you don't despawn so you can come back and exact some vengeance later")
+    public static boolean revengePreventDespawn = true;
 
     public static void printParryList() {
         if (printParryList)

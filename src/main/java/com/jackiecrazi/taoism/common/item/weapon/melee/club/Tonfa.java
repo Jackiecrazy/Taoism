@@ -155,7 +155,7 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
+        return 2f + getExtraReach(p);
     }
 
     @Override

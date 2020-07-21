@@ -119,9 +119,9 @@ public class Pollaxe extends TaoWeapon {
             if (getCombo(p, is) == 1)
                 return 99;
             if (getCombo(p, is) == 2)
-                return 6;
+                return 6 + getExtraReach(p);
         }
-        return 3f;
+        return 3f + getExtraReach(p);
     }
 
     @Override

@@ -35,6 +35,11 @@ public class QingLongJi extends TaoWeapon {
      * If idle for over 5 seconds or switched out, it'll revert to main end.
      * Notably, only alternating attacks will accumulate chi, and chi is directly tied to attack speed.
      * Riposte: instantly gain two layers of chi.
+     *
+     * execution: soryuha! leap into the air and levitate
+     * Offhand attacks have massive reach and collect mobs in front of you
+     * Each collecting hit consumes 0.5 qi
+     * below 5 qi, or on left click, perform a high damage pierce that drives them into the ground
      */
     public QingLongJi() {
         super(2, 1.2, 5.5d, 1f);
@@ -57,7 +62,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f;
+        return 4f + getExtraReach(p);
     }
 
     @Override

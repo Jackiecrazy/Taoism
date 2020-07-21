@@ -44,7 +44,7 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(ClientEvents.class);
         RenderingRegistry.registerEntityRenderingHandler(EntityRopeDart.class, manager -> new RenderTaoItemProjectile<>(manager, 1, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1f));
         RenderingRegistry.registerEntityRenderingHandler(EntityChui.class, manager -> new RenderTaoItemProjectile<>(manager, 2, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, -90, 0), 2f));
-        RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1.5f));
+        RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f));
         RenderingRegistry.registerEntityRenderingHandler(EntityAxeCleave.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1.5f));
     }
 

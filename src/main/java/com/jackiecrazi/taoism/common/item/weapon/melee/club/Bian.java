@@ -137,7 +137,7 @@ public class Bian extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return 3 + getExtraReach(p);
     }
 
     @Override

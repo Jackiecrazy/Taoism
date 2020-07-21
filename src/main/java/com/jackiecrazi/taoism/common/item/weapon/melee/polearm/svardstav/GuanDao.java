@@ -32,15 +32,18 @@ public class GuanDao extends TaoWeapon {
      * start at 1.3 attack speed and 5 damage in the "new moon" phase
      * Right click moves the blade backwards, sweeping enemies in 90 degrees *behind* you
      * Left click moves the backwards blade forward again, sweeping enemies in 90 degrees before you
-     * Successfully alternating attacks stacks a layer of moonlight, up to 4, at which point it's a "full moon"
+     * Successfully alternating attacks stacks a layer of moonlight, up to 8, at which point it's a "full moon"
      * Each layer of moonlight adds 0.1 attack speed and 10% base damage
      * Moonlight layers last up to 5 seconds, each gain resets the timer
      *
      * execution: only executable at full moon
-     * gain the fifth layer, blood moon.
-     * main attack slashes legs, reducing mobility.
-     * off attack hits twice against slowed enemies
-     * when enemy is staggered, lop off their head, ending blood moon.
+     * gain the ninth layer, blood moon.
+     * MEIDO ZANGETSUHA!
+     * Your attack range is doubled
+     * Each time you gain moonlight, a black sword beam is shot that bounces up to (overflow moonlight) enemies
+     * Crits sends out three black sword beams angled in a claw formation forwards/backwards for 0.5 qi
+     * Both actions cost 0.5 qi, at 3 qi you unleash a barrage of black sword beams with random orientation in the given direction
+     * the number of beams increase with overflow moonlight, your moonlight is reset.
      */
     public GuanDao() {
         super(1, 1, 5d, 1f);
@@ -160,6 +163,6 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3;
+        return isCharged(p, is) ? 6 + getExtraReach(p) : 3 + getExtraReach(p);
     }
 }
