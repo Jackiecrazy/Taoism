@@ -43,8 +43,8 @@ public class Emeici extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 0;
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 2;
     }
 
     @Override

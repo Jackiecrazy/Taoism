@@ -57,9 +57,9 @@ public class TaoCombatUtils {
     public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent) {
         float temp = getHandCoolDown(elb, hand);
         target.hurtResistantTime = 0;
-        rechargeHand(elb, hand, cooldownPercent);
+        rechargeHand(elb, hand, cooldownPercent, false);
         taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true);
-        rechargeHand(elb, hand, temp);
+        rechargeHand(elb, hand, temp, true);
     }
 
     public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
@@ -73,7 +73,7 @@ public class TaoCombatUtils {
         return 1f;
     }
 
-    public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent) {
+    public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent, boolean syncWithClient) {
         if (!(elb instanceof EntityPlayer)) return;
         double totalSec = 20 / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, hand);
         //if (percent != 0f)//this is because this is called in tickStuff on the first tick after cooldown starts, so constant resetting would just make the weapon dysfunctional
@@ -83,7 +83,8 @@ public class TaoCombatUtils {
                 break;
             case MAIN_HAND:
                 Taoism.setAtk(elb, (int) (percent * totalSec));
-                TaoCasterData.syncAttackTimer(elb);
+                if (syncWithClient)
+                    TaoCasterData.syncAttackTimer(elb);
                 break;
         }
     }

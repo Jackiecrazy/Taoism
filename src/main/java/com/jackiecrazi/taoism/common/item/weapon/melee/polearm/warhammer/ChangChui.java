@@ -64,8 +64,8 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4 + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 4;
     }
 
     @Override
@@ -183,6 +183,6 @@ public class ChangChui extends TaoWeapon {
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack stack) {
         EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f, true);
     }
 }

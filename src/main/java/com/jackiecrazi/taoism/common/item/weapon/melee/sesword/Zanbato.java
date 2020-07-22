@@ -50,8 +50,8 @@ public class Zanbato extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4 + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 4;
     }
 
     @Override

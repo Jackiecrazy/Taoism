@@ -177,7 +177,7 @@ public class TaoCombatHandler {
                 NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
                 //reset cooldown
-                TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f);
+                TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend);
                 }

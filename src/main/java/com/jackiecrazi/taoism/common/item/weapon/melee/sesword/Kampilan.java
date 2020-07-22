@@ -4,14 +4,17 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBouncySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeamBase;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -34,8 +37,8 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 3f;
     }
 
     @Override
@@ -49,25 +52,27 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    protected float getQiAccumulationRate(ItemStack is) {
-        return qiRate;
-    }
-
-    @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase elb, int chi) {
         if (isCharged(elb, stack) && !elb.world.isRemote) {
             if (TaoCasterData.getTaoCap(elb).consumeQi(0.5f, 5))
                 splash(elb, stack, 360);
             else {
-                for (int i = 0; i < 5; i++) {
-                    float rotation = 72 * i;
-                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(stack), stack).setRenderRotation(-40 + Taoism.unirand.nextInt(80));
+                elb.world.playSound(null, elb.posX,elb.posY,elb.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, SoundCategory.PLAYERS,elb.world.rand.nextFloat()+0.9f,elb.world.rand.nextFloat()+0.6f);
+                for (int i = 0; i < 10; i++) {
+                    float rotation = 36 * i;
+                    EntitySwordBeamBase esb = new EntityBouncySwordBeam(elb.world, elb, getHand(stack), stack).setRenderRotation(-40 + Taoism.unirand.nextInt(80));
                     esb.shoot(elb, 0, elb.rotationYaw + rotation, 0.0F, 1f, 0.0F);
                     elb.world.spawnEntity(esb);
                 }
+                dischargeWeapon(elb, stack);
             }
         } else splash(elb, stack, 120);
+    }
+
+    @Override
+    protected float getQiAccumulationRate(ItemStack is) {
+        return qiRate;
     }
 
     @Override
@@ -108,12 +113,13 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
-        boolean comboEnded = getCombo(elb, is) == getComboLength(elb, is) - 1;
-        if (comboEnded) dischargeWeapon(elb, is);
+//        boolean comboEnded = getCombo(elb, is) == getComboLength(elb, is) - 1;
+//        if (comboEnded) dischargeWeapon(elb, is);
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        if (isCharged(wielder, is)) return 99999;
         if (TaoCasterData.getTaoCap(wielder).getQi() >= 5)
             return 3;
         return 1;

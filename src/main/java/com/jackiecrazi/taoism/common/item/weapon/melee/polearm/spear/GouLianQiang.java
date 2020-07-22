@@ -50,8 +50,8 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 6f;
     }
 
     @Override
@@ -125,6 +125,6 @@ public class GouLianQiang extends TaoWeapon {
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         super.afterSwing(elb, is);
         if (getHand(is) == EnumHand.OFF_HAND && TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND) < 0.5f)//
-            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f);
+            TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f, true);
     }
 }

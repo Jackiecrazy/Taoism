@@ -48,8 +48,8 @@ public class BohemianEarspoon extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 6f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 6f;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class CatNineTails extends TaoWeapon {
     }
 
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getTrueReach(null, stack)) + TextFormatting.RESET);
         tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
     }
 
@@ -109,7 +109,7 @@ public class CatNineTails extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 4f;
     }
 }

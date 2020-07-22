@@ -72,7 +72,7 @@ public class PacketExtendThyReach implements IMessage {
                 if (reachSq >= distanceSq) {
                     TaoCombatUtils.taoWeaponAttack(theEntity, thePlayer, heldItem, message.off, true);
                 }
-                TaoCombatUtils.rechargeHand(thePlayer, message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, 0f);
+                TaoCombatUtils.rechargeHand(thePlayer, message.off ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, 0f, true);
             });
             return null;
         }

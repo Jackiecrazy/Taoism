@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
@@ -8,27 +9,31 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class EntitySwordBeam extends EntityThrownWeapon {
+public class EntitySwordBeamBase extends EntityThrownWeapon {
     protected EnumHand h;
     protected String s;
     protected float zSpin;
 
-    public EntitySwordBeam(World w) {
+    public EntitySwordBeamBase(World w) {
         super(w);
+        //setSize(2,2);
     }
 
-    public EntitySwordBeam(World worldIn, EntityLivingBase throwerIn, EnumHand hand, ItemStack is) {
+    public EntitySwordBeamBase(World worldIn, EntityLivingBase throwerIn, EnumHand hand, ItemStack is) {
         super(worldIn, throwerIn, hand);
+        //setSize(2,2);
         s = is.getUnlocalizedName();
         h = hand;
     }
 
-    public EntitySwordBeam setRenderRotation(float amnt) {
+    public EntitySwordBeamBase setRenderRotation(float amnt) {
         this.zSpin = amnt;
+        setSize(MathHelper.sin(NeedyLittleThings.rad(amnt)) * 2, MathHelper.cos(NeedyLittleThings.rad(amnt)) * 2);
         return this;
     }
 
@@ -47,7 +52,7 @@ public class EntitySwordBeam extends EntityThrownWeapon {
     @Override
     public void onUpdate() {
         if (!world.isRemote) {
-            if (shootingEntity == null || h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s)) {
+            if (shootingEntity == null || h == null || s == null || !getThrower().getHeldItem(h).getUnlocalizedName().equals(s) || getDistance(getThrower()) > 400||ticksExisted>100) {
                 this.setDead();
                 return;
             }
@@ -60,6 +65,11 @@ public class EntitySwordBeam extends EntityThrownWeapon {
     @Override
     protected float getGravityVelocity() {
         return 0F;
+    }
+
+    @Override
+    protected void onHitBlock(RayTraceResult rtr) {
+        //phase through
     }
 
     @Override

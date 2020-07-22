@@ -1,10 +1,7 @@
 package com.jackiecrazi.taoism.common.entity;
 
 import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityChui;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -33,8 +30,10 @@ public class TaoEntities {
 //        e.getRegistry().register(factoryMove(MoveMultiStrike.class));
         e.getRegistry().register(factoryArrow(EntityRopeDart.class));
         e.getRegistry().register(factoryArrow(EntityChui.class));
-        e.getRegistry().register(factoryArrow(EntitySwordBeam.class));
+        e.getRegistry().register(factoryArrow(EntitySwordBeamBase.class));
         e.getRegistry().register(factoryArrow(EntityAxeCleave.class));
+        e.getRegistry().register(factoryArrow(EntityMeidoZangetsuha.class));
+        e.getRegistry().register(factoryArrow(EntityBouncySwordBeam.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
         String name = move.getSimpleName().toLowerCase().substring(6);

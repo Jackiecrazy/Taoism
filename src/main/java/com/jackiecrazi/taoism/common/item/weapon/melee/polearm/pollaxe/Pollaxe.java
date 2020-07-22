@@ -114,14 +114,14 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) {
             if (getCombo(p, is) == 1)
                 return 99;
             if (getCombo(p, is) == 2)
-                return 6 + getExtraReach(p);
+                return 6;
         }
-        return 3f + getExtraReach(p);
+        return 3f;
     }
 
     @Override
@@ -159,7 +159,7 @@ public class Pollaxe extends TaoWeapon {
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
         if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-            TaoCombatUtils.rechargeHand(defender, other, 0.9f);
+            TaoCombatUtils.rechargeHand(defender, other, 0.9f, true);
         }
     }
 
@@ -177,7 +177,7 @@ public class Pollaxe extends TaoWeapon {
         super.afterSwing(elb, is);
         if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-            TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+            TaoCombatUtils.rechargeHand(elb, other, 0.5f, true);
         }
     }
 

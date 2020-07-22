@@ -104,7 +104,7 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, 100, qi - 7), false);
         }
         if (isCharged(defender, item))
-            TaoCombatUtils.rechargeHand(defender, getHand(item), 1);
+            TaoCombatUtils.rechargeHand(defender, getHand(item), 1, true);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class Tonfa extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ARMORBREAK, 100, qi - 7), false);
         }
         if (isCharged(defender, item))
-            TaoCombatUtils.rechargeHand(defender, getHand(item), 1);
+            TaoCombatUtils.rechargeHand(defender, getHand(item), 1, true);
     }
 
     @Override
@@ -154,8 +154,8 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 2f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
     }
 
     @Override

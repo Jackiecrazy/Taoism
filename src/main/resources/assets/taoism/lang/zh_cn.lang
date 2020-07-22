@@ -38,7 +38,7 @@ weapon.spoiler=斩杀还没有做好哦～
 item.ken.name=剑
 ken.combo=普攻挽出三个剑花后才进入冷却
 ken.qi=每层气增伤3%%
-ken.aoe=横扫身前90度的扇形区域
+ken.aoe=横扫身前60度的扇形区域
 ken.stab=若只有一个敌人，造成120%%伤害
 ken.riposte=招架后重置连击
 

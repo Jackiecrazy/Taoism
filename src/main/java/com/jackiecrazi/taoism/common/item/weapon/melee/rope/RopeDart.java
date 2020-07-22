@@ -136,11 +136,6 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 + getExtraReach(p) : 0;
-    }
-
-    @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
     }
@@ -156,6 +151,11 @@ public class RopeDart extends TaoWeapon {
                 gettagfast(stack).removeTag("connected");
             }
         }
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 : 0;
     }
 
     @Override

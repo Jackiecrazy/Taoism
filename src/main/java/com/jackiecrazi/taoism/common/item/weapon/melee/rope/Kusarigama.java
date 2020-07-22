@@ -79,10 +79,6 @@ public class Kusarigama extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
-        tooltip.add(I18n.format("guandao.alt"));
-        tooltip.add(I18n.format("guandao.alt.attack"));
-        tooltip.add(I18n.format("guandao.guard"));
-        tooltip.add(I18n.format("guandao.strike"));
     }
 
     @Override
@@ -121,7 +117,7 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return getHand(is) == EnumHand.OFF_HAND ? 5 : 3;
     }
 

@@ -67,17 +67,17 @@ public class EntityRopeDart extends EntityThrownWeapon {
             Vec3d dudeVec = getThrower().getPositionVector().addVector(0, getThrower().getEyeHeight() - 0.1, 0);
             if (dudeVec.subtract(this.getPositionVector()).lengthSquared() < 1) {
                 if (hitStatus > 0) {
-                    motionX /= 10;
-                    motionY /= 10;
-                    motionZ /= 10;
+                    motionX /= 10d;
+                    motionY /= 10d;
+                    motionZ /= 10d;
                     updateHitStatus(-2);
                     markVelocityChanged();
                     onRecallTriggered = false;
                 }
             } else if (hitStatus == -2) {
-                motionX *= 8;
-                motionY *= 8;
-                motionZ *= 8;
+                motionX *= 8d;
+                motionY *= 8d;
+                motionZ *= 8d;
                 updateHitStatus(0);
                 markVelocityChanged();
             }

@@ -46,7 +46,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -110,6 +109,11 @@ public class ClientEvents {
             regWeap(i);
         }
         regWeap(TaoItems.prop);
+    }
+
+    @SubscribeEvent
+    public static void color(ColorHandlerEvent.Item e) {
+        //e.getItemColors().registerItemColorHandler(ProjectileTinter.INSTANCE, TaoItems.prop);
     }
 
     private static void regWeap(Item i) {
@@ -179,33 +183,6 @@ public class ClientEvents {
             }
             if (TaoCasterData.getTaoCap(event.getEntity()).getCannonballTime() > 0 && !event.getEntity().onGround) {
                 GlStateManager.popMatrix();
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void attackKey(InputEvent.KeyInputEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.pointedEntity != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange && mc.gameSettings.keyBindAttack.isKeyDown()) {
-            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
-            float reach = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
-            if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > reach * reach) {
-                mc.gameSettings.keyBindAttack.isPressed();
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void attackMouse(InputEvent.MouseInputEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.pointedEntity != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange && mc.gameSettings.keyBindAttack.isKeyDown()) {
-            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
-            float reach = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
-            double dist=NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player);
-            if (dist > reach * reach) {
-                mc.gameSettings.keyBindAttack.isPressed();
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
             }
         }
     }

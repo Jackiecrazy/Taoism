@@ -30,7 +30,7 @@ public abstract class MeleeMove extends EntityMove {
             //System.out.println("a");
             EntityPlayer p = ((EntityPlayer) attacker);
             EnumHand hand = p.getHeldItemMainhand() == stack ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-            TaoCombatUtils.rechargeHand(attacker, hand, 1f);
+            TaoCombatUtils.rechargeHand(attacker, hand, 1f, true);
             defender.hurtResistantTime = 0;
             TaoCombatUtils.taoWeaponAttack(defender, p, stack, hand==EnumHand.MAIN_HAND, true);
         } else

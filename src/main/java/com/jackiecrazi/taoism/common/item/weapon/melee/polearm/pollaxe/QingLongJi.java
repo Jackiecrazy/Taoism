@@ -61,8 +61,8 @@ public class QingLongJi extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 4f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 4f;
     }
 
     @Override
@@ -147,7 +147,7 @@ public class QingLongJi extends TaoWeapon {
             } else setReversed(stack, true);
         }
         EnumHand other = getHand(stack) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f);
+        TaoCombatUtils.rechargeHand(attacker, other, TaoCombatUtils.getHandCoolDown(attacker, other) * 0.5f, true);
     }
 
     private void setReversed(ItemStack is, boolean to) {

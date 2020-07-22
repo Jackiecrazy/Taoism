@@ -52,9 +52,9 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) return 16;
-        return 2f + getExtraReach(p);
+        return 2f;
     }
 
     @Override
@@ -142,7 +142,7 @@ public class Karambit extends TaoWeapon {
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (elb instanceof EntityPlayer) {
             EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-            TaoCombatUtils.rechargeHand(elb, hand, 1);
+            TaoCombatUtils.rechargeHand(elb, hand, 1, true);
         }
     }
 

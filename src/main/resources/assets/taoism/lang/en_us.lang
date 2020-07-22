@@ -38,7 +38,7 @@ weapon.spoiler=Executions aren't done yet! No spoilers!
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before recharging
 ken.qi=+3%% damage per chi level
-ken.aoe=strikes all enemies in a 90 degree sector
+ken.aoe=strikes all enemies in a 60 degree sector
 ken.stab=if only one target was attacked, deal an extra 20%% damage
 ken.riposte=a parry will reset the combo counter
 

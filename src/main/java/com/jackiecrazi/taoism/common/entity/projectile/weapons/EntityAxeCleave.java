@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityAxeCleave extends EntitySwordBeam {
+public class EntityAxeCleave extends EntitySwordBeamBase {
     //first pass: crack particles
     //second pass: explosion particles
     private List<Entity> hitList = new ArrayList<>();

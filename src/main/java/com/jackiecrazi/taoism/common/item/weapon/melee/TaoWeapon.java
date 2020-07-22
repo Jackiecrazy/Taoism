@@ -237,11 +237,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
         if (handIn == EnumHand.OFF_HAND) {
             ItemStack offhand = p.getHeldItemOffhand();
-            if (!worldIn.isRemote) {
-                System.out.println("results:");
-                System.out.println(TaoCombatHandler.lastRightClickTime.getOrDefault(p, 0L));
-                System.out.println(worldIn.getTotalWorldTime());
-            }
             if (!offhand.isEmpty() && TaoCombatHandler.lastRightClickTime.getOrDefault(p, 0L) + 5 < worldIn.getTotalWorldTime() && TaoCombatUtils.getCooledAttackStrengthOff(p, 0.5f) == 1f) {
                 if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
                     p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
@@ -257,14 +252,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 }
                 float temp = p.getCooledAttackStrength(0.5f);
                 p.swingArm(handIn);
-                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp);
+                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp, true);
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);
                 if (!worldIn.isRemote)
                     TaoCombatHandler.lastRightClickTime.put(p, worldIn.getTotalWorldTime());
                 return new ActionResult<>(EnumActionResult.SUCCESS, offhand);
             }
             if (!worldIn.isRemote) {
-                System.out.println("set lastRightClickTime to " + worldIn.getTotalWorldTime());
                 TaoCombatHandler.lastRightClickTime.put(p, worldIn.getTotalWorldTime());
             }
         }
@@ -375,9 +369,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     long curr = w.getTotalWorldTime();
                     int interval = tag.getInteger("multiHitInterval");
                     if (till >= curr && from != curr && (curr - from) % interval == 0) {
-                        TaoCombatUtils.rechargeHand(elb, getHand(stack), 1);
-                        victim.hurtResistantTime = 0;
-                        TaoCombatUtils.taoWeaponAttack(victim, elb, stack, onMainHand, false);
+                        performScheduledAction(elb, victim, stack, curr-from, interval);
                     }
                 }
             }
@@ -470,7 +462,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", attackDamage(stack) - 1, 0));
             multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", speed(stack), 0));
             multimap.put(TaoEntities.QIRATE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getQiAccumulationRate(stack), 0));
-            multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getReach(null, stack) - 3, 0));
+            multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getTrueReach(null, stack) - 3, 0));
+            //FIXME turn attribute modifier into unchanging field, avoid circular reference causing double implementation
             //for (int x = 0; x < IElemental.ATTRIBUTES.length; x++)
             //multimap.put(IElemental.ATTRIBUTES[x].getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getAffinity(stack, x), 0));
         }
@@ -641,11 +634,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return isCharged(null, is) ? 0 : qiRate;
     }
 
+    public abstract float getTrueReach(EntityLivingBase elb, ItemStack is);
+
     /**
      * default method! Override for complex weapons!
      */
     protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getReach(null, stack)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", getTrueReach(null, stack)) + TextFormatting.RESET);
         tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
         tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", postureDealtBase(null, null, stack, 1)) + TextFormatting.RESET);
     }
@@ -662,17 +657,24 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return ItemStack.EMPTY;
     }
 
+    @Override
+    public float getReach(EntityLivingBase p, ItemStack is) {
+        return getExtraReach(p, is);
+    }
+
+    protected float getExtraReach(EntityLivingBase elb, ItemStack is) {
+        if (elb != null && elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE) != null) {
+            double ret = NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, elb, getHand(is)) - 2d;
+            return (float) ret;
+        }
+        return 0;
+    }
+
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
      */
     protected boolean[] harvestable(ItemStack is) {
         return new boolean[]{false, false, false, false};
-    }
-
-    protected float getExtraReach(EntityLivingBase elb) {
-        if (elb != null && elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE) != null)
-            return (float) elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue();
-        return 0;
     }
 
     protected double getDamageAgainst(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
@@ -718,25 +720,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, horAngle, vertAngle, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test));
     }
 
-    protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int horDeg, int vertDeg, List<Entity> targets) {
-        boolean sweep = false;
-        for (Entity target : targets) {
-            if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
-            //!NeedyLittleThings.isFacingEntity(attacker,target)||
-            if ((horDeg != 360 && vertDeg != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg, vertDeg)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
-                continue;
-            TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing());
-            if (attacker instanceof EntityPlayer) {
-                EntityPlayer p = (EntityPlayer) attacker;
-                TaoCombatUtils.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
-            } else attacker.attackEntityAsMob(target);
-            sweep = true;
-        }
-        if (sweep && attacker instanceof EntityPlayer) {
-            ((EntityPlayer) attacker).spawnSweepParticles();
-        }
-    }
-
     protected int getQiFromStack(ItemStack stack) {
         return gettagfast(stack).getInteger("qifloor");
     }
@@ -747,6 +730,30 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int degrees, List<Entity> targets) {
         splash(attacker, ignored, is, degrees, degrees, targets);
+    }
+
+    protected void additionalSplashAction(EntityLivingBase attacker, Entity target, ItemStack is){
+
+    }
+
+    protected void splash(EntityLivingBase attacker, Entity ignored, ItemStack is, int horDeg, int vertDeg, List<Entity> targets) {
+        boolean sweep = false;
+        for (Entity target : targets) {
+            if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
+            //!NeedyLittleThings.isFacingEntity(attacker,target)||
+            if ((horDeg != 360 && vertDeg != 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg, vertDeg)) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is) || target == ignored)
+                continue;
+            TaoCombatUtils.rechargeHand(attacker, getHand(is), TaoCasterData.getTaoCap(attacker).getSwing(), true);
+            if (attacker instanceof EntityPlayer) {
+                EntityPlayer p = (EntityPlayer) attacker;
+                TaoCombatUtils.taoWeaponAttack(target, p, is, getHand(is) == EnumHand.MAIN_HAND, false);
+            } else attacker.attackEntityAsMob(target);
+            additionalSplashAction(attacker, target, is);
+            sweep = true;
+        }
+        if (sweep && attacker instanceof EntityPlayer) {
+            ((EntityPlayer) attacker).spawnSweepParticles();
+        }
     }
 
     @Override
@@ -863,6 +870,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
+    protected void performScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, long l, int interval){
+        TaoCombatUtils.rechargeHand(elb, getHand(stack), 1, false);
+        victim.hurtResistantTime = 0;
+        TaoCombatUtils.taoWeaponAttack(victim, elb, stack, getHand(stack)==EnumHand.MAIN_HAND, false);
+    }
+
+
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
         return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
     }
@@ -890,6 +904,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
+            return false;
         return attacker != target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
     }
 

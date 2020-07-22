@@ -5,13 +5,16 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBouncySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeamBase;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -50,11 +53,6 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    protected float getQiAccumulationRate(ItemStack is) {
-        return qiRate;
-    }
-
-    @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
         if (isCharged(elb, is)) {
             if (!elb.world.isRemote) {
@@ -65,10 +63,11 @@ public class Ken extends TaoWeapon {
                 }
                 Vec3d look = elb.getLookVec();
                 for (int i = 0; i < numToFire; i++) {
+                    elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, SoundCategory.PLAYERS, elb.world.rand.nextFloat() + i+1, elb.world.rand.nextFloat() + i * 1.7f);
                     float rotation = (getCombo(elb, is) + i) % 2 * 20;
                     if (rotation == 0) rotation = -40;
                     rotation += Taoism.unirand.nextInt(20);
-                    EntitySwordBeam esb = new EntitySwordBeam(elb.world, elb, getHand(is), is).setRenderRotation(rotation);
+                    EntitySwordBeamBase esb = new EntityBouncySwordBeam(elb.world, elb, getHand(is), is).setRenderRotation(rotation);
                     esb.setPositionAndRotation(elb.posX + (look.x * i * 2), elb.posY + (double) elb.getEyeHeight() - 0.10000000149011612D + (look.y * i * 2), elb.posZ + (look.z * i * 2), elb.rotationYaw, elb.rotationPitch);
                     esb.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
                     elb.world.spawnEntity(esb);
@@ -81,11 +80,14 @@ public class Ken extends TaoWeapon {
     @Override
     //default attack code to AoE
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (isAoE(attacker, stack) || !isAiming(attacker, stack))
-            splash(attacker, stack, 90);
-//            else {
-//                splash(attacker, stack, 10);
-//            }
+        if (isAoE(attacker, stack) || !isAiming(attacker, stack)) {
+            splash(attacker, stack, 60);
+        }
+    }
+
+    @Override
+    protected float getQiAccumulationRate(ItemStack is) {
+        return qiRate;
     }
 
     @Override
@@ -124,7 +126,7 @@ public class Ken extends TaoWeapon {
         boolean toggle = false;
         for (Entity target : attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test)) {
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
-            if (!NeedyLittleThings.isFacingEntity(attacker, target, 90) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
+            if (!NeedyLittleThings.isFacingEntity(attacker, target, 60) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;
             if (toggle) {
                 return true;
@@ -138,7 +140,7 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3 + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 3;
     }
 }

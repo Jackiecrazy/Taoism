@@ -16,15 +16,21 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
     private final int index;
     private final RenderItem itemRenderer;
     private final Vec3i rot;
-    private final float scale;
+    private final float sX, sY, sZ;
     protected ItemStack item;
 
     RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleFactor) {
+        this(renderManagerIn, index, itemRendererIn, rotations, scaleFactor, scaleFactor, scaleFactor);
+    }
+
+    RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleX, float scaleY, float scaleZ) {
         super(renderManagerIn);
         this.index = index;
         this.itemRenderer = itemRendererIn;
         rot = rotations;
-        scale=scaleFactor;
+        sX = scaleX;
+        sY = scaleY;
+        sZ = scaleZ;
     }
 
     /**
@@ -32,17 +38,18 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
      */
     public void doRender(T e, double x, double y, double z, float entityYaw, float partialTicks) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float) x, (float) y+(e.height>1?e.height/2:0), (float) z);
+        GlStateManager.translate((float) x, (float) y + (e.height > 1 ? e.height / 2 : 0), (float) z);
         GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(scale, scale, scale);
+        GlStateManager.enableBlend();
+        GlStateManager.enableAlpha();
         GlStateManager.rotate(e.rotationYaw, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(-e.rotationPitch, 1.0F, 0.0F, 0.0F);
         GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(rot.getY() + e.ySpin(), 0, 1, 0);
         GlStateManager.rotate(rot.getZ() + e.zSpin(), 0, 0, 1);
         GlStateManager.rotate(rot.getX() + e.xSpin(), 1, 0, 0);
+        GlStateManager.scale(sX, sY, sZ);
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
         if (this.renderOutlines) {
             GlStateManager.enableColorMaterial();
             GlStateManager.enableOutlineMode(this.getTeamColor(e));
@@ -56,12 +63,17 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
         }
 
         GlStateManager.disableRescaleNormal();
+        GlStateManager.disableBlend();
+        GlStateManager.disableAlpha();
         GlStateManager.popMatrix();
         super.doRender(e, x, y, z, entityYaw, partialTicks);
     }
 
     private ItemStack getStackToRender(T entityIn) {
-        if (item == null) item = new ItemStack(TaoItems.prop, index);
+        if (item == null) {
+            item = new ItemStack(TaoItems.prop, index);
+            //item.setItemDamage(color);
+        }
         return item;
     }
 

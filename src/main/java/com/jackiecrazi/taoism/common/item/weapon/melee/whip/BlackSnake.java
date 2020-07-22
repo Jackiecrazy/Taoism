@@ -49,7 +49,7 @@ public class BlackSnake extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return 0;
     }
 

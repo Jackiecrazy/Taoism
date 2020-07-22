@@ -197,8 +197,8 @@ public class NeedyLittleThings {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         elb.setHeldItem(EnumHand.OFF_HAND, main);
         elb.setHeldItem(EnumHand.MAIN_HAND, off);
-        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND));
-        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND));
+        TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.OFF_HAND), true);
+        TaoCombatUtils.rechargeHand(elb, EnumHand.OFF_HAND, TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND), true);
     }
 
     public static double getAttributeModifierHandSensitive(IAttribute ia, EntityLivingBase elb, EnumHand hand) {
@@ -426,7 +426,7 @@ public class NeedyLittleThings {
     @Nonnull
     public static RayTraceResult raytraceAnything(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range * 2);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
         Vec3d end = start.add(look);
         Entity entity = null;
         List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
@@ -472,7 +472,7 @@ public class NeedyLittleThings {
 
     public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range * 2);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
         Vec3d end = start.add(look);
         Entity entity = null;
         List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
@@ -525,7 +525,7 @@ public class NeedyLittleThings {
 
     public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range * 2);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
         Vec3d end = start.add(look);
         ArrayList<Entity> ret = new ArrayList<>();
         List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), VALID_TARGETS::test);

@@ -1,10 +1,7 @@
 package com.jackiecrazi.taoism.client;
 
 import com.jackiecrazi.taoism.common.CommonProxy;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityChui;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeam;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.model.ModelBase;
@@ -44,8 +41,10 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(ClientEvents.class);
         RenderingRegistry.registerEntityRenderingHandler(EntityRopeDart.class, manager -> new RenderTaoItemProjectile<>(manager, 1, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1f));
         RenderingRegistry.registerEntityRenderingHandler(EntityChui.class, manager -> new RenderTaoItemProjectile<>(manager, 2, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, -90, 0), 2f));
-        RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f));
+        RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeamBase.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f));
         RenderingRegistry.registerEntityRenderingHandler(EntityAxeCleave.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1.5f));
+        RenderingRegistry.registerEntityRenderingHandler(EntityMeidoZangetsuha.class, manager -> new RenderTaoItemProjectile<>(manager, 5, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 4f,4,1));
+        RenderingRegistry.registerEntityRenderingHandler(EntityBouncySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f,2,1));
     }
 
     public void init(FMLInitializationEvent event) {

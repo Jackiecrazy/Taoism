@@ -49,8 +49,8 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 5f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 5f;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class Staff extends TaoWeapon {
     @Override
     protected void afterSwing(EntityLivingBase elb, ItemStack is) {
         EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-        TaoCombatUtils.rechargeHand(elb, other, 0.5f);
+        TaoCombatUtils.rechargeHand(elb, other, 0.5f, true);
     }
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {

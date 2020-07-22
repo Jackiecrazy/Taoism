@@ -122,8 +122,8 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public float getReach(EntityLivingBase p, ItemStack is) {
-        return 3.5f + getExtraReach(p);
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 3.5f;
     }
 
     @Override

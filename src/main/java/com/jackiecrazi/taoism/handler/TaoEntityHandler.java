@@ -326,7 +326,7 @@ public class TaoEntityHandler {
                             }
                             float cd = tw.newCooldown(p, mainhand);
                             if (cd != 0)
-                                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd);
+                                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, cd, true);
                             tw.setCombo(p, mainhand, tw.getCombo(p, mainhand) + 1);
                             TaoCasterData.getTaoCap(p).setOffhandAttack(false);
                         }
@@ -352,7 +352,7 @@ public class TaoEntityHandler {
                         }
                         float cd = tw.newCooldown(p, offhand);
                         if (cd != 0)
-                            TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd);
+                            TaoCombatUtils.rechargeHand(p, EnumHand.OFF_HAND, cd, true);
                         tw.setCombo(p, offhand, tw.getCombo(p, offhand) + 1);
                         TaoCasterData.getTaoCap(p).setOffhandAttack(false);
                     }

@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherAnchor;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.effect.FakeExplosion;
@@ -137,7 +138,7 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
         hit.motionY = motionY;
         hit.motionZ = motionZ;
         hit.velocityChanged = true;
-        TaoCombatUtils.rechargeHand(getThrower(), hand, 1f);
+        TaoCombatUtils.rechargeHand(getThrower(), hand, 1f, true);
         if (getThrower() instanceof EntityPlayer)
             TaoCombatUtils.taoWeaponAttack(hit, (EntityPlayer) getThrower(), is, hand == EnumHand.MAIN_HAND, true, DamageSource.causePlayerDamage((EntityPlayer) getThrower()).setProjectile());
         sync();
@@ -150,7 +151,9 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).setRootTime(0);
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).stopRecordingDamage(getThrower());
         }
-        //TODO blocky shockwave, discharge weapon
+        if(stack.getItem() instanceof IChargeableWeapon){
+            ((IChargeableWeapon)stack.getItem()).dischargeWeapon(getThrower(), stack);
+        }
     }
 
     public void onRecall() {

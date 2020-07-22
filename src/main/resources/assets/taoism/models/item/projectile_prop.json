@@ -26,7 +26,14 @@
         "type": 4
       },
       "model": "taoism:dummy"
-    }],
+    },
+    {
+      "predicate": {
+        "type": 5
+      },
+      "model": "taoism:projectile/mdzgh"
+    }
+  ],
   "display": {
     "thirdperson_righthand": {
       "rotation": [ 0, -90, 55 ],
