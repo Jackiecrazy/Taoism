@@ -33,10 +33,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.*;
@@ -46,6 +43,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -55,6 +53,7 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = Taoism.MODID)
 public class ClientEvents {
+    //TODO somehow cancel short attacks on the client...
 
     //Reflection time!
     public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
@@ -111,13 +110,13 @@ public class ClientEvents {
         regWeap(TaoItems.prop);
     }
 
+    private static void regWeap(Item i) {
+        ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
+    }
+
     @SubscribeEvent
     public static void color(ColorHandlerEvent.Item e) {
         //e.getItemColors().registerItemColorHandler(ProjectileTinter.INSTANCE, TaoItems.prop);
-    }
-
-    private static void regWeap(Item i) {
-        ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
     }
 
     //attacks when out of range, charges for l'execution
@@ -273,9 +272,49 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
+    public static void noHit(InputEvent.KeyInputEvent e) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
+            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
+            float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
+            rangesq *= rangesq;
+            if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
+                mc.pointedEntity = null;
+                Vec3d look= mc.player.getLook(1).scale(3);
+                mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void noHitMouse(InputEvent.MouseInputEvent e) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
+            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
+            float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
+            rangesq *= rangesq;
+            if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
+                mc.pointedEntity = null;
+                Vec3d look= mc.player.getLook(1).scale(3);
+                mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void longPress(TickEvent.ClientTickEvent e) {
         if (e.phase == TickEvent.Phase.START) {
             Minecraft mc = Minecraft.getMinecraft();
+            if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
+                IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
+                float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
+                rangesq *= rangesq;
+                if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
+                    mc.pointedEntity = null;
+                    Vec3d look= mc.player.getLook(1).scale(3);
+                    mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
+                }
+            }
             if (Taoism.proxy.isBreakingBlock(mc.player)) {
                 leftClickAt = 0;
                 rightClickAt = 0;
@@ -286,6 +325,45 @@ public class ClientEvents {
                 if (leftClickAt == CHARGE) {
                     //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void zTarget(TickEvent.RenderTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            EntityPlayerSP player = Minecraft.getMinecraft().player;
+            if (player == null) return;
+            ITaoStatCapability cap = TaoCasterData.getTaoCap(player);
+            if (cap.getForcedLookAt() != null) {
+                Entity e = cap.getForcedLookAt();
+                double dx = player.posX - e.posX;
+                double dz = player.posZ - e.posZ;
+                double angle = Math.atan2(dz, dx) * 180 / Math.PI;
+                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.getEyeHeight())), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+                double distance = player.getDistance(e);
+                float rYaw = (float) (angle - player.rotationYaw);
+                while (rYaw > 180) {
+                    rYaw -= 360;
+                }
+                while (rYaw < -180) {
+                    rYaw += 360;
+                }
+                rYaw += 90F;
+                float rPitch = (float) pitch - (float) (10.0F / Math.sqrt(distance)) + (float) (distance * Math.PI / 90);
+                player.turn(rYaw, -(rPitch - player.rotationPitch));
+            }
+        } else {
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
+                IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
+                float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
+                rangesq *= rangesq;
+                if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
+                    mc.pointedEntity = null;
+                    Vec3d look= mc.player.getLook(1).scale(3);
+                    mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
                 }
             }
         }
@@ -313,33 +391,6 @@ public class ClientEvents {
         float cd = TaoCombatUtils.getCooledAttackStrengthOff(p, e.getPartialTicks());
         float f6 = 1 - (cd * cd * cd);
         ir.renderItemInFirstPerson(p, e.getPartialTicks(), f1, EnumHand.OFF_HAND, e.getSwingProgress(), p.getHeldItemOffhand(), f6);
-    }
-
-    @SubscribeEvent
-    public static void zTarget(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            EntityPlayerSP player = Minecraft.getMinecraft().player;
-            if (player == null) return;
-            ITaoStatCapability cap = TaoCasterData.getTaoCap(player);
-            if (cap.getForcedLookAt() != null) {
-                Entity e = cap.getForcedLookAt();
-                double dx = player.posX - e.posX;
-                double dz = player.posZ - e.posZ;
-                double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.getEyeHeight())), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
-                double distance = player.getDistance(e);
-                float rYaw = (float) (angle - player.rotationYaw);
-                while (rYaw > 180) {
-                    rYaw -= 360;
-                }
-                while (rYaw < -180) {
-                    rYaw += 360;
-                }
-                rYaw += 90F;
-                float rPitch = (float) pitch - (float) (10.0F / Math.sqrt(distance)) + (float) (distance * Math.PI / 90);
-                player.turn(rYaw, -(rPitch - player.rotationPitch));
-            }
-        }
     }
 
     @SubscribeEvent

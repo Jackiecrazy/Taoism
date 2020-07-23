@@ -1,9 +1,11 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityMeidoZangetsuha;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -47,7 +49,7 @@ public class GuanDao extends TaoWeapon {
      * the number of beams increase with moonlight, your moonlight is reset.
      */
     public GuanDao() {
-        super(1, 1, 5d, 1f);
+        super(1, 1.3, 5d, 1f);
         //this.addPropertyOverride(new ResourceLocation("long"), (stack, world, ent) -> isLong(stack) ? 1 : 0);
     }
 
@@ -84,54 +86,8 @@ public class GuanDao extends TaoWeapon {
         }
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (attacker.world.isRemote) return;
-        if (!isCharged(attacker, stack) || TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5)) {
-            if (getHand(stack) == EnumHand.OFF_HAND) {
-                if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode())) {
-                    if (isCharged(attacker, stack)) {
-                        for (int x = 0; x < 5; x++) {
-                            EntityMeidoZangetsuha meido = new EntityMeidoZangetsuha(attacker, getHand(stack), stack);
-                            meido.setRenderRotation(90).shoot(attacker, -attacker.rotationPitch, attacker.rotationYaw + 240 - x * 30, 0, 1, 0);
-                            meido.motionY -= attacker.motionY;
-                            attacker.world.spawnEntity(meido);
-                        }
-                    }
-                    splash(attacker, stack, -20, 120);
-                } else {
-                    splash(attacker, stack, -120);
-                }
-            } else {
-                if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode())) {
-                    if (isCharged(attacker, stack)) {
-                        for (int x = 0; x < 3; x++) {
-                            EntityMeidoZangetsuha meido = new EntityMeidoZangetsuha(attacker, getHand(stack), stack);
-                            meido.setRenderRotation(90).shoot(attacker, attacker.rotationPitch, attacker.rotationYaw - 30 + x * 30, 0, 1f, 0);
-                            meido.motionY -= attacker.motionY;
-                            attacker.world.spawnEntity(meido);
-                        }
-                    }
-                    splash(attacker, stack, 20, 120);
-                } else {
-                    splash(attacker, stack, 90);
-                }
-            }
-        } else {
-            dischargeWeapon(attacker, stack);
-        }
-    }
-
     protected double speed(ItemStack stack) {
         return Math.min(0.8 + (getBuff(stack) / 10f) - 4, -0.24);
-    }
-
-    protected float getQiAccumulationRate(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : super.getQiAccumulationRate(is);
-    }
-
-    @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return (isCharged(p, is) ? 6 : 3);
     }
 
     @Override
@@ -145,8 +101,41 @@ public class GuanDao extends TaoWeapon {
     }
 
     @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return isCharged(p, is) ? 8 : 4;
+    }
+
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (attacker.world.isRemote) return;
+        if (!isCharged(attacker, stack) || TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5)) {
+            if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode())) {
+                if (isCharged(attacker, stack)) {
+                    for (int x = 0; x < 4; x++) {
+                        EntityMeidoZangetsuha meido = new EntityMeidoZangetsuha(attacker, getHand(stack), stack);
+                        meido.setRenderRotation(90).shoot(attacker, -90 + x * 4, attacker.rotationYaw, 0, 1f, 0);
+                        meido.motionY -= attacker.motionY;
+                        attacker.world.spawnEntity(meido);
+                        EntityMeidoZangetsuha meido2 = new EntityMeidoZangetsuha(attacker, getHand(stack), stack);
+                        meido2.setRenderRotation(90).shoot(attacker, 90 - x * 4, attacker.rotationYaw - 180, 0, 1f, 0);
+                        meido2.motionY -= attacker.motionY;
+                        attacker.world.spawnEntity(meido2);
+                    }
+                }
+                splash(attacker, stack, 20, 360);
+                splash(attacker, stack, -20, 360);
+            } else if (getHand(stack) == EnumHand.OFF_HAND) {
+                splash(attacker, stack, -120);
+            } else {
+                splash(attacker, stack, 90);
+            }
+        } else {
+            dischargeWeapon(attacker, stack);
+        }
+    }
+
+    @Override
     protected void additionalSplashAction(EntityLivingBase attacker, Entity target, ItemStack is) {
-        if (isCharged(attacker, is) && !attacker.world.isRemote) {
+        if (isCharged(attacker, is) && attacker.onGround && !attacker.world.isRemote) {
             EntityMeidoZangetsuha meido = new EntityMeidoZangetsuha(attacker, getHand(is), is);
             meido.shootTo(target.getPositionVector().addVector(0, target.height / 2, 0), 1, 0);
             attacker.world.spawnEntity(meido);
@@ -161,14 +150,16 @@ public class GuanDao extends TaoWeapon {
         return super.canCharge(wielder, item) && getBuff(item) > 7;
     }
 
-//    @Override
-//    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-//        return getBuff(item) > 3 ? Event.Result.ALLOW : Event.Result.DENY;
-//    }
-
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
-        super.dischargeWeapon(elb, item);
+        if (isDummy(item) && elb.getHeldItemMainhand() != item) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            dischargeWeapon(elb, elb.getHeldItemMainhand());
+            return;
+        }
+        gettagfast(item).setBoolean("charge", false);
+        gettagfast(item).setLong("chargedAtTime", 0);
+        gettagfast(item).setLong("startAt", 0);
         //spawn a barrage of mdzgh
         multiHit(elb, item, elb, 10 + getBuff(item), 1);
         setBuff(item, 0);
@@ -183,6 +174,19 @@ public class GuanDao extends TaoWeapon {
                 meido.shoot(attacker, -5 - Taoism.unirand.nextInt(25), attacker.rotationYaw - 30 + Taoism.unirand.nextInt(60), 0, 1.5f, 0);
                 attacker.world.spawnEntity(meido);
             }
+    }
+
+    @Override
+    protected void endScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, int interval) {
+        elb.getEntityAttribute(TaoEntities.QIRATE).removeModifier(QI_EXECUTION);
+    }
+
+    @Override
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack is, boolean recharged) {
+        if (getHand(is) == EnumHand.OFF_HAND) {
+            return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
+        }
+        else return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, -120);
     }
 
     @Override

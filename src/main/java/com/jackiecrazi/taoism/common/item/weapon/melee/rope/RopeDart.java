@@ -154,6 +154,28 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
+    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8f) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
+        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", 0f) + TextFormatting.RESET);
+    }
+
+    @Override
+    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("ropedart.parry") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.projectile") + TextFormatting.RESET);
+        tooltip.add(I18n.format("ropedart.projectile"));
+        tooltip.add(I18n.format("ropedart.attack"));
+        tooltip.add(I18n.format("ropedart.pain"));
+        tooltip.add(I18n.format("ropedart.loss"));
+        tooltip.add(I18n.format("ropedart.punch"));
+        tooltip.add(I18n.format("ropedart.alt"));
+        tooltip.add(I18n.format("ropedart.trick"));
+        tooltip.add(I18n.format("ropedart.accel"));
+    }
+
+    @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return isThrown(is) || getHand(is) == EnumHand.OFF_HAND ? 2 : 0;
     }
@@ -183,30 +205,8 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    protected void statDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.WHITE + I18n.format("taoism.weaponReach", 8f) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.YELLOW + I18n.format("taoism.weaponDefMult", postureMultiplierDefend(null, null, stack, 0)) + TextFormatting.RESET);
-        tooltip.add(TextFormatting.RED + I18n.format("taoism.weaponAttMult", 0f) + TextFormatting.RESET);
-    }
-
-    @Override
-    protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.DARK_RED + I18n.format("ropedart.parry") + TextFormatting.RESET);
-        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.projectile") + TextFormatting.RESET);
-        tooltip.add(I18n.format("ropedart.projectile"));
-        tooltip.add(I18n.format("ropedart.attack"));
-        tooltip.add(I18n.format("ropedart.pain"));
-        tooltip.add(I18n.format("ropedart.loss"));
-        tooltip.add(I18n.format("ropedart.punch"));
-        tooltip.add(I18n.format("ropedart.alt"));
-        tooltip.add(I18n.format("ropedart.trick"));
-        tooltip.add(I18n.format("ropedart.accel"));
-    }
-
-    @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
-        return (isThrown(item) || getHand(item) == EnumHand.OFF_HAND) && recharged;
+        return (isThrown(item) || getHand(item) == EnumHand.OFF_HAND) && super.canBlock(defender, attacker, item, recharged);
     }
 
     @Override
@@ -259,15 +259,15 @@ public class RopeDart extends TaoWeapon {
         return gettagfast(is).getBoolean("dartAttack");
     }
 
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
-    }
-
     private EntityRopeDart getDartEntity(ItemStack is, EntityLivingBase elb) {
         if (isThrown(is) && elb.world.getEntityByID(getDartID(is)) != null)
             return (EntityRopeDart) elb.world.getEntityByID(getDartID(is));
         return null;
+    }
+
+    @Override
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 1f;
     }
 
     @Override

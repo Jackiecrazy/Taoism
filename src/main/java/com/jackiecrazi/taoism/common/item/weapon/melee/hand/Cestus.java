@@ -49,11 +49,6 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
-    }
-
-    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (e instanceof EntityLivingBase) {
@@ -63,9 +58,16 @@ public class Cestus extends TaoWeapon {
                     dischargeWeapon(elb, stack);
                 else if (getLastAttackedEntity(w, stack) instanceof EntityLivingBase) {
                     EntityLivingBase uke = (EntityLivingBase) getLastAttackedEntity(w, stack);
-                    if (TaoCasterData.getTaoCap(uke).isRecordingDamage() && NeedyLittleThings.getDistSqCompensated(uke, elb) <= 2 && TaoCasterData.getTaoCap(elb).getRootTime() > 0) {
-                        TaoCasterData.getTaoCap(uke).setRootTime(500);
-                        TaoCasterData.getTaoCap(uke).setBindTime(500);
+                    if (TaoCasterData.getTaoCap(uke).isRecordingDamage()) {
+                        if ((NeedyLittleThings.getDistSqCompensated(uke, elb) <= 2 || uke.posY == elb.posY) && TaoCasterData.getTaoCap(elb).getRootTime() > 0) {
+                            TaoCasterData.getTaoCap(uke).setRootTime(500);
+                            TaoCasterData.getTaoCap(uke).setBindTime(500);
+                        } else {
+                            if (uke.posY < e.posY)
+                                uke.motionY = 0.1;
+                            else uke.motionY = -0.1;
+                            uke.velocityChanged = true;
+                        }
                     }
                     if (TaoCasterData.getTaoCap(elb).isRecordingDamage() && elb.motionY < 0) {
                         TaoCasterData.getTaoCap(elb).setRootTime(500);
@@ -113,6 +115,11 @@ public class Cestus extends TaoWeapon {
         tooltip.add(I18n.format("cestus.debuff"));
         tooltip.add(I18n.format("cestus.damage"));
         tooltip.add(I18n.format("cestus.riposte"));
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
     }
 
     @Override

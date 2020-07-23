@@ -62,7 +62,7 @@ public class TaoCombatHandler {
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void iHaveAWifeAndChildren(LivingAttackEvent e) {
-        if (e.getSource().getTrueSource() instanceof EntityLivingBase) {
+        if (TaoCombatUtils.isMeleeDamage(e.getSource())&&e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
             if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
                 //you may only attack the target that taunted you
@@ -78,8 +78,7 @@ public class TaoCombatHandler {
                 return;
             }
             //reset mustDropHead tag every attack, so only the killing blow's head status is counted
-            if (TaoCombatUtils.isMeleeDamage(e.getSource()))
-                TaoCasterData.getTaoCap(e.getEntityLiving()).setMustDropHead(false);
+            TaoCasterData.getTaoCap(e.getEntityLiving()).setMustDropHead(false);
         }
         //rolling inv frames for projectiles and melee damage
         if (TaoCombatUtils.isPhysicalDamage(e.getSource()) && TaoCasterData.getTaoCap(e.getEntityLiving()).getRollCounter() < CombatConfig.rollThreshold)
@@ -90,13 +89,15 @@ public class TaoCombatHandler {
     public static void projectileParry(ProjectileImpactEvent e) {
         Entity ent = e.getEntity();
         if (ent == null) return;
-        if (EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID))
-            return;//derp derp derp
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !TaoCombatUtils.getParryingItemStack(ent, uke, 1).isEmpty()) {
+            ItemStack perrier=TaoCombatUtils.getParryingItemStack(ent, uke, 1);
+            if(EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)){
+                perrier=TaoCombatUtils.getShield(ent, uke, 1);
+            }
+            if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !perrier.isEmpty()) {
                 if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
@@ -169,13 +170,18 @@ public class TaoCombatHandler {
             boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
             if ((!smart || !defend.isEmpty()) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
                 e.setCanceled(true);
-                uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
-//                    uke.world.playSound(uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 1f, 1f, true);
-//                    uke.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 1f, 1f);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
                 NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
+                //shield disabling
+                if(TaoCombatUtils.isShield(defend)&&attack.getItem().canDisableShield(attack, defend, uke, seme)){
+                    if(uke instanceof EntityPlayer)
+                    ((EntityPlayer)uke).getCooldownTracker().setCooldown(defend.getItem(), 60);
+                    uke.world.setEntityState(uke, (byte)30);
+                    uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
+                }else
+                    uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
                 //reset cooldown
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
@@ -345,7 +351,7 @@ public class TaoCombatHandler {
         if (ukecap.isRecordingDamage()) {//record damage for rainy days
             ukecap.addRecordedDamage(e.getAmount());
             e.setAmount(0);
-            e.setCanceled(true);
+            //e.setCanceled(true);
         }
         uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
         if (!e.isCanceled()) {//do not reset when a person's downed, otherwise it gets out of hand fast
@@ -353,8 +359,6 @@ public class TaoCombatHandler {
             if (!TaoCombatUtils.isMeleeDamage(e.getSource())) return;
             if (ukecap.getDownTimer() <= 0)
                 ukecap.setPostureRechargeCD(CombatConfig.postureCD);
-//            else
-//                ukecap.setDownTimer(ukecap.getDownTimer()-(int)(e.getAmount()*5));
         }
         TaoCasterData.forceUpdateTrackingClients(uke);
     }

@@ -55,7 +55,7 @@ import java.util.UUID;
 public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded, IMove {
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     protected static final UUID QI_MODIFIER = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130003");
-    private static final UUID QI_EXECUTION = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130013");
+    protected static final UUID QI_EXECUTION = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130013");
     //booleans only used when attacking to determine what type of attack it is
     //0
     private static final List<Material> pickList = Arrays.asList(
@@ -369,7 +369,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     long curr = w.getTotalWorldTime();
                     int interval = tag.getInteger("multiHitInterval");
                     if (till >= curr && from != curr && (curr - from) % interval == 0) {
-                        performScheduledAction(elb, victim, stack, curr-from, interval);
+                        performScheduledAction(elb, victim, stack, curr - from, interval);
+                    }
+                    if(curr==till){
+                        endScheduledAction(elb, victim, stack, interval);
                     }
                 }
             }
@@ -517,15 +520,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.onLeftClickEntity(stack, player, entity);
     }
 
-    @Nullable
-    protected EnumHand getHand(ItemStack item) {
-        if (isDummy(item)) return EnumHand.OFF_HAND;
-        if (gettagfast(item).hasKey("off")) {
-            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-        }
-        return null;
-    }
-
     @Override
     public boolean onEntityItemUpdate(EntityItem entityItem) {
         if (isDummy(entityItem.getItem())) {
@@ -615,13 +609,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return changed;
     }
 
-    /**
-     * AoE
-     */
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-
-    }
-
     public double attackDamage(ItemStack stack) {
         return dmg;
     }
@@ -634,8 +621,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return isCharged(null, is) ? 0 : qiRate;
     }
 
-    public abstract float getTrueReach(EntityLivingBase elb, ItemStack is);
-
     /**
      * default method! Override for complex weapons!
      */
@@ -646,6 +631,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     abstract protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn);
+
+    public abstract float getTrueReach(EntityLivingBase elb, ItemStack is);
 
     private ItemStack unwrapDummy(ItemStack from) {
         NBTTagCompound sub = from.getSubCompound("sub");
@@ -670,11 +657,27 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return 0;
     }
 
+    @Nullable
+    protected EnumHand getHand(ItemStack item) {
+        if (isDummy(item)) return EnumHand.OFF_HAND;
+        if (gettagfast(item).hasKey("off")) {
+            return gettagfast(item).getBoolean("off") ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+        }
+        return null;
+    }
+
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
      */
     protected boolean[] harvestable(ItemStack is) {
         return new boolean[]{false, false, false, false};
+    }
+
+    /**
+     * AoE
+     */
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+
     }
 
     protected double getDamageAgainst(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
@@ -732,7 +735,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         splash(attacker, ignored, is, degrees, degrees, targets);
     }
 
-    protected void additionalSplashAction(EntityLivingBase attacker, Entity target, ItemStack is){
+    protected void additionalSplashAction(EntityLivingBase attacker, Entity target, ItemStack is) {
 
     }
 
@@ -811,6 +814,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public int getChargedTime(EntityLivingBase elb, ItemStack item) {
+        if (elb == null) return 0;
         return (int) (elb.world.getTotalWorldTime() - gettagfast(item).getLong("chargedAtTime"));
     }
 
@@ -870,12 +874,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
-    protected void performScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, long l, int interval){
+    protected void performScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, long l, int interval) {
         TaoCombatUtils.rechargeHand(elb, getHand(stack), 1, false);
         victim.hurtResistantTime = 0;
-        TaoCombatUtils.taoWeaponAttack(victim, elb, stack, getHand(stack)==EnumHand.MAIN_HAND, false);
+        TaoCombatUtils.taoWeaponAttack(victim, elb, stack, getHand(stack) == EnumHand.MAIN_HAND, false);
     }
 
+    protected void endScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, int interval){
+
+    }
 
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
         return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
@@ -904,8 +911,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
-            return false;
+//        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
+//            return false;
         return attacker != target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
     }
 

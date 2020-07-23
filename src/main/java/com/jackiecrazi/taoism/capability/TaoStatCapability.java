@@ -162,7 +162,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         //only happens on the client
         zTarget = nbt.getInteger("lookingAt");
         cannonball = nbt.getInteger("spinny");
-        head=nbt.getBoolean("head");
+        head = nbt.getBoolean("head");
     }
 
     private void setPrevSizes(float width, float height) {
@@ -463,7 +463,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setRootTime(from.getRootTime());
         setRecordedDamage(from.getRecordedDamage());
         recording = from.isRecordingDamage();
-        head=from.willDropHead();
+        head = from.willDropHead();
     }
 
     @Override
@@ -707,9 +707,11 @@ public class TaoStatCapability implements ITaoStatCapability {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }
             }
-            if (damage < 0) return;
-            target.hurtResistantTime = 0;
-            target.attackEntityFrom(ds, damage);
+            while (damage > 0) {
+                target.hurtResistantTime = 0;
+                target.attackEntityFrom(ds, Math.min(damage, 20));
+                damage -= 20f;
+            }
         }
     }
 
@@ -776,7 +778,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setMustDropHead(boolean toggle) {
-        head=toggle;
+        head = toggle;
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

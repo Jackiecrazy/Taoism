@@ -103,7 +103,6 @@ public class Kusarigama extends TaoWeapon {
     }
 
     private void setBuff(ItemStack is, int phase) {
-        System.out.println("setting moonlight to "+phase);
         gettagfast(is).setInteger("phase", MathHelper.clamp(phase, 0, 4));
     }
 
@@ -118,7 +117,7 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 5 : 3;
+        return getHand(is) == EnumHand.OFF_HAND ? 6 : 2;
     }
 
     @Override

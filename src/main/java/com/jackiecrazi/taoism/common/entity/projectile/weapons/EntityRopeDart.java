@@ -116,7 +116,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
         if (is.getItem() != stack.getItem() || !is.hasTagCompound()) onRetrieveWeapon();
         assert is.getTagCompound() != null;
         is.getTagCompound().setBoolean("dartAttack", true);
-        TaoCombatUtils.attack(getThrower(), hit, hand);
+        TaoCombatUtils.attackIndirectly(getThrower(), this, hit, hand);
         is.getTagCompound().setBoolean("dartAttack", false);
         charge++;
         onRecall();

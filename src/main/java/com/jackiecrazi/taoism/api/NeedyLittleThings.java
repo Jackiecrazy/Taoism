@@ -274,18 +274,20 @@ public class NeedyLittleThings {
      */
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int horAngle, int vertAngle) {
         if (horAngle < 0) return isBehindEntity(entity2, entity1, -horAngle, Math.abs(vertAngle));
-        Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
-        //y calculations
         double xDiff = entity1.posX - entity2.posX, zDiff = entity1.posZ - entity2.posZ;
-        double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
-        double relativeHeadVec = entity2.posY - entity1.posY - entity1.getEyeHeight() + entity2.height;
-        double relativeFootVec = entity2.posY - entity1.posY - entity1.getEyeHeight();
-        double angleHead = -MathHelper.atan2(relativeHeadVec, distIgnoreY);
-        double angleFoot = -MathHelper.atan2(relativeFootVec, distIgnoreY);
-        //straight up is -90 and straight down is 90
-        double maxRot = rad(entity1.rotationPitch + vertAngle / 2);
-        double minRot = rad(entity1.rotationPitch - vertAngle / 2);
-        if (angleHead > maxRot || angleFoot < minRot) return false;
+        if(vertAngle!=360) {
+            Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
+            //y calculations
+            double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+            double relativeHeadVec = entity2.posY - entity1.posY - entity1.getEyeHeight() + entity2.height;
+            double relativeFootVec = entity2.posY - entity1.posY - entity1.getEyeHeight();
+            double angleHead = -MathHelper.atan2(relativeHeadVec, distIgnoreY);
+            double angleFoot = -MathHelper.atan2(relativeFootVec, distIgnoreY);
+            //straight up is -90 and straight down is 90
+            double maxRot = rad(entity1.rotationPitch + vertAngle / 2);
+            double minRot = rad(entity1.rotationPitch - vertAngle / 2);
+            if (angleHead > maxRot || angleFoot < minRot) return false;
+        }
         //xz begins
         //subtract half of width from calculations in the xz plane so wide mobs that are barely in frame still get lambasted
         double xDiffCompensated;

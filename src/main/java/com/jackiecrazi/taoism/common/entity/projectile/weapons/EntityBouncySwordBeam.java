@@ -41,7 +41,7 @@ public class EntityBouncySwordBeam extends EntitySwordBeamBase {
                                 break;
                             }
                         }
-                        TaoCombatUtils.attack(getThrower(), e, hand);
+                        TaoCombatUtils.attackIndirectly(getThrower(), this, e, hand);
                         lastHit = e;
                         hitTimes++;
                         if (hitTimes > 4) {
@@ -97,7 +97,7 @@ public class EntityBouncySwordBeam extends EntitySwordBeamBase {
                     shootTo(secondaryTarget.getPositionVector().addVector(0, secondaryTarget.height / 2, 0), 1, 0);
                 else {
                     if (lastHit != null && getThrower() != null) {
-                        TaoCombatUtils.attack(getThrower(), lastHit, hand);
+                        TaoCombatUtils.attackIndirectly(getThrower(), this, lastHit, hand);
                         TaoCasterData.getTaoCap(getThrower()).addQi(0.1f);
                     }
                     setDead();

@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.utils;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.allthedamagetypes.EntityDamageSourceTaoIndirect;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IMove;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
@@ -51,15 +52,23 @@ public class TaoCombatUtils {
     }
 
     public static void attack(EntityLivingBase elb, Entity target, EnumHand hand) {
-        attackAtStrength(elb, target, hand, 1);
+        attack(elb, target, hand, causeLivingDamage(elb));
     }
 
-    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent) {
+    public static void attackIndirectly(EntityLivingBase elb, Entity proxy, Entity target, EnumHand hand) {
+        attack(elb, target, hand, new EntityDamageSourceTaoIndirect(elb instanceof EntityPlayer ? "player" : "mob", elb, proxy));
+    }
+
+    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand, DamageSource ds) {
+        attackAtStrength(elb, target, hand, 1, ds);
+    }
+
+    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent, DamageSource ds) {
         float temp = getHandCoolDown(elb, hand);
         target.hurtResistantTime = 0;
         rechargeHand(elb, hand, cooldownPercent, false);
-        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true);
-        rechargeHand(elb, hand, temp, true);
+        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true, ds);
+        rechargeHand(elb, hand, temp, false);
     }
 
     public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
@@ -90,16 +99,21 @@ public class TaoCombatUtils {
     }
 
     public static void taoWeaponAttack(Entity targetEntity, EntityLivingBase elb, ItemStack stack, boolean main, boolean updateOff) {
-        if (elb instanceof EntityPlayer)
-            taoWeaponAttack(targetEntity, (EntityPlayer) elb, stack, main, updateOff, DamageSource.causePlayerDamage((EntityPlayer) elb));
-        else
-            targetEntity.attackEntityFrom(DamageSource.causeMobDamage(elb), (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
+        taoWeaponAttack(targetEntity, elb, stack, main, updateOff, causeLivingDamage(elb));
     }
 
-    private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
-        if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, target))) return false;
-        ItemStack stack = player.getHeldItem(hand);
-        return stack.isEmpty() || !stack.getItem().onLeftClickEntity(stack, player, target);
+    public static void taoWeaponAttack(Entity targetEntity, EntityLivingBase elb, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
+        if (elb instanceof EntityPlayer)
+            taoWeaponAttack(targetEntity, (EntityPlayer) elb, stack, main, updateOff, ds);
+        else
+            targetEntity.attackEntityFrom(ds, (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
+    }
+
+    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
+        if (elb == null) return DamageSource.GENERIC;
+        if (elb instanceof EntityPlayer)
+            return DamageSource.causePlayerDamage((EntityPlayer) elb);
+        else return DamageSource.causeMobDamage(elb);
     }
 
     /**
@@ -304,8 +318,37 @@ public class TaoCombatUtils {
         }
     }
 
+    private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
+        if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, target))) return false;
+        ItemStack stack = player.getHeldItem(hand);
+        return stack.isEmpty() || !stack.getItem().onLeftClickEntity(stack, player, target);
+    }
+
+    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
+    }
+
+    public static float getCooldownPeriodOff(EntityLivingBase elb) {
+        return (float) (1.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
+    }
+
     public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
         return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
+    }
+
+    public static ItemStack getShield(Entity attacker, EntityLivingBase elb, float amount) {
+        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        float defMult = 42;//meaning of life, the universe and everything
+        ItemStack ret = ItemStack.EMPTY;
+        //shields
+        if (isShield(off) && offRec) {
+            return off;
+        }
+        if (isShield(main) && mainRec) {
+            return main;
+        }
+        return ret;
     }
 
     public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
@@ -346,10 +389,6 @@ public class TaoCombatUtils {
         return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
     }
 
-    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
-        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
-    }
-
     public static boolean isShield(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.shieldItems) {
@@ -368,10 +407,6 @@ public class TaoCombatUtils {
 
     public static float getCooldownPeriod(EntityLivingBase elb) {
         return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
-    }
-
-    public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
@@ -394,12 +429,5 @@ public class TaoCombatUtils {
 
     public static boolean isPhysicalDamage(DamageSource ds) {
         return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
-    }
-
-    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
-        if (elb == null) return DamageSource.GENERIC;
-        if (elb instanceof EntityPlayer)
-            return DamageSource.causePlayerDamage((EntityPlayer) elb);
-        else return DamageSource.causeMobDamage(elb);
     }
 }

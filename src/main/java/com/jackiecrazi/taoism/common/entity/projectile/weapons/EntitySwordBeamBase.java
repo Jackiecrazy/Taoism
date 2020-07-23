@@ -82,7 +82,7 @@ public class EntitySwordBeamBase extends EntityThrownWeapon {
                             this.setDead();
                             return;
                         }
-                        TaoCombatUtils.attack(getThrower(), e, hand);
+                        TaoCombatUtils.attackIndirectly(getThrower(), this, e, hand);
                         TaoCasterData.getTaoCap(getThrower()).addQi(0.18f);
                         setDead();
                     }

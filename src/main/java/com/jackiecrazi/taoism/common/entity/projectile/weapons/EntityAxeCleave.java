@@ -80,7 +80,7 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
                 if (detonate) {
                     if (!hitList.contains(hit)) {
                         hitList.add(hit);
-                        TaoCombatUtils.attack(getThrower(), hit, EnumHand.OFF_HAND);
+                        TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.OFF_HAND);
                         if (hit instanceof EntityLivingBase) {
                             TaoCasterData.getTaoCap((EntityLivingBase) hit).setRootTime(0);
                         }
@@ -88,7 +88,7 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
                 } else {
                     if (!hitList.contains(hit)) {
                         hitList.add(hit);
-                        TaoCombatUtils.attack(getThrower(), hit, EnumHand.MAIN_HAND);
+                        TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.MAIN_HAND);
                         if (hit instanceof EntityLivingBase) {
                             TaoCasterData.getTaoCap((EntityLivingBase) hit).setRootTime(60);
                         }
