@@ -207,9 +207,4 @@ public class Kusarigama extends TaoWeapon {
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
 }

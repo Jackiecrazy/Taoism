@@ -121,18 +121,8 @@ public class Bian extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 0;
-    }
-
-    @Override
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
         return attacker.isAirBorne;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
     }
 
     @Override

@@ -77,20 +77,20 @@ public class TaoEntityHandler {
         if (e instanceof EntityThrowable) {
             EntityThrowable et = (EntityThrowable) e;
             EntityLivingBase elb = et.getThrower();
-            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
+            if (elb != null && (TaoCasterData.getTaoCap(elb).getDownTimer() > 0 || TaoCasterData.getTaoCap(elb).getBindTime() > 0)) {
                 ev.setCanceled(true);
             }
         }
         if (e instanceof EntityFireball) {
             EntityFireball et = (EntityFireball) e;
             EntityLivingBase elb = et.shootingEntity;
-            if (elb != null && TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
+            if (elb != null && (TaoCasterData.getTaoCap(elb).getDownTimer() > 0 || TaoCasterData.getTaoCap(elb).getBindTime() > 0)) {
                 ev.setCanceled(true);
             }
         }
         if (e instanceof EntityArrow) {
             EntityArrow et = (EntityArrow) e;
-            if (et.shootingEntity instanceof EntityLivingBase && TaoCasterData.getTaoCap((EntityLivingBase) et.shootingEntity).getDownTimer() > 0) {
+            if (et.shootingEntity instanceof EntityLivingBase && (TaoCasterData.getTaoCap((EntityLivingBase) et.shootingEntity).getDownTimer() > 0 || TaoCasterData.getTaoCap((EntityLivingBase) et.shootingEntity).getBindTime() > 0)) {
                 ev.setCanceled(true);
             }
         }

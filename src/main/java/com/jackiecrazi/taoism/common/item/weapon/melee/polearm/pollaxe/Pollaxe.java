@@ -60,11 +60,6 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 100;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.5f;
     }

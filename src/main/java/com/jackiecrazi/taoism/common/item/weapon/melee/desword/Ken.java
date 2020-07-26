@@ -43,11 +43,6 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 180;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }

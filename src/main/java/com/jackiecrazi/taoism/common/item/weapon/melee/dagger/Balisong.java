@@ -168,11 +168,6 @@ public class Balisong extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 400;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;
     }

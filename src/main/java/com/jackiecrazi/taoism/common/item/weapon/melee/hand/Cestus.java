@@ -194,11 +194,6 @@ public class Cestus extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.8f;
     }

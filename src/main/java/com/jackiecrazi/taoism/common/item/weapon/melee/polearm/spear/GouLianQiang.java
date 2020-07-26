@@ -45,18 +45,8 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return 6f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 80;
     }
 
     @Override

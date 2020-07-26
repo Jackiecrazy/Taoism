@@ -54,11 +54,6 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 200;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 0.8f;
     }

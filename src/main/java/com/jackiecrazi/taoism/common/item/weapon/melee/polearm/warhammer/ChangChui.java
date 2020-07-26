@@ -59,18 +59,8 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return 4;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 100;
     }
 
     @Override

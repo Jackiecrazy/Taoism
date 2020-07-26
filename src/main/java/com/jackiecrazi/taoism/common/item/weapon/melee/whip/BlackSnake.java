@@ -15,9 +15,9 @@ public class BlackSnake extends TaoWeapon {
     /*
     a whipping weapon that can be used as a bludgeon close up. High power and speed, mid range, low combo and defense
     cannot parry
-    attacks beyond 3 blocks is a whip lash that inflicts critical cutting damage (1.2~3 with chi) along with a loud crack,
+    attacks beyond 4 blocks is a whip lash that inflicts critical cutting damage (1.2~3 with chi) along with a loud crack,
         this cannot be parried, but damage is doubly reduced by armor
-    attacks within 3 blocks is a whack with the blackjack end, dealing good blunt damage and stunning with chi
+    attacks within 4 blocks is a whack with the blackjack end, dealing good blunt damage and stunning with chi
      */
     public BlackSnake() {
         super(1, 1.2, 6, 0);

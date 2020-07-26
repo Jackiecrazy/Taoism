@@ -189,7 +189,7 @@ rapier.combo=normal attack chains up to 3 times before recharging
 rapier.riposte=inflicts a critical hit if you recently dodged or parried, or if the enemy recently attacked
 
 item.kusarigama.name=Kusarigama
-kusarigama.ball=weighted chain in the offhand accumulates speed over 2 seconds, alt attack to release towards an enemy
+kusarigama.ball=weighted chain in offhand accumulates speed over 2 seconds, alt attack to release towards an enemy
 kusarigama.followup=following up this attack with the sickle will deal up to an extra 50%% damage based on charge
 kusarigama.parry=the chain cannot parry, but if the projectile is between you and the enemy when you parry, bind enemy for (charge) ticks
 kusarigama.critfollowup=attacking a bound enemy with the sickle will crit for double damage and consume double posture

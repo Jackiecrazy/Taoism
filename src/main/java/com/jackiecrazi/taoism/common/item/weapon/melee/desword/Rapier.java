@@ -112,11 +112,6 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 10;
-    }
-
-    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 3;
     }

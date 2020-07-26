@@ -127,11 +127,6 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
     }
@@ -264,11 +259,6 @@ public class RopeDart extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 20;
     }
 
 }

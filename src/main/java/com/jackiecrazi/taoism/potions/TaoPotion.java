@@ -143,12 +143,16 @@ public class TaoPotion extends Potion {
             //DETERMINATION!
             TaoCasterData.getTaoCap(elb).setPosInvulTime(e.getPotionEffect().getDuration());
         }
-        if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
+        else if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
             PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
             elb.removeActivePotionEffect(HEMORRHAGE);
             current.combine(new PotionEffect(current.getPotion(), current.getDuration() + (pe.getDuration() * (pe.getAmplifier() + 1) / 4), current.getAmplifier()));
         }
-        if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
+        else if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
+            ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
+            ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
+        }
+        else if (current.getPotion() == DISORIENT && e.getEntityLiving() instanceof EntityLiving) {
             ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
             ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
         }

@@ -33,18 +33,8 @@ public class Chui extends TaoWeapon {
     }
 
     @Override
-    public int getMaxChargeTime() {
-        return 100;
-    }
-
-    @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
     }
 
     @Override

@@ -60,11 +60,6 @@ public class GuanDao extends TaoWeapon {
 
 
     @Override
-    public int getMaxChargeTime() {
-        return 100;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1f;
     }
@@ -229,10 +224,5 @@ public class GuanDao extends TaoWeapon {
 
     private int getBuff(ItemStack is) {
         return gettagfast(is).getInteger("phase");
-    }
-
-    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
     }
 }

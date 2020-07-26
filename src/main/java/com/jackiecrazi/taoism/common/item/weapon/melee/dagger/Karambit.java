@@ -47,19 +47,9 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
-    }
-
-    @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) return 16;
         return 2f;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 400;
     }
 
     @Override

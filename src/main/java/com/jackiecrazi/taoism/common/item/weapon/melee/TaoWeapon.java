@@ -332,6 +332,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return false;
     }
 
+    @Override
+    public int getMaxChargeTime() {
+        return 0;
+    }
+
+    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
+    }
+
     @SideOnly(Side.CLIENT)
     public boolean isFull3D() {
         return true;
