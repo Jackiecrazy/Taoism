@@ -34,6 +34,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         stack.getTagCompound().setBoolean("thrown", true);
         this.rotationPitch = dude.rotationPitch;
         this.rotationYaw = dude.rotationYaw;
+        setPosition(dude.posX, dude.posY + (double)dude.getEyeHeight() - height/2, dude.posZ);
     }
 
     @Override
@@ -143,7 +144,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     @Nullable
     protected Vec3d getHomeLocation() {
         if (getThrower() == null) return null;
-        return getThrower().getPositionVector().addVector(0, shootingEntity.getEyeHeight() -0.1, 0);
+        return getThrower().getPositionVector().addVector(0, shootingEntity.getEyeHeight() -height/2, 0);
     }
 
     protected float getReturnVelocity() {

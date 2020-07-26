@@ -6,7 +6,6 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
-import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
@@ -374,13 +373,13 @@ public class ClientEvents {
         if (e.getHand().equals(EnumHand.MAIN_HAND)) return;
         AbstractClientPlayer p = Minecraft.getMinecraft().player;
         //cancel event so two handed weapons give a visual cue to their two-handedness
-        if (p.getHeldItemMainhand().getItem() instanceof ITwoHanded) {
-            if (((TaoWeapon) p.getHeldItemMainhand().getItem()).isTwoHanded(p.getHeldItemMainhand())) {
-                e.setCanceled(true);
-
-                return;
-            }
-        }
+//        if (p.getHeldItemMainhand().getItem() instanceof ITwoHanded) {
+//            if (((TaoWeapon) p.getHeldItemMainhand().getItem()).isTwoHanded(p.getHeldItemMainhand())) {
+//                e.setCanceled(true);
+//
+//                return;
+//            }
+//        }
         //force offhand to have some semblance of cooldown
         if (!(e.getItemStack().getItem() instanceof TaoWeapon) && !TaoCombatUtils.isValidWeapon(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()))
             return;
@@ -480,7 +479,7 @@ public class ClientEvents {
                 ITaoStatCapability cap = TaoCasterData.getTaoCap(player);
                 int width = sr.getScaledWidth();
                 int height = sr.getScaledHeight();
-                if (gamesettings.thirdPersonView == 0) {
+                //if (gamesettings.thirdPersonView == 0) {
                     mc.getTextureManager().bindTexture(hud);
                     float targetQiLevel = cap.getQi();
                     boolean closeEnough = true;
@@ -543,7 +542,7 @@ public class ClientEvents {
                     if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && (TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() || TaoCasterData.getTaoCap((EntityLivingBase) look).getDownTimer() > 0)) {
                         drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                     }
-                }
+                //}
             }
     }
 

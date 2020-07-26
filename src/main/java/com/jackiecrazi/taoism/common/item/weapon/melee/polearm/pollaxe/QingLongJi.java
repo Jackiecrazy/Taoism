@@ -151,10 +151,10 @@ public class QingLongJi extends TaoWeapon {
      * override to keep qi gen on
      */
     @Override
-    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
         if (isDummy(item) && attacker.getHeldItemMainhand() != item) {//better safe than sorry...
             //forward it to the main item, then do nothing as the main item will forward it back.
-            chargeWeapon(attacker, attacker.getHeldItemMainhand(), ticks);
+            chargeWeapon(attacker, attacker.getHeldItemMainhand());
             return;
         }
         gettagfast(item).setBoolean("charge", true);

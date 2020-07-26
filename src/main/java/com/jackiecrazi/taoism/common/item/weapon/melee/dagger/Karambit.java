@@ -88,6 +88,10 @@ public class Karambit extends TaoWeapon {
                 gettagfast(stack).setInteger("flashesWithoutHit", 0);
                 gettagfast(stack).setInteger("flashes", gettagfast(stack).getInteger("flashes") + 1);
             }
+            for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
+                TaoCasterData.getTaoCap(e).setRootTime(0);
+                TaoCasterData.getTaoCap(e).setBindTime(0);
+            }
             TaoCasterData.getTaoCap(elb).setRootTime(0);
             elb.setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
             elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_SHULKER_TELEPORT, SoundCategory.PLAYERS, 1f, 0.5f + Taoism.unirand.nextFloat() / 2);
@@ -95,8 +99,10 @@ public class Karambit extends TaoWeapon {
             if (gettagfast(stack).getInteger("flashesWithoutHit") > 3 || !TaoCasterData.getTaoCap(elb).consumeQi(1, 5)) {
                 dischargeWeapon(elb, stack);
             } else {
-                for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16)))
+                for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
                     TaoCasterData.getTaoCap(e).setRootTime(200);
+                    TaoCasterData.getTaoCap(e).setBindTime(200);
+                }
             }
         }
         return super.onEntitySwing(elb, stack);
@@ -122,10 +128,12 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
-        super.chargeWeapon(attacker, item, ticks);
-        for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(32)))
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
+        super.chargeWeapon(attacker, item);
+        for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(32))) {
             TaoCasterData.getTaoCap(e).setRootTime(400);
+            TaoCasterData.getTaoCap(e).setBindTime(400);
+        }
         TaoCasterData.getTaoCap(attacker).startRecordingDamage();
     }
 

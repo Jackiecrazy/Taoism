@@ -1,0 +1,47 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "taoism:weapon/whole/kusarigama"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "offhand": 1
+      },
+      "model": "taoism:item/kusari"
+    },
+    {
+      "predicate": {
+        "offhand": 2
+      },
+      "model": "taoism:item/gama"
+    },
+    {
+      "predicate": {
+        "offhand": 3
+      },
+      "model": "taoism:item/rope"
+    }],
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [ 0, -90, 55 ],
+      "translation": [ 0, 6.0, 0.5 ],
+      "scale": [ 1.25, 1.25, 0.85 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 0, 90, -55 ],
+      "translation": [ 0, 6.0, 0.5 ],
+      "scale": [ 1.25, 1.25, 0.85 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, -90, 25 ],
+      "translation": [ 1.13, 3.2, 1.13 ],
+      "scale": [ 1.18, 1.18, 0.68 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ 0, 90, -25 ],
+      "translation": [ 1.13, 3.2, 1.13 ],
+      "scale": [ 1.18, 1.18, 0.68 ]
+    }
+  }
+}

@@ -51,12 +51,12 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
     }
 
     @Override
-    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
     }
 
@@ -83,7 +83,7 @@ public class Rapier extends TaoWeapon {
     }
 
     @Override
-    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             //heart stab!
             dischargeWeapon(attacker, stack);

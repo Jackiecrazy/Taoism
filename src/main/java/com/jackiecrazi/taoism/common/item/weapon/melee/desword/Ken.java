@@ -100,10 +100,10 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         //combo limit is raised to 9 for the next 9 seconds
         setCombo(defender, item, 0);
-        super.onParry(attacker, defender, item);
+        super.onParry(attacker, defender, item, amount);
     }
 
     @Override

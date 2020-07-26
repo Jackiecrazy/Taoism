@@ -35,20 +35,12 @@ public class EntityRopeDart extends EntityThrownWeapon {
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-//        if (origin != null) {
-//            compound.setDouble("homeX", origin.x);
-//            compound.setDouble("homeY", origin.y);
-//            compound.setDouble("homeZ", origin.z);
-//        }
-        compound.setInteger("charge", charge);
         compound.setBoolean("recalling", onRecallTriggered);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        //origin = new Vec3d(compound.getDouble("homeX"), compound.getDouble("homeY"), compound.getDouble("homeZ"));
-        charge = compound.getInteger("charge");
         onRecallTriggered = compound.getBoolean("recalling");
     }
 

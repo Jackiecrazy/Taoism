@@ -17,10 +17,10 @@ public class EntityDamageSourceTaoIndirect extends EntityDamageSource {
     /** The entity who created the direct source, e.g. the shooter of an arrow */
     private final Entity indirectEntity;
 
-    public EntityDamageSourceTaoIndirect(String damageTypeIn, Entity source, @Nullable Entity indirectEntityIn)
+    public EntityDamageSourceTaoIndirect(String damageTypeIn, Entity proxy, @Nullable Entity caster)
     {
-        super(damageTypeIn, source);
-        this.indirectEntity = indirectEntityIn;
+        super(damageTypeIn, proxy);
+        this.indirectEntity = caster;
     }
 
     /**

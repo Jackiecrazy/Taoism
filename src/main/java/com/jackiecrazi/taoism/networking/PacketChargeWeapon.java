@@ -44,7 +44,7 @@ public class PacketChargeWeapon implements IMessage {
                 if (heldItem.getItem() instanceof IChargeableWeapon) {
                     IChargeableWeapon icw = (IChargeableWeapon) heldItem.getItem();
                     if (icw.canCharge(thePlayer, heldItem))
-                        icw.chargeWeapon(thePlayer, heldItem, icw.getMaxChargeTime());
+                        icw.chargeWeapon(thePlayer, heldItem);
                 }
             });
             return null;

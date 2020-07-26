@@ -73,8 +73,8 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
-        super.chargeWeapon(attacker, item, ticks);
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
+        super.chargeWeapon(attacker, item);
         attacker.addPotionEffect(new PotionEffect(TaoPotion.RESOLUTION, 400));
         TaoCasterData.getTaoCap(attacker).startRecordingDamage();
     }
@@ -87,13 +87,13 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
         if (isCharged(defender, item)) return true;
-        return super.canBlock(defender, attacker, item, recharged);
+        return super.canBlock(defender, attacker, item, recharged, amount);
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         TaoCasterData.getTaoCap(defender).addQi(0.3f);
         int qi = TaoCasterData.getTaoCap(attacker).getQiFloored();
         if (qi >= 3) {
@@ -108,7 +108,7 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         int qi = TaoCasterData.getTaoCap(defender).getQiFloored();
         if (qi >= 3) {//reset cooldown
             Taoism.setAtk(attacker, 0);

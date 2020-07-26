@@ -1,7 +1,9 @@
 package com.jackiecrazi.taoism.common.entity;
 
+import com.jackiecrazi.taoism.common.entity.fx.EntityEvidence;
 import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -34,17 +36,23 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityAxeCleave.class));
         e.getRegistry().register(factoryArrow(EntityMeidoZangetsuha.class));
         e.getRegistry().register(factoryArrow(EntityBouncySwordBeam.class));
+        e.getRegistry().register(factoryArrow(EntityKusarigamaShot.class));
+        e.getRegistry().register(factoryAmbient(EntityEvidence.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
-        String name = move.getSimpleName().toLowerCase().substring(6);
+        String name = move.getSimpleName().substring(6).toLowerCase();
         return EntityEntryBuilder.create().entity(move).name(name).tracker(64,20,false).id(name,id++).build();
     }
     private static EntityEntry factoryArrow(Class<?extends EntityTaoProjectile> arr){
-        String name = arr.getSimpleName().toLowerCase().substring(6);
+        String name = arr.getSimpleName().substring(6).toLowerCase();
         return EntityEntryBuilder.create().entity(arr).name(name).tracker(64,20,false).id(name,id++).build();
     }
     private static EntityEntry factoryProjectile(Class<?extends EntityThrowable> projectile){
-        String name = projectile.getSimpleName().toLowerCase().substring(6);
+        String name = projectile.getSimpleName().substring(6).toLowerCase();
         return EntityEntryBuilder.create().entity(projectile).name(name).tracker(64,5,true).id(name,id++).build();
+    }
+    private static EntityEntry factoryAmbient(Class<?extends Entity> ambient){
+        String name = ambient.getSimpleName().substring(6).toLowerCase();
+        return EntityEntryBuilder.create().entity(ambient).name(name).tracker(64,20,false).id(name,id++).build();
     }
 }

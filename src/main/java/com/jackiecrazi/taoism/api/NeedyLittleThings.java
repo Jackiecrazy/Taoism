@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.handler.TaoCombatHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.sun.javafx.geom.Vec2d;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -149,31 +150,31 @@ public class NeedyLittleThings {
         double heightParse = e.height;
         if (widthParse <= 0.5) widthParse = 0;
         if (heightParse <= 1) heightParse = 0;
-        for (double addX = -widthParse; addX <= widthParse; addX++) {
-            for (double addZ = -widthParse; addZ <= widthParse; addZ++) {
-                for (double addY = e.height / 2; addY <= heightParse; addY++) {
+        for (double addX = -widthParse; addX <= widthParse; addX+=0.5) {
+            for (double addZ = -widthParse; addZ <= widthParse; addZ+=0.5) {
+                for (double addY = e.height / 2; addY <= heightParse; addY+=0.5) {
                     Vec3d mod = new Vec3d(addX, addY, addZ);
                     RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
                     if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK && !r.hitVec.equals(from.add(mod))) {
                         Vec3d hit = r.hitVec.subtract(mod);
                         switch (r.sideHit) {
                             case NORTH:
-                                hit.addVector(0, 0, 1);
+                                hit=hit.addVector(0, 0, 1);
                                 break;
                             case SOUTH:
-                                hit.addVector(0, 0, -1);
+                                hit=hit.addVector(0, 0, -1);
                                 break;
                             case EAST:
-                                hit.addVector(-1, 0, 0);
+                                hit=hit.addVector(-1, 0, 0);
                                 break;
                             case WEST:
-                                hit.addVector(1, 0, 0);
+                                hit=hit.addVector(1, 0, 0);
                                 break;
                             case UP:
-                                hit.addVector(0, -1, 0);
+                                //hit.addVector(0, -1, 0);
                                 break;
                             case DOWN:
-                                hit.addVector(0, 1, 0);
+                                hit=hit.addVector(0, -1, 0);
                                 break;
                         }
                         if (from.squareDistanceTo(hit) < from.squareDistanceTo(ret)) {
@@ -290,21 +291,29 @@ public class NeedyLittleThings {
         }
         //xz begins
         //subtract half of width from calculations in the xz plane so wide mobs that are barely in frame still get lambasted
-        double xDiffCompensated;
-        if (xDiff < 0) {
-            xDiffCompensated = Math.min(-0.1, xDiff + entity1.width / 2 + entity2.width / 2);
-        } else {
-            xDiffCompensated = Math.max(0.1, xDiff - entity1.width / 2 - entity2.width / 2);
-        }
-        double zDiffCompensated;
-        if (zDiff < 0) {
-            zDiffCompensated = Math.min(-0.1, zDiff + entity1.width / 2 + entity2.width / 2);
-        } else {
-            zDiffCompensated = Math.max(0.1, zDiff - entity1.width / 2 - entity2.width / 2);
-        }
+//        double xDiffCompensated;
+//        if (xDiff < 0) {
+//            xDiffCompensated = Math.min(-0.1, xDiff + entity1.width / 2 + entity2.width / 2);
+//        } else {
+//            xDiffCompensated = Math.max(0.1, xDiff - entity1.width / 2 - entity2.width / 2);
+//        }
+//        double zDiffCompensated;
+//        if (zDiff < 0) {
+//            zDiffCompensated = Math.min(-0.1, zDiff + entity1.width / 2 + entity2.width / 2);
+//        } else {
+//            zDiffCompensated = Math.max(0.1, zDiff - entity1.width / 2 - entity2.width / 2);
+//        }
+//        double yDiffCompensated;
+//        if (entity1.posY-entity2.posY < 0) {
+//            yDiffCompensated = Math.min(-0.1, entity1.posY-entity2.posY + entity1.height / 2 + entity2.height / 2);
+//        } else {
+//            yDiffCompensated = Math.max(0.1, entity1.posY-entity2.posY - entity1.height / 2 - entity2.height / 2);
+//        }
         Vec3d lookVec = entity1.getLook(1.0F);
         Vec3d bodyVec = getBodyOrientation(entity1);
-        Vec3d relativePosVec = new Vec3d(xDiffCompensated, 0, zDiffCompensated);
+        //lookVec=new Vec3d(lookVec.x, 0, lookVec.z);
+        //bodyVec=new Vec3d(bodyVec.x, 0, bodyVec.z);
+        Vec3d relativePosVec = new Vec3d(xDiff, entity1.posY-entity2.posY, zDiff);
         double dotsqLook = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         double dotsqBody = ((relativePosVec.dotProduct(bodyVec) * Math.abs(relativePosVec.dotProduct(bodyVec))) / (relativePosVec.lengthSquared() * bodyVec.lengthSquared()));
         double cos = MathHelper.cos(rad(horAngle / 2));
@@ -452,7 +461,9 @@ public class NeedyLittleThings {
         look = attacker.getLookVec().scale(range);
         end = start.add(look);
         RayTraceResult rtr = world.rayTraceBlocks(start, end, false, true, false);
-        if (rtr != null) return rtr;
+        if (rtr != null){
+            return rtr;
+        }
         return new RayTraceResult(end, EnumFacing.UP);
     }
 

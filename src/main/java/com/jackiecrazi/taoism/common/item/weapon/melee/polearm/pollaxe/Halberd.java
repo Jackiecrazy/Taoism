@@ -125,8 +125,8 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
-        return getHand(item) == EnumHand.MAIN_HAND && super.canBlock(defender, attacker, item, recharged);
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
+        return getHand(item) == EnumHand.MAIN_HAND && super.canBlock(defender, attacker, item, recharged, amount);
     }
 
     @Override

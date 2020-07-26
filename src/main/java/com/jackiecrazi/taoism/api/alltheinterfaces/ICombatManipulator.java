@@ -45,16 +45,28 @@ public interface ICombatManipulator {
     float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
-     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions, and after armorIgnoreAmount
+     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions
      * @return a new damage if necessary
      */
-    float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+    float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
-     * this is called on LivingDamageEvent, after armor, absorption, and all other reductions, but before damageStart
-     * @return a new damage if necessary
+     * this is called on LivingHurtEvent to apply armor down for the particular attack only
+     * @return how much armor to ignore
      */
     int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
+     * this is called on LivingHurtEvent, after hurtStart, but before downed damage multipliers have been applied
+     * @return a new damage if necessary
+     */
+    float onBeingHurt(DamageSource ds, EntityLivingBase defender, ItemStack item, float amount);
+
+    /**
+     * this is called on LivingDamageEvent, after damageStart
+     * @return a new damage if necessary
+     */
+    float onBeingDamaged(DamageSource ds, EntityLivingBase defender, ItemStack item, float amount);
 
     /**
      * This is called by TaoStatCapability when an entity is no longer "immune" to damage after a cinematic execution sequence

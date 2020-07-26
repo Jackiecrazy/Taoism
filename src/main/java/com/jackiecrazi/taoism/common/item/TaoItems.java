@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Balisong;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
+import com.jackiecrazi.taoism.common.item.weapon.melee.desword.ExecutionerSword;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Rapier;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
@@ -57,7 +58,8 @@ public class TaoItems {
             ropedart,
             bian,
             rapier,
-    kusarigama;
+    kusarigama,
+    executionerSword;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -98,6 +100,7 @@ public class TaoItems {
         bian = new Bian();
         rapier=new Rapier();
         kusarigama=new Kusarigama();
+        executionerSword=new ExecutionerSword();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -123,6 +126,7 @@ public class TaoItems {
         e.getRegistry().register(bian);
         e.getRegistry().register(rapier);
         e.getRegistry().register(kusarigama);
+        e.getRegistry().register(executionerSword);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

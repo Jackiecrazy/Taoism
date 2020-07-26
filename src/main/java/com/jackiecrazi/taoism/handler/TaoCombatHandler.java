@@ -47,7 +47,7 @@ public class TaoCombatHandler {
     //"puny" here defined as weapons that can't attack from offhand
     @SubscribeEvent
     public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
-        if(e.getEntityPlayer().world.isRemote)return;
+        if (e.getEntityPlayer().world.isRemote) return;
         if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
             if (lastRightClickTime.getOrDefault(e.getEntityPlayer(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
                 if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
@@ -62,7 +62,7 @@ public class TaoCombatHandler {
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void iHaveAWifeAndChildren(LivingAttackEvent e) {
-        if (TaoCombatUtils.isMeleeDamage(e.getSource())&&e.getSource().getTrueSource() instanceof EntityLivingBase) {
+        if (TaoCombatUtils.isMeleeDamage(e.getSource()) && e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
             if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
                 //you may only attack the target that taunted you
@@ -93,9 +93,9 @@ public class TaoCombatHandler {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
             if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            ItemStack perrier=TaoCombatUtils.getParryingItemStack(ent, uke, 1);
-            if(EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)){
-                perrier=TaoCombatUtils.getShield(ent, uke, 1);
+            ItemStack perrier = TaoCombatUtils.getParryingItemStack(ent, uke, 1);
+            if (EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)) {
+                perrier = TaoCombatUtils.getShield(ent, uke, 1);
             }
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !perrier.isEmpty()) {
                 if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
@@ -122,7 +122,7 @@ public class TaoCombatHandler {
         if (e.getSource() == null) return;
         DamageSource ds = e.getSource();
         if (ds.getTrueSource() instanceof EntityLivingBase && !uke.world.isRemote) {
-            if (ds.getImmediateSource() != ds.getTrueSource() || !TaoCombatUtils.isMeleeDamage(ds))//
+            if (!TaoCombatUtils.isMeleeDamage(ds))//
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
             TaoCasterData.updateCasterData(seme);
@@ -142,6 +142,8 @@ public class TaoCombatHandler {
                 ICombatManipulator icm = (ICombatManipulator) attack.getItem();
                 icm.attackStart(ds, seme, uke, attack, e.getAmount());
             }
+            if (ds.getImmediateSource() != ds.getTrueSource())
+                return;//indirect attacks, like kusarigama and rope dart, cannot be parried at this point
             if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
             if (ukeCap.isRecordingDamage()) return;//prevent parries when being executed, and makes it look better
             //slime, I despise thee.
@@ -175,21 +177,21 @@ public class TaoCombatHandler {
                 NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
                 //shield disabling
-                if(TaoCombatUtils.isShield(defend)&&attack.getItem().canDisableShield(attack, defend, uke, seme)){
-                    if(uke instanceof EntityPlayer)
-                    ((EntityPlayer)uke).getCooldownTracker().setCooldown(defend.getItem(), 60);
-                    uke.world.setEntityState(uke, (byte)30);
+                if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
+                    if (uke instanceof EntityPlayer)
+                        ((EntityPlayer) uke).getCooldownTracker().setCooldown(defend.getItem(), 60);
+                    uke.world.setEntityState(uke, (byte) 30);
                     uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
-                }else
+                } else
                     uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
                 //reset cooldown
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend);
+                    ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend, e.getAmount());
                 }
                 EnumHand other = uke.getHeldItemMainhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
                 if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other));
+                    ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other), e.getAmount());
                 }
             }
             TaoCasterData.forceUpdateTrackingClients(uke);
@@ -268,6 +270,13 @@ public class TaoCombatHandler {
                 }
         }
 
+        if (uke.getHeldItemMainhand().getItem() instanceof ICombatManipulator) {
+            amnt = ((ICombatManipulator) uke.getHeldItemMainhand().getItem()).onBeingHurt(e.getSource(), uke, uke.getHeldItemMainhand(), amnt);
+        }
+        if (uke.getHeldItemOffhand().getItem() instanceof ICombatManipulator) {
+            amnt = ((ICombatManipulator) uke.getHeldItemOffhand().getItem()).onBeingHurt(e.getSource(), uke, uke.getHeldItemOffhand(), amnt);
+        }
+
         ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
         boolean posBreak = false;
         //if posture is broken, damage increased, ignores deflection/absorption
@@ -332,7 +341,7 @@ public class TaoCombatHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void wail(LivingDamageEvent e) {
-
+        e.getEntityLiving().getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
     }
 
     //resets posture regen if dealt damage, and gives the attacker 1 chi
@@ -344,8 +353,14 @@ public class TaoCombatHandler {
             EntityLivingBase seme = ((EntityLivingBase) e.getSource().getTrueSource());
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
             if (stack.getItem() instanceof ICombatManipulator) {
-                e.setAmount(((ICombatManipulator) stack.getItem()).finalDamageMods(e.getSource(), seme, uke, stack, e.getAmount()));
+                e.setAmount(((ICombatManipulator) stack.getItem()).damageStart(e.getSource(), seme, uke, stack, e.getAmount()));
             }
+        }
+        if (uke.getHeldItemMainhand().getItem() instanceof ICombatManipulator) {
+            e.setAmount(((ICombatManipulator) uke.getHeldItemMainhand().getItem()).onBeingDamaged(e.getSource(), uke, uke.getHeldItemMainhand(), e.getAmount()));
+        }
+        if (uke.getHeldItemOffhand().getItem() instanceof ICombatManipulator) {
+            e.setAmount(((ICombatManipulator) uke.getHeldItemOffhand().getItem()).onBeingDamaged(e.getSource(), uke, uke.getHeldItemOffhand(), e.getAmount()));
         }
         ITaoStatCapability ukecap = TaoCasterData.getTaoCap(uke);
         if (ukecap.isRecordingDamage()) {//record damage for rainy days
@@ -353,7 +368,6 @@ public class TaoCombatHandler {
             e.setAmount(0);
             //e.setCanceled(true);
         }
-        uke.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(noArmor);
         if (!e.isCanceled()) {//do not reset when a person's downed, otherwise it gets out of hand fast
             //do not reset for fire, poison and arrows
             if (!TaoCombatUtils.isMeleeDamage(e.getSource())) return;

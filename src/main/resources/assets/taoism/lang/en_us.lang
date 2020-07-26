@@ -8,6 +8,10 @@ attribute.name.generic.affWater=Water Affinity
 attribute.name.generic.affFire=Fire Affinity
 attribute.name.generic.affMetal=Metal Affinity
 attribute.name.generic.qiGen=Chi Per Strike
+attribute.name.generic.postureRegen=Posture Regeneration
+attribute.name.generic.healRate=Heal Efficiency
+attribute.name.generic.lingRegen=Spirit Power Regeneration
+attribute.name.taoism.maxPosture=Max Posture
 
 
 item.weapon.name=Weapon
@@ -29,7 +33,7 @@ weapon.projectile=this weapon ignores parries
 weapon.disshield=this weapon disables shields when launching a leaping strike
 taoism.weaponReach=attack range: %.1f
 taoism.weaponDefMult=defense posture multiplier: %.2f
-taoism.weaponAttMult=attack posture multiplier: %.2f
+taoism.weaponAttMult=attack posture consumption: %.2f
 weapon.notenoughqi=You need nine levels of chi to charge an execution
 weapon.alreadycharged=This weapon is already charged
 weapon.discharge=This weapon has discharged
@@ -183,6 +187,22 @@ bian.enfeeble=attacks reduce posture regeneration of the target for 2 seconds, r
 item.rapier.name=Rapier
 rapier.combo=normal attack chains up to 3 times before recharging
 rapier.riposte=inflicts a critical hit if you recently dodged or parried, or if the enemy recently attacked
+
+item.kusarigama.name=Kusarigama
+kusarigama.ball=weighted chain in the offhand accumulates speed over 2 seconds, alt attack to release towards an enemy
+kusarigama.followup=following up this attack with the sickle will deal up to an extra 50%% damage based on charge
+kusarigama.parry=the chain cannot parry, but if the projectile is between you and the enemy when you parry, bind enemy for (charge) ticks
+kusarigama.critfollowup=attacking a bound enemy with the sickle will crit for double damage and consume double posture
+
+item.executionersword.name=Executioner's Sword
+exesword.count=eyes of judgment: %s
+exesword.trial=attack to start the trial, which ends when the defendant dies or another target is attacked
+exesword.evidence=every 10(-qi/2) seconds and after every attack, evidence manifest in an 8-block radius around it
+exesword.eye=any damage will destroy evidence, walking into it opens one eye of judgment
+exesword.decrease=taking 5 damage before reduction will close one eye of judgment
+exesword.addqi=if a trial ends by hitting another entity, gain qi equal to 10%% of your eyes
+exesword.execution=if target's health is less than the square of your eyes, instantly kill on attack
+exesword.head=targets killed in this manner are guaranteed to drop a head
 
 item.projectile_prop.name=just a prop, don't mind me...
 

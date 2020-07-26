@@ -37,11 +37,11 @@ public interface IStaminaPostureManipulable {
     it also works as a "downed" indicator to show whether the player should constantly regenerate posture for a comeback
     high vanilla damage sources to keep in mind: (charged) creeper 73(145), ghast 25, golem 31, ravager 18, dragon 15
      */
-    boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged);
+    boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount);
 
-    void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
+    void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount);
 
-    void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item);
+    void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount);
 
     float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount);
 

@@ -699,7 +699,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (target != null) {
             float damage = getRecordedDamage();
             setRecordedDamage(0);
-            DamageSource ds = TaoCombatUtils.causeLivingDamage(elb);
+            DamageSource ds = TaoCombatUtils.causeLivingDamage(elb).setDamageBypassesArmor().setDamageIsAbsolute();
             if (elb != null) {
                 if (elb == target) return;//bootleg invulnerability!
                 ItemStack is = elb.getHeldItemMainhand();
@@ -707,10 +707,11 @@ public class TaoStatCapability implements ITaoStatCapability {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }
             }
+            float hp = target.getHealth(), dam = damage;
             while (damage > 0) {
                 target.hurtResistantTime = 0;
                 target.attackEntityFrom(ds, Math.min(damage, 20));
-                damage -= 20f;
+                damage -= 20;
             }
         }
     }

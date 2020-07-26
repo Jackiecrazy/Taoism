@@ -127,8 +127,8 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks) {
-        super.chargeWeapon(attacker, item, ticks);
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
+        super.chargeWeapon(attacker, item);
         setLastAttackedEntity(item, null);
     }
 
@@ -144,7 +144,7 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (isCharged(defender, item)) {
             setLastAttackedEntity(item, attacker);
             Vec3d pos = NeedyLittleThings.getPointInFrontOf(attacker, defender, -2);

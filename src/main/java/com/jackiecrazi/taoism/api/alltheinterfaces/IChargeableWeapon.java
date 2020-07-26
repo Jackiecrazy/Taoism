@@ -7,7 +7,7 @@ public interface IChargeableWeapon {
 
     boolean canCharge(EntityLivingBase wielder, ItemStack item);
 
-    void chargeWeapon(EntityLivingBase attacker, ItemStack item, int ticks);
+    void chargeWeapon(EntityLivingBase attacker, ItemStack item);
 
     void dischargeWeapon(EntityLivingBase attacker, ItemStack item);
 

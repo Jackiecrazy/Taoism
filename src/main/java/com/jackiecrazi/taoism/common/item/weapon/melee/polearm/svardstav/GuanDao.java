@@ -182,7 +182,7 @@ public class GuanDao extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack is, boolean recharged) {
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack is, boolean recharged, float amount) {
         if (getHand(is) == EnumHand.OFF_HAND) {
             return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
         }

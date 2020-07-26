@@ -156,7 +156,7 @@ public class Pollaxe extends TaoWeapon {
         return getHand(item) == EnumHand.OFF_HAND ? 0 : 3;
     }
 
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is, float amount) {
         if (isTwoHanded(is)) {
             EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
             TaoCombatUtils.rechargeHand(defender, other, 0.9f, true);
@@ -211,7 +211,7 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float finalDamageMods(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
             return Math.min(orig + target.getMaxHealth() / 2, orig * 10);
         }

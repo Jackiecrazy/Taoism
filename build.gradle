@@ -20,7 +20,7 @@ sourceSets {
         //add it back in afterwards otherwise the textures don't load, sadface
 }
 
-version = "2.2.0.8"
+version = "2.2.0.9"
 group = "com.jackiecrazi.taoism" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "taoism"
 

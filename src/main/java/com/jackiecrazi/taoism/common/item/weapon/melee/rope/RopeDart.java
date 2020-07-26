@@ -6,17 +6,14 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityRopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -25,7 +22,6 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -82,47 +78,47 @@ public class RopeDart extends TaoWeapon {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void render(RenderWorldLastEvent event) {
-        if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() instanceof RopeDart) {
-            ItemStack is = Minecraft.getMinecraft().player.getHeldItemMainhand();
-            Entity e = Minecraft.getMinecraft().world.getEntityByID(((RopeDart) is.getItem()).getDartID(is));
-            EntityPlayer p = Minecraft.getMinecraft().player;
-            if (e != null) {
-                double doubleX = p.prevPosX + (p.posX - p.prevPosX) * event.getPartialTicks();
-                double doubleY = p.prevPosY + (p.posY - p.prevPosY) * event.getPartialTicks();
-                double doubleZ = p.prevPosZ + (p.posZ - p.prevPosZ) * event.getPartialTicks();
-                Vec3d vec = e.getPositionVector();
-                Vec3d pvec = p.getPositionVector();
-                double vx = vec.x;
-                double vy = vec.y;
-                double vz = vec.z;
-                double px = pvec.x;
-                double py = pvec.y;
-                double pz = pvec.z;
-
-                GL11.glPushMatrix();
-                //GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glDisable(GL11.GL_DEPTH_TEST);
-
-
-                GL11.glLineWidth(2);
-                GL11.glTranslated(-doubleX, -doubleY, -doubleZ);
-                GL11.glColor3f(0.8f, 0.8f, 0.8f);
-
-                GL11.glEnable(GL11.GL_LINE_SMOOTH);
-                GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-                GL11.glBegin(GL11.GL_LINE_STRIP);
-
-                GL11.glVertex3d(px, py, pz);
-                GL11.glVertex3d(vx, vy, vz);
-
-                GL11.glEnd();
-                //GL11.glEnable(GL11.GL_LIGHTING);
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-                GL11.glEnable(GL11.GL_DEPTH_TEST);
-                GL11.glPopMatrix();
-            }
-        }
+//        if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() instanceof RopeDart) {
+//            ItemStack is = Minecraft.getMinecraft().player.getHeldItemMainhand();
+//            Entity e = Minecraft.getMinecraft().world.getEntityByID(((RopeDart) is.getItem()).getDartID(is));
+//            EntityPlayer p = Minecraft.getMinecraft().player;
+//            if (e != null) {
+//                double doubleX = p.prevPosX + (p.posX - p.prevPosX) * event.getPartialTicks();
+//                double doubleY = p.prevPosY + (p.posY - p.prevPosY) * event.getPartialTicks();
+//                double doubleZ = p.prevPosZ + (p.posZ - p.prevPosZ) * event.getPartialTicks();
+//                Vec3d vec = e.getPositionVector();
+//                Vec3d pvec = p.getPositionVector();
+//                double vx = vec.x;
+//                double vy = vec.y;
+//                double vz = vec.z;
+//                double px = pvec.x;
+//                double py = pvec.y;
+//                double pz = pvec.z;
+//
+//                GL11.glPushMatrix();
+//                //GL11.glDisable(GL11.GL_LIGHTING);
+//                GL11.glDisable(GL11.GL_TEXTURE_2D);
+//                GL11.glDisable(GL11.GL_DEPTH_TEST);
+//
+//
+//                GL11.glLineWidth(2);
+//                GL11.glTranslated(-doubleX, -doubleY, -doubleZ);
+//                GL11.glColor3f(0.8f, 0.8f, 0.8f);
+//
+//                GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//                GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+//                GL11.glBegin(GL11.GL_LINE_STRIP);
+//
+//                GL11.glVertex3d(px, py, pz);
+//                GL11.glVertex3d(vx, vy, vz);
+//
+//                GL11.glEnd();
+//                //GL11.glEnable(GL11.GL_LIGHTING);
+//                GL11.glEnable(GL11.GL_TEXTURE_2D);
+//                GL11.glEnable(GL11.GL_DEPTH_TEST);
+//                GL11.glPopMatrix();
+//            }
+//        }
     }
 
     @Override
@@ -205,8 +201,8 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged) {
-        return (isThrown(item) || getHand(item) == EnumHand.OFF_HAND) && super.canBlock(defender, attacker, item, recharged);
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
+        return (isThrown(item) || getHand(item) == EnumHand.OFF_HAND) && super.canBlock(defender, attacker, item, recharged, amount);
     }
 
     @Override

@@ -83,10 +83,10 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item) {
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         //resets combo, the next combo sequence in 5 seconds additionally has its knockback converted to true posture damage
         setCombo(defender, item, 0);
-        super.onParry(attacker, defender, item);
+        super.onParry(attacker, defender, item, amount);
     }
 
     @Override

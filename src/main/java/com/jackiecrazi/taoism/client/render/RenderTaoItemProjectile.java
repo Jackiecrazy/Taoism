@@ -1,4 +1,4 @@
-package com.jackiecrazi.taoism.client;
+package com.jackiecrazi.taoism.client.render;
 
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityThrownWeapon;
 import com.jackiecrazi.taoism.common.item.TaoItems;
@@ -19,11 +19,11 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
     private final float sX, sY, sZ;
     protected ItemStack item;
 
-    RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleFactor) {
+    public RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleFactor) {
         this(renderManagerIn, index, itemRendererIn, rotations, scaleFactor, scaleFactor, scaleFactor);
     }
 
-    RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleX, float scaleY, float scaleZ) {
+    public RenderTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleX, float scaleY, float scaleZ) {
         super(renderManagerIn);
         this.index = index;
         this.itemRenderer = itemRendererIn;
@@ -38,7 +38,7 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
      */
     public void doRender(T e, double x, double y, double z, float entityYaw, float partialTicks) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float) x, (float) y + (e.height > 1 ? e.height / 2 : 0), (float) z);
+        GlStateManager.translate((float) x, (float) y + (e.height / 2), (float) z);
         GlStateManager.enableRescaleNormal();
         GlStateManager.enableBlend();
         GlStateManager.enableAlpha();

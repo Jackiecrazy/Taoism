@@ -1,16 +1,21 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.rope;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityKusarigamaShot;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -19,36 +24,39 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Kusarigama extends TaoWeapon {
+    private static final PartDefinition[] parts = {
+            StaticRefs.HEAD,
+            StaticRefs.HANDLE,
+            StaticRefs.CHAIN
+    };
+
     /*
      * A sickle attached to a weighted chain. High defense and speed, medium power and range, low combo
-     * Two handed, you hold the sickle in the offhand by default. Chain cannot block, but will store up charge by being held.
+     * Two handed, you hold the sickle in the offhand. Chain cannot block, but will store up charge by being held.
      * Charge reaches maximum after 40 ticks
      *
      * Right click to throw the weighted chain with range 6. This operates off charge rather than attack speed, so it'll always be ready at varying speeds
-     * If this were to strike an opponent, following up with the sickle (range 2) within (charge) ticks deals 1.5x damage
+     * If this were to strike an opponent, following up with the sickle (range 2) within (charge) ticks deals up to 1.5x damage depending on charge
      * If the chain is in between you two when the enemy attacks, the chain will entangle the opponent's weapon
      * The opponent is now bound for (charge) ticks
      * Following up with the sickle will crit for double damage and decent posture damage
      * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
-        super(1, 1.3, 5, 1);
+        super(1, 1.7, 5, 1);
+        this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
+            if (elb != null) {
+                if (getHand(stack) == EnumHand.OFF_HAND) {
+                    if (isThrown(stack)) return 3;
+                    return 1;
+                } else if (getHand(stack) == EnumHand.MAIN_HAND) return 2;
+            }
+            return 0;
+        });
     }
 
-    @Override
-    public PartDefinition[] getPartNames(ItemStack is) {
-        return StaticRefs.SWORD;
-    }
-
-
-    @Override
-    public int getMaxChargeTime() {
-        return 100;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+    private boolean isThrown(ItemStack is) {
+        return gettagfast(is).hasKey("dartID");
     }
 
     @Override
@@ -57,73 +65,151 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
-    protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is) {
-
-    }
-
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.MAIN_HAND) {
-            splash(attacker, stack, 90);
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (!w.isRemote
+                && gettagfast(stack).hasKey("dartID")
+                && e.world.getEntityByID(gettagfast(stack).getInteger("dartID")) == null) {
+            gettagfast(stack).removeTag("dartID");
         }
     }
 
-    protected double speed(ItemStack stack) {
-        if(getHand(stack)==EnumHand.OFF_HAND)return -3.5;
-        return 0.8 + (getBuff(stack) / 10f) - 4;
+    @Override
+    public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
+        if (!elb.world.isRemote) {
+            if (getHand(is) == EnumHand.OFF_HAND) {
+                if (!isThrown(is)) {
+                    EntityKusarigamaShot eks = new EntityKusarigamaShot(elb.world, elb, getHand(is));
+                    eks.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, getBuff(is, "hitCharge") / (float) getMaxChargeTime(), 0.0F);
+                    elb.world.spawnEntity(eks);
+                    gettagfast(elb.getHeldItemMainhand()).setInteger("dartID", eks.getEntityId());
+                } else {
+                    if (elb.isSneaking()) {
+                        EntityKusarigamaShot erd = getBall(is, elb);
+                        if (erd != null) erd.setDead();
+                    }
+                }
+            }
+        }
+        return super.onEntitySwing(elb, is);
     }
 
-    protected float getQiAccumulationRate(ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : super.getQiAccumulationRate(is);
+    @Override
+    protected double speed(ItemStack stack) {
+        if (getHand(stack) == EnumHand.OFF_HAND) return 0;
+        return super.speed(stack);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
+        tooltip.add(I18n.format("kusarigama.ball"));
+        tooltip.add(I18n.format("kusarigama.followup"));
+        tooltip.add(I18n.format("kusarigama.parry"));
+        tooltip.add(I18n.format("kusarigama.critfollowup"));
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
+    }
+
+    @Override
+    protected int chargePerTick(ItemStack is) {
+        return isThrown(is) ? 0 : 1;
+    }
+
+    @Override
+    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
+        return getHand(item) == EnumHand.MAIN_HAND && super.canBlock(defender, attacker, item, recharged, amount);
+    }
+
+    @Override
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        EntityKusarigamaShot ball = getBall(item, defender);
+        if (ball != null && NeedyLittleThings.isFacingEntity(attacker, ball, 120) && defender.getDistanceSq(ball) < defender.getDistanceSq(attacker)) {
+            TaoCasterData.getTaoCap(attacker).setBindTime(ball.getCharge());
+            defender.world.playSound(null, defender.posX, defender.posY, defender.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+        }
+    }
+
+    @Override
+    public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (defender != null && TaoCasterData.getTaoCap(defender).getBindTime() > 0)
+            return super.postureDealtBase(attacker, defender, item, amount) * 2;
+        return super.postureDealtBase(attacker, defender, item, amount);
+    }
+
+    @Override
+    public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
+        stack.setItemDamage(getMaxChargeTime());
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return Event.Result.DENY;
+        return TaoCasterData.getTaoCap(target).getBindTime() > 0 ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1f;
-    }
-
-    @Override
-    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        super.attackStart(ds, attacker, target, stack, orig);
-        if (attacker.world.getTotalWorldTime() - lastAttackTime(attacker, stack) > 100) setBuff(attacker.getHeldItemMainhand(), 0);
+        return 2f;
     }
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return orig * (1 + getBuff(stack) * 0.1f);
+        if (getHand(stack) == EnumHand.OFF_HAND) return getBuff(stack, "hitCharge") / (float) getMaxChargeTime();
+        if (getLastAttackedEntity(attacker.world, stack) == target && getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isValid() && !getLastMove(stack).isLeftClick()
+                && lastAttackTime(attacker, stack) + getBuff(stack, "hitCharge") > attacker.world.getTotalWorldTime())
+            return 1 + getBuff(stack, "hitCharge") / ((float) getMaxChargeTime() * 2);
+        return orig;
     }
 
-    private void setBuff(ItemStack is, int phase) {
-        gettagfast(is).setInteger("phase", MathHelper.clamp(phase, 0, 4));
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        setBuff(attacker, stack, "hitCharge", 0);
+        if (getHand(stack) == EnumHand.OFF_HAND) {
+            setBuff(attacker, stack, "hitCharge", getMaxChargeTime() - stack.getItemDamage());
+            attacker.getHeldItemMainhand().setItemDamage(getMaxChargeTime());
+        }
     }
 
-    private int getBuff(ItemStack is) {
-        return gettagfast(is).getInteger("phase");
+    @Override
+    public int getMaxChargeTime() {
+        return 40;
+    }
+
+    private EntityKusarigamaShot getBall(ItemStack is, EntityLivingBase elb) {
+        if (isThrown(is) && elb.world.getEntityByID(getBallID(is)) != null)
+            return (EntityKusarigamaShot) elb.world.getEntityByID(getBallID(is));
+        return null;
+    }
+
+    private int getBallID(ItemStack is) {
+        return gettagfast(is).getInteger("dartID");
+    }
+
+    @Override
+    public boolean showDurabilityBar(ItemStack stack) {
+        return getHand(stack) == EnumHand.OFF_HAND;
+    }
+
+    @Override
+    public double getDurabilityForDisplay(ItemStack stack) {
+        return ((double) stack.getItemDamage()) / (double) getMaxChargeTime();
+    }
+
+    @Override
+    public PartDefinition[] getPartNames(ItemStack is) {
+        return parts;
+    }
+
+    @Override
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        return 1f;
     }
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
-    }
-
-    @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 6 : 2;
-    }
-
-    @Override
-    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if(getHand(stack)==EnumHand.OFF_HAND){
-            setBuff(attacker.getHeldItemMainhand(), getBuff(stack)+1);
-        }
     }
 }
