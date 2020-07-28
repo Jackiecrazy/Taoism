@@ -64,7 +64,7 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        PotionEffect hemorrhage = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD);
+        PotionEffect hemorrhage = TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.HEMORRHAGE, 100, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION);
         if (hemorrhage.getAmplifier() * 4 >= target.getTotalArmorValue() || !TaoPotionUtils.attemptAddPot(target, hemorrhage, false)) {//isCharged(attacker,stack)
             target.hurtResistantTime = 0;
             target.removeActivePotionEffect(TaoPotion.HEMORRHAGE);

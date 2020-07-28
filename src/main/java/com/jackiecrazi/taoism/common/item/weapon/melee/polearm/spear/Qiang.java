@@ -85,7 +85,7 @@ public class Qiang extends TaoWeapon {
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 1f);
+            NeedyLittleThings.knockBack(target, attacker, 1f, true);
         } else {
             setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }

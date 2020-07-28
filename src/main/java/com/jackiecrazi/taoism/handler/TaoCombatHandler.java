@@ -174,8 +174,8 @@ public class TaoCombatHandler {
                 e.setCanceled(true);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()));
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()));
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
                     if (uke instanceof EntityPlayer)
@@ -222,10 +222,10 @@ public class TaoCombatHandler {
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
-        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
-            e.setCanceled(true);
-            return;
-        }
+//        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
+//            e.setCanceled(true);
+//            return;
+//        }
         if (!modCall && CombatConfig.modifyKnockBackCode) {
             e.setCanceled(true);
             NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ());

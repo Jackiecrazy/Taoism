@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    " tt",
+    " tt",
+    "st "
+  ],
+  "key":
+  {
+    "t":
+    {
+      "type": "forge:ore_dict",
+      "ore": "string"
+    },
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:bullwhip"
+  }
+}

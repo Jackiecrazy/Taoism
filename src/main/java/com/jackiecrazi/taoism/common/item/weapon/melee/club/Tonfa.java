@@ -52,7 +52,7 @@ public class Tonfa extends TaoWeapon {
             if (!w.isRemote && target != null && getLastAttackedEntity(w, stack) != target) {
                 TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
                 TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
-                NeedyLittleThings.knockBack(elb, target, 1f);
+                NeedyLittleThings.knockBack(elb, target, 1f, true);
                 if (elb.motionY > 0.1) {
                     elb.motionY = 0.1;
                     elb.velocityChanged = true;

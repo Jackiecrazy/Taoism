@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.jackiecrazi.taoism.api.NeedyLittleThings.VALID_TARGETS;
+import static com.jackiecrazi.taoism.utils.TaoCombatUtils.VALID_TARGETS;
 
 public class TaoMovementUtils {
     private static Method jump = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70664_aZ", Void.TYPE);

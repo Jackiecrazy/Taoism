@@ -133,14 +133,14 @@ public class Staff extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             float groundKB = attacker.onGround ? 0.5f : 1f;
-            NeedyLittleThings.knockBack(target, attacker, groundKB);
+            NeedyLittleThings.knockBack(target, attacker, groundKB, true);
         } else {
             if (attacker.onGround || attacker.isSneaking()) {
                 if (target.onGround) {
                     target.addVelocity(0, chi / 15f, 0);
                     TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4), false);
                 } else {
-                    NeedyLittleThings.knockBack(target, attacker, 1f);
+                    NeedyLittleThings.knockBack(target, attacker, 1f, true);
                     target.motionY = 0;
                     //target.addVelocity(0, -1-chi/5f, 0);
                     target.hurtResistantTime = 0;

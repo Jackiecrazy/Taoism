@@ -9,40 +9,43 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 public class RenderTetheredTaoItemProjectile<T extends EntityThrownWeapon> extends RenderTaoItemProjectile<T> {
-    private final boolean renderOnPrimaryHand;
+    private final EnumHand renderOnHand;
 
-    public RenderTetheredTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleFactor, boolean main) {
+    public RenderTetheredTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleFactor, EnumHand main) {
         super(renderManagerIn, index, itemRendererIn, rotations, scaleFactor);
-        renderOnPrimaryHand = main;
+        renderOnHand = main;
     }
 
-    public RenderTetheredTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleX, float scaleY, float scaleZ, boolean main) {
+    public RenderTetheredTaoItemProjectile(RenderManager renderManagerIn, int index, RenderItem itemRendererIn, Vec3i rotations, float scaleX, float scaleY, float scaleZ, EnumHand main) {
         super(renderManagerIn, index, itemRendererIn, rotations, scaleX, scaleY, scaleZ);
-        renderOnPrimaryHand = main;
+        renderOnHand = main;
     }
 
     public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
         EntityLivingBase thrower = entity.getThrower();
         if (thrower != null && !this.renderOutlines) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translate((float) x, (float) y, (float) z);
-            GlStateManager.enableRescaleNormal();
-            GlStateManager.scale(0.5F, 0.5F, 0.5F);
-            this.bindEntityTexture(entity);
+//            GlStateManager.pushMatrix();
+//            GlStateManager.translate((float) x, (float) y, (float) z);
+//            GlStateManager.enableRescaleNormal();
+//            GlStateManager.scale(0.5F, 0.5F, 0.5F);
+//            this.bindEntityTexture(entity);
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
-            GlStateManager.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-            GlStateManager.rotate((float) (this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.popMatrix();
-            int handSide = (thrower.getPrimaryHand() == EnumHandSide.RIGHT) == (renderOnPrimaryHand) ? 1 : -1;
+//            GlStateManager.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+//            GlStateManager.rotate((float) (this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+//
+//            GlStateManager.disableRescaleNormal();
+//            GlStateManager.popMatrix();
+            int handSide = (thrower.getPrimaryHand() == EnumHandSide.RIGHT) == (renderOnHand == EnumHand.MAIN_HAND) ? 1 : -1;
+            if (renderOnHand == null)
+                handSide = (entity.getHand() == EnumHand.MAIN_HAND) == (thrower.getPrimaryHand() == EnumHandSide.RIGHT) ? 1 : -1;
 
             float swingProgress = 0;//thrower.getSwingProgress(partialTicks);
             float sinSwing = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
@@ -66,7 +69,7 @@ public class RenderTetheredTaoItemProjectile<T extends EntityThrownWeapon> exten
                 throwerSpotX = thrower.prevPosX + (thrower.posX - thrower.prevPosX) * (double) partialTicks + vec3d.x;
                 throwerSpotY = thrower.prevPosY + (thrower.posY - thrower.prevPosY) * (double) partialTicks + vec3d.y;
                 throwerSpotZ = thrower.prevPosZ + (thrower.posZ - thrower.prevPosZ) * (double) partialTicks + vec3d.z;
-                eyeHeight = thrower.getEyeHeight()-0.06;
+                eyeHeight = thrower.getEyeHeight() - 0.06;
             } else {
                 throwerSpotX = thrower.prevPosX + (thrower.posX - thrower.prevPosX) * (double) partialTicks - cosThrowerYaw * handOffset - sinThrowerYaw * 0.8D;
                 throwerSpotY = thrower.prevPosY + (double) thrower.getEyeHeight() + (thrower.posY - thrower.prevPosY) * (double) partialTicks - 0.45D;
@@ -86,8 +89,8 @@ public class RenderTetheredTaoItemProjectile<T extends EntityThrownWeapon> exten
             int maxVertices = 1;
 
             for (int vertexCount = 0; vertexCount <= maxVertices; ++vertexCount) {
-                float f11 = (float) vertexCount / (float) maxVertices;
-                bufferbuilder.pos(x + lengthX * (double) f11, y + lengthY * (double) (f11 * f11 + f11) * 0.5D + 0.25D, z + lengthZ * (double) f11).color(0, 0, 0, 255).endVertex();
+                float vertexIncrement = (float) vertexCount / (float) maxVertices;
+                bufferbuilder.pos(x + lengthX * (double) vertexIncrement, y + lengthY * (double) (vertexIncrement * vertexIncrement + vertexIncrement) * 0.5D + 0.25D, z + lengthZ * (double) vertexIncrement).color(0, 0, 0, 255).endVertex();
             }
 
             tessellator.draw();

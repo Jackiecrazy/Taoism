@@ -1,5 +1,7 @@
 package com.jackiecrazi.taoism.utils;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
@@ -25,6 +27,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
@@ -33,6 +36,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
 public class TaoCombatUtils {
+    /**
+     * Copied from EntityArrow, because kek.
+     */
+    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
+
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
         ItemStack main = elb.getHeldItemMainhand();
         ItemStack off = elb.getHeldItemOffhand();

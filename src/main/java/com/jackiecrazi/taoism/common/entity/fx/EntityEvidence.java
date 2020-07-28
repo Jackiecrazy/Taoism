@@ -6,10 +6,12 @@ import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -26,7 +28,7 @@ public class EntityEvidence extends Entity {
     public EntityEvidence(World worldIn, EntityLivingBase sinner) {
         this(worldIn);
         setSinner(sinner);
-        double xMod = -8 + rand.nextInt(16), yMod = -8 + rand.nextInt(16), zMod = -8 + rand.nextInt(16);
+        double xMod = rand.nextGaussian() * 3, yMod = rand.nextGaussian() * 3, zMod = rand.nextGaussian() * 3;
         BlockPos attemptLocation = new BlockPos(sinner.posX + xMod, sinner.posY + yMod, sinner.posZ + zMod);
         BlockPos origLocation = attemptLocation.up();
         while (!worldIn.isAirBlock(attemptLocation) && attemptLocation.getY() > 0 && sinner.posY - attemptLocation.getY() < 16)
@@ -75,6 +77,7 @@ public class EntityEvidence extends Entity {
     public void onCollideWithPlayer(EntityPlayer p) {
         ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(p);
         if (is.getItem() instanceof ExecutionerSword && ((ExecutionerSword) is.getItem()).attemptAbsorbSoul(p, is, this)) {
+            world.playSound(null, posX, posY, posZ, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
             setDead();
         }
     }
@@ -82,18 +85,15 @@ public class EntityEvidence extends Entity {
     @Override
     public void applyEntityCollision(Entity e) {
         super.applyEntityCollision(e);
-        if (getSinner() == e) setDead();
+        if (getSinner() == e){
+            world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
+            setDead();
+        }
     }
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (source.getTrueSource() instanceof EntityLivingBase) {
-            EntityLivingBase p = (EntityLivingBase) source.getTrueSource();
-            ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(p);
-            if (is.getItem() instanceof ExecutionerSword) {
-                ((ExecutionerSword) is.getItem()).attemptAbsorbSoul(p, is, this);
-            }
-        }
+        world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
         setDead();
         return false;
     }

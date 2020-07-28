@@ -43,7 +43,7 @@ public class Kusarigama extends TaoWeapon {
      * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
-        super(1, 1.7, 5, 1);
+        super(1, 1.5, 5, 1);
         this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
             if (elb != null) {
                 if (getHand(stack) == EnumHand.OFF_HAND) {
@@ -65,6 +65,11 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
+    public int getMaxChargeTime() {
+        return 40;
+    }
+
+    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (!w.isRemote
@@ -80,7 +85,7 @@ public class Kusarigama extends TaoWeapon {
             if (getHand(is) == EnumHand.OFF_HAND) {
                 if (!isThrown(is)) {
                     EntityKusarigamaShot eks = new EntityKusarigamaShot(elb.world, elb, getHand(is));
-                    eks.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, getBuff(is, "hitCharge") / (float) getMaxChargeTime(), 0.0F);
+                    eks.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, (getMaxChargeTime() - is.getItemDamage()) / (float) getMaxChargeTime(), 0.0F);
                     elb.world.spawnEntity(eks);
                     gettagfast(elb.getHeldItemMainhand()).setInteger("dartID", eks.getEntityId());
                 } else {
@@ -111,7 +116,7 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : 3;
     }
 
     @Override
@@ -156,6 +161,12 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (getHand(stack) == EnumHand.OFF_HAND) return 0;
+        return super.knockback(attacker, target, stack, orig);
+    }
+
+    @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) return getBuff(stack, "hitCharge") / (float) getMaxChargeTime();
         if (getLastAttackedEntity(attacker.world, stack) == target && getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isValid() && !getLastMove(stack).isLeftClick()
@@ -171,11 +182,6 @@ public class Kusarigama extends TaoWeapon {
             setBuff(attacker, stack, "hitCharge", getMaxChargeTime() - stack.getItemDamage());
             attacker.getHeldItemMainhand().setItemDamage(getMaxChargeTime());
         }
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 40;
     }
 
     private EntityKusarigamaShot getBall(ItemStack is, EntityLivingBase elb) {

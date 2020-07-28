@@ -27,6 +27,10 @@ public class ExecutionerSword extends TaoWeapon {
     If you attack before the enemy is judged, it deals normal damage and halves the amount of time before the next spirit manifests
     Every 5 damage reduces an eye
     When looking at a spirit or the defendant, gain a speed boost
+    Execution for it could also just be something simple,
+    like casting a huge sweep that knocks away all enemies other than the trial target and drastically slows them with a blind,
+    while if the main is hit within the sweep it immobilizes and disables them temporarily on the spot based on secondary targets affected
+    and increases current eyes by 25%ish. Could be nicknamed "Order in the court"
      */
 
     public ExecutionerSword() {
@@ -49,6 +53,11 @@ public class ExecutionerSword extends TaoWeapon {
     }
 
     @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        return super.getItemStackDisplayName(stack)+I18n.format("exesword.count", getBuff(stack, "souls"));
+    }
+
+    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (onHand && e.ticksExisted % (200 - getQiFromStack(stack) * 10) == 0 && getLastAttackedEntity(w, stack) instanceof EntityLivingBase && !w.isRemote) {
@@ -60,7 +69,6 @@ public class ExecutionerSword extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(I18n.format("exesword.count", getBuff(stack, "souls")));
         tooltip.add(I18n.format("exesword.trial"));
         tooltip.add(I18n.format("exesword.evidence"));
         tooltip.add(I18n.format("exesword.eye"));

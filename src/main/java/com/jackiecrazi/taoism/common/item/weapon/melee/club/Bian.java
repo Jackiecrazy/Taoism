@@ -11,7 +11,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
@@ -40,7 +39,7 @@ public class Bian extends TaoWeapon {
     dealing remaining hp damage to the target
      */
     public Bian() {
-        super(0, 1.4, 6, 0.9f);
+        super(0, 1.6, 6, 0.9f);
     }
 
     @Override
@@ -98,7 +97,8 @@ public class Bian extends TaoWeapon {
                 for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(16))) {
                     if (e != attacker) {
                         TaoPotionUtils.attemptAddPot(e, new PotionEffect(TaoPotion.FATIGUE, 200, 1), false);
-                        TaoPotionUtils.attemptAddPot(e, new PotionEffect(MobEffects.BLINDNESS, 200, 1), false);
+                        TaoPotionUtils.blind(e, 200, 1);
+                        //TaoPotionUtils.attemptAddPot(e, new PotionEffect(MobEffects.BLINDNESS, 200, 1), false);
                     }
                 }
                 gettagfast(item).setBoolean("ouches", false);

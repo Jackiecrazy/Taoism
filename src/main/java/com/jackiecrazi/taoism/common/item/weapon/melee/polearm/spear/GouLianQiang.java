@@ -33,6 +33,8 @@ public class GouLianQiang extends TaoWeapon {
     right click to hook for no damage. Doing this twice in a row will trip, inflicting 50% max posture damage
     if the target is not facing the attacker, instantly trip
     if the target is unaware of attacker, instantly down
+
+    Execution: grab enemy with hook and slam them to the other side, then follow up with a heart stab that deals a *lot* of damage
      */
 
     public GouLianQiang() {

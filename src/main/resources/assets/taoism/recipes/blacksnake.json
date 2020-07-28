@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    " tt",
+    " tt",
+    "it "
+  ],
+  "key":
+  {
+    "t":
+    {
+      "type": "forge:ore_dict",
+      "ore": "string"
+    },
+    "i":
+    {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:blacksnake"
+  }
+}

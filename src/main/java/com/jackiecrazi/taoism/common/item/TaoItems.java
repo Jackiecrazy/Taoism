@@ -27,6 +27,8 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.rope.Kusarigama;
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
+import com.jackiecrazi.taoism.common.item.weapon.melee.whip.BlackSnake;
+import com.jackiecrazi.taoism.common.item.weapon.melee.whip.Bullwhip;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
@@ -58,8 +60,10 @@ public class TaoItems {
             ropedart,
             bian,
             rapier,
-    kusarigama,
-    executionerSword;
+            kusarigama,
+            executionerSword,
+            bullwhip,
+            blacksnake;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -98,9 +102,11 @@ public class TaoItems {
         nunchaku = new Nunchaku();
         ropedart = new RopeDart();
         bian = new Bian();
-        rapier=new Rapier();
-        kusarigama=new Kusarigama();
-        executionerSword=new ExecutionerSword();
+        rapier = new Rapier();
+        kusarigama = new Kusarigama();
+        executionerSword = new ExecutionerSword();
+        bullwhip = new Bullwhip();
+        blacksnake = new BlackSnake();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -127,6 +133,8 @@ public class TaoItems {
         e.getRegistry().register(rapier);
         e.getRegistry().register(kusarigama);
         e.getRegistry().register(executionerSword);
+        e.getRegistry().register(bullwhip);
+        e.getRegistry().register(blacksnake);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

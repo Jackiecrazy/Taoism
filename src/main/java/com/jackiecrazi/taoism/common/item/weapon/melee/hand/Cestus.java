@@ -184,7 +184,8 @@ public class Cestus extends TaoWeapon {
             TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, 30, Math.floorDiv(qi, 3) - 1), false);
         }
         if (qi >= 9) {
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.BLINDNESS, 40, 0), false);
+            //TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.BLINDNESS, 40, 0), false);
+            TaoPotionUtils.blind(target, 40, 0);
         }
     }
 

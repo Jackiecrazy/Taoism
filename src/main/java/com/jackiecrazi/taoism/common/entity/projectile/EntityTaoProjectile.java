@@ -1,9 +1,9 @@
 package com.jackiecrazi.taoism.common.entity.projectile;
 
 import com.jackiecrazi.taoism.Taoism;
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IDamageType;
 import com.jackiecrazi.taoism.networking.PacketUpdateProjectile;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -542,7 +542,7 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
         Entity entity = null;
         float atLeastWidth = Math.min(1, width);
         float atLeastHeight = Math.min(1, height);
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(atLeastWidth, atLeastHeight, atLeastWidth), NeedyLittleThings.VALID_TARGETS);
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(atLeastWidth, atLeastHeight, atLeastWidth), TaoCombatUtils.VALID_TARGETS);
         double d0 = 0.0D;
 
         for (Entity entity1 : list) {

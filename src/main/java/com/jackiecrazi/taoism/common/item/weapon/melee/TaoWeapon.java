@@ -744,7 +744,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     protected void splash(EntityLivingBase attacker, ItemStack is, int horAngle, int vertAngle) {
         if (attacker.world.isRemote) return;
-        splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, horAngle, vertAngle, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test));
+        splash(attacker, NeedyLittleThings.raytraceEntity(attacker.world, attacker, getReach(attacker, is)), is, horAngle, vertAngle, attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), TaoCombatUtils.VALID_TARGETS::test));
     }
 
     protected int getQiFromStack(ItemStack stack) {

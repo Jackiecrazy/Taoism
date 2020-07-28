@@ -34,6 +34,23 @@ public class Karambit extends TaoWeapon {
     //Each chi level allows you to ignore 6 points of armor when inflicting bleed.
     //Can be used to harvest plant blocks, for what that's worth.
 
+    /*
+    common rework feature: attack on collide when dodging
+
+    //rework 1: as you progress in qi, more and more bleed is converted into damage
+    so you start at like 1 damage and 6 seconds of bleed 1, and it stacks by max duration so you have a constantly decreasing bleed counter on them
+    but every other qi level (13579) it converts 1 second of bleed to 1 damage
+    that is, you can open up with a 6 second bleed, then at the end of it all you're dealing 6 damage and just a little bleed
+    it's flipped on the offhand... maybe
+
+    //rework 2: inverse qi scaling, bleed scales with damage
+    you start at 6 damage, and at level 258 it decreases by 1
+    duration of bleed inflicted is equal to damage dealt
+
+    //rework 3: no rework, increase bleed duration to scale with qi up to 10 seconds, each stack resets timer
+    //execution rework: all 5 hits are unloaded on a single enemy for a shower of blood, nearby enemies are afflicted with fear
+     */
+
     private static final boolean[] harvestList = {false, false, false, true};
 
     public Karambit() {
@@ -44,12 +61,6 @@ public class Karambit extends TaoWeapon {
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        if (isCharged(p, is)) return 16;
-        return 2f;
     }
 
     @Override
@@ -91,7 +102,8 @@ public class Karambit extends TaoWeapon {
             } else {
                 for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
                     TaoCasterData.getTaoCap(e).setRootTime(200);
-                    TaoCasterData.getTaoCap(e).setBindTime(200);
+                    if (e != elb)
+                        TaoCasterData.getTaoCap(e).setBindTime(200);
                 }
             }
         }
@@ -109,6 +121,12 @@ public class Karambit extends TaoWeapon {
         tooltip.add(I18n.format("karambit.harvest"));
     }
 
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        if (isCharged(p, is)) return 16;
+        return 2f;
+    }
+
     /**
      * @return 0 pick, 1 shovel, 2 axe, 3 scythe
      */
@@ -122,7 +140,8 @@ public class Karambit extends TaoWeapon {
         super.chargeWeapon(attacker, item);
         for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(32))) {
             TaoCasterData.getTaoCap(e).setRootTime(400);
-            TaoCasterData.getTaoCap(e).setBindTime(400);
+            if (e != attacker)
+                TaoCasterData.getTaoCap(e).setBindTime(400);
         }
         TaoCasterData.getTaoCap(attacker).startRecordingDamage();
     }

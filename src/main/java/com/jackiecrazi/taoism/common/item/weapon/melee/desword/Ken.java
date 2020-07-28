@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityBouncySwordBeam;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntitySwordBeamBase;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -119,7 +120,7 @@ public class Ken extends TaoWeapon {
 
     private boolean isAoE(EntityLivingBase attacker, ItemStack is) {
         boolean toggle = false;
-        for (Entity target : attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), NeedyLittleThings.VALID_TARGETS::test)) {
+        for (Entity target : attacker.world.getEntitiesInAABBexcluding(null, attacker.getEntityBoundingBox().grow(getReach(attacker, is)), TaoCombatUtils.VALID_TARGETS::test)) {
             if (target == attacker || attacker.isRidingOrBeingRiddenBy(target)) continue;
             if (!NeedyLittleThings.isFacingEntity(attacker, target, 60) || NeedyLittleThings.getDistSqCompensated(target, attacker) > getReach(attacker, is) * getReach(attacker, is))
                 continue;

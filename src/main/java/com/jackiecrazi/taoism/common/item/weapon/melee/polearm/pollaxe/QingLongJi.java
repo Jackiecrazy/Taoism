@@ -76,20 +76,14 @@ public class QingLongJi extends TaoWeapon {
     }
 
     @Override
-    protected void oncePerHit(EntityLivingBase attacker, EntityLivingBase target, ItemStack is) {
-        if (gettagfast(is).getBoolean("release")) {
-            attacker.world.playSound(null, attacker.posX, attacker.posY, attacker.posZ, SoundEvents.ENTITY_ENDERDRAGON_GROWL, SoundCategory.PLAYERS, 1f, 1f);
-        }
-    }
-
-    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (getHand(stack) == EnumHand.MAIN_HAND && e instanceof EntityLivingBase && e.ticksExisted % 20 == 0) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (isCharged(elb, stack) && !TaoCasterData.getTaoCap(elb).consumeQi(0.5f, 5)) {
                 gettagfast(stack).setBoolean("release", true);
-                splash(elb, stack, 360);
+                elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ENDERDRAGON_GROWL, SoundCategory.PLAYERS, 1f, 1f);
+                splash(elb, stack, 120);
                 dischargeWeapon(elb, stack);
                 gettagfast(stack).setBoolean("release", false);
             }
@@ -128,7 +122,10 @@ public class QingLongJi extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) splash(attacker, stack, 60 + chi * 6);
+        if (getHand(stack) == EnumHand.OFF_HAND){
+            if (isCharged(attacker, stack)) splash(attacker, stack, 120);
+            else splash(attacker, stack, 60 + chi * 6);
+        }
         else if (isCharged(attacker, stack)) splash(attacker, stack, 20);
     }
 
@@ -180,7 +177,7 @@ public class QingLongJi extends TaoWeapon {
     @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (gettagfast(stack).getBoolean("release"))
-            return orig + getChargedTime(attacker, stack) / 10f;
+            return orig + getChargedTime(attacker, stack) / 20f;
         return super.knockback(attacker, target, stack, orig);
     }
 
@@ -190,7 +187,7 @@ public class QingLongJi extends TaoWeapon {
             return;
         }
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 0.3f);
+            NeedyLittleThings.knockBack(target, attacker, 0.3f, true);
             if (isReversed(stack)) {
                 //crescent cut!
                 TaoPotionUtils.forceBleed(target, attacker, chi * 4, 0, TaoPotionUtils.POTSTACKINGMETHOD.ADD);

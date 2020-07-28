@@ -8,6 +8,10 @@ attribute.name.generic.affWater=水靈性
 attribute.name.generic.affFire=火靈性
 attribute.name.generic.affMetal=金靈性
 attribute.name.generic.qiGen=攻擊增加氣
+attribute.name.generic.postureRegen=架勢恢復
+attribute.name.generic.healRate=治療效率
+attribute.name.generic.lingRegen=靈力恢復
+attribute.name.taoism.maxPosture=最大架勢
 
 
 item.weapon.name=武器
@@ -183,6 +187,22 @@ bian.enfeeble=攻擊使目標的架勢恢復速度減緩兩秒，效果隨氣而
 item.rapier.name=刺劍
 rapier.combo=普攻可連擊三次
 rapier.riposte=在敵人攻擊後或你招架或閃避後造成暴擊傷害
+
+item.kusarigama.name=鎖鐮
+kusarigama.ball=副手在兩秒內蓄力至最大速度，右擊放出距離6的鐵球
+kusarigama.followup=鐵球擊中敵人後，用鐮刀攻擊可根據蓄力額外造成最多50%%的傷害
+kusarigama.parry=副手無法招架，但若招架時鐵球在二者之間，束縛敵人等同於蓄力的時間
+kusarigama.critfollowup=鐮刀對被束縛的敵人暴擊，造成雙倍傷害和雙倍架勢消耗
+
+item.executionersword.name=誅戮之劍
+exesword.count=：已打開%s只審判之眼
+exesword.trial=攻擊目標開始審判，在被告死亡或切換目標時結束
+exesword.evidence=每十秒（每層氣減少半秒）和每次攻擊被告後，在其周圍八方塊內凝結罪證
+exesword.eye=罪證會被任何傷害摧毀，撿起罪證後睜開一隻審判之眼
+exesword.decrease=受到5點減免前的傷害會合上一隻審判之眼
+exesword.addqi=若切換目標終止審判，每隻審判之眼將會轉換為0.1層氣
+exesword.execution=若被告生命低於審判之眼的平方，下一次攻擊將其斬首
+exesword.head=被斬首的敵方必定掉落它的頭
 
 item.projectile_prop.name=舞台道具不要在意
 

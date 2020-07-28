@@ -37,6 +37,7 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityMeidoZangetsuha.class));
         e.getRegistry().register(factoryArrow(EntityBouncySwordBeam.class));
         e.getRegistry().register(factoryArrow(EntityKusarigamaShot.class));
+        e.getRegistry().register(factoryArrow(EntityWhiplash.class));
         e.getRegistry().register(factoryAmbient(EntityEvidence.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){

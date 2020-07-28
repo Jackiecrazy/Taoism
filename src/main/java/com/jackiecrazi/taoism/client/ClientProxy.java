@@ -11,6 +11,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -43,13 +44,14 @@ public class ClientProxy extends CommonProxy {
 
 		}*/
         MinecraftForge.EVENT_BUS.register(ClientEvents.class);
-        RenderingRegistry.registerEntityRenderingHandler(EntityRopeDart.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 1, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1f, true));
+        RenderingRegistry.registerEntityRenderingHandler(EntityRopeDart.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 1, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1f, EnumHand.MAIN_HAND));
         RenderingRegistry.registerEntityRenderingHandler(EntityChui.class, manager -> new RenderTaoItemProjectile<>(manager, 2, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, -90, 0), 2f));
         RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeamBase.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f));
         RenderingRegistry.registerEntityRenderingHandler(EntityAxeCleave.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 1.5f));
         RenderingRegistry.registerEntityRenderingHandler(EntityMeidoZangetsuha.class, manager -> new RenderTaoItemProjectile<>(manager, 5, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 4f,4,1));
         RenderingRegistry.registerEntityRenderingHandler(EntityBouncySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f,2,1));
-        RenderingRegistry.registerEntityRenderingHandler(EntityKusarigamaShot.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 6, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 0, 0), 1.5f, 1.5f, 4.5f, false));
+        RenderingRegistry.registerEntityRenderingHandler(EntityKusarigamaShot.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 6, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 0, 0), 1.5f, 1.5f, 4.5f, EnumHand.OFF_HAND));
+        RenderingRegistry.registerEntityRenderingHandler(EntityWhiplash.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1.5f, null));
         RenderingRegistry.registerEntityRenderingHandler(EntityEvidence.class, RenderNothing::new);
     }
 

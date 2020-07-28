@@ -1,12 +1,9 @@
 package com.jackiecrazi.taoism.api;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.handler.TaoCombatHandler;
 import com.jackiecrazi.taoism.networking.PacketUpdateSize;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
-import com.sun.javafx.geom.Vec2d;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -22,7 +19,6 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.*;
@@ -35,10 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NeedyLittleThings {
-    /**
-     * Copied from EntityArrow, because kek.
-     */
-    public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
 
     public static double getSpeedSq(Entity e) {
         return e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ;
@@ -85,10 +77,13 @@ public class NeedyLittleThings {
     /**
      * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
-    public static void knockBack(Entity to, Entity from, float strength) {
+    public static void knockBack(Entity to, Entity from, float strength, boolean considerRelativeAngle) {
         Vec3d distVec = to.getPositionVector().addVector(0, to.getEyeHeight(), 0).subtractReverse(from.getPositionVector().addVector(0, from.getEyeHeight(), 0)).normalize();
         if (to instanceof EntityLivingBase) {
-            knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
+            if (considerRelativeAngle)
+                knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
+            else
+                NeedyLittleThings.knockBack(((EntityLivingBase) to), from, (float) strength * 0.5F, (double) MathHelper.sin(from.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(from.rotationYaw * 0.017453292F)));
         } else {
             //eh
             to.motionX = distVec.x * strength;
@@ -150,31 +145,31 @@ public class NeedyLittleThings {
         double heightParse = e.height;
         if (widthParse <= 0.5) widthParse = 0;
         if (heightParse <= 1) heightParse = 0;
-        for (double addX = -widthParse; addX <= widthParse; addX+=0.5) {
-            for (double addZ = -widthParse; addZ <= widthParse; addZ+=0.5) {
-                for (double addY = e.height / 2; addY <= heightParse; addY+=0.5) {
+        for (double addX = -widthParse; addX <= widthParse; addX += 0.5) {
+            for (double addZ = -widthParse; addZ <= widthParse; addZ += 0.5) {
+                for (double addY = e.height / 2; addY <= heightParse; addY += 0.5) {
                     Vec3d mod = new Vec3d(addX, addY, addZ);
                     RayTraceResult r = e.world.rayTraceBlocks(from.add(mod), to.add(mod), false, true, true);
                     if (r != null && r.typeOfHit == RayTraceResult.Type.BLOCK && !r.hitVec.equals(from.add(mod))) {
                         Vec3d hit = r.hitVec.subtract(mod);
                         switch (r.sideHit) {
                             case NORTH:
-                                hit=hit.addVector(0, 0, 1);
+                                hit = hit.addVector(0, 0, 1);
                                 break;
                             case SOUTH:
-                                hit=hit.addVector(0, 0, -1);
+                                hit = hit.addVector(0, 0, -1);
                                 break;
                             case EAST:
-                                hit=hit.addVector(-1, 0, 0);
+                                hit = hit.addVector(-1, 0, 0);
                                 break;
                             case WEST:
-                                hit=hit.addVector(1, 0, 0);
+                                hit = hit.addVector(1, 0, 0);
                                 break;
                             case UP:
                                 //hit.addVector(0, -1, 0);
                                 break;
                             case DOWN:
-                                hit=hit.addVector(0, -1, 0);
+                                hit = hit.addVector(0, -1, 0);
                                 break;
                         }
                         if (from.squareDistanceTo(hit) < from.squareDistanceTo(ret)) {
@@ -276,7 +271,7 @@ public class NeedyLittleThings {
     public static boolean isFacingEntity(Entity entity1, Entity entity2, int horAngle, int vertAngle) {
         if (horAngle < 0) return isBehindEntity(entity2, entity1, -horAngle, Math.abs(vertAngle));
         double xDiff = entity1.posX - entity2.posX, zDiff = entity1.posZ - entity2.posZ;
-        if(vertAngle!=360) {
+        if (vertAngle != 360) {
             Vec3d posVec = entity2.getPositionVector().addVector(0, entity2.getEyeHeight(), 0);
             //y calculations
             double distIgnoreY = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
@@ -313,7 +308,7 @@ public class NeedyLittleThings {
         Vec3d bodyVec = getBodyOrientation(entity1);
         //lookVec=new Vec3d(lookVec.x, 0, lookVec.z);
         //bodyVec=new Vec3d(bodyVec.x, 0, bodyVec.z);
-        Vec3d relativePosVec = new Vec3d(xDiff, entity1.posY-entity2.posY, zDiff);
+        Vec3d relativePosVec = new Vec3d(xDiff, entity1.posY - entity2.posY, zDiff);
         double dotsqLook = ((relativePosVec.dotProduct(lookVec) * Math.abs(relativePosVec.dotProduct(lookVec))) / (relativePosVec.lengthSquared() * lookVec.lengthSquared()));
         double dotsqBody = ((relativePosVec.dotProduct(bodyVec) * Math.abs(relativePosVec.dotProduct(bodyVec))) / (relativePosVec.lengthSquared() * bodyVec.lengthSquared()));
         double cos = MathHelper.cos(rad(horAngle / 2));
@@ -461,7 +456,7 @@ public class NeedyLittleThings {
         look = attacker.getLookVec().scale(range);
         end = start.add(look);
         RayTraceResult rtr = world.rayTraceBlocks(start, end, false, true, false);
-        if (rtr != null){
+        if (rtr != null) {
             return rtr;
         }
         return new RayTraceResult(end, EnumFacing.UP);
@@ -541,7 +536,7 @@ public class NeedyLittleThings {
         Vec3d look = attacker.getLookVec().scale(range + 2);
         Vec3d end = start.add(look);
         ArrayList<Entity> ret = new ArrayList<>();
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), VALID_TARGETS::test);
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), TaoCombatUtils.VALID_TARGETS::test);
 
         for (Entity entity1 : list) {
             if (entity1 != attacker && getDistSqCompensated(attacker, entity1) < range * range) {

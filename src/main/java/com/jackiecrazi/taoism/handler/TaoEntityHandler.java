@@ -154,7 +154,7 @@ public class TaoEntityHandler {
 
     @SubscribeEvent
     public static void dramatic(LivingFallEvent e) {
-        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()&&e.getDistance()>2) {
             TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
         }
     }

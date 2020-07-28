@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.potions;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
@@ -114,6 +115,8 @@ public class TaoPotion extends Potion {
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.1, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
+        //MobEffects.BLINDNESS
+        //        .registerPotionAttributeModifier(SharedMonsterAttributes.FOLLOW_RANGE, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.5, 1);
         event.getRegistry().register(BLEED);
         event.getRegistry().register(HIDE);
         event.getRegistry().register(ARMORBREAK);
@@ -142,17 +145,14 @@ public class TaoPotion extends Potion {
         if (current.getPotion() == RESOLUTION) {
             //DETERMINATION!
             TaoCasterData.getTaoCap(elb).setPosInvulTime(e.getPotionEffect().getDuration());
-        }
-        else if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
+        } else if (current.getPotion() != HEMORRHAGE && elb.getActivePotionEffect(HEMORRHAGE) != null && current.getPotion().isBadEffect()) {
             PotionEffect pe = elb.getActivePotionEffect(HEMORRHAGE);
             elb.removeActivePotionEffect(HEMORRHAGE);
             current.combine(new PotionEffect(current.getPotion(), current.getDuration() + (pe.getDuration() * (pe.getAmplifier() + 1) / 4), current.getAmplifier()));
-        }
-        else if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
+        } else if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
             ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
             ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
-        }
-        else if (current.getPotion() == DISORIENT && e.getEntityLiving() instanceof EntityLiving) {
+        } else if (current.getPotion() == DISORIENT && e.getEntityLiving() instanceof EntityLiving) {
             ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
             ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
         }
@@ -177,8 +177,21 @@ public class TaoPotion extends Potion {
 
     @SubscribeEvent
     public static void taunt(LivingSetAttackTargetEvent e) {
-        if (e.getEntityLiving() instanceof EntityLiving) {
+        if (e.getEntityLiving() instanceof EntityLiving && e.getTarget() != null) {
             EntityLiving el = (EntityLiving) e.getEntityLiving();
+            if (el.isPotionActive(MobEffects.BLINDNESS) && CombatConfig.blindMobs) {
+                PotionEffect pe = el.getActivePotionEffect(MobEffects.BLINDNESS);
+                double zeno = 1;
+                for (int a = 0; a <= pe.getAmplifier(); a++) {
+                    zeno /= 2;
+                }
+                double attr = 16;
+                if (el.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE) != null) {
+                    attr = el.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getAttributeValue();
+                }
+                if (NeedyLittleThings.getDistSqCompensated(e.getTarget(), el) < attr * zeno)
+                    el.setAttackTarget(null);
+            }
             Entity taunter = el.world.getEntityByID(TaoCasterData.getTaoCap(el).getTauntID());
             if (taunter instanceof EntityLivingBase && taunter != e.getTarget()) {
                 el.setAttackTarget((EntityLivingBase) taunter);
@@ -190,12 +203,15 @@ public class TaoPotion extends Potion {
     @ParametersAreNonnullByDefault
     public void performEffect(EntityLivingBase l, int amplifier) {
         if (this == BLEED) {
-            l.hurtResistantTime = 0;
-            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), (1 + amplifier) / 2f);
+            //l.hurtResistantTime = 0;
+            float damage = (1 + amplifier) / 2f;
+            if (l.getHealth() > damage)
+                l.setHealth(l.getHealth() - damage);
+            else l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), damage);
             if (l.world instanceof WorldServer) {
-                ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 20, l.width / 4, l.height / 4, l.width / 4, 0.5f);
+                ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 10, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
-            l.hurtResistantTime = 0;
+            //l.hurtResistantTime = 0;
         } else if (this == ENRAGE) {
             TaoCasterData.getTaoCap(l).tauntedBy(null);
         } else if (this == AMPUTATION && amplifier != 0) {

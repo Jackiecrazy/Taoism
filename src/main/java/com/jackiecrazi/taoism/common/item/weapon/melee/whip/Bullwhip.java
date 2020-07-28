@@ -2,14 +2,21 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.whip;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityKusarigamaShot;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityWhiplash;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,7 +39,7 @@ public class Bullwhip extends TaoWeapon {
     };
 
     public Bullwhip() {
-        super(1, 1.4, 9, 0.5f);
+        super(1, 1.6, 6, 0.5f);
     }
 
     @Override
@@ -46,18 +53,23 @@ public class Bullwhip extends TaoWeapon {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (!w.isRemote
+                && gettagfast(stack).hasKey("dartID")
+                && e.world.getEntityByID(gettagfast(stack).getInteger("dartID")) == null) {
+            gettagfast(stack).removeTag("dartID");
+        }
+    }
+
+    @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
         if (!elb.world.isRemote) {
             if (!isThrown(is)) {
-                EntityKusarigamaShot eks = new EntityKusarigamaShot(elb.world, elb, getHand(is));
-                eks.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, getBuff(is, "hitCharge") / (float) getMaxChargeTime(), 0.0F);
-                elb.world.spawnEntity(eks);
-                gettagfast(elb.getHeldItemMainhand()).setInteger("dartID", eks.getEntityId());
-            } else {
-                if (elb.isSneaking()) {
-                    EntityWhiplash erd = getLash(is, elb);
-                    if (erd != null) erd.setDead();
-                }
+                EntityWhiplash ew = new EntityWhiplash(elb.world, elb, getHand(is), 7);
+                ew.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, 1f, 0.0F);
+                elb.world.spawnEntity(ew);
+                gettagfast(is).setInteger("dartID", ew.getEntityId());
             }
         }
         return super.onEntitySwing(elb, is);
@@ -65,7 +77,13 @@ public class Bullwhip extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.parry") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.projectile") + TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("bullwhip.armor") + TextFormatting.RESET);
+        tooltip.add(I18n.format("bullwhip.knockback"));
+        tooltip.add(I18n.format("bullwhip.sonicboom"));
+        tooltip.add(I18n.format("bullwhip.sneak"));
+        tooltip.add(I18n.format("bullwhip.sneakboom"));
     }
 
     @Override
@@ -76,6 +94,51 @@ public class Bullwhip extends TaoWeapon {
     @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
         return false;
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return getBuff(item, "boomer") == 1 ? Event.Result.ALLOW : Event.Result.DENY;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 0.5f;
+    }
+
+    @Override
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return super.damageMultiplier(attacker, target, item);
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (getBuff(stack, "boomer") == 1) {
+            if (!attacker.isSneaking()) {
+                //TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.DISORIENT, 20), false);
+                TaoPotionUtils.disorient(target, 20);
+            }
+        }
+        if (attacker.isSneaking()) {
+            return -orig * 2;
+        }
+        return super.knockback(attacker, target, stack, orig) * 1.2f;
+    }
+
+    @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return -target.getTotalArmorValue()/2;
+    }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (attacker.isSneaking()) {
+            int time=getBuff(stack, "boomer") == 1 ? 40 : 10;
+            TaoCasterData.getTaoCap(target).setBindTime(time);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, time), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.WEAKNESS, time), false);
+            TaoCasterData.getTaoCap(target).setBindTime(10);
+        }
     }
 
     private boolean isThrown(ItemStack is) {

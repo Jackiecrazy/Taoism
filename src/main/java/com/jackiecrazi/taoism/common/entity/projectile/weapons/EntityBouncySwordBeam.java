@@ -72,7 +72,7 @@ public class EntityBouncySwordBeam extends EntitySwordBeamBase {
                 double dist = 999;
                 EntityLivingBase secondaryTarget = null;
                 double secondaryDist = 999;
-                for (EntityLivingBase elb : world.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox().grow(8), NeedyLittleThings.VALID_TARGETS)) {
+                for (EntityLivingBase elb : world.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox().grow(8), TaoCombatUtils.VALID_TARGETS)) {
                     if (elb != getThrower() && elb != lastHit) {//clear LoS to target
                         boolean fresh = true;
                         for (int a : hitList)

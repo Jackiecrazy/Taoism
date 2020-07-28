@@ -3,10 +3,12 @@ package com.jackiecrazi.taoism.utils;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
@@ -14,6 +16,53 @@ import java.util.Map;
 
 public class TaoPotionUtils {
     //so you think immunity to my potions is clever, eh?
+
+    public static void disorient(EntityLivingBase elb, int duration) {
+        if (elb instanceof EntityLiving) {
+            EntityLiving el = (EntityLiving) elb;
+            el.getNavigator().clearPath();
+            el.setAttackTarget(null);
+        }
+        attemptAddPot(elb, new PotionEffect(TaoPotion.DISORIENT, duration, 0), false);
+    }
+
+    public static void blind(EntityLivingBase elb, int duration, int potency) {
+        if (elb instanceof EntityLiving) {
+            EntityLiving el = (EntityLiving) elb;
+            el.getNavigator().clearPath();
+            el.setAttackTarget(null);
+        }
+        attemptAddPot(elb, new PotionEffect(MobEffects.BLINDNESS, duration, potency), false);
+    }
+
+    /**
+     * Attempts to add the potion effect. If it fails, the function will *permanently* apply all the attribute modifiers, with the option to stack them as well
+     * Take that, wither!
+     */
+    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot, boolean stackWhenFailed) {
+        Potion p = pot.getPotion();
+        elb.addPotionEffect(pot);
+        if (!elb.isPotionActive(p)) {
+            for (Map.Entry<IAttribute, AttributeModifier> e : p.getAttributeModifierMap().entrySet()) {
+                if (elb.getEntityAttribute(e.getKey()) != null) {
+                    if (stackWhenFailed) {
+                        AttributeModifier am = elb.getEntityAttribute(e.getKey()).getModifier(e.getValue().getID());
+                        if (am != null && am.getOperation() == e.getValue().getOperation()) {
+                            AttributeModifier apply = new AttributeModifier(e.getValue().getID(), e.getValue().getName(), am.getAmount() + e.getValue().getAmount(), am.getOperation());
+                            elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
+                            elb.getEntityAttribute(e.getKey()).applyModifier(apply);
+                        } else elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
+                    } else {
+                        elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
+                        elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
+                    }
+                }
+            }
+            elb.getActivePotionMap().put(pot.getPotion(), pot);
+            return false;
+        }
+        return true;
+    }
 
     /**
      * justice prevails.
@@ -61,35 +110,6 @@ public class TaoPotionUtils {
                 break;
         }
         return new PotionEffect(p, length, potency, false, false);
-    }
-
-    /**
-     * Attempts to add the potion effect. If it fails, the function will *permanently* apply all the attribute modifiers, with the option to stack them as well
-     * Take that, wither!
-     */
-    public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot, boolean stackWhenFailed) {
-        Potion p = pot.getPotion();
-        elb.addPotionEffect(pot);
-        if (!elb.isPotionActive(p)) {
-            for (Map.Entry<IAttribute, AttributeModifier> e : p.getAttributeModifierMap().entrySet()) {
-                if (elb.getEntityAttribute(e.getKey()) != null) {
-                    if (stackWhenFailed) {
-                        AttributeModifier am = elb.getEntityAttribute(e.getKey()).getModifier(e.getValue().getID());
-                        if (am != null && am.getOperation() == e.getValue().getOperation()) {
-                            AttributeModifier apply = new AttributeModifier(e.getValue().getID(), e.getValue().getName(), am.getAmount() + e.getValue().getAmount(), am.getOperation());
-                            elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
-                            elb.getEntityAttribute(e.getKey()).applyModifier(apply);
-                        } else elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
-                    } else {
-                        elb.getEntityAttribute(e.getKey()).removeModifier(e.getValue().getID());
-                        elb.getEntityAttribute(e.getKey()).applyModifier(e.getValue());
-                    }
-                }
-            }
-            elb.getActivePotionMap().put(pot.getPotion(), pot);
-            return false;
-        }
-        return true;
     }
 
     public static double getEffectiveLevel(EntityLivingBase elb, Potion p, IAttribute workOff) {

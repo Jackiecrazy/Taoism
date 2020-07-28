@@ -69,7 +69,7 @@ karambit.harvest=functions as shears
 
 item.chui.name=Spherical Mace
 chui.leap=crits deal double damage
-chui.stagger=deals 1.5x damage against downed targets
+chui.stagger=deals 1.5x damage against stagger targets
 chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration increases by half a second every level
 
 item.cestus.name=Cestus
@@ -91,7 +91,7 @@ qiang.bash=right click to bash an enemy back, or sweep in a 120 degree sector if
 item.goulianqiang.name=Hooked Spear
 goulianqiang.trip=right click on a target twice to trip them, dealing half their max posture, up to the limit of your attack damage
 goulianqiang.trip.sneaky=if the target is not facing the attacker, only one attack is needed.
-goulianqiang.bash=normal attack will ignore half armor and inflict double damage if they are downed
+goulianqiang.bash=normal attack will ignore half armor and inflict double damage if they are staggered
 
 item.qinglongji.name=Qinglong Ji
 qinglongji.stab=normal attack is a stab that deals (1.5+chi/10)x damage
@@ -195,14 +195,31 @@ kusarigama.parry=the chain cannot parry, but if the projectile is between you an
 kusarigama.critfollowup=attacking a bound enemy with the sickle will crit for double damage and consume double posture
 
 item.executionersword.name=Executioner's Sword
-exesword.count=eyes of judgment: %s
+exesword.count=: %s eyes opened
 exesword.trial=attack to start the trial, which ends when the defendant dies or another target is attacked
-exesword.evidence=every 10(-qi/2) seconds and after every attack, evidence manifest in an 8-block radius around it
+exesword.evidence=every 10(-chi/2) seconds and after every attack, evidence manifest in an 8-block radius around it
 exesword.eye=any damage will destroy evidence, walking into it opens one eye of judgment
 exesword.decrease=taking 5 damage before reduction will close one eye of judgment
 exesword.addqi=if a trial ends by hitting another entity, gain qi equal to 10%% of your eyes
 exesword.execution=if target's health is less than the square of your eyes, instantly kill on attack
 exesword.head=targets killed in this manner are guaranteed to drop a head
+
+item.bullwhip.name=Bullwhip
+bullwhip.armor=damage treats target as having 1.5x the armor it has
+bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
+bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
+bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
+bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
+
+item.blacksnake.name=Blacksnake
+blacksnake.armor=lash treats target as having 1.5x the armor it has
+blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
+blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
+blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
+blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
+
+item.misericorde.name=Misericorde
+misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
 
 item.projectile_prop.name=just a prop, don't mind me...
 

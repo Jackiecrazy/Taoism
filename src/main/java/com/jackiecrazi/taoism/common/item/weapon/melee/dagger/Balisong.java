@@ -84,6 +84,7 @@ public class Balisong extends TaoWeapon {
             } else {
                 for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
                     TaoCasterData.getTaoCap(e).setRootTime(200);
+                    if(e!=elb)
                     TaoCasterData.getTaoCap(e).setBindTime(200);
                 }
             }
@@ -112,6 +113,7 @@ public class Balisong extends TaoWeapon {
         super.chargeWeapon(attacker, item);
         for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(16))) {
             TaoCasterData.getTaoCap(e).setRootTime(200);
+            if(e!=attacker)
             TaoCasterData.getTaoCap(e).setBindTime(200);
         }
         TaoCasterData.getTaoCap(attacker).startRecordingDamage();

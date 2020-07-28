@@ -31,10 +31,13 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         if (main != null)
             hand = main;
         stack = dude.getHeldItem(hand);
-        stack.getTagCompound().setBoolean("thrown", true);
         this.rotationPitch = dude.rotationPitch;
         this.rotationYaw = dude.rotationYaw;
         setPosition(dude.posX, dude.posY + (double)dude.getEyeHeight() - height/2, dude.posZ);
+    }
+
+    public EnumHand getHand() {
+        return hand;
     }
 
     @Override
@@ -117,7 +120,7 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
     }
 
     protected void onRetrieveWeapon() {
-        if (stack != null)
+        if (stack != null&&stack.hasTagCompound())
             stack.getTagCompound().setBoolean("thrown", false);
         this.setDead();
         this.velocityChanged = true;

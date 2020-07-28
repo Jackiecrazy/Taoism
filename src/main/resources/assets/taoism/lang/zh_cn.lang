@@ -8,6 +8,10 @@ attribute.name.generic.affWater=水灵性
 attribute.name.generic.affFire=火灵性
 attribute.name.generic.affMetal=金灵性
 attribute.name.generic.qiGen=攻击增加气
+attribute.name.generic.postureRegen=架势恢复
+attribute.name.generic.healRate=治疗效率
+attribute.name.generic.lingRegen=灵力恢复
+attribute.name.taoism.maxPosture=最大架势
 
 
 item.weapon.name=武器
@@ -183,6 +187,36 @@ bian.enfeeble=攻击使目标的架势恢复速度减缓两秒，效果随气而
 item.rapier.name=刺剑
 rapier.combo=普攻可连击三次
 rapier.riposte=在敌人攻击后或你招架或闪避后造成暴击伤害
+
+item.kusarigama.name=锁镰
+kusarigama.ball=副手在两秒内蓄力至最大速度，右击放出距离6的铁球
+kusarigama.followup=铁球击中敌人后，用镰刀攻击可根据蓄力额外造成最多50%%的伤害
+kusarigama.parry=副手无法招架，但若招架时铁球在二者之间，束缚敌人等同于蓄力的时间
+kusarigama.critfollowup=镰刀对被束缚的敌人暴击，造成双倍伤害和双倍架势消耗
+
+item.executionersword.name=诛戮之剑
+exesword.count=：已打开%s只审判之眼
+exesword.trial=攻击目标开始审判，在被告死亡或切换目标时结束
+exesword.evidence=每十秒（每层气减少半秒）和每次攻击被告后，在其周围八方块内凝结罪证
+exesword.eye=罪证会被任何伤害摧毁，捡起罪证后睁开一只审判之眼
+exesword.decrease=受到5点减免前的伤害会合上一只审判之眼
+exesword.addqi=若切换目标终止审判，每只审判之眼将会转换为0.1层气
+exesword.execution=若被告生命低于审判之眼的平方，下一次攻击将其斩首
+exesword.head=被斩首的敌方必定掉落它的头
+
+item.bullwhip.name=软鞭
+bullwhip.armor=damage dealt is doubly reduced by armor
+bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
+bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
+bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
+bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
+
+item.blacksnake.name=Blacksnake
+blacksnake.armor=damage dealt is doubly reduced by armor
+blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
+blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
+blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
+blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
 
 item.projectile_prop.name=舞台道具不要在意
 
