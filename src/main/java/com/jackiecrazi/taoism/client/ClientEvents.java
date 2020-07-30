@@ -127,7 +127,6 @@ public class ClientEvents {
         if (i.getItem() instanceof IRange) {
             //System.out.println("range!");
             IRange icr = (IRange) i.getItem();
-
             Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
             if (elb != null) {
                 //System.out.println("sending packet!");

@@ -166,6 +166,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        super.attackStart(ds,attacker,target,stack,orig);
         if (isCharged(attacker, stack)) {
             if (!TaoCasterData.getTaoCap(target).isRecordingDamage())
                 TaoCasterData.getTaoCap(target).startRecordingDamage();

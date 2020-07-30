@@ -62,7 +62,7 @@ public class TaoCombatHandler {
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void iHaveAWifeAndChildren(LivingAttackEvent e) {
-        if (TaoCombatUtils.isMeleeDamage(e.getSource()) && e.getSource().getTrueSource() instanceof EntityLivingBase) {
+        if (TaoCombatUtils.isDirectDamage(e.getSource()) && TaoCombatUtils.isMeleeDamage(e.getSource()) && e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
             if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
                 //you may only attack the target that taunted you
@@ -222,10 +222,10 @@ public class TaoCombatHandler {
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
-//        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()) {
-//            e.setCanceled(true);
-//            return;
-//        }
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).getDownTimer() > 0) {
+            e.setCanceled(true);
+            return;
+        }
         if (!modCall && CombatConfig.modifyKnockBackCode) {
             e.setCanceled(true);
             NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ());
@@ -256,7 +256,7 @@ public class TaoCombatHandler {
         float amnt = e.getAmount();
 
         //initial damage modifiers
-        if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
+        if (TaoCombatUtils.isDirectDamage(ds) && ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
             if (stack.getItem() instanceof ICombatManipulator) {
@@ -327,7 +327,7 @@ public class TaoCombatHandler {
         armor is reduced by 9 when calculating damage
          */
         DamageSource ds = e.getSource();
-        if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
+        if (TaoCombatUtils.isDirectDamage(ds) && ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             int ignoreAmnt = 0;
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);

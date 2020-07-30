@@ -9,10 +9,13 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.club.Chui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.club.Tonfa;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Balisong;
 import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Karambit;
+import com.jackiecrazi.taoism.common.item.weapon.melee.dagger.Misericorde;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.ExecutionerSword;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Ken;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Rapier;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
+import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Emeici;
+import com.jackiecrazi.taoism.common.item.weapon.melee.hand.PanGuanBi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Halberd;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
@@ -63,7 +66,10 @@ public class TaoItems {
             kusarigama,
             executionerSword,
             bullwhip,
-            blacksnake;
+            blacksnake,
+            misericorde,
+            emeici,
+            panguanbi;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -107,6 +113,9 @@ public class TaoItems {
         executionerSword = new ExecutionerSword();
         bullwhip = new Bullwhip();
         blacksnake = new BlackSnake();
+        misericorde = new Misericorde();
+        panguanbi = new PanGuanBi();
+        emeici = new Emeici();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -135,6 +144,9 @@ public class TaoItems {
         e.getRegistry().register(executionerSword);
         e.getRegistry().register(bullwhip);
         e.getRegistry().register(blacksnake);
+        e.getRegistry().register(misericorde);
+        e.getRegistry().register(panguanbi);
+        e.getRegistry().register(emeici);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

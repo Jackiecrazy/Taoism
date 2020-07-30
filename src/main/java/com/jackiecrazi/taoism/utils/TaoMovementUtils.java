@@ -9,7 +9,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.*;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -65,7 +68,7 @@ public class TaoMovementUtils {
      */
     public static Entity collidingEntity(Entity elb) {
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX * 6, elb.motionY * 6, elb.motionZ * 6), VALID_TARGETS::test);
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX, elb.motionY * 6, elb.motionZ), VALID_TARGETS::test);
         double dist = 0;
         Entity pick = null;
         for (Entity e : entities) {
@@ -122,6 +125,18 @@ public class TaoMovementUtils {
         return true;
     }
 
+    public static void kick(EntityLivingBase elb, EntityLivingBase uke){
+        uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
+        TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
+        for (int i = 0; i < 10; ++i) {
+            double d0 = Taoism.unirand.nextGaussian() * 0.02D;
+            double d1 = Taoism.unirand.nextGaussian() * 0.02D;
+            double d2 = Taoism.unirand.nextGaussian() * 0.02D;
+            elb.world.spawnParticle(EnumParticleTypes.FIREWORKS_SPARK, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
+        }
+        elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
+    }
+
     public static boolean attemptJump(EntityLivingBase elb) {
         //if you're on the ground, I'll let vanilla handle you
         if (elb.onGround) return false;
@@ -132,16 +147,7 @@ public class TaoMovementUtils {
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
         Entity ent = collidingEntity(elb);
         if (ent instanceof EntityLivingBase) {
-            EntityLivingBase uke = (EntityLivingBase) ent;
-            uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
-            TaoCasterData.getTaoCap(uke).consumePosture(7, true, elb);
-            for (int i = 0; i < 10; ++i) {
-                double d0 = Taoism.unirand.nextGaussian() * 0.02D;
-                double d1 = Taoism.unirand.nextGaussian() * 0.02D;
-                double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-                elb.world.spawnParticle(EnumParticleTypes.FIREWORKS_SPARK, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
-            }
-            elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
+            kick(elb, (EntityLivingBase) ent);
         } else {
             //if you're exhausted or just jumped, you can't jump again
             if ((itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING))

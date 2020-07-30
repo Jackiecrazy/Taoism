@@ -28,14 +28,14 @@ public class EntityEvidence extends Entity {
     public EntityEvidence(World worldIn, EntityLivingBase sinner) {
         this(worldIn);
         setSinner(sinner);
-        double xMod = rand.nextGaussian() * 3, yMod = rand.nextGaussian() * 3, zMod = rand.nextGaussian() * 3;
+        double xMod = rand.nextGaussian() * 2.5, yMod = rand.nextGaussian() * 2.5, zMod = rand.nextGaussian() * 2.5;
         BlockPos attemptLocation = new BlockPos(sinner.posX + xMod, sinner.posY + yMod, sinner.posZ + zMod);
         BlockPos origLocation = attemptLocation.up();
-        while (!worldIn.isAirBlock(attemptLocation) && attemptLocation.getY() > 0 && sinner.posY - attemptLocation.getY() < 16)
-            attemptLocation = attemptLocation.down();
-        attemptLocation = origLocation;
         while (!worldIn.isAirBlock(attemptLocation) && attemptLocation.getY() < 256 && attemptLocation.getY() - sinner.posY < 16)
             attemptLocation = attemptLocation.up();
+        attemptLocation = origLocation;
+        while (!worldIn.isAirBlock(attemptLocation) && attemptLocation.getY() > 0 && sinner.posY - attemptLocation.getY() < 16)
+            attemptLocation = attemptLocation.down();
         if (!worldIn.isAirBlock(attemptLocation)) {
             Vec3d ray = NeedyLittleThings.getClosestAirSpot(sinner.getPositionVector(), new Vec3d(attemptLocation), this);
             attemptLocation = new BlockPos(ray);
@@ -77,7 +77,9 @@ public class EntityEvidence extends Entity {
     public void onCollideWithPlayer(EntityPlayer p) {
         ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(p);
         if (is.getItem() instanceof ExecutionerSword && ((ExecutionerSword) is.getItem()).attemptAbsorbSoul(p, is, this)) {
-            world.playSound(null, posX, posY, posZ, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
+            if (world instanceof WorldServer)
+                ((WorldServer)world).spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, posX, posY, posZ, 6, 0.5, 0.5, 0.5, 0);
+            world.playSound(null, posX, posY, posZ, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
             setDead();
         }
     }
@@ -85,15 +87,15 @@ public class EntityEvidence extends Entity {
     @Override
     public void applyEntityCollision(Entity e) {
         super.applyEntityCollision(e);
-        if (getSinner() == e){
-            world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
+        if (getSinner() == e) {
+            world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
             setDead();
         }
     }
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f+rand.nextFloat()*0.4f, 0.8f+rand.nextFloat()*0.4f);
+        world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
         setDead();
         return false;
     }

@@ -19,6 +19,6 @@ public class DamageSourceBleed extends DamageSource {
 
     public static DamageSource causeEntityBleedingDamage(Entity e){
         if(e==null)return causeBleedingDamage();
-        return new EntityDamageSource("bleed", e);
+        return new EntityDamageSource("bleed", e).setDamageBypassesArmor().setDamageIsAbsolute();
     }
 }

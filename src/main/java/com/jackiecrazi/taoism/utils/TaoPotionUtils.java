@@ -41,6 +41,7 @@ public class TaoPotionUtils {
      */
     public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot, boolean stackWhenFailed) {
         Potion p = pot.getPotion();
+        elb.removeActivePotionEffect(p);
         elb.addPotionEffect(pot);
         if (!elb.isPotionActive(p)) {
             for (Map.Entry<IAttribute, AttributeModifier> e : p.getAttributeModifierMap().entrySet()) {
@@ -58,7 +59,7 @@ public class TaoPotionUtils {
                     }
                 }
             }
-            elb.getActivePotionMap().put(pot.getPotion(), pot);
+            //add goes here
             return false;
         }
         return true;
@@ -69,14 +70,17 @@ public class TaoPotionUtils {
      */
     public static void forceBleed(EntityLivingBase elb, Entity attacker, int duration, int potency, POTSTACKINGMETHOD method) {
         PotionEffect pe = stackPot(elb, new PotionEffect(TaoPotion.BLEED, duration, potency, true, false), method);
-        if (pe.getDuration() > 6000 || pe.getAmplifier() > 107) {
+        if (pe.getDuration() > 1200 || pe.getAmplifier() > 9) {
             elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), pe.getAmplifier() * 2 * Math.max((pe.getDuration() - 6000) / 20, 1));
-            pe = new PotionEffect(TaoPotion.BLEED, Math.min(pe.getDuration(), 6000), Math.min(pe.getAmplifier(), 107), true, false);
+            elb.removeActivePotionEffect(TaoPotion.BLEED);
+            return;
         }
         if (!attemptAddPot(elb, pe, true)) {
+            //pe = new PotionEffect(TaoPotion.BLEED, Math.min(pe.getDuration(), 6000), 99999, true, false);
             elb.hurtResistantTime = 0;
             elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), potency);
             elb.hurtResistantTime = 0;
+            elb.getActivePotionMap().put(TaoPotion.BLEED, pe);
         }
     }
 
@@ -84,17 +88,21 @@ public class TaoPotionUtils {
      * increases the potion amplifier on the entity, with options on the duration
      */
     public static PotionEffect stackPot(EntityLivingBase elb, PotionEffect toAdd, POTSTACKINGMETHOD method) {
-        PotionEffect pe = elb.getActivePotionEffect(toAdd.getPotion());
+        Potion p = toAdd.getPotion();
+        PotionEffect pe = elb.getActivePotionEffect(p);
         if (pe == null || method == POTSTACKINGMETHOD.NONE) {
+            //System.out.println("beep1");
             return toAdd;
         }
-        Potion p = toAdd.getPotion();
+        //System.out.println(pe);
         int length = pe.getDuration();
         int potency = pe.getAmplifier() + 1 + toAdd.getAmplifier();
+        //System.out.println(length);
+        //System.out.println(potency);
 
         switch (method) {
             case ADD:
-                length += pe.getDuration();
+                length = toAdd.getDuration()+pe.getDuration();
                 break;
             case MAXDURATION:
                 length = Math.max(pe.getDuration(), toAdd.getDuration());
@@ -108,7 +116,12 @@ public class TaoPotionUtils {
             case MINPOTENCY:
                 length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.min(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() < toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
                 break;
+            case ONLYADD:
+                potency=toAdd.getAmplifier();
+                length = toAdd.getDuration()+pe.getDuration();
+                break;
         }
+        //System.out.println(ret);
         return new PotionEffect(p, length, potency, false, false);
     }
 
@@ -128,5 +141,6 @@ public class TaoPotionUtils {
         MAXPOTENCY,
         MINDURATION,
         MINPOTENCY,
+        ONLYADD
     }
 }

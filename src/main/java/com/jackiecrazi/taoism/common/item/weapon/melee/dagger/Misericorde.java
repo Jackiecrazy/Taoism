@@ -1,9 +1,12 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.dagger;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -59,5 +62,15 @@ public class Misericorde extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2;
+    }
+
+    @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold&&collidingEntity instanceof EntityLivingBase) {
+            TaoMovementUtils.kick(elb, (EntityLivingBase) collidingEntity);
+            NeedyLittleThings.knockBack(elb, collidingEntity, 2, true);
+            return true;
+        }
+        return false;
     }
 }

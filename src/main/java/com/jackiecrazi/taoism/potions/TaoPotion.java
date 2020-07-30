@@ -51,7 +51,7 @@ public class TaoPotion extends Potion {
     /**
      * prevents posture regeneration
      */
-    public static Potion FATIGUE = null;
+    public static Potion EXHAUSTION = null;
     /**
      * prevents stagger
      */
@@ -96,7 +96,7 @@ public class TaoPotion extends Potion {
         HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("effect.hiding");
         BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("effect.bleed")
                 .registerPotionAttributeModifier(TaoEntities.HEAL, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 0);
-        FATIGUE = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("effect.fatigue")
+        EXHAUSTION = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("effect.fatigue")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
         ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("effect.enfeeble")
                 .registerPotionAttributeModifier(TaoEntities.MAXPOSTURE, "CC5AF142-2BD2-4215-B636-2605AED11727", -3, 0);
@@ -115,6 +115,8 @@ public class TaoPotion extends Potion {
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.1, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
+        MobEffects.NAUSEA
+                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
         //MobEffects.BLINDNESS
         //        .registerPotionAttributeModifier(SharedMonsterAttributes.FOLLOW_RANGE, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.5, 1);
         event.getRegistry().register(BLEED);
@@ -123,7 +125,7 @@ public class TaoPotion extends Potion {
         event.getRegistry().register(RESOLUTION);
         event.getRegistry().register(HEMORRHAGE);
         event.getRegistry().register(LACERATION);
-        event.getRegistry().register(FATIGUE);
+        event.getRegistry().register(EXHAUSTION);
         event.getRegistry().register(ENFEEBLE);
         event.getRegistry().register(DISORIENT);
         event.getRegistry().register(ENRAGE);
@@ -152,6 +154,7 @@ public class TaoPotion extends Potion {
         } else if (current.getPotion() == MobEffects.BLINDNESS && e.getEntityLiving() instanceof EntityLiving && CombatConfig.blindMobs) {
             ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
             ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
+
         } else if (current.getPotion() == DISORIENT && e.getEntityLiving() instanceof EntityLiving) {
             ((EntityLiving) e.getEntityLiving()).getNavigator().clearPath();
             ((EntityLiving) e.getEntityLiving()).setAttackTarget(null);
@@ -203,15 +206,17 @@ public class TaoPotion extends Potion {
     @ParametersAreNonnullByDefault
     public void performEffect(EntityLivingBase l, int amplifier) {
         if (this == BLEED) {
-            //l.hurtResistantTime = 0;
+            l.hurtResistantTime = 0;
             float damage = (1 + amplifier) / 2f;
-            if (l.getHealth() > damage)
-                l.setHealth(l.getHealth() - damage);
-            else l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), damage);
+//            if (l.getHealth() > damage)
+//                l.setHealth(l.getHealth() - damage);
+//            else
+                l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), damage);
             if (l.world instanceof WorldServer) {
                 ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 10, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
-            //l.hurtResistantTime = 0;
+            l.hurtResistantTime = 0;
+            l.hurtTime=0;
         } else if (this == ENRAGE) {
             TaoCasterData.getTaoCap(l).tauntedBy(null);
         } else if (this == AMPUTATION && amplifier != 0) {

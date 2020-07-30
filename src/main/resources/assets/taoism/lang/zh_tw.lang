@@ -64,8 +64,10 @@ item.karambit.name=爪刀
 karambit.switch=裝備時立刻重置冷卻
 karambit.backstab=背刺造成1.5倍傷害
 karambit.initiative=第一次攻擊無視所有護甲
-karambit.bleed=對無護甲的目標疊加一層持續一秒的流血，每層氣使觸發條件無視6點護甲
-karambit.harvest=可以採集剪刀能採集的方塊
+karambit.damage=傷害每兩層氣增加1，最多7
+karambit.bleed=可附加並延長層數等同於自身氣一半的流血
+karambit.duration=每次延長六秒，每兩層氣減少一秒
+karambit.harvest=可以作為剪刀使用
 
 item.chui.name=博浪錘
 chui.leap=爆擊造成雙倍傷害
@@ -195,7 +197,7 @@ kusarigama.parry=副手無法招架，但若招架時鐵球在二者之間，束
 kusarigama.critfollowup=鐮刀對被束縛的敵人暴擊，造成雙倍傷害和雙倍架勢消耗
 
 item.executionersword.name=誅戮之劍
-exesword.count=：已打開%s只審判之眼
+exesword.count=已打開%s只審判之眼
 exesword.trial=攻擊目標開始審判，在被告死亡或切換目標時結束
 exesword.evidence=每十秒（每層氣減少半秒）和每次攻擊被告後，在其周圍八方塊內凝結罪證
 exesword.eye=罪證會被任何傷害摧毀，撿起罪證後睜開一隻審判之眼
@@ -203,6 +205,27 @@ exesword.decrease=受到5點減免前的傷害會合上一隻審判之眼
 exesword.addqi=若切換目標終止審判，每隻審判之眼將會轉換為0.1層氣
 exesword.execution=若被告生命低於審判之眼的平方，下一次攻擊將其斬首
 exesword.head=被斬首的敵方必定掉落它的頭
+
+item.bullwhip.name=Bullwhip
+bullwhip.armor=damage treats target as having 1.5x the armor it has
+bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
+bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
+bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
+bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
+
+item.blacksnake.name=Blacksnake
+blacksnake.armor=lash treats target as having 1.5x the armor it has
+blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
+blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
+blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
+blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
+
+item.misericorde.name=Misericorde
+misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
+
+item.panguanbi.name=Judge's Pen
+
+item.emeici.name=Emeici
 
 item.projectile_prop.name=舞台道具不要在意
 

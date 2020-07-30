@@ -73,7 +73,7 @@ public class BanFu extends TaoWeapon {
         if (e instanceof EntityLivingBase && isCharged((EntityLivingBase) e, stack) && getHand(stack) != null) {
             final EntityLivingBase elb = (EntityLivingBase) e;
             //it spins you right round, baby, right round
-            elb.rotationYaw += Math.min(getChargedTime(elb, stack) / 5, 7);
+            elb.rotationYaw += Math.min(getChargedTime(elb, stack) / 5, 10);
             if (!w.isRemote) {
                 if (elb.ticksExisted % 10 == 0) {
                     if (!TaoCasterData.getTaoCap(elb).consumeQi(0.25f, 5)) {
@@ -208,7 +208,7 @@ public class BanFu extends TaoWeapon {
             if (TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) < chi - 1 || getHand(stack) == EnumHand.OFF_HAND)
                 TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1), false);
             else
-                TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD), false);
+                TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
         }
     }
 }

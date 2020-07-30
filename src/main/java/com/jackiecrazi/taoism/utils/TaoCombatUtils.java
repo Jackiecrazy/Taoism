@@ -359,6 +359,23 @@ public class TaoCombatUtils {
         return ret;
     }
 
+    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
+        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+    }
+
+    public static boolean isShield(ItemStack i) {
+        if (i.getItem().getRegistryName() == null) return false;
+        for (String s : CombatConfig.shieldItems) {
+            if (s.equals(i.getItem().getRegistryName().toString())) return true;
+        }
+        return false;
+    }
+
+    public static float getCooldownPeriod(EntityLivingBase elb) {
+        return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
+    }
+
     public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
@@ -392,29 +409,12 @@ public class TaoCombatUtils {
         return ret;
     }
 
-    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
-        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
-        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
-    }
-
-    public static boolean isShield(ItemStack i) {
-        if (i.getItem().getRegistryName() == null) return false;
-        for (String s : CombatConfig.shieldItems) {
-            if (s.equals(i.getItem().getRegistryName().toString())) return true;
-        }
-        return false;
-    }
-
     public static boolean isValidWeapon(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         for (String s : CombatConfig.parryCapableItems) {
             if (s.equals(i.getItem().getRegistryName().toString())) return true;
         }
         return false;
-    }
-
-    public static float getCooldownPeriod(EntityLivingBase elb) {
-        return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
@@ -437,5 +437,9 @@ public class TaoCombatUtils {
 
     public static boolean isPhysicalDamage(DamageSource ds) {
         return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
+    }
+
+    public static boolean isDirectDamage(DamageSource ds) {
+        return "player".equals(ds.damageType) || "mob".equals(ds.damageType);
     }
 }

@@ -120,7 +120,7 @@ public class Bullwhip extends TaoWeapon {
             }
         }
         if (attacker.isSneaking()) {
-            return -orig * 2;
+            return -orig * 3;
         }
         return super.knockback(attacker, target, stack, orig) * 1.2f;
     }

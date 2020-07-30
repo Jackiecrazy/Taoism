@@ -33,6 +33,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -154,7 +155,7 @@ public class TaoEntityHandler {
 
     @SubscribeEvent
     public static void dramatic(LivingFallEvent e) {
-        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage()&&e.getDistance()>2) {
+        if (TaoCasterData.getTaoCap(e.getEntityLiving()).isRecordingDamage() && e.getDistance() > 2) {
             TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(e.getEntityLiving().getRevengeTarget());
         }
     }
@@ -211,8 +212,14 @@ public class TaoEntityHandler {
             }
             flag = true;
         }
-        if (itsc.getCannonballTime() > 0 && !elb.noClip && elb.motionY < 0 && elb.motionY > -0.1) {
-            elb.motionY -= 0.1;
+        if (itsc.getCannonballTime() > 0 && !elb.noClip && elb.motionY < 0) {
+//            if (elb.motionY > -0.1)
+//                elb.motionY = -0.1;
+            //System.out.println(elb.motionX*elb.motionX+elb.motionZ*elb.motionZ/5);
+            elb.motionY *= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.8, 1);
+            elb.motionX /= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.7, 1);
+            elb.motionZ /= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.7, 1);
+            //TODO just have it ride on an entity...
             flag = true;
         }
         if (flag) elb.velocityChanged = true;

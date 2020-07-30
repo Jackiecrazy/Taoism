@@ -151,8 +151,8 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).setRootTime(0);
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).stopRecordingDamage(getThrower());
         }
-        if(stack.getItem() instanceof IChargeableWeapon){
-            ((IChargeableWeapon)stack.getItem()).dischargeWeapon(getThrower(), stack);
+        if (stack.getItem() instanceof IChargeableWeapon) {
+            ((IChargeableWeapon) stack.getItem()).dischargeWeapon(getThrower(), stack);
         }
     }
 
@@ -162,10 +162,18 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
                 getThrower().setPositionAndUpdate(getX(), getY() + 1, getZ());
             else {
                 Vec3d tpTo = NeedyLittleThings.getClosestAirSpot(getThrower().getPositionVector(), getPositionVector(), getThrower());
-                getThrower().setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
+                if (Double.isNaN(tpTo.x) || Double.isNaN(tpTo.y) || Double.isNaN(tpTo.z) || tpTo.y > 256 || tpTo.y < 0) {
+                    onRetrieveWeapon();
+                }
+                else getThrower().setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
             }
         }
         //onRetrieveWeapon();
+    }
+
+    @Override
+    protected boolean shouldRetrieve() {
+        return false;
     }
 
     @Override

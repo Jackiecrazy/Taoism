@@ -208,6 +208,9 @@ public class TaoStatCapability implements ITaoStatCapability {
                 int overflow = -getDownTimer();
                 setDownTimer(0);
                 addPosture(getPostureRegenAmount(elb, overflow));
+            } else if (elb.motionY > 0 && (!elb.noClip || !elb.world.isAirBlock(elb.getPosition().down()))) {
+                elb.motionY = -0.1;
+                elb.velocityChanged = true;
             }
         }
         diff = ticks;
@@ -707,11 +710,10 @@ public class TaoStatCapability implements ITaoStatCapability {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }
             }
-            float hp = target.getHealth(), dam = damage;
             while (damage > 0) {
                 target.hurtResistantTime = 0;
-                target.attackEntityFrom(ds, Math.min(damage, 20));
-                damage -= 20;
+                target.attackEntityFrom(ds, Math.min(damage, 3));
+                damage -= 3;
             }
         }
     }

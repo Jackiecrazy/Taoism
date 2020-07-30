@@ -64,8 +64,10 @@ item.karambit.name=爪刀
 karambit.switch=装备时立刻重置冷却
 karambit.backstab=背刺造成1.5倍伤害
 karambit.initiative=第一次攻击无视所有护甲
-karambit.bleed=对无护甲的目标叠加一层持续一秒的流血，每层气使触发条件无视6点护甲
-karambit.harvest=可以采集剪刀能采集的方块
+karambit.damage=伤害每两层气增加1，最多7
+karambit.bleed=可附加并延长层数等同于自身气一半的流血
+karambit.duration=每次延长六秒，每两层气减少一秒
+karambit.harvest=可以作为剪刀使用
 
 item.chui.name=博浪锤
 chui.leap=暴击造成双倍伤害
@@ -195,7 +197,7 @@ kusarigama.parry=副手无法招架，但若招架时铁球在二者之间，束
 kusarigama.critfollowup=镰刀对被束缚的敌人暴击，造成双倍伤害和双倍架势消耗
 
 item.executionersword.name=诛戮之剑
-exesword.count=：已打开%s只审判之眼
+exesword.count=已打开%s只审判之眼
 exesword.trial=攻击目标开始审判，在被告死亡或切换目标时结束
 exesword.evidence=每十秒（每层气减少半秒）和每次攻击被告后，在其周围八方块内凝结罪证
 exesword.eye=罪证会被任何伤害摧毁，捡起罪证后睁开一只审判之眼
@@ -211,12 +213,19 @@ bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage
 bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
 bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
 
-item.blacksnake.name=Blacksnake
+item.blacksnake.name=黑蛇鞭
 blacksnake.armor=damage dealt is doubly reduced by armor
 blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
 blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
 blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
 blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
+
+item.misericorde.name=慈悲之刺
+misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
+
+item.panguanbi.name=判官笔
+
+item.emeici.name=峨眉刺
 
 item.projectile_prop.name=舞台道具不要在意
 

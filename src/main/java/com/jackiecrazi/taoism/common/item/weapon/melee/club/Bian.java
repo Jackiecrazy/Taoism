@@ -96,7 +96,7 @@ public class Bian extends TaoWeapon {
                 }
                 for (EntityLivingBase e : attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, attacker.getEntityBoundingBox().grow(16))) {
                     if (e != attacker) {
-                        TaoPotionUtils.attemptAddPot(e, new PotionEffect(TaoPotion.FATIGUE, 200, 1), false);
+                        TaoPotionUtils.attemptAddPot(e, new PotionEffect(TaoPotion.EXHAUSTION, 200, 1), false);
                         TaoPotionUtils.blind(e, 200, 1);
                         //TaoPotionUtils.attemptAddPot(e, new PotionEffect(MobEffects.BLINDNESS, 200, 1), false);
                     }
@@ -111,8 +111,8 @@ public class Bian extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack))
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
-        else TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.FATIGUE, 40, chi / 3), false);
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.EXHAUSTION, 40, chi / 3), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
+        else TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.EXHAUSTION, 40, chi / 3), false);
     }
 
     @Override

@@ -140,7 +140,7 @@ public class Cestus extends TaoWeapon {
 
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        TaoCasterData.getTaoCap(defender).addQi(0.3f);
+        //TaoCasterData.getTaoCap(defender).addQi(0.3f);
         super.onParry(attacker, defender, item, amount);
     }
 

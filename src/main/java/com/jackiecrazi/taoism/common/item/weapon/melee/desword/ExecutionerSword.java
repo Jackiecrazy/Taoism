@@ -9,8 +9,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -53,11 +55,6 @@ public class ExecutionerSword extends TaoWeapon {
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
-        return super.getItemStackDisplayName(stack)+I18n.format("exesword.count", getBuff(stack, "souls"));
-    }
-
-    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (onHand && e.ticksExisted % (200 - getQiFromStack(stack) * 10) == 0 && getLastAttackedEntity(w, stack) instanceof EntityLivingBase && !w.isRemote) {
@@ -96,10 +93,11 @@ public class ExecutionerSword extends TaoWeapon {
 
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        super.attackStart(ds,attacker,target,stack,orig);
         if (target.getEntityId() != getLastAttackedEntityID(stack)) {
             TaoCasterData.getTaoCap(attacker).addQi(getBuff(stack, "souls") / 10f);
             setBuff(attacker, stack, "souls", 0);
-        } else if (getBuff(stack, "souls") * getBuff(stack, "souls") >= target.getHealth()) {
+        } else if (getBuff(stack, "souls") * getBuff(stack, "souls") >= target.getHealth()*(TaoCasterData.getTaoCap(target).getDownTimer()>0?0.5:1)) {
             chargeWeapon(attacker, stack);
         }
     }
@@ -141,7 +139,8 @@ public class ExecutionerSword extends TaoWeapon {
             EntityLivingBase target = (EntityLivingBase) getLastAttackedEntity(elb.world, is);
             if (soul.getSinner() == target) {
                 setBuff(elb, is, "souls", getBuff(is, "souls") + 1);
-                System.out.println("absorbed, now " + getBuff(is, "souls"));
+                if(elb instanceof EntityPlayer)
+                    ((EntityPlayer)elb).sendStatusMessage(new TextComponentTranslation("exesword.count", getBuff(is, "souls")), true);
                 return true;
             }
         }

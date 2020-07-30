@@ -8,7 +8,6 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
-import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -44,20 +43,21 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
+    public PartDefinition[] getPartNames(ItemStack is) {
+        return parts;
+    }
+
+    @Override
+    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (isCharged(defender, item)) return 0f;
+        return 0.7f;
+    }
+
+    @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
         if (e instanceof EntityLivingBase && onHand && isCharged((EntityLivingBase) e, stack) && getHand(stack) == EnumHand.MAIN_HAND) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            Entity target = TaoMovementUtils.collidingEntity(elb);
-            if (!w.isRemote && target != null && getLastAttackedEntity(w, stack) != target) {
-                TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
-                TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
-                NeedyLittleThings.knockBack(elb, target, 1f, true);
-                if (elb.motionY > 0.1) {
-                    elb.motionY = 0.1;
-                    elb.velocityChanged = true;
-                }
-            }
             if (getChargedTime(elb, stack) > getMaxChargeTime())
                 dischargeWeapon(elb, stack);
         }
@@ -70,6 +70,26 @@ public class Tonfa extends TaoWeapon {
         tooltip.add(I18n.format("tonfa.parry"));
         tooltip.add(I18n.format("tonfa.reset"));
         tooltip.add(I18n.format("tonfa.defbreak"));
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 2f;
+    }
+
+    @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity target, ItemStack stack) {
+        if (isCharged(elb, stack) && (getLastAttackedEntity(elb.world, stack) != target || elb.world.getTotalWorldTime() - lastAttackTime(elb, stack) > 10) && getHand(stack) == EnumHand.MAIN_HAND) {
+            TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
+            TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
+            NeedyLittleThings.knockBack(elb, target, 1f, true);
+            if (elb.motionY > 0.1) {
+                elb.motionY = 0.1;
+                elb.velocityChanged = true;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -87,6 +107,11 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
+    public int getMaxChargeTime() {
+        return 400;
+    }
+
+    @Override
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
         if (isCharged(defender, item)) return true;
         return super.canBlock(defender, attacker, item, recharged, amount);
@@ -94,7 +119,7 @@ public class Tonfa extends TaoWeapon {
 
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        TaoCasterData.getTaoCap(defender).addQi(0.3f);
+        //TaoCasterData.getTaoCap(defender).addQi(0.3f);
         int qi = TaoCasterData.getTaoCap(attacker).getQiFloored();
         if (qi >= 3) {
             Taoism.setAtk(attacker, 0);
@@ -128,7 +153,7 @@ public class Tonfa extends TaoWeapon {
         }
         if (isCharged(attacker, stack)) {
             TaoCasterData.getTaoCap(target).setDownTimer(10);
-            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.FATIGUE, 20, 4), false);
+            TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.EXHAUSTION, 20, 4), false);
         }
     }
 
@@ -138,24 +163,5 @@ public class Tonfa extends TaoWeapon {
             multiHit(attacker, stack, target, 3, 3);
     }
 
-    @Override
-    public int getMaxChargeTime() {
-        return 400;
-    }
 
-    @Override
-    public PartDefinition[] getPartNames(ItemStack is) {
-        return parts;
-    }
-
-    @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return 2f;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        if (isCharged(defender, item)) return 0f;
-        return 0.7f;
-    }
 }
