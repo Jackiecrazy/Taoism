@@ -348,12 +348,13 @@ public class TaoCombatUtils {
     public static ItemStack getShield(Entity attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120);
         ItemStack ret = ItemStack.EMPTY;
         //shields
-        if (isShield(off) && offRec) {
+        if (isShield(off) && offRec && facing) {
             return off;
         }
-        if (isShield(main) && mainRec) {
+        if (isShield(main) && mainRec && facing) {
             return main;
         }
         return ret;
@@ -378,22 +379,23 @@ public class TaoCombatUtils {
 
     public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120);
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shields
-        if (isShield(off) && offRec) {
+        if (isShield(off) && offRec && facing) {
             return off;
         }
-        if (isShield(main) && mainRec) {
+        if (isShield(main) && mainRec && facing) {
             return main;
         }
         //parries
-        if (isValidWeapon(main) && mainRec) {
+        if (isValidWeapon(main) && mainRec && facing) {
             ret = main;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
-        if (isValidWeapon(off) && offRec) {
+        if (isValidWeapon(off) && offRec && facing) {
             ret = off;
             defMult = CombatConfig.defaultMultiplierPostureDefend;
         }
