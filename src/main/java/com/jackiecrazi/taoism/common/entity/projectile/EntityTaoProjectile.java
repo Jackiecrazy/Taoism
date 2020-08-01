@@ -512,7 +512,7 @@ public class EntityTaoProjectile extends EntityArrow implements IDamageType {
         setKnockbackStrength(charge / (maxCharge / 3));
         Entity entity = raytraceResultIn.entityHit;
 
-        if (entity != null) {
+        if (raytraceResultIn.typeOfHit== RayTraceResult.Type.ENTITY) {
             onHitEntity(entity);
         } else {
             onHitBlock(raytraceResultIn);

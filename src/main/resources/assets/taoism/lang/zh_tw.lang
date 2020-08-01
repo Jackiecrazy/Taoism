@@ -206,30 +206,53 @@ exesword.addqi=若切換目標終止審判，每隻審判之眼將會轉換為0.
 exesword.execution=若被告生命低於審判之眼的平方，下一次攻擊將其斬首
 exesword.head=被斬首的敵方必定掉落它的頭
 
-item.bullwhip.name=Bullwhip
-bullwhip.armor=damage treats target as having 1.5x the armor it has
-bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
-bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
-bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
-bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
+item.bullwhip.name=軟鞭
+bullwhip.armor=傷害計算目標1.5倍的護甲
+bullwhip.knockback=普攻為範圍7且擊退較高的鞭擊
+bullwhip.sonicboom=若擊中距離6以外的敵人，鞭頭將造成減半的範圍傷害和一秒混亂
+bullwhip.sneak=潛行時普攻會把敵人拉進來並附加半秒緩慢、虛弱和束縛
+bullwhip.sneakboom=若敵人被鞭頭擊中，三種效果的時長延至兩秒
 
-item.blacksnake.name=Blacksnake
-blacksnake.armor=lash treats target as having 1.5x the armor it has
-blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
-blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
-blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
-blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
+item.blacksnake.name=黑蛇鞭
+blacksnake.armor=傷害計算目標1.5倍的護甲
+blacksnake.sonicboom=普攻為距離5的鞭擊，擊中距離4以外的敵人時造成 1(+chi/3) 倍的暴擊傷害
+blacksnake.blackjack=若敵人在距離2內，近戰普攻附加1.5秒緩慢和虛弱
+blacksnake.sneak=潛行時鞭擊將會把兩人拉向中間，造成半秒束縛
+blacksnake.sneakboom=若暴擊，額外造成近戰效果
 
-item.misericorde.name=Misericorde
-misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
+item.misericorde.name=慈悲之刺
+misericorde.stagger=對擊倒的目標造成雙倍傷害且無視其所有護甲
 
-item.panguanbi.name=Judge's Pen
+item.panguanbi.name=判官筆
+panguanbi.detonation=每四次攻擊會完成一套點穴術，根據該次攻擊時自身的狀態造成額外效果
+panguanbi.sneak=若潛行，造成4點架勢傷害和三秒疲憊
+panguanbi.normal=若騰空，造成4點流血傷害和三秒流血I
+panguanbi.jump=若非潛行且非騰空，同時禁錮並束縛1.5秒
+panguanbi.variation=前三次攻擊每出現一種以上狀態，傷害和效果時長便會增加，最多達到三倍傷害和時長
 
-item.emeici.name=Emeici
+item.emeici.name=峨眉刺
+emeici.spin=若攻擊者的基本方向和上次攻擊不同：
+emeici.crit=造成1.5倍暴擊傷害和3點架勢傷害
 
 item.projectile_prop.name=舞台道具不要在意
 
 <Resources>=
+
+<Effects>=
+effect.taoamputation=截肢
+effect.taoarmorbreak=破甲
+effect.taobleed=流血
+effect.taodeathmark=死亡宣判
+effect.taodisorient=混亂
+effect.taoenfeeble=衰弱
+effect.taoenrage=挑釁
+effect.taoexhaustion=疲憊
+effect.taofear=恐懼
+effect.taohiding=夜行
+effect.taointernalbleed=內傷
+effect.taolaceration=撕裂
+effect.taorefluence=氣逆
+effect.taoresolution=意志
 
 <Blocks>=
 tile.TaoisticAnvil.name=

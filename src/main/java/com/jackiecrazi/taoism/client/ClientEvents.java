@@ -118,6 +118,11 @@ public class ClientEvents {
         //e.getItemColors().registerItemColorHandler(ProjectileTinter.INSTANCE, TaoItems.prop);
     }
 
+//    @SubscribeEvent
+//    public static void squish(ItemTooltipEvent e){
+//        e.getToolTip().removeIf(s -> (s.startsWith(TextFormatting.BLUE) && !KeyBindOverlord.isShiftDown())||());
+//    }
+
     //attacks when out of range, charges for l'execution
     @SubscribeEvent
     public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {

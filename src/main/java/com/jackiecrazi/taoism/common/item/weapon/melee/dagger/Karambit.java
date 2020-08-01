@@ -85,9 +85,8 @@ public class Karambit extends TaoWeapon {
             Vec3d tpTo = NeedyLittleThings.getClosestAirSpot(elb.getPositionVector(), r.hitVec, elb);
             boolean shouldDischarge = gettagfast(stack).getInteger("flashesWithoutHit") > 3;
             gettagfast(stack).setInteger("flashesWithoutHit", gettagfast(stack).getInteger("flashesWithoutHit") + 1);
-            if (r.entityHit != null) {
+            if (getLastAttackedEntity(elb.world, stack) != null) {
                 tpTo = NeedyLittleThings.getPointInFrontOf(r.entityHit, elb, -5);
-                TaoCombatUtils.attack(elb, r.entityHit, EnumHand.MAIN_HAND);
                 shouldDischarge = true;
             }
             for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
@@ -178,12 +177,16 @@ public class Karambit extends TaoWeapon {
     @Override
     protected void endScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, int interval) {
         if (victim instanceof EntityLivingBase) {
-            TaoCasterData.getTaoCap((EntityLivingBase) victim).stopRecordingDamage(elb);
             //TODO aoe fear if enemy dies
+            for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
+                if (e != elb)
+                    TaoPotionUtils.fear(e, elb, (int) TaoCasterData.getTaoCap((EntityLivingBase) victim).getRecordedDamage() * 3);
+            }
+            TaoCasterData.getTaoCap((EntityLivingBase) victim).stopRecordingDamage(elb);
             for (int ignored = 0; ignored < 60; ignored++) {
-                double x = victim.posX + (Taoism.unirand.nextFloat() - 0.5) * 5;
-                double y = victim.posY + Taoism.unirand.nextFloat() * victim.height;
-                double z = victim.posZ + (Taoism.unirand.nextFloat() - 0.5) * 5;
+                double x = victim.posX + (Taoism.unirand.nextFloat() - 0.5) * 10;
+                double y = victim.posY + Taoism.unirand.nextFloat() * 5;
+                double z = victim.posZ + (Taoism.unirand.nextFloat() - 0.5) * 10;
                 victim.world.spawnParticle(EnumParticleTypes.REDSTONE, x, y, z, 1, 0, 0);
             }
         }

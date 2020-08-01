@@ -207,29 +207,52 @@ exesword.execution=若被告生命低于审判之眼的平方，下一次攻击�
 exesword.head=被斩首的敌方必定掉落它的头
 
 item.bullwhip.name=软鞭
-bullwhip.armor=damage dealt is doubly reduced by armor
-bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
-bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
-bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
-bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
+bullwhip.armor=伤害计算目标1.5倍的护甲
+bullwhip.knockback=普攻为范围7且击退较高的鞭击
+bullwhip.sonicboom=若击中距离6以外的敌人，鞭头将造成减半的范围伤害和一秒混乱
+bullwhip.sneak=潜行时普攻会把敌人拉进来并附加半秒缓慢、虚弱和束缚
+bullwhip.sneakboom=若敌人被鞭头击中，三种效果的时长延至两秒
 
 item.blacksnake.name=黑蛇鞭
-blacksnake.armor=damage dealt is doubly reduced by armor
-blacksnake.sonicboom=lashes in range 5. If opponent is at least 4 blocks away, crit for 1(+chi/3)x damage
-blacksnake.blackjack=if opponent is in range 2, inflicts 1.5 seconds of slowness and weakness, but can be parried
-blacksnake.sneak=while sneaking, whiplash will pull attacker and target together, binding the target for half a second
-blacksnake.sneakboom=if enemy is hit by sonic boom, melee debuffs are additionally applied
+blacksnake.armor=伤害计算目标1.5倍的护甲
+blacksnake.sonicboom=普攻为距离5的鞭击，击中距离4以外的敌人时造成 1(+chi/3) 倍的暴击伤害
+blacksnake.blackjack=若敌人在距离2内，近战普攻附加1.5秒缓慢和虚弱
+blacksnake.sneak=潜行时鞭击将会把两人拉向中间，造成半秒束缚
+blacksnake.sneakboom=若暴击，额外造成近战效果
 
 item.misericorde.name=慈悲之刺
-misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
+misericorde.stagger=对击倒的目标造成双倍伤害且无视其所有护甲
 
 item.panguanbi.name=判官笔
+panguanbi.detonation=每四次攻击会完成一套点穴术，根据该次攻击时自身的状态造成额外效果
+panguanbi.sneak=若潜行，造成4点架势伤害和三秒疲惫
+panguanbi.normal=若腾空，造成4点流血伤害和三秒流血I
+panguanbi.jump=若非潜行且非腾空，同时禁锢并束缚1.5秒
+panguanbi.variation=前三次攻击每出现一种以上状态，伤害和效果时长便会增加，最多达到三倍伤害和时长
 
 item.emeici.name=峨眉刺
+emeici.spin=若攻击者的基本方向和上次攻击不同：
+emeici.crit=造成1.5倍暴击伤害和3点架势伤害
 
 item.projectile_prop.name=舞台道具不要在意
 
 <Resources>=
+
+<Effects>=
+effect.taoamputation=截肢
+effect.taoarmorbreak=破甲
+effect.taobleed=流血
+effect.taodeathmark=死亡宣判
+effect.taodisorient=混乱
+effect.taoenfeeble=衰弱
+effect.taoenrage=挑衅
+effect.taoexhaustion=疲惫
+effect.taofear=恐惧
+effect.taohiding=夜行
+effect.taointernalbleed=内伤
+effect.taolaceration=撕裂
+effect.taorefluence=气逆
+effect.taoresolution=意志
 
 <Blocks>=
 tile.TaoisticAnvil.name=

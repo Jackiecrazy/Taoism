@@ -3,7 +3,7 @@
   "pattern":
   [
     " tt",
-    " tt",
+    " t ",
     "it "
   ],
   "key":
@@ -11,7 +11,7 @@
     "t":
     {
       "type": "forge:ore_dict",
-      "ore": "string"
+      "ore": "leather"
     },
     "i":
     {

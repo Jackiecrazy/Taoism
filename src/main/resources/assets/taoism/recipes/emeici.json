@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    " tt",
-    " t ",
-    "st "
+    "n n",
+    " s ",
+    "n  "
   ],
   "key":
   {
-    "t":
+    "n":
     {
       "type": "forge:ore_dict",
-      "ore": "leather"
+      "ore": "nuggetIron"
     },
     "s":
     {
@@ -21,6 +21,6 @@
   },
   "result":
   {
-    "item": "taoism:bullwhip"
+    "item": "taoism:emeici"
   }
 }

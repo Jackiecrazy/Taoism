@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.client.render.RenderTaoItemProjectile;
 import com.jackiecrazi.taoism.client.render.RenderTetheredTaoItemProjectile;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.entity.fx.EntityEvidence;
+import com.jackiecrazi.taoism.common.entity.fx.EntityFear;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -52,7 +53,9 @@ public class ClientProxy extends CommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntityBouncySwordBeam.class, manager -> new RenderTaoItemProjectile<>(manager, 3, Minecraft.getMinecraft().getRenderItem(), new Vec3i(-90, 0, 0), 2f,2,1));
         RenderingRegistry.registerEntityRenderingHandler(EntityKusarigamaShot.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 6, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 0, 0), 1.5f, 1.5f, 4.5f, EnumHand.OFF_HAND));
         RenderingRegistry.registerEntityRenderingHandler(EntityWhiplash.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1.5f, null));
+        RenderingRegistry.registerEntityRenderingHandler(EntityPhysicsDummy.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1));
         RenderingRegistry.registerEntityRenderingHandler(EntityEvidence.class, RenderNothing::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityFear.class, RenderNothing::new);
     }
 
     public void init(FMLInitializationEvent event) {

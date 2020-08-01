@@ -21,6 +21,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +63,6 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
     }
 
     @Override
-    public boolean canBeAttackedWithItem() {
-        return super.canBeAttackedWithItem();
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         if (target != null) {
@@ -92,35 +88,23 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
         if (ticksExisted % 10 == 0)
             prevTickExplosion = explosion;
         super.onUpdate();
-        //if(!world.isRemote)
         updateTetheringVelocity();
-        //System.out.println("at "+getPositionVector());
+//        System.out.println(world.isRemote+" at "+getPositionVector());
+//        if(target!=null){
+//            System.out.println(world.isRemote+" mob at "+getPositionVector());
+//        }
         if (target != null && target.isDead) {
             target = null;
+            //updateHitStatus(-1);
         }
         if (target instanceof EntityLivingBase && NeedyLittleThings.getDistSqCompensated(this, target) == 0) {
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).setDownTimer(200);
+            target.motionX=target.motionY=target.motionZ=0;
+            target.velocityChanged=true;
         }
         if (ticksExisted % 10 == 0 && prevTickExplosion != 0 && prevTickExplosion == explosion) {
             explosion = prevTickExplosion = 0;
         }
-    }
-
-    @Override
-    protected void onHitBlock(RayTraceResult rtr) {
-        if (target == null && explosion < 2 && NeedyLittleThings.getSpeedSq(this) > 0.5 && rtr.sideHit != EnumFacing.UP) {
-            //world.newExplosion(this, posX, posY, posZ, 3, false, true);
-            FakeExplosion.explode(world, this, getThrower(), posX, posY, posZ, 4 - explosion);
-            explosion++;
-            if (explosion > 1) {
-                motionX *= 0.5;
-                motionY *= 0.5;
-                motionZ *= 0.5;
-            }
-        } else {
-            super.onHitBlock(rtr);
-        }
-        sync();
     }
 
     @Override
@@ -151,7 +135,7 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).setRootTime(0);
             TaoCasterData.getTaoCap(((EntityLivingBase) target)).stopRecordingDamage(getThrower());
         }
-        if (stack.getItem() instanceof IChargeableWeapon) {
+        if (stack != null && stack.getItem() instanceof IChargeableWeapon) {
             ((IChargeableWeapon) stack.getItem()).dischargeWeapon(getThrower(), stack);
         }
     }
@@ -164,11 +148,10 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
                 Vec3d tpTo = NeedyLittleThings.getClosestAirSpot(getThrower().getPositionVector(), getPositionVector(), getThrower());
                 if (Double.isNaN(tpTo.x) || Double.isNaN(tpTo.y) || Double.isNaN(tpTo.z) || tpTo.y > 256 || tpTo.y < 0) {
                     onRetrieveWeapon();
-                }
-                else getThrower().setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
+                } else getThrower().setPositionAndUpdate(tpTo.x, tpTo.y, tpTo.z);
             }
         }
-        //onRetrieveWeapon();
+        onRetrieveWeapon();
     }
 
     @Override
@@ -183,5 +166,42 @@ public class EntityChui extends EntityThrownWeapon implements ITetherAnchor {
             return (Minecraft.getMinecraft().getRenderPartialTicks() + ticksExisted) * 20;
         }
         return ticksExisted * 3;
+    }
+
+    @Override
+    protected void onHit(RayTraceResult rtr) {
+        if (rtr.entityHit != null) target = rtr.entityHit;
+        if (target == null && explosion < 2 && NeedyLittleThings.getSpeedSq(this) > 0.5 && rtr.sideHit != EnumFacing.UP) {
+            //world.newExplosion(this, posX, posY, posZ, 3, false, true);
+            FakeExplosion.explode(world, this, getThrower(), posX, posY, posZ, 4 - explosion);
+            explosion++;
+            if (explosion > 1) {
+                motionX *= 0.5;
+                motionY *= 0.5;
+                motionZ *= 0.5;
+            }
+        } else {
+            super.onHit(rtr);
+        }
+    }
+
+    @Override
+    protected float getGravityVelocity() {
+        return 0.05f;
+    }
+
+    /**
+     * overridden to prevent it from detecting its target
+     */
+    @Nullable
+    @Override
+    protected Entity findEntityOnPath(Vec3d start, Vec3d end) {
+        if(target!=null)return null;
+        return super.findEntityOnPath(start,end);
+    }
+
+    @Override
+    public boolean canBeAttackedWithItem() {
+        return super.canBeAttackedWithItem();
     }
 }

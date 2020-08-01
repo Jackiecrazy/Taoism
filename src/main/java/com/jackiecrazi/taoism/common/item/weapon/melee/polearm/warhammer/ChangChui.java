@@ -4,6 +4,8 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.effect.FakeExplosion;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityPhysicsDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
@@ -60,11 +62,6 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return 4;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1.6f;
     }
@@ -79,14 +76,6 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-//        if (getHand(stack) == EnumHand.OFF_HAND) {
-//            splash(attacker, stack, 120);
-//        }
-    }
-
-    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
@@ -94,6 +83,19 @@ public class ChangChui extends TaoWeapon {
         tooltip.add(I18n.format("maul.impact"));
         tooltip.add(I18n.format("maul.nail"));
         tooltip.add(I18n.format("maul.hardness"));
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 4;
+    }
+
+    @Override
+    //default attack code to AoE
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+//        if (getHand(stack) == EnumHand.OFF_HAND) {
+//            splash(attacker, stack, 120);
+//        }
     }
 
     @Override
@@ -120,13 +122,18 @@ public class ChangChui extends TaoWeapon {
 
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
-        if (isCharged(attacker, item)) {
-            target.motionX -= MathHelper.sin(-attacker.rotationYaw * 0.017453292F - (float) Math.PI) * 5;
-            target.motionZ -= MathHelper.cos(-attacker.rotationYaw * 0.017453292F - (float) Math.PI) * 5;
-            target.velocityChanged = true;
+        if (isCharged(attacker, item) && !attacker.world.isRemote) {
+            EntityPhysicsDummy epd = new EntityPhysicsDummy(attacker.world, attacker, getHand(item), target);
+            epd.shoot(attacker, -45, attacker.rotationYaw, 0.0F, 1.5f, 0.0F);
+            attacker.world.spawnEntity(epd);
+            if (getHand(item) == EnumHand.OFF_HAND) {
+                item = attacker.getHeldItemMainhand();
+            }
             TaoCasterData.getTaoCap(target).startRecordingDamage();
             TaoCasterData.getTaoCap(target).setCannonballTime(100);
             TaoCasterData.getTaoCap(attacker).consumeQi(4, 0);
+            dischargeWeapon(attacker, item);
+            //TODO baseball
         }
     }
 
@@ -137,9 +144,11 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f), false);
-        //TaoCasterData.getTaoCap(target).setCannonballTime(0);
-        TaoCasterData.getTaoCap(target).consumePosture(orig * 2, true, true, null);
+        //target.world.createExplosion(attacker, target.posX, target.posY, target.posZ, MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f), false);
+        FakeExplosion.explode(target.world, target, attacker, target.posX, target.posY, target.posZ, (float) MathHelper.clamp(target.width * target.height * (float) NeedyLittleThings.getSpeedSq(target), 4f, 8f));
+        target.motionX=target.motionY=target.motionZ=0;
+        TaoCasterData.getTaoCap(target).setCannonballTime(0);
+        TaoCasterData.getTaoCap(target).consumePosture(orig * 4, true, true, null);
         return orig * 4;
     }
 
@@ -147,10 +156,6 @@ public class ChangChui extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (attacker.world.isRemote) return;
         World w = attacker.world;
-        if(isCharged(attacker, stack)) {
-            target.motionY += 1.5;
-            dischargeWeapon(attacker, stack);
-        }
         if (getHand(stack) == EnumHand.OFF_HAND) {
             int blocksQueried = 0;
             int airBlocks = 0;

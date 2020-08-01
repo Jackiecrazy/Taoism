@@ -245,7 +245,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
         if (handIn == EnumHand.OFF_HAND) {
             ItemStack offhand = p.getHeldItemOffhand();
-            if (!offhand.isEmpty() && TaoCombatHandler.lastRightClickTime.getOrDefault(p, 0L) + 5 < worldIn.getTotalWorldTime() && TaoCombatUtils.getCooledAttackStrengthOff(p, 0.5f) == 1f) {
+            if (!offhand.isEmpty() && TaoCombatHandler.lastRightClickTime.getOrDefault(p.getEntityId(), 0L) + 5 < worldIn.getTotalWorldTime() && TaoCombatUtils.getCooledAttackStrengthOff(p, 0.5f) == 1f) {
                 if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
                     p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
                 }
@@ -263,11 +263,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp, true);
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);
                 if (!worldIn.isRemote)
-                    TaoCombatHandler.lastRightClickTime.put(p, worldIn.getTotalWorldTime());
+                    TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
                 return new ActionResult<>(EnumActionResult.SUCCESS, offhand);
             }
             if (!worldIn.isRemote) {
-                TaoCombatHandler.lastRightClickTime.put(p, worldIn.getTotalWorldTime());
+                TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
             }
         }
         return super.onItemRightClick(worldIn, p, handIn);
@@ -489,10 +489,15 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
             multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", attackDamage(stack) - 1, 0));
             multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", speed(stack), 0));
-            multimap.put(TaoEntities.QIRATE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getQiAccumulationRate(stack), 0));
+            multimap.put(TaoEntities.QIRATE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getQiAccumulationRate(stack) * (1 + EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("sweeping"), stack) / 4f), 0));
             multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getTrueReach(null, stack) - 3, 0));
+            multimap.put(TaoEntities.MAXPOSTURE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("unbreaking"), stack)/10f, 1));
+            multimap.put(TaoEntities.POSREGEN.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("mending"), stack)/5f, 1));
             //for (int x = 0; x < IElemental.ATTRIBUTES.length; x++)
             //multimap.put(IElemental.ATTRIBUTES[x].getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", (double) getAffinity(stack, x), 0));
+        }else if(equipmentSlot==EntityEquipmentSlot.OFFHAND){
+            multimap.put(TaoEntities.MAXPOSTURE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("unbreaking"), stack)/10f, 1));
+            multimap.put(TaoEntities.POSREGEN.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("mending"), stack)/5f, 1));
         }
         return multimap;
     }
@@ -542,9 +547,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (hand != null)
             TaoCasterData.getTaoCap(player).setSwing(TaoCombatUtils.getHandCoolDown(player, hand));
         return super.onLeftClickEntity(stack, player, entity);
-    }    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
     }
 
     @Override
@@ -554,6 +556,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             return true;
         }
         return super.onEntityItemUpdate(entityItem);
+    }    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
     }
 
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
@@ -606,7 +611,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     }
                 }
             }
-        }else{
+        } else {
             elb.getAttributeMap().onAttributeModified(elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE));
         }
         EnumHand hand = getHand(stack);
@@ -663,9 +668,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
      * @return true if the enchantment can be applied to this item
      */
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if (enchantment.equals(Enchantment.getEnchantmentByLocation("sweeping"))) return false;
-        if (enchantment.equals(Enchantment.getEnchantmentByLocation("unbreaking"))) return false;
-        if (enchantment.equals(Enchantment.getEnchantmentByLocation("mending"))) return false;
         return enchantment.type != null && (enchantment.type.canEnchantItem(Items.IRON_SWORD));
     }
 
@@ -994,16 +996,16 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
     }
 
-//    public EnumPhase getPhase(final ItemStack stack){
-//
-//    }
-
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
 //        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
 //            return false;
         return attacker != target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
     }
+
+//    public EnumPhase getPhase(final ItemStack stack){
+//
+//    }
 
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return Event.Result.DEFAULT;

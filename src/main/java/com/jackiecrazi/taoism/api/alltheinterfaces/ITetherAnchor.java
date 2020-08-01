@@ -13,34 +13,40 @@ public interface ITetherAnchor {
     default void updateTetheringVelocity() {
         if (getTetheringEntity() != null) {
             Vec3d offset = getTetheredOffset();
-            Entity e = getTetheringEntity();
-            Entity target = getTetheredEntity();
-            if (e != null) {
+            Entity toBeMoved = getTetheringEntity();
+            Entity moveTowards = getTetheredEntity();
+            if (toBeMoved != null) {
                 double distsq = 0;
                 Vec3d point = null;
                 if (offset != null) {
-                    distsq = NeedyLittleThings.getDistSqCompensated(e, offset);
+                    distsq = NeedyLittleThings.getDistSqCompensated(toBeMoved, offset);
                     point = offset;
-                    if (target != null) {
-                        distsq = e.getDistanceSq(target);
-                        point = target.getPositionVector().add(offset);
+                    if (moveTowards != null) {
+                        distsq = toBeMoved.getDistanceSq(moveTowards);
+                        point = moveTowards.getPositionVector().add(offset);
                     }
                 }
                 //update the entity's relative position to the point
                 //if the distance is below tether length, do nothing
                 //if the distance is above tether length, apply centripetal force to the point
                 if (getTetherLength() * getTetherLength() < distsq && point != null) {
-                    e.motionX += (point.x - e.posX) * 0.05;
-                    e.motionY += (point.y - e.posY) * 0.05;
-                    e.motionZ += (point.z - e.posZ) * 0.05;
+                    toBeMoved.motionX += (point.x - toBeMoved.posX) * 0.05;
+                    toBeMoved.motionY += (point.y - toBeMoved.posY) * 0.05;
+                    toBeMoved.motionZ += (point.z - toBeMoved.posZ) * 0.05;
                 }
-                else if (getTetherLength() == 0 && target != null) {//special case to help with catching up to entities
-                    e.motionX = target.motionX;
-                    e.motionZ = target.motionZ;
-                    if(!target.onGround) e.motionY = target.motionY;
-                    else e.motionY=0;
+                if (getTetherLength() == 0 && moveTowards != null) {//special case to help with catching up to entities
+                    //System.out.println(target.getDistanceSq(e));
+                    //if(NeedyLittleThings.getDistSqCompensated(moveTowards, toBeMoved)>8){
+                        toBeMoved.posX=moveTowards.posX;
+                        toBeMoved.posY=moveTowards.posY;
+                        toBeMoved.posZ=moveTowards.posZ;
+                    //}
+                    toBeMoved.motionX = moveTowards.motionX;
+                    toBeMoved.motionZ = moveTowards.motionZ;
+                    if(!moveTowards.onGround) toBeMoved.motionY = moveTowards.motionY;
+                    else toBeMoved.motionY=0;
                 }//else e.motionZ=e.motionX=e.motionY=0;
-                e.velocityChanged = true;
+                toBeMoved.velocityChanged = true;
             }
         }
     }

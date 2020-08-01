@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.hand;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,13 +26,14 @@ public class Emeici extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, false, true};
 
     public Emeici() {
-        super(1, 2, 5f, 0);
+        super(1, 2, 5f, 0.1f);
     }
 
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(I18n.format("emeici.spin"));
+        tooltip.add(I18n.format("emeici.crit"));
     }
 
     @Override
@@ -44,7 +46,7 @@ public class Emeici extends TaoWeapon {
         if (getBuff(item, "crit") == 1) {
             return 3;
         }
-        return super.postureDealtBase(attacker, defender, item, amount);
+        return 0.1f;
     }
 
     @Override

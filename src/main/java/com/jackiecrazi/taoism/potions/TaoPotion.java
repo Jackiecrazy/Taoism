@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -85,6 +86,10 @@ public class TaoPotion extends Potion {
      * reduces max health. Automatically cured if you somehow over-heal (e.g. healing/regen pot)
      */
     public static Potion AMPUTATION = null;
+    /**
+     * causes target to move around randomly
+     */
+    public static Potion FEAR = null;
     private int interval = 0;
 
     private TaoPotion(boolean isBad, int colour) {
@@ -93,30 +98,31 @@ public class TaoPotion extends Potion {
 
     @SubscribeEvent
     public static void init(RegistryEvent.Register<Potion> event) {
-        HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("effect.hiding");
-        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("effect.bleed")
+        HIDE = new TaoPotion(true, 0).setRegistryName("hide").setPotionName("effect.taohiding");
+        BLEED = new TaoPotion(true, new Color(187, 10, 30).getRGB()).procInterval(20).setRegistryName("bleed").setPotionName("effect.taobleed")
                 .registerPotionAttributeModifier(TaoEntities.HEAL, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 0);
-        EXHAUSTION = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("fatigue").setPotionName("effect.fatigue")
+        EXHAUSTION = new TaoPotion(true, new Color(250, 200, 0).getRGB()).setRegistryName("exhaustion").setPotionName("effect.taoexhaustion")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
-        ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("effect.enfeeble")
+        ENFEEBLE = new TaoPotion(true, new Color(167, 161, 155).getRGB()).setRegistryName("enfeeble").setPotionName("effect.taoenfeeble")
                 .registerPotionAttributeModifier(TaoEntities.MAXPOSTURE, "CC5AF142-2BD2-4215-B636-2605AED11727", -3, 0);
         RESOLUTION = new TaoPotion(false, new Color(0xFC6600).getRGB()).setRegistryName("resolution").setPotionName("effect.resolution");
-        ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("effect.armorBreak")
+        ARMORBREAK = new TaoPotion(true, new Color(255, 233, 54).getRGB()).setRegistryName("armorBreak").setPotionName("effect.taoarmorBreak")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.ARMOR, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0);
-        HEMORRHAGE = new TaoPotion(true, new Color(100, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("effect.internalBleed");
-        LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("effect.laceration");
-        DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("effect.disorient");
-        ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("effect.enrage")
+        HEMORRHAGE = new TaoPotion(true, new Color(100, 10, 30).getRGB()).setRegistryName("internalBleed").setPotionName("effect.taointernalBleed");
+        LACERATION = new TaoPotion(true, new Color(140, 10, 30).getRGB()).setRegistryName("laceration").setPotionName("effect.taolaceration");
+        DISORIENT = new TaoPotion(true, new Color(70, 70, 70).getRGB()).setRegistryName("disorient").setPotionName("effect.taodisorient");
+        ENRAGE = new TaoPotion(false, new Color(255, 0, 0).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("enrage").setPotionName("effect.taoenrage")
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.3, 2);
-        DEATHMARK = new TaoPotion(true, new Color(10, 10, 10).getRGB()).setRegistryName("deathmark").setPotionName("effect.deathmark");
-        REFLUENCE = new TaoPotion(true, new Color(70, 90, 240).getRGB()).setRegistryName("refluence").setPotionName("effect.refluence");
-        AMPUTATION = new TaoPotion(true, new Color(200, 0, 50).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("amputation").setPotionName("effect.amputation")
+        DEATHMARK = new TaoPotion(true, new Color(10, 10, 10).getRGB()).setRegistryName("deathmark").setPotionName("effect.taodeathmark");
+        REFLUENCE = new TaoPotion(true, new Color(70, 90, 240).getRGB()).setRegistryName("refluence").setPotionName("effect.taorefluence");
+        AMPUTATION = new TaoPotion(true, new Color(200, 0, 50).getRGB()).procInterval(Integer.MAX_VALUE).setRegistryName("amputation").setPotionName("effect.taoamputation")
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11728", -2, 0)
                 .registerPotionAttributeModifier(SharedMonsterAttributes.MAX_HEALTH, "CC5AF142-2BD2-4215-B636-2605AED11729", -0.1, 2);
         MobEffects.POISON
                 .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.2, 0);
-        MobEffects.NAUSEA
-                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
+        FEAR = new TaoPotion(true, new Color(200, 200, 0).getRGB()).setRegistryName("fear").setPotionName("effect.taofear");
+//        MobEffects.NAUSEA
+//                .registerPotionAttributeModifier(TaoEntities.POSREGEN, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.3, 1);
         //MobEffects.BLINDNESS
         //        .registerPotionAttributeModifier(SharedMonsterAttributes.FOLLOW_RANGE, "CC5AF142-2BD2-4215-B636-2605AED11727", -0.5, 1);
         event.getRegistry().register(BLEED);
@@ -132,6 +138,7 @@ public class TaoPotion extends Potion {
         event.getRegistry().register(DEATHMARK);
         event.getRegistry().register(REFLUENCE);
         event.getRegistry().register(AMPUTATION);
+        event.getRegistry().register(FEAR);
     }
 
     private TaoPotion procInterval(int interval) {
@@ -165,6 +172,8 @@ public class TaoPotion extends Potion {
     public static void pain(LivingHurtEvent e) {
         DamageSource ds = e.getSource();
         if (!isSpecialDamage(ds)) {
+            if(TaoCombatUtils.isDirectDamage(ds))
+                e.getEntityLiving().removeActivePotionEffect(FEAR);
             if (e.getEntityLiving().getActivePotionEffect(LACERATION) != null)
                 e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(LACERATION).getAmplifier() + 1) * 0.2f));
             if (e.getEntityLiving().getActivePotionEffect(ENRAGE) != null)
@@ -219,8 +228,8 @@ public class TaoPotion extends Potion {
             l.hurtTime=0;
         } else if (this == ENRAGE) {
             TaoCasterData.getTaoCap(l).tauntedBy(null);
-        } else if (this == AMPUTATION && amplifier != 0) {
-            l.removeActivePotionEffect(this);
+        }else if (this == AMPUTATION && amplifier != 0) {
+            l.removePotionEffect(this);
             TaoPotionUtils.attemptAddPot(l, new PotionEffect(this, 200, amplifier - 1), false);
         }
     }
@@ -235,6 +244,10 @@ public class TaoPotion extends Potion {
         super.removeAttributesModifiersFromEntity(entityLivingBaseIn, attributeMapIn, amplifier);
         if (this == ENRAGE)
             TaoCasterData.getTaoCap(entityLivingBaseIn).tauntedBy(null);
+        else if (this == AMPUTATION && amplifier != 0) {
+            entityLivingBaseIn.removePotionEffect(this);
+            TaoPotionUtils.attemptAddPot(entityLivingBaseIn, new PotionEffect(this, 200, amplifier - 1), false);
+        }
     }
 
     public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier) {

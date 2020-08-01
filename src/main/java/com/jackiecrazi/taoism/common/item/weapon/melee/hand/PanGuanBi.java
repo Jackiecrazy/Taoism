@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -33,7 +34,7 @@ public class PanGuanBi extends TaoWeapon {
      */
 
     public PanGuanBi() {
-        super(2, 1.4, 6f, 0);
+        super(2, 1.6, 5f, 0.1f);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 2f;
+        return 1.4f;
     }
 
     @Override
@@ -53,7 +54,11 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(I18n.format("panguanbi.detonation"));
+        tooltip.add(I18n.format("panguanbi.sneak"));
+        tooltip.add(I18n.format("panguanbi.normal"));
+        tooltip.add(I18n.format("panguanbi.jump"));
+        tooltip.add(I18n.format("panguanbi.variation"));
     }
 
     @Override

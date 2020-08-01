@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.capability;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
+import com.jackiecrazi.taoism.api.allthedamagetypes.EntityDamageSourceTaoIndirect;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICombatManipulator;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.config.CombatConfig;
@@ -14,6 +15,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -66,6 +68,7 @@ public class TaoStatCapability implements ITaoStatCapability {
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
+        float nausea = elb.getActivePotionEffect(MobEffects.NAUSEA) == null ? 0 : (elb.getActivePotionEffect(MobEffects.NAUSEA).getAmplifier() + 1) * 0.05f;
         float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
         float healthMod = elb.getHealth() / elb.getMaxHealth();
         if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
@@ -73,7 +76,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         }
         if (posMult < 0)
             return (ticks * 0.05f) * posMult / (armorMod * healthMod);
-        return (ticks * 0.05f) * armorMod * posMult * healthMod;
+        return ((ticks * 0.05f) * armorMod * posMult * healthMod) - nausea;
     }
 
     /**
@@ -702,10 +705,10 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (target != null) {
             float damage = getRecordedDamage();
             setRecordedDamage(0);
-            DamageSource ds = TaoCombatUtils.causeLivingDamage(elb).setDamageBypassesArmor().setDamageIsAbsolute();
+            DamageSource ds = new EntityDamageSourceTaoIndirect(elb instanceof EntityPlayer? "player":"mob", null, elb).setDamageBypassesArmor().setDamageIsAbsolute();
             if (elb != null) {
                 if (elb == target) return;//bootleg invulnerability!
-                ItemStack is = elb.getHeldItemMainhand();
+                ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);
                 if (is.getItem() instanceof ICombatManipulator) {
                     damage = ((ICombatManipulator) is.getItem()).onStoppedRecording(ds, elb, target, is, damage);
                 }

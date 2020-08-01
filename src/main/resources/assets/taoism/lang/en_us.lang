@@ -224,12 +224,35 @@ item.misericorde.name=Misericorde
 misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
 
 item.panguanbi.name=Judge's Pen
+panguanbi.detonation=every fourth hit attacks a pressure point, causing effects according to your stance:
+panguanbi.sneak=sneaking: deal 4 posture damage and exhaust for 3 seconds
+panguanbi.normal=standing: bind and root for 1.5 seconds
+panguanbi.jump=airborne: instantly deal 4 bleed damage and extends bleed I for 3 seconds
+panguanbi.variation=by varying stances for the first three hits one can detonate more damage and extend effect duration, up to triple their original
 
 item.emeici.name=Emeici
+emeici.spin=if the attacker does not face the same cardinal direction as the last hit:
+emeici.crit=crit for 1.5x damage and deal 3 posture damage
 
 item.projectile_prop.name=just a prop, don't mind me...
 
 <Resources>=
+
+<Effects>=
+effect.taoamputation=Amputation
+effect.taoarmorbreak=Armor Break
+effect.taobleed=Bleed
+effect.taodeathmark=Death Mark
+effect.taodisorient=Disorientation
+effect.taoenfeeble=Enfeeble
+effect.taoenrage=Enrage
+effect.taoexhaustion=Exhaustion
+effect.taofear=Fear
+effect.taohiding=Camouflaged
+effect.taointernalbleed=Hemorrhage
+effect.taolaceration=Laceration
+effect.taorefluence=Chi Reflux
+effect.taoresolution=Resolution
 
 <Blocks>=
 tile.TaoisticAnvil.name=

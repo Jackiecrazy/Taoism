@@ -12,9 +12,11 @@ import com.jackiecrazi.taoism.common.block.tile.TileTempExplosion;
 import com.jackiecrazi.taoism.common.effect.FakeExplosion;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
+import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityPhysicsDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.GeneralConfig;
+import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
 import net.minecraft.entity.Entity;
@@ -31,9 +33,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -124,6 +124,9 @@ public class TaoEntityHandler {
         if (e.getAmount() < 0) {
             e.getEntityLiving().attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), -e.getAmount());
         }
+        if(e.getAmount()+e.getEntityLiving().getHealth()>e.getEntityLiving().getMaxHealth()+2){
+            e.getEntityLiving().removePotionEffect(TaoPotion.AMPUTATION);
+        }
     }
 
     @SubscribeEvent
@@ -175,12 +178,17 @@ public class TaoEntityHandler {
             e.getAffectedEntities().remove(detonator);
             if (!(proxy instanceof EntityLivingBase) || !TaoCasterData.getTaoCap((EntityLivingBase) proxy).isRecordingDamage()) {
                 e.getAffectedEntities().remove(proxy);
+                if(proxy instanceof EntityPhysicsDummy){
+                    e.getAffectedEntities().remove(((EntityPhysicsDummy)proxy).getTetheredEntity());
+                }
             }
             List<BlockPos> hitList = e.getAffectedBlocks();
             for (Iterator<BlockPos> iter = hitList.iterator(); iter.hasNext(); ) {
                 BlockPos pos = iter.next();
-                if (pos.getY() > 0 && pos.getY() < 256 && e.getWorld().getTileEntity(pos) == null)
+                if (pos.getY() > 0 && pos.getY() < 256 && !e.getWorld().isAirBlock(pos) && e.getWorld().getTileEntity(pos) == null) {
+                    //System.out.println("backing up "+e.getWorld().getBlockState(pos));
                     TileTempExplosion.replaceBlockAndBackup(e.getWorld(), pos, Math.max(20, 200 + Taoism.unirand.nextInt(20) - (int) (5 * proxy.getDistanceSq(pos))));
+                }
                 iter.remove();
             }
         }
@@ -193,11 +201,7 @@ public class TaoEntityHandler {
     public static void phaseThroughTiles(GetCollisionBoxesEvent e) {
         if (e.getWorld().isRemote) return;
         if (e.getEntity() instanceof EntityLivingBase && NeedyLittleThings.getSpeedSq(e.getEntity()) > 0.5 && TaoCasterData.getTaoCap((EntityLivingBase) e.getEntity()).getCannonballTime() > 0)
-            for (Iterator<AxisAlignedBB> iter = e.getCollisionBoxesList().iterator(); iter.hasNext(); ) {
-                BlockPos pos = NeedyLittleThings.posFromAABB(iter.next());
-                if (pos.getY() > 0 && e.getWorld().getTileEntity(pos) != null)
-                    iter.remove();
-            }
+            e.getCollisionBoxesList().clear();
     }
 
     @SubscribeEvent
@@ -212,30 +216,17 @@ public class TaoEntityHandler {
             }
             flag = true;
         }
-        if (itsc.getCannonballTime() > 0 && !elb.noClip && elb.motionY < 0) {
-//            if (elb.motionY > -0.1)
-//                elb.motionY = -0.1;
-            //System.out.println(elb.motionX*elb.motionX+elb.motionZ*elb.motionZ/5);
-            elb.motionY *= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.8, 1);
-            elb.motionX /= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.7, 1);
-            elb.motionZ /= MathHelper.clamp(elb.motionX * elb.motionX + elb.motionZ * elb.motionZ, 0.7, 1);
-            //TODO just have it ride on an entity...
-            flag = true;
-        }
         if (flag) elb.velocityChanged = true;
         if (elb.world.isRemote) return;
-        if (itsc.getCannonballTime() > 0 && (TaoMovementUtils.willCollide(elb))) {
-            if (TaoMovementUtils.collisionStatusVelocitySensitive(elb)[3] || elb.onGround || elb.collidedVertically) {
-                TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
-            }
-            if (NeedyLittleThings.getSpeedSq(elb) > 0.5) {
-                //FakeExplosion.explode(elb.world, elb, elb.getRevengeTarget(), elb.posX, elb.posY, elb.posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(elb) * 3 * elb.width * elb.height));
-                elb.world.newExplosion(elb, elb.posX, elb.posY, elb.posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(elb) * 3 * elb.width * elb.height), false, true);
-                elb.motionX *= 0.7;
-                elb.motionY *= 0.7;
-                elb.motionZ *= 0.7;
-            } else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
-        }
+//        if (itsc.getCannonballTime() > 0 && (TaoMovementUtils.willCollide(elb))) {
+//            if (NeedyLittleThings.getSpeedSq(elb) > 0.5) {
+//                //FakeExplosion.explode(elb.world, elb, elb.getRevengeTarget(), elb.posX, elb.posY, elb.posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(elb) * 3 * elb.width * elb.height));
+//                elb.world.newExplosion(elb, elb.posX, elb.posY, elb.posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(elb) * 3 * elb.width * elb.height), false, true);
+//                elb.motionX *= 0.7;
+//                elb.motionY *= 0.7;
+//                elb.motionZ *= 0.7;
+//            } else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
+//        }
         boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(elb);

@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.common.entity;
 
 import com.jackiecrazi.taoism.common.entity.fx.EntityEvidence;
+import com.jackiecrazi.taoism.common.entity.fx.EntityFear;
 import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.entity.Entity;
@@ -39,6 +40,8 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityKusarigamaShot.class));
         e.getRegistry().register(factoryArrow(EntityWhiplash.class));
         e.getRegistry().register(factoryAmbient(EntityEvidence.class));
+        e.getRegistry().register(factoryArrow(EntityPhysicsDummy.class));
+        e.getRegistry().register(factoryAmbient(EntityFear.class));
     }
     private static EntityEntry factoryMove(Class<?extends EntityMove> move){
         String name = move.getSimpleName().substring(6).toLowerCase();

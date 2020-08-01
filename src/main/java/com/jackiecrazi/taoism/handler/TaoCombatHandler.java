@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Taoism.MODID)
 public class TaoCombatHandler {
-    public static final HashMap<EntityPlayer, Long> lastRightClickTime = new HashMap<>();
+    public static final HashMap<Integer, Long> lastRightClickTime = new HashMap<>();
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
     public static boolean modCall;
     private static boolean abort = false;
@@ -49,12 +49,12 @@ public class TaoCombatHandler {
     public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
         if (e.getEntityPlayer().world.isRemote) return;
         if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
-            if (lastRightClickTime.getOrDefault(e.getEntityPlayer(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
+            if (lastRightClickTime.getOrDefault(e.getEntityPlayer().getEntityId(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
                 if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
                     TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
                     TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
                 }
-            lastRightClickTime.put(e.getEntityPlayer(), e.getEntityPlayer().world.getTotalWorldTime());
+            lastRightClickTime.put(e.getEntityPlayer().getEntityId(), e.getEntityPlayer().world.getTotalWorldTime());
         }
     }
 

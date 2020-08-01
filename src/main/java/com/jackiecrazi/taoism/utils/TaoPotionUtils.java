@@ -1,13 +1,13 @@
 package com.jackiecrazi.taoism.utils;
 
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
+import com.jackiecrazi.taoism.common.entity.fx.EntityFear;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -26,22 +26,12 @@ public class TaoPotionUtils {
         attemptAddPot(elb, new PotionEffect(TaoPotion.DISORIENT, duration, 0), false);
     }
 
-    public static void blind(EntityLivingBase elb, int duration, int potency) {
-        if (elb instanceof EntityLiving) {
-            EntityLiving el = (EntityLiving) elb;
-            el.getNavigator().clearPath();
-            el.setAttackTarget(null);
-        }
-        attemptAddPot(elb, new PotionEffect(MobEffects.BLINDNESS, duration, potency), false);
-    }
-
     /**
      * Attempts to add the potion effect. If it fails, the function will *permanently* apply all the attribute modifiers, with the option to stack them as well
      * Take that, wither!
      */
     public static boolean attemptAddPot(EntityLivingBase elb, PotionEffect pot, boolean stackWhenFailed) {
         Potion p = pot.getPotion();
-        elb.removeActivePotionEffect(p);
         elb.addPotionEffect(pot);
         if (!elb.isPotionActive(p)) {
             for (Map.Entry<IAttribute, AttributeModifier> e : p.getAttributeModifierMap().entrySet()) {
@@ -60,9 +50,29 @@ public class TaoPotionUtils {
                 }
             }
             //add goes here
+            elb.getActivePotionMap().put(pot.getPotion(), pot);
             return false;
+        } else {
+            elb.getActivePotionEffect(pot.getPotion()).combine(pot);
         }
         return true;
+    }
+
+    public static void fear(EntityLivingBase elb, EntityLivingBase applier, int duration) {
+        attemptAddPot(elb, new PotionEffect(TaoPotion.FEAR, duration, 0), false);
+        if (!elb.world.isRemote) {
+            EntityFear f = new EntityFear(elb.world, elb.posX, elb.posY, elb.posZ, applier, elb);
+            elb.world.spawnEntity(f);
+        }
+    }
+
+    public static void blind(EntityLivingBase elb, int duration, int potency) {
+        if (elb instanceof EntityLiving) {
+            EntityLiving el = (EntityLiving) elb;
+            el.getNavigator().clearPath();
+            el.setAttackTarget(null);
+        }
+        attemptAddPot(elb, new PotionEffect(MobEffects.BLINDNESS, duration, potency), false);
     }
 
     /**
@@ -80,7 +90,6 @@ public class TaoPotionUtils {
             elb.hurtResistantTime = 0;
             elb.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), potency);
             elb.hurtResistantTime = 0;
-            elb.getActivePotionMap().put(TaoPotion.BLEED, pe);
         }
     }
 
@@ -102,7 +111,7 @@ public class TaoPotionUtils {
 
         switch (method) {
             case ADD:
-                length = toAdd.getDuration()+pe.getDuration();
+                length = toAdd.getDuration() + pe.getDuration();
                 break;
             case MAXDURATION:
                 length = Math.max(pe.getDuration(), toAdd.getDuration());
@@ -117,8 +126,8 @@ public class TaoPotionUtils {
                 length = pe.getAmplifier() == toAdd.getAmplifier() ? Math.min(pe.getDuration(), toAdd.getDuration()) : pe.getAmplifier() < toAdd.getAmplifier() ? pe.getDuration() : toAdd.getDuration();
                 break;
             case ONLYADD:
-                potency=toAdd.getAmplifier();
-                length = toAdd.getDuration()+pe.getDuration();
+                potency = toAdd.getAmplifier();
+                length = toAdd.getDuration() + pe.getDuration();
                 break;
         }
         //System.out.println(ret);
@@ -126,11 +135,8 @@ public class TaoPotionUtils {
     }
 
     public static double getEffectiveLevel(EntityLivingBase elb, Potion p, IAttribute workOff) {
-        IAttributeInstance iai = elb.getEntityAttribute(workOff);
-        AttributeModifier am = iai.getModifier(p.getAttributeModifierMap().get(workOff).getID());
-
-        if (am != null && p.getAttributeModifierMap().get(workOff) != null)
-            return (am.getAmount()) / p.getAttributeModifierAmount(0, p.getAttributeModifierMap().get(workOff));
+        if (elb.getActivePotionEffect(p) != null)
+            return elb.getActivePotionEffect(p).getAmplifier() + 1;
         return 0;
     }
 

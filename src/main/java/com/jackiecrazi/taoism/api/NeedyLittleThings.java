@@ -126,6 +126,83 @@ public class NeedyLittleThings {
         }
     }
 
+    @Nonnull
+    public static RayTraceResult raytraceAnything(World world, EntityLivingBase attacker, double range) {
+        Vec3d start = attacker.getPositionEyes(0.5f);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
+        Vec3d end = start.add(look);
+        Entity entity = null;
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
+        double d0 = 0.0D;
+
+        for (Entity entity1 : list) {
+            if (entity1 != attacker) {
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
+                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+                if (raytraceresult != null) {
+                    double d1 = getDistSqCompensated(entity1, attacker);
+
+                    if ((d1 < d0 || d0 == 0.0D) && d1 < range * range) {
+                        entity = entity1;
+                        d0 = d1;
+                    }
+                }
+            }
+        }
+        if (entity != null) return new RayTraceResult(entity);
+        look = attacker.getLookVec().scale(range);
+        end = start.add(look);
+        RayTraceResult rtr = world.rayTraceBlocks(start, end, false, true, false);
+        if (rtr != null) {
+            return rtr;
+        }
+        return new RayTraceResult(end, EnumFacing.UP);
+    }
+
+    public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
+        Vec3d start = attacker.getPositionEyes(0.5f);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
+        Vec3d end = start.add(look);
+        Entity entity = null;
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
+        double d0 = -1.0D;//necessary to prevent small derps
+
+        for (Entity entity1 : list) {
+            if (entity1 != attacker) {
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
+                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+                if (raytraceresult != null) {
+                    double d1 = getDistSqCompensated(entity1, attacker);
+
+                    if ((d1 < d0 || d0 == -1.0D) && d1 < range * range) {
+                        entity = entity1;
+                        d0 = d1;
+                    }
+                }
+            }
+        }
+        return entity;
+    }
+
+    public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {
+        Vec3d start = attacker.getPositionEyes(0.5f);
+        Vec3d look = attacker.getLookVec().scale(range + 2);
+        Vec3d end = start.add(look);
+        ArrayList<Entity> ret = new ArrayList<>();
+        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), TaoCombatUtils.VALID_TARGETS::test);
+
+        for (Entity entity1 : list) {
+            if (entity1 != attacker && getDistSqCompensated(attacker, entity1) < range * range) {
+                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
+                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+                if (raytraceresult != null) {
+                    ret.add(entity1);
+                }
+            }
+        }
+        return ret;
+    }
+
     public static Vec3d getPointInFrontOf(Entity target, Entity from, double distance) {
         Vec3d end = target.getPositionVector().add(from.getPositionVector().subtract(target.getPositionVector()).normalize().scale(distance));
         return getClosestAirSpot(from.getPositionVector(), end, from);
@@ -141,6 +218,8 @@ public class NeedyLittleThings {
      */
     public static Vec3d getClosestAirSpot(Vec3d from, Vec3d to, Entity e) {
         Vec3d ret = to;
+        //extend the to vector slightly to make it hit what it originally hit
+        to=to.add(to.subtract(from).normalize().scale(2));
         double widthParse = e.width / 2;
         double heightParse = e.height;
         if (widthParse <= 0.5) widthParse = 0;
@@ -154,16 +233,16 @@ public class NeedyLittleThings {
                         Vec3d hit = r.hitVec.subtract(mod);
                         switch (r.sideHit) {
                             case NORTH:
-                                hit = hit.addVector(0, 0, 1);
-                                break;
-                            case SOUTH:
                                 hit = hit.addVector(0, 0, -1);
                                 break;
+                            case SOUTH:
+                                hit = hit.addVector(0, 0, 1);
+                                break;
                             case EAST:
-                                hit = hit.addVector(-1, 0, 0);
+                                hit = hit.addVector(1, 0, 0);
                                 break;
                             case WEST:
-                                hit = hit.addVector(1, 0, 0);
+                                hit = hit.addVector(-1, 0, 0);
                                 break;
                             case UP:
                                 //hit.addVector(0, -1, 0);
@@ -429,39 +508,6 @@ public class NeedyLittleThings {
         return ret;
     }
 
-    @Nonnull
-    public static RayTraceResult raytraceAnything(World world, EntityLivingBase attacker, double range) {
-        Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range + 2);
-        Vec3d end = start.add(look);
-        Entity entity = null;
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
-        double d0 = 0.0D;
-
-        for (Entity entity1 : list) {
-            if (entity1 != attacker) {
-                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
-                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
-                if (raytraceresult != null) {
-                    double d1 = getDistSqCompensated(entity1, attacker);
-
-                    if ((d1 < d0 || d0 == 0.0D) && d1 < range * range) {
-                        entity = entity1;
-                        d0 = d1;
-                    }
-                }
-            }
-        }
-        if (entity != null) return new RayTraceResult(entity);
-        look = attacker.getLookVec().scale(range);
-        end = start.add(look);
-        RayTraceResult rtr = world.rayTraceBlocks(start, end, false, true, false);
-        if (rtr != null) {
-            return rtr;
-        }
-        return new RayTraceResult(end, EnumFacing.UP);
-    }
-
     /**
      * modified getdistancesq to account for thicc mobs
      */
@@ -476,31 +522,6 @@ public class NeedyLittleThings {
         double me = x * x + y * y + z * z;
         double you = from.getDistanceSq(to);
         return Math.min(me, you);
-    }
-
-    public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
-        Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range + 2);
-        Vec3d end = start.add(look);
-        Entity entity = null;
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), null);
-        double d0 = -1.0D;//necessary to prevent small derps
-
-        for (Entity entity1 : list) {
-            if (entity1 != attacker) {
-                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
-                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
-                if (raytraceresult != null) {
-                    double d1 = getDistSqCompensated(entity1, attacker);
-
-                    if ((d1 < d0 || d0 == -1.0D) && d1 < range * range) {
-                        entity = entity1;
-                        d0 = d1;
-                    }
-                }
-            }
-        }
-        return entity;
     }
 
     /**
@@ -529,24 +550,5 @@ public class NeedyLittleThings {
         double z = from.posZ - to.getZ();
         z = Math.max(Math.abs(z) - (from.width / 2), 0);
         return x * x + y * y + z * z;
-    }
-
-    public static List<Entity> raytraceEntities(World world, EntityLivingBase attacker, double range) {
-        Vec3d start = attacker.getPositionEyes(0.5f);
-        Vec3d look = attacker.getLookVec().scale(range + 2);
-        Vec3d end = start.add(look);
-        ArrayList<Entity> ret = new ArrayList<>();
-        List<Entity> list = world.getEntitiesInAABBexcluding(attacker, attacker.getEntityBoundingBox().expand(look.x, look.y, look.z).grow(1.0D), TaoCombatUtils.VALID_TARGETS::test);
-
-        for (Entity entity1 : list) {
-            if (entity1 != attacker && getDistSqCompensated(attacker, entity1) < range * range) {
-                AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox();
-                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
-                if (raytraceresult != null) {
-                    ret.add(entity1);
-                }
-            }
-        }
-        return ret;
     }
 }
