@@ -325,7 +325,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                         ent.motionX += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
                         ent.motionZ += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
                     }
-                    itemstack.damageItem(1, entity);
                 }
                 return true;
             }

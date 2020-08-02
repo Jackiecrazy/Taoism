@@ -1,6 +1,5 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.rope;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
@@ -44,7 +43,7 @@ public class Kusarigama extends TaoWeapon {
      * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
-        super(1, 1.5, 5, 1);
+        super(1, 1.5, 6, 1);
         this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
             if (elb != null) {
                 if (getHand(stack) == EnumHand.OFF_HAND) {
@@ -134,7 +133,7 @@ public class Kusarigama extends TaoWeapon {
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         EntityKusarigamaShot ball = getBall(item, defender);
-        if (ball != null && NeedyLittleThings.isFacingEntity(attacker, ball, 120) && defender.getDistanceSq(ball) < defender.getDistanceSq(attacker)) {
+        if (ball != null) {
             TaoCasterData.getTaoCap(attacker).setBindTime(ball.getCharge());
             defender.world.playSound(null, defender.posX, defender.posY, defender.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
         }
