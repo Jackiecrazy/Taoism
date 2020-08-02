@@ -60,26 +60,6 @@ public class TaoMovementUtils {
         return elb.world.collidesWithAnyBlock(elb.getEntityBoundingBox().expand(elb.motionX * allowance, elb.motionY * allowance, elb.motionZ * allowance));// || collidingEntity(elb) != null;
     }
 
-    /**
-     * Checks the +x, -x, +y, -y, +z, -z, in that order
-     *
-     * @param elb
-     * @return
-     */
-    public static Entity collidingEntity(Entity elb) {
-        AxisAlignedBB aabb = elb.getEntityBoundingBox();
-        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX, elb.motionY * 6, elb.motionZ), VALID_TARGETS::test);
-        double dist = 0;
-        Entity pick = null;
-        for (Entity e : entities) {
-            if (e.getDistanceSq(elb) < dist || dist == 0) {
-                pick = e;
-                dist = e.getDistanceSq(elb);
-            }
-        }
-        return pick;
-    }
-
     public static boolean willHitWallFrom(Entity elb, Entity from) {
         double allowance = 1;
         AxisAlignedBB aabb = elb.getEntityBoundingBox();
@@ -125,18 +105,6 @@ public class TaoMovementUtils {
         return true;
     }
 
-    public static void kick(EntityLivingBase elb, EntityLivingBase uke){
-        uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
-        TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
-        for (int i = 0; i < 10; ++i) {
-            double d0 = Taoism.unirand.nextGaussian() * 0.02D;
-            double d1 = Taoism.unirand.nextGaussian() * 0.02D;
-            double d2 = Taoism.unirand.nextGaussian() * 0.02D;
-            elb.world.spawnParticle(EnumParticleTypes.FIREWORKS_SPARK, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
-        }
-        elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
-    }
-
     public static boolean attemptJump(EntityLivingBase elb) {
         //if you're on the ground, I'll let vanilla handle you
         if (elb.onGround) return false;
@@ -146,7 +114,7 @@ public class TaoMovementUtils {
         if (itsc.getQi() == 0) return false;
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
         Entity ent = collidingEntity(elb);
-        if (ent instanceof EntityLivingBase) {
+        if (ent instanceof EntityLivingBase && !elb.isRidingOrBeingRiddenBy(ent)) {
             kick(elb, (EntityLivingBase) ent);
         } else {
             //if you're exhausted or just jumped, you can't jump again
@@ -201,6 +169,38 @@ public class TaoMovementUtils {
         elb.velocityChanged = true;
         TaoCasterData.forceUpdateTrackingClients(elb);
         return true;
+    }
+
+    /**
+     * Checks the +x, -x, +y, -y, +z, -z, in that order
+     *
+     * @param elb
+     * @return
+     */
+    public static Entity collidingEntity(Entity elb) {
+        AxisAlignedBB aabb = elb.getEntityBoundingBox();
+        List<Entity> entities = elb.world.getEntitiesInAABBexcluding(elb, aabb.expand(elb.motionX, elb.motionY * 6, elb.motionZ), VALID_TARGETS::test);
+        double dist = 0;
+        Entity pick = null;
+        for (Entity e : entities) {
+            if (e.getDistanceSq(elb) < dist || dist == 0) {
+                pick = e;
+                dist = e.getDistanceSq(elb);
+            }
+        }
+        return pick;
+    }
+
+    public static void kick(EntityLivingBase elb, EntityLivingBase uke) {
+        uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
+        TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
+        for (int i = 0; i < 10; ++i) {
+            double d0 = Taoism.unirand.nextGaussian() * 0.02D;
+            double d1 = Taoism.unirand.nextGaussian() * 0.02D;
+            double d2 = Taoism.unirand.nextGaussian() * 0.02D;
+            elb.world.spawnParticle(EnumParticleTypes.FIREWORKS_SPARK, uke.posX + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, uke.posY + 1.0D + (double) (Taoism.unirand.nextFloat() * uke.height), uke.posZ + (double) (Taoism.unirand.nextFloat() * uke.width * 2.0F) - (double) uke.width, d0, d1, d2);
+        }
+        elb.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_ZOMBIE_ATTACK_DOOR_WOOD, SoundCategory.PLAYERS, 0.5f + Taoism.unirand.nextFloat() * 0.5f, 0.85f + Taoism.unirand.nextFloat() * 0.3f);
     }
 
     public static boolean isTouchingWall(Entity elb) {

@@ -40,7 +40,7 @@ public class Halberd extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Halberd() {
-        super(3, 1, 8, 1f);
+        super(3, 1.3, 8, 1f);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class Halberd extends TaoWeapon {
     }
 
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? 0.1 - 4d : super.speed(stack);
+        return getHand(stack) == EnumHand.OFF_HAND ? 0.2 - 4d : super.speed(stack);
     }
 
     @Override

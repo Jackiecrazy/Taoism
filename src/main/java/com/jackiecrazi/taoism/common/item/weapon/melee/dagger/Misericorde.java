@@ -40,6 +40,16 @@ public class Misericorde extends TaoWeapon {
     }
 
     @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold && collidingEntity instanceof EntityLivingBase) {
+            TaoMovementUtils.kick(elb, (EntityLivingBase) collidingEntity);
+            NeedyLittleThings.knockBack(elb, collidingEntity, 2, true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
         return TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? Event.Result.ALLOW : Event.Result.DENY;
     }
@@ -62,15 +72,5 @@ public class Misericorde extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2;
-    }
-
-    @Override
-    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
-        if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold&&collidingEntity instanceof EntityLivingBase) {
-            TaoMovementUtils.kick(elb, (EntityLivingBase) collidingEntity);
-            NeedyLittleThings.knockBack(elb, collidingEntity, 2, true);
-            return true;
-        }
-        return false;
     }
 }

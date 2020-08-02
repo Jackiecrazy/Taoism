@@ -172,7 +172,7 @@ public class TaoPotion extends Potion {
     public static void pain(LivingHurtEvent e) {
         DamageSource ds = e.getSource();
         if (!isSpecialDamage(ds)) {
-            if(TaoCombatUtils.isDirectDamage(ds))
+            if (TaoCombatUtils.isDirectDamage(ds))
                 e.getEntityLiving().removeActivePotionEffect(FEAR);
             if (e.getEntityLiving().getActivePotionEffect(LACERATION) != null)
                 e.setAmount(e.getAmount() * 1 + ((e.getEntityLiving().getActivePotionEffect(LACERATION).getAmplifier() + 1) * 0.2f));
@@ -204,6 +204,9 @@ public class TaoPotion extends Potion {
                 if (NeedyLittleThings.getDistSqCompensated(e.getTarget(), el) < attr * zeno)
                     el.setAttackTarget(null);
             }
+            if (el.isPotionActive(DISORIENT) || el.isPotionActive(FEAR)) {
+                el.setAttackTarget(null);
+            }
             Entity taunter = el.world.getEntityByID(TaoCasterData.getTaoCap(el).getTauntID());
             if (taunter instanceof EntityLivingBase && taunter != e.getTarget()) {
                 el.setAttackTarget((EntityLivingBase) taunter);
@@ -220,15 +223,15 @@ public class TaoPotion extends Potion {
 //            if (l.getHealth() > damage)
 //                l.setHealth(l.getHealth() - damage);
 //            else
-                l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), damage);
+            l.attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), damage);
             if (l.world instanceof WorldServer) {
                 ((WorldServer) l.world).spawnParticle(EnumParticleTypes.DRIP_LAVA, l.posX, l.posY + l.height / 2, l.posZ, 10, l.width / 4, l.height / 4, l.width / 4, 0.5f);
             }
             l.hurtResistantTime = 0;
-            l.hurtTime=0;
+            l.hurtTime = 0;
         } else if (this == ENRAGE) {
             TaoCasterData.getTaoCap(l).tauntedBy(null);
-        }else if (this == AMPUTATION && amplifier != 0) {
+        } else if (this == AMPUTATION && amplifier != 0) {
             l.removePotionEffect(this);
             TaoPotionUtils.attemptAddPot(l, new PotionEffect(this, 200, amplifier - 1), false);
         }

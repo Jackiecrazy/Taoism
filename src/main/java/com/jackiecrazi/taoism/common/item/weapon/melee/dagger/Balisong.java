@@ -6,14 +6,17 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
@@ -105,6 +108,7 @@ public class Balisong extends TaoWeapon {
         tooltip.add(I18n.format("balisong.stance"));
         tooltip.add(I18n.format("balisong.hammer"));
         tooltip.add(I18n.format("balisong.reverse"));
+        tooltip.add(I18n.format("balisong.dash"));
         //tooltip.add(I18n.format("balisong.riposte"));
     }
 
@@ -126,6 +130,7 @@ public class Balisong extends TaoWeapon {
         TaoCasterData.getTaoCap(elb).stopRecordingDamage(elb);
         gettagfast(item).setInteger("flashesWithoutHit", 0);
         gettagfast(item).setInteger("flashes", 0);
+        elb.addPotionEffect(new PotionEffect(MobEffects.INVISIBILITY, 100));
     }
 
     @Override
@@ -172,5 +177,14 @@ public class Balisong extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;
+    }
+
+    @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold) {
+            TaoCombatUtils.attack(elb, collidingEntity, getHand(stack));
+            return true;
+        }
+        return false;
     }
 }

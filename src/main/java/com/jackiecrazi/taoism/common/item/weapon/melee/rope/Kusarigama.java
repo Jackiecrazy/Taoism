@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Kusarigama extends TaoWeapon {
+    private static final boolean[] harvestList = {false, false, false, true};
     private static final PartDefinition[] parts = {
             StaticRefs.HEAD,
             StaticRefs.HANDLE,
@@ -62,11 +63,6 @@ public class Kusarigama extends TaoWeapon {
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
-    }
-
-    @Override
-    public int getMaxChargeTime() {
-        return 40;
     }
 
     @Override
@@ -112,11 +108,17 @@ public class Kusarigama extends TaoWeapon {
         tooltip.add(I18n.format("kusarigama.followup"));
         tooltip.add(I18n.format("kusarigama.parry"));
         tooltip.add(I18n.format("kusarigama.critfollowup"));
+        tooltip.add(I18n.format("kusarigama.harvest"));
     }
 
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return getHand(is) == EnumHand.OFF_HAND ? 0 : 3;
+    }
+
+    @Override
+    public int getMaxChargeTime() {
+        return 40;
     }
 
     @Override
@@ -166,12 +168,20 @@ public class Kusarigama extends TaoWeapon {
         return super.knockback(attacker, target, stack, orig);
     }
 
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    @Override
+    protected boolean[] harvestable(ItemStack is) {
+        return harvestList;
+    }
+
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) return getBuff(stack, "hitCharge") / (float) getMaxChargeTime();
         if (getLastAttackedEntity(attacker.world, stack) == target && getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isValid() && !getLastMove(stack).isLeftClick()
                 && lastAttackTime(attacker, stack) + getBuff(stack, "hitCharge") > attacker.world.getTotalWorldTime())
-            return 1 + getBuff(stack, "hitCharge") / ((float) getMaxChargeTime() * 2);
+            return orig * (1 + getBuff(stack, "hitCharge") / ((float) getMaxChargeTime() * 2));
         return orig;
     }
 

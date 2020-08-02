@@ -29,13 +29,27 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
     public EntityAxeCleave(World w) {
         super(w);
         setSize(3, 1);
-        isImmuneToFire=true;
+        isImmuneToFire = true;
+        stepHeight = 4;
     }
 
     public EntityAxeCleave(World worldIn, EntityLivingBase throwerIn, EnumHand hand, ItemStack is) {
         super(worldIn, throwerIn, hand, is);
         setSize(3, 1);
-        isImmuneToFire=true;
+        isImmuneToFire = true;
+        stepHeight = 4;
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        //compound.setBoolean("detonate", detonate);
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        //detonate = compound.getBoolean("detonate");
     }
 
     @Override
@@ -72,6 +86,13 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
         return onGround ? 0 : 0.05f;
     }
 
+    /**
+     * necessary because it's riding on the ground rather than sticking to it
+     */
+    @Override
+    protected void onHitBlock(RayTraceResult rtr) {
+        motionY = 0;
+    }
 
     @Override
     protected void onHitEntity(Entity hit) {
@@ -99,29 +120,9 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        //compound.setBoolean("detonate", detonate);
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        //detonate = compound.getBoolean("detonate");
-    }
-
-    @Override
     public void handleStatusUpdate(byte id) {
         if (id == -1) detonate = true;
         else super.handleStatusUpdate(id);
-    }
-
-    /**
-     * necessary because it's riding on the ground rather than sticking to it
-     */
-    @Override
-    protected void onHitBlock(RayTraceResult rtr) {
-        motionY = 0;
     }
 
     @Override

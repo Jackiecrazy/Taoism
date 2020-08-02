@@ -123,6 +123,7 @@ public class Karambit extends TaoWeapon {
         tooltip.add(I18n.format("karambit.damage"));
         tooltip.add(I18n.format("karambit.bleed"));
         tooltip.add(I18n.format("karambit.duration"));
+        tooltip.add(I18n.format("karambit.dash"));
         tooltip.add(I18n.format("karambit.harvest"));
     }
 

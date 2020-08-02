@@ -59,6 +59,7 @@ balisong.initiative=the first strike on a target ignores all armor
 balisong.stance=has two forms, hammer stance and reverse stance; offhand balisong are held in reverse stance
 balisong.hammer=in hammer stance, combo limit extends by 1 per chi level, up to 6 at level 10
 balisong.reverse=in reverse stance, pierces 1 armor for every level of chi
+balisong.dash=dodging through an enemy counts as attacking them at full strength
 
 item.karambit.name=Karambit
 karambit.switch=attack timer is immediately reset when switching in
@@ -67,6 +68,7 @@ karambit.initiative=the first strike on a target ignores all armor
 karambit.damage=damage increases every other chi level, up to 7
 karambit.bleed=applies and extends bleed with level equivalent to half of chi rounded up
 karambit.duration=each extension adds (6-chi/2) seconds
+karambit.dash=dodging through an enemy counts as attacking them at full strength
 karambit.harvest=functions as shears
 
 item.chui.name=Spherical Mace
@@ -195,6 +197,7 @@ kusarigama.ball=weighted chain in offhand accumulates speed over 2 seconds, alt 
 kusarigama.followup=following up this attack with the sickle will deal up to an extra 50%% damage based on charge
 kusarigama.parry=the chain cannot parry, but if the projectile is between you and the enemy when you parry, bind enemy for (charge) ticks
 kusarigama.critfollowup=attacking a bound enemy with the sickle will crit for double damage and consume double posture
+kusarigama.harvest=functions as shears
 
 item.executionersword.name=Executioner's Sword
 exesword.count=%s eyes opened
