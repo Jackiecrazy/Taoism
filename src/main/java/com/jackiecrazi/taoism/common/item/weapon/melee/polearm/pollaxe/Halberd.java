@@ -147,7 +147,7 @@ public class Halberd extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 80, isCharged(attacker, stack) ? 5 : 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 200, isCharged(attacker, stack) ? 5 : 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
         }
     }
 

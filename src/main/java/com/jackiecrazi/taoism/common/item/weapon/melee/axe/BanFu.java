@@ -193,7 +193,7 @@ public class BanFu extends TaoWeapon {
 
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return getHand(stack) == EnumHand.OFF_HAND && TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) >= TaoCasterData.getTaoCap(attacker).getQiFloored() - 1 ?
+        return getHand(stack) == EnumHand.OFF_HAND && TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) >= TaoCasterData.getTaoCap(attacker).getQiFloored() ?
                 orig + (TaoCasterData.getTaoCap(attacker).getQiFloored() / 2f) : orig;
     }
 
@@ -205,7 +205,7 @@ public class BanFu extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (chi > 0) {
-            if (TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) < chi - 1 || getHand(stack) == EnumHand.OFF_HAND)
+            if (TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) < chi || getHand(stack) == EnumHand.OFF_HAND)
                 TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, (chi) - 1), false);
             else
                 TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 60, 0), TaoPotionUtils.POTSTACKINGMETHOD.ADD), true);
