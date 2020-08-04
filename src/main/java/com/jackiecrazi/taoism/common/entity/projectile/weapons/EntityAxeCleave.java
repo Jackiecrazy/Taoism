@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +26,7 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
     //second pass: explosion particles
     private List<Entity> hitList = new ArrayList<>();
     private boolean detonate = false;
+    private double startX, startY, startZ;
 
     public EntityAxeCleave(World w) {
         super(w);
@@ -38,18 +40,27 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
         setSize(3, 1);
         isImmuneToFire = true;
         stepHeight = 4;
+        startX = throwerIn.posX;
+        startY = throwerIn.posY;
+        startZ = throwerIn.posZ;
     }
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        //compound.setBoolean("detonate", detonate);
+        compound.setBoolean("detonate", detonate);
+        compound.setDouble("startX", startX);
+        compound.setDouble("startY", startY);
+        compound.setDouble("startZ", startZ);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        //detonate = compound.getBoolean("detonate");
+        detonate = compound.getBoolean("detonate");
+        startX = compound.getDouble("startX");
+        startY = compound.getDouble("startY");
+        startZ = compound.getDouble("startZ");
     }
 
     @Override
@@ -78,6 +89,24 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
                     }
                 }
             }
+        } else {
+            for (EntityLivingBase hit : world.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox())) {
+                if (getThrower() != null) {
+                    if (hit != getThrower()) {
+                        motionY = 0;
+                        if (!hitList.contains(hit))
+                            if (detonate) {
+                                hitList.add(hit);
+                                TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.OFF_HAND);
+                                TaoCasterData.getTaoCap(hit).setRootTime(0);
+                            } else {
+                                hitList.add(hit);
+                                TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.MAIN_HAND);
+                                TaoCasterData.getTaoCap(hit).setRootTime(60);
+                            }
+                    }
+                }
+            }
         }
     }
 
@@ -91,32 +120,25 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
      */
     @Override
     protected void onHitBlock(RayTraceResult rtr) {
-        motionY = 0;
+        motionY = rtr.sideHit == EnumFacing.UP ? 0 : Math.max(motionY, 0);
+        if (rtr.sideHit != EnumFacing.UP && world.getBlockState(rtr.getBlockPos()).isBlockNormalCube()) {
+            BlockPos bp = rtr.getBlockPos();
+            while (bp.getY() < posY + stepHeight) {
+                if (world.isAirBlock(bp)) {
+                    posY = bp.getY();
+                    return;
+                }
+                bp = bp.up();
+            }
+            if (detonate) {
+                onRetrieveWeapon();
+            } else onRecall();
+        }
     }
 
     @Override
     protected void onHitEntity(Entity hit) {
-        if (getThrower() != null) {
-            if (hit != getThrower()) {
-                if (detonate) {
-                    if (!hitList.contains(hit)) {
-                        hitList.add(hit);
-                        TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.OFF_HAND);
-                        if (hit instanceof EntityLivingBase) {
-                            TaoCasterData.getTaoCap((EntityLivingBase) hit).setRootTime(0);
-                        }
-                    }
-                } else {
-                    if (!hitList.contains(hit)) {
-                        hitList.add(hit);
-                        TaoCombatUtils.attackIndirectly(getThrower(), this, hit, EnumHand.MAIN_HAND);
-                        if (hit instanceof EntityLivingBase) {
-                            TaoCasterData.getTaoCap((EntityLivingBase) hit).setRootTime(60);
-                        }
-                    }
-                }
-            }
-        }
+
     }
 
     @Override
@@ -139,7 +161,7 @@ public class EntityAxeCleave extends EntitySwordBeamBase {
             onRetrieveWeapon();
             return;
         }
-        setPositionAndUpdate(getThrower().posX, getThrower().posY, getThrower().posZ);
+        setPositionAndUpdate(startX, startY, startZ);
         hitList.clear();
         detonate = true;
         world.setEntityState(this, (byte) -1);

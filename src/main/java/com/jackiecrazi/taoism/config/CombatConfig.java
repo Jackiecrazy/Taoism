@@ -34,6 +34,8 @@ public class CombatConfig {
     public static int rollThreshold = 15;
     @Config.Comment("Number of ticks after a roll for which the player cannot roll again.")
     public static int rollCooldown = 20;
+    @Config.Comment("Number of ticks after a shield parry for which the player will continue to parry for free.")
+    public static int shieldThreshold = 16;
     @Config.Comment("Number of ticks one should be protected for after sudden stagger prevention activates.")
     public static int ssptime = 20;
     @Config.Comment("Maximum number of ticks between two attacks for it to be considered as part of the same combo.")

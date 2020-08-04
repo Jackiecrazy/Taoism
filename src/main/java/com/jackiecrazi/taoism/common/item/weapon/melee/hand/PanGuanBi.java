@@ -1,20 +1,24 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.hand;
 
 import com.jackiecrazi.taoism.api.BinaryMachiavelli;
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -34,7 +38,7 @@ public class PanGuanBi extends TaoWeapon {
      */
 
     public PanGuanBi() {
-        super(2, 1.6, 5f, 0.1f);
+        super(2, 1, 5f, 0.1f);
     }
 
     @Override
@@ -49,7 +53,7 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 4;
+        return 1;
     }
 
     @Override
@@ -63,17 +67,21 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     public float getTrueReach(EntityLivingBase elb, ItemStack is) {
-        return 2;
+        return 3;
     }
 
     @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
-        setCombo(elb, stack, 0);
+        if (elb instanceof EntityPlayer) {
+            EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand, 1, true);
+        }
+        setBuff(elb, stack, "hits", 0);
     }
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getCombo(attacker, item) == 3 ? Event.Result.ALLOW : Event.Result.DENY;
+        return getBuff(item, "hits") == 3 ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
@@ -92,34 +100,39 @@ public class PanGuanBi extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         super.applyEffects(stack, target, attacker, chi);
+        setLastAttackedRangeSq(attacker, stack, (float) NeedyLittleThings.getDistSqCompensated(attacker, target));
+        int hits = getBuff(stack, "hits");
         int setTo = getBuff(stack, "pressure");
-        if (getCombo(attacker, stack) == 3) {//detonate
+        if (hits == 3) {//detonate
             int potency = 0;
             for (int a = 0; a < 16; a++)
                 if (BinaryMachiavelli.getBoolean(setTo, a)) potency++;
             if (attacker.isSneaking()) {//sneaking, 5 posture and exhaust 1/3
-                TaoCasterData.getTaoCap(target).consumePosture(4*potency, true);
-                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.EXHAUSTION, 60*potency, 0), false);
+                TaoCasterData.getTaoCap(target).consumePosture(4 * potency, true);
+                TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.EXHAUSTION, 60 * potency, 0), false);
             } else if (!attacker.onGround) {//airborne, 5 bleed damage and bleed 1/3
-                target.hurtResistantTime=0;
-                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker),4*potency);
-                TaoPotionUtils.forceBleed(target, attacker, 60*potency, 0, TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD);
+                target.hurtResistantTime = 0;
+                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(attacker), 4 * potency);
+                TaoPotionUtils.forceBleed(target, attacker, 60 * potency, 0, TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD);
             } else {//standing, bind and root for 1.5 seconds
-                TaoCasterData.getTaoCap(target).setRootTime(30*potency);
-                TaoCasterData.getTaoCap(target).setBindTime(30*potency);
+                TaoCasterData.getTaoCap(target).setRootTime(30 * potency);
+                TaoCasterData.getTaoCap(target).setBindTime(30 * potency);
             }
-            setTo=0;
+            setTo = 0;
         } else if (attacker.isSneaking()) {
             setTo |= 2;
         } else if (!attacker.onGround) {
             setTo |= 4;
         } else setTo |= 1;
         setBuff(attacker, stack, "pressure", setTo);
+        setBuff(attacker, stack, "hits", (hits + 1) % 4);
     }
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return 0;
+        if (getLastAttackedRangeSq(is) > 4)
+            return 0;
+        return 0.5f;
     }
 
     @Override

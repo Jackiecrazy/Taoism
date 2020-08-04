@@ -40,6 +40,17 @@ public class Kusarigama extends TaoWeapon {
      * If the chain is in between you two when the enemy attacks, the chain will entangle the opponent's weapon
      * The opponent is now bound for (charge) ticks
      * Following up with the sickle will crit for double damage and decent posture damage
+     *
+     * redesign:
+     * offhand defense multiplier goes from 3x to 1x with more windup, on offhand parry it'll inflict brief mining fatigue
+     * crits on mining fatigue enemies, main hand defense at 1.5 so you have to be over half charge to parry on off
+     * right click throws the weighted chain with speed and max range depending on charge
+     * dashing into the enemy at full charge engages tether
+     * parrying the tethered enemy gives them weakness and mining fatigue, you consistently crit with main hand
+     * the tether breaks and returns after 6+(qi) blows have been traded, a successful hit on you counts as three hits
+     * if the enemy tries to escape, deal good posture damage depending on trade count and pull them back slightly
+     * right click to retrieve the ball for the same effect
+     *
      * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
@@ -115,6 +126,14 @@ public class Kusarigama extends TaoWeapon {
         return getHand(is) == EnumHand.OFF_HAND ? 0 : 3;
     }
 
+    /**
+     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
+     */
+    @Override
+    protected boolean[] harvestable(ItemStack is) {
+        return harvestList;
+    }
+
     @Override
     public int getMaxChargeTime() {
         return 40;
@@ -167,14 +186,6 @@ public class Kusarigama extends TaoWeapon {
         return super.knockback(attacker, target, stack, orig);
     }
 
-    /**
-     * @return 0 pick, 1 shovel, 2 axe, 3 scythe
-     */
-    @Override
-    protected boolean[] harvestable(ItemStack is) {
-        return harvestList;
-    }
-
     @Override
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) return getBuff(stack, "hitCharge") / (float) getMaxChargeTime();
@@ -220,6 +231,6 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+        return getHand(item) == EnumHand.OFF_HAND ? 1 + (item.getItemDamage() / 20f) : 1f;
     }
 }

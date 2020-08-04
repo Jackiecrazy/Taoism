@@ -12,10 +12,11 @@ import com.jackiecrazi.taoism.common.block.tile.TileTempExplosion;
 import com.jackiecrazi.taoism.common.effect.FakeExplosion;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.ai.AIDowned;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityPhysicsDummy;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityPhysicsDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.GeneralConfig;
+import com.jackiecrazi.taoism.networking.AttackPacketDenier;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
@@ -31,6 +32,7 @@ import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -47,6 +49,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.util.Iterator;
 import java.util.List;
@@ -118,13 +121,21 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
+    public static void bigBrother(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
+        if(event.getHandler() instanceof NetHandlerPlayServer) {
+            Taoism.logger.debug("registered cooldown packet eater");
+            event.getManager().channel().pipeline().addBefore("packet_handler", "cooldown_eater", new AttackPacketDenier(event));
+        }
+    }
+
+    @SubscribeEvent
     public static void sike(LivingHealEvent e) {
         e.setAmount((float) (e.getEntityLiving().getEntityAttribute(TaoEntities.HEAL).getAttributeValue() * e.getAmount()));
         if (e.getAmount() <= 0) e.setCanceled(true);
         if (e.getAmount() < 0) {
             e.getEntityLiving().attackEntityFrom(DamageSourceBleed.causeBleedingDamage(), -e.getAmount());
         }
-        if(e.getAmount()+e.getEntityLiving().getHealth()>e.getEntityLiving().getMaxHealth()+2){
+        if (e.getAmount() + e.getEntityLiving().getHealth() > e.getEntityLiving().getMaxHealth() + 2) {
             e.getEntityLiving().removePotionEffect(TaoPotion.AMPUTATION);
         }
     }
@@ -178,8 +189,8 @@ public class TaoEntityHandler {
             e.getAffectedEntities().remove(detonator);
             if (!(proxy instanceof EntityLivingBase) || !TaoCasterData.getTaoCap((EntityLivingBase) proxy).isRecordingDamage()) {
                 e.getAffectedEntities().remove(proxy);
-                if(proxy instanceof EntityPhysicsDummy){
-                    e.getAffectedEntities().remove(((EntityPhysicsDummy)proxy).getTetheredEntity());
+                if (proxy instanceof EntityPhysicsDummy) {
+                    e.getAffectedEntities().remove(((EntityPhysicsDummy) proxy).getTetheredEntity());
                 }
             }
             List<BlockPos> hitList = e.getAffectedBlocks();

@@ -5,7 +5,7 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.effect.FakeExplosion;
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityPhysicsDummy;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityBaseball;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
@@ -123,7 +123,7 @@ public class ChangChui extends TaoWeapon {
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         super.attackStart(ds, attacker, target, item, orig);
         if (isCharged(attacker, item) && !attacker.world.isRemote) {
-            EntityPhysicsDummy epd = new EntityPhysicsDummy(attacker.world, attacker, getHand(item), target);
+            EntityBaseball epd = new EntityBaseball(attacker.world, attacker, target);
             epd.shoot(attacker, -45, attacker.rotationYaw, 0.0F, 1.5f, 0.0F);
             attacker.world.spawnEntity(epd);
             if (getHand(item) == EnumHand.OFF_HAND) {

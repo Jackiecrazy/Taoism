@@ -13,6 +13,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -47,6 +48,12 @@ public class Pollaxe extends TaoWeapon {
 
     public Pollaxe() {
         super(3, 1.2, 7, 1.3f);
+        this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
+            if (elb != null) {
+                if (isDummy(stack)) return 1;
+            }
+            return 0;
+        });
     }
 
     @Override
@@ -65,7 +72,7 @@ public class Pollaxe extends TaoWeapon {
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
-        return getHand(stack) == EnumHand.MAIN_HAND && !attacker.onGround;
+        return !isDummy(stack) && !attacker.onGround;
     }
 
     @Override
@@ -90,11 +97,11 @@ public class Pollaxe extends TaoWeapon {
                         //if the distance is below expected, add outwards velocity
                         //if the distance is above expected, add inwards velocity
                         //otherwise do nothing
-                        if (distsq > 4) {
+                        if (distsq > 25) {
                             a.motionX += (point.x - a.posX) * 0.02;
                             a.motionY += (point.y - a.posY) * 0.02;
                             a.motionZ += (point.z - a.posZ) * 0.02;
-                        } else if (distsq < 1) {
+                        } else if (distsq < 9) {
                             a.motionX -= (point.x - a.posX) * 0.02;
                             a.motionY -= (point.y - a.posY) * 0.02;
                             a.motionZ -= (point.z - a.posZ) * 0.02;
@@ -121,7 +128,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
+        return isDummy(stack) ? (super.speed(stack) + 4) * 2 - 4 : super.speed(stack);
     }
 
     @Override
@@ -145,24 +152,24 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public int getDamageType(ItemStack item) {
-        if (getHand(item) == EnumHand.OFF_HAND && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
+        if (isDummy(item) && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
             return 2;
         }
-        return getHand(item) == EnumHand.OFF_HAND ? 0 : 3;
+        return isDummy(item) ? 0 : 3;
     }
 
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack is, float amount) {
         if (isTwoHanded(is)) {
-            EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+            EnumHand other = isDummy(is) ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
             TaoCombatUtils.rechargeHand(defender, other, 0.9f, true);
         }
     }
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        if (getHand(item) == EnumHand.OFF_HAND && getLastMove(item).isValid() && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
+        if (isDummy(item) && getLastMove(item).isValid() && !getLastMove(item).isLeftClick() && getLastAttackedRangeSq(item) != 0) {
             return super.postureDealtBase(attacker, defender, item, amount) * 2;
-        } else if (getHand(item) == EnumHand.MAIN_HAND) {
+        } else if (!isDummy(item)) {
             return super.postureDealtBase(attacker, defender, item, amount) / 2;
         }
         return super.postureDealtBase(attacker, defender, item, amount);
@@ -178,13 +185,13 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return getHand(item) == EnumHand.MAIN_HAND && getLastAttackedRangeSq(item) != 0 && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && target == attacker.getLastAttackedEntity() ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
+        return !isDummy(item) && getLastAttackedRangeSq(item) != 0 && getLastMove(item).isValid() && getLastMove(item).isLeftClick() && target == attacker.getLastAttackedEntity() ? Event.Result.ALLOW : super.critCheck(attacker, target, item, crit, vanCrit);
     }
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
         float crit = 1;
-        if (getHand(stack) == EnumHand.MAIN_HAND && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
+        if (!isDummy(stack) && getLastMove(stack).isLeftClick() && getLastAttackedRangeSq(stack) != 0) {
             crit *= 1.5f;
         }
         crit = !attacker.onGround ? crit * 1.5f : crit;
@@ -194,7 +201,7 @@ public class Pollaxe extends TaoWeapon {
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         //nerf offhand damage
-        return getHand(item) == EnumHand.OFF_HAND ? 0.4f : 1f;
+        return isDummy(item) ? 0.4f : 1f;
     }
 
     @Override

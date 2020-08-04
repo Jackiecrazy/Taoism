@@ -78,7 +78,7 @@ public class NeedyLittleThings {
      * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
     public static void knockBack(Entity to, Entity from, float strength, boolean considerRelativeAngle) {
-        Vec3d distVec = to.getPositionVector().addVector(0, to.getEyeHeight(), 0).subtractReverse(from.getPositionVector().addVector(0, from.getEyeHeight(), 0)).normalize();
+        Vec3d distVec = to.getPositionVector().subtractReverse(from.getPositionVector()).normalize();
         if (to instanceof EntityLivingBase) {
             if (considerRelativeAngle)
                 knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);

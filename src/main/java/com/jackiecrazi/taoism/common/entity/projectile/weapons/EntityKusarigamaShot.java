@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism.common.entity.projectile.weapons;
 
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherAnchor;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
@@ -7,9 +8,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class EntityKusarigamaShot extends EntityThrownWeapon {
+import javax.annotation.Nullable;
+
+public class EntityKusarigamaShot extends EntityThrownWeapon implements ITetherAnchor {
     public EntityKusarigamaShot(World worldIn) {
         super(worldIn);
     }
@@ -65,5 +69,27 @@ public class EntityKusarigamaShot extends EntityThrownWeapon {
 
     protected void onRetrieveWeapon() {
         super.onRetrieveWeapon();
+    }
+
+    @Override
+    public Entity getTetheringEntity() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Vec3d getTetheredOffset() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Entity getTetheredEntity() {
+        return null;
+    }
+
+    @Override
+    public double getTetherLength() {
+        return 0;
     }
 }

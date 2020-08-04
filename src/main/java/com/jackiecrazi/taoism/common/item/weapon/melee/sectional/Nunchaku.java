@@ -53,6 +53,7 @@ public class Nunchaku extends TaoWeapon {
      * Lasts until distance > 3, at which point the opponent is tripped for 50% max posture damage
      * Alternatively, by dealing enough damage to you (threshold scales with higher chi) will end this state as well
      *
+     * slight buff: knockback converted into some kind of damage, attack speed rises for consecutive attacks
      */
     private final PartDefinition[] parts = {
             StaticRefs.HANDLE,
@@ -106,6 +107,11 @@ public class Nunchaku extends TaoWeapon {
         if (elb instanceof EntityPlayer && !Taoism.proxy.isBreakingBlock((EntityPlayer) elb))
             updateStanceSide(is);
         return super.onEntitySwing(elb, is);
+    }
+
+    @Override
+    protected double speed(ItemStack stack) {
+        return 1.3 + Math.min(0.7, getBuff(stack, "consecutiveStrike") / 10) - 4;
     }
 
     @Override
@@ -165,15 +171,6 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if (getCurrentMove(item).isSneakPressed() && !getLastMove(item).isSneakPressed()) {//high low
-            //smash!
-            return 1.5f;
-        }
-        return 1;
-    }
-
-    @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         if (!getCurrentMove(item).isSneakPressed() && getLastMove(item).isSneakPressed()) {//low high
             //8-spin! reduce damage
@@ -192,6 +189,20 @@ public class Nunchaku extends TaoWeapon {
             TaoCasterData.getTaoCap(attacker).startRecordingDamage();
             TaoCasterData.getTaoCap(attacker).setForcedLookAt(target);
         }
+        if (lastAttackTime(attacker, stack) + 100 < attacker.world.getTotalWorldTime()) {
+            setBuff(attacker, stack, "consecutiveStrike", 0);
+        } else setBuff(attacker, stack, "consecutiveStrike", getBuff(stack, "consecutiveStrike") + 1);
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        gettagfast(stack).setFloat("kb", orig);
+        return 0;
+    }
+
+    @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return orig + gettagfast(stack).getFloat("kb");
     }
 
     @Override
@@ -206,7 +217,7 @@ public class Nunchaku extends TaoWeapon {
     protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (!getCurrentMove(stack).isSneakPressed() && getLastMove(stack).isSneakPressed()) {//low high
             //8-spin!
-            multiHit(attacker, stack, target, 4, 2);
+            scheduleExtraAction(attacker, stack, target, 4, 2);
         }
     }
 

@@ -178,7 +178,6 @@ public class Karambit extends TaoWeapon {
     @Override
     protected void endScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, int interval) {
         if (victim instanceof EntityLivingBase) {
-            //TODO aoe fear if enemy dies
             for (EntityLivingBase e : elb.world.getEntitiesWithinAABB(EntityLivingBase.class, elb.getEntityBoundingBox().grow(16))) {
                 if (e != elb)
                     TaoPotionUtils.fear(e, elb, (int) TaoCasterData.getTaoCap((EntityLivingBase) victim).getRecordedDamage() * 3);
@@ -251,7 +250,7 @@ public class Karambit extends TaoWeapon {
     @Override
     protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack)) {
-            multiHit(attacker, stack, target, 20, 20);
+            scheduleExtraAction(attacker, stack, target, 20, 20);
         }
     }
 }

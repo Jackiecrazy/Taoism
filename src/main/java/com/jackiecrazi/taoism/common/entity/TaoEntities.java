@@ -3,6 +3,9 @@ package com.jackiecrazi.taoism.common.entity;
 import com.jackiecrazi.taoism.common.entity.fx.EntityEvidence;
 import com.jackiecrazi.taoism.common.entity.fx.EntityFear;
 import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityBaseball;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityOrbitDummy;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityPhysicsDummy;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -22,9 +25,10 @@ public class TaoEntities {
     public static final IAttribute LINGREGEN = (new RangedAttribute(null, "generic.lingRegen", 1.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Ling Regeneration").setShouldWatch(true);
     public static final IAttribute QIRATE = (new RangedAttribute(null, "generic.qiGen", 0.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Qi Accumulation Rate").setShouldWatch(true);
     public static final IAttribute MAXPOSTURE = (new RangedAttribute(null, "taoism.maxPosture", 10.0D, 0, Double.MAX_VALUE)).setDescription("Max Posture").setShouldWatch(true);
-    private static int id=0;
+    private static int id = 0;
+
     @SubscribeEvent
-    public static void init(RegistryEvent.Register<EntityEntry> e){
+    public static void init(RegistryEvent.Register<EntityEntry> e) {
 //        e.getRegistry().register(factoryArrow(EntityTaoArrowBlunt.class));
 //        e.getRegistry().register(factoryArrow(EntityTaoArrowScream.class));
 //        e.getRegistry().register(factoryArrow(EntityTaoArrowHarpoon.class));
@@ -41,22 +45,28 @@ public class TaoEntities {
         e.getRegistry().register(factoryArrow(EntityWhiplash.class));
         e.getRegistry().register(factoryAmbient(EntityEvidence.class));
         e.getRegistry().register(factoryArrow(EntityPhysicsDummy.class));
+        e.getRegistry().register(factoryArrow(EntityBaseball.class));
+        e.getRegistry().register(factoryArrow(EntityOrbitDummy.class));
         e.getRegistry().register(factoryAmbient(EntityFear.class));
     }
-    private static EntityEntry factoryMove(Class<?extends EntityMove> move){
-        String name = move.getSimpleName().substring(6).toLowerCase();
-        return EntityEntryBuilder.create().entity(move).name(name).tracker(64,20,false).id(name,id++).build();
-    }
-    private static EntityEntry factoryArrow(Class<?extends EntityTaoProjectile> arr){
+
+    private static EntityEntry factoryArrow(Class<? extends EntityTaoProjectile> arr) {
         String name = arr.getSimpleName().substring(6).toLowerCase();
-        return EntityEntryBuilder.create().entity(arr).name(name).tracker(64,20,false).id(name,id++).build();
+        return EntityEntryBuilder.create().entity(arr).name(name).tracker(64, 20, false).id(name, id++).build();
     }
-    private static EntityEntry factoryProjectile(Class<?extends EntityThrowable> projectile){
-        String name = projectile.getSimpleName().substring(6).toLowerCase();
-        return EntityEntryBuilder.create().entity(projectile).name(name).tracker(64,5,true).id(name,id++).build();
-    }
-    private static EntityEntry factoryAmbient(Class<?extends Entity> ambient){
+
+    private static EntityEntry factoryAmbient(Class<? extends Entity> ambient) {
         String name = ambient.getSimpleName().substring(6).toLowerCase();
-        return EntityEntryBuilder.create().entity(ambient).name(name).tracker(64,20,false).id(name,id++).build();
+        return EntityEntryBuilder.create().entity(ambient).name(name).tracker(64, 20, false).id(name, id++).build();
+    }
+
+    private static EntityEntry factoryMove(Class<? extends EntityMove> move) {
+        String name = move.getSimpleName().substring(6).toLowerCase();
+        return EntityEntryBuilder.create().entity(move).name(name).tracker(64, 20, false).id(name, id++).build();
+    }
+
+    private static EntityEntry factoryProjectile(Class<? extends EntityThrowable> projectile) {
+        String name = projectile.getSimpleName().substring(6).toLowerCase();
+        return EntityEntryBuilder.create().entity(projectile).name(name).tracker(64, 5, true).id(name, id++).build();
     }
 }

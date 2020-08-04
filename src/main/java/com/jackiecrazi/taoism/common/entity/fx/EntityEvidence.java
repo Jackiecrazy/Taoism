@@ -2,7 +2,6 @@ package com.jackiecrazi.taoism.common.entity.fx;
 
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.common.item.weapon.melee.desword.ExecutionerSword;
-import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -75,12 +74,20 @@ public class EntityEvidence extends Entity {
 
     @Override
     public void onCollideWithPlayer(EntityPlayer p) {
-        ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(p);
+        ItemStack is = p.getHeldItemMainhand();
         if (is.getItem() instanceof ExecutionerSword && ((ExecutionerSword) is.getItem()).attemptAbsorbSoul(p, is, this)) {
             if (world instanceof WorldServer)
                 ((WorldServer)world).spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, posX, posY, posZ, 6, 0.5, 0.5, 0.5, 0);
             world.playSound(null, posX, posY, posZ, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
             setDead();
+        }else{
+            is = p.getHeldItemOffhand();
+            if (is.getItem() instanceof ExecutionerSword && ((ExecutionerSword) is.getItem()).attemptAbsorbSoul(p, is, this)) {
+                if (world instanceof WorldServer)
+                    ((WorldServer)world).spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, posX, posY, posZ, 6, 0.5, 0.5, 0.5, 0);
+                world.playSound(null, posX, posY, posZ, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
+                setDead();
+            }
         }
     }
 
@@ -95,6 +102,10 @@ public class EntityEvidence extends Entity {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
+        if(source.getTrueSource() instanceof EntityPlayer){
+            onCollideWithPlayer((EntityPlayer) source.getTrueSource());
+            return false;
+        }
         world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.NEUTRAL, 0.8f + rand.nextFloat() * 0.4f, 0.8f + rand.nextFloat() * 0.4f);
         setDead();
         return false;

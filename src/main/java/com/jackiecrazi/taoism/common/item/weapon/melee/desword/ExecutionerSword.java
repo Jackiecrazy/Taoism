@@ -9,6 +9,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -57,7 +58,7 @@ public class ExecutionerSword extends TaoWeapon {
     @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (onHand && e.ticksExisted % (200 - getQiFromStack(stack) * 10) == 0 && getLastAttackedEntity(w, stack) instanceof EntityLivingBase && !w.isRemote) {
+        if (getHand(stack)!=null && e.ticksExisted % (200 - getQiFromStack(stack) * 10) == 0 && getLastAttackedEntity(w, stack) instanceof EntityLivingBase && !w.isRemote) {
             EntityLivingBase sinner = (EntityLivingBase) getLastAttackedEntity(w, stack);
             EntityEvidence ee = new EntityEvidence(w, sinner);
             w.spawnEntity(ee);
@@ -106,6 +107,7 @@ public class ExecutionerSword extends TaoWeapon {
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack)) {
             ds.setDamageIsAbsolute().setDamageBypassesArmor().setDamageAllowedInCreativeMode();
+            attacker.world.addWeatherEffect(new EntityLightningBolt(attacker.world, target.posX, target.posY, target.posZ, true));
             dischargeWeapon(attacker, stack);
             TaoCasterData.getTaoCap(target).setMustDropHead(true);
             return target.getMaxHealth() * 5;

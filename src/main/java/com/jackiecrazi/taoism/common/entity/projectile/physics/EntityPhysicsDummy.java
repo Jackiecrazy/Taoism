@@ -1,15 +1,11 @@
-package com.jackiecrazi.taoism.common.entity.projectile.weapons;
+package com.jackiecrazi.taoism.common.entity.projectile.physics;
 
-import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherAnchor;
-import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.effect.FakeExplosion;
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -20,16 +16,16 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityPhysicsDummy extends EntityThrownWeapon implements ITetherAnchor {
-    private Entity target;
+public class EntityPhysicsDummy extends EntityTaoProjectile implements ITetherAnchor {
+    protected Entity target;
 
     public EntityPhysicsDummy(World worldIn) {
         super(worldIn);
         setSize(0.5f, 0.5f);
     }
 
-    public EntityPhysicsDummy(World worldIn, EntityLivingBase dude, EnumHand main, Entity attachTo) {
-        super(worldIn, dude, main);
+    public EntityPhysicsDummy(World worldIn, EntityLivingBase dude, Entity attachTo) {
+        super(worldIn, dude);
         setSize(0.5f, 0.5f);
         target = attachTo;
         setPosition(dude.posX, dude.posY+dude.height/2, dude.posZ);
@@ -80,43 +76,12 @@ public class EntityPhysicsDummy extends EntityThrownWeapon implements ITetherAnc
 
     @Override
     protected void onHitEntity(Entity hit) {
+
     }
 
     @Override
-    protected void onRetrieveWeapon() {
-        super.onRetrieveWeapon();
-        if (target instanceof EntityLivingBase) {
-            TaoCasterData.getTaoCap(((EntityLivingBase) target)).setRootTime(0);
-            TaoCasterData.getTaoCap(((EntityLivingBase) target)).stopRecordingDamage(getThrower());
-        }
-    }
+    protected void onHitBlock(RayTraceResult raytraceResultIn) {
 
-    public void onRecall() {
-        //onRetrieveWeapon();
-    }
-
-    @Override
-    protected boolean shouldRetrieve() {
-        return false;
-    }
-
-    @Override
-    protected void onHit(RayTraceResult rtr) {
-        if (rtr == null || rtr.typeOfHit != RayTraceResult.Type.BLOCK || world.getTileEntity(rtr.getBlockPos()) != null)
-            return;
-        if (rtr.sideHit != EnumFacing.UP && target != null && NeedyLittleThings.getSpeedSq(this) > 0.5) {
-            //world.newExplosion(this, posX, posY, posZ, 3, false, true);
-            FakeExplosion.explode(world, this, getThrower(), posX, posY, posZ, (float) Math.min(5f, NeedyLittleThings.getSpeedSq(target) * 3 * target.width * target.height));
-            motionX *= 0.7;
-            motionY *= 0.7;
-            motionZ *= 0.7;
-            sync();
-        } else {
-            if (target instanceof EntityLivingBase) {
-                TaoCasterData.getTaoCap((EntityLivingBase) target).stopRecordingDamage(((EntityLivingBase) target).getRevengeTarget());
-            }
-            setDead();
-        }
     }
 
     /**

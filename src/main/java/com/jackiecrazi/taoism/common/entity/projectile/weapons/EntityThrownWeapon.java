@@ -158,16 +158,4 @@ public abstract class EntityThrownWeapon extends EntityTaoProjectile {
         return hitStatus > 0;
     }
 
-    public float xSpin() {
-        return 0;
-    }
-
-    public float ySpin() {
-        return 0;
-    }
-
-    public float zSpin() {
-        return 0;
-    }
-
 }

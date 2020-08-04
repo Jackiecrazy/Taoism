@@ -13,10 +13,10 @@
       "type": "forge:ore_dict",
       "ore": "nuggetIron"
     },
-    "r":
+    "l":
     {
       "type": "forge:ore_dict",
-      "ore": "string"
+      "ore": "leather"
     },
     "s":
     {

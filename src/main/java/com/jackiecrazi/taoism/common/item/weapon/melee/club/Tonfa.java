@@ -160,7 +160,7 @@ public class Tonfa extends TaoWeapon {
     @Override
     protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND)
-            multiHit(attacker, stack, target, 3, 3);
+            scheduleExtraAction(attacker, stack, target, 3, 3);
     }
 
 

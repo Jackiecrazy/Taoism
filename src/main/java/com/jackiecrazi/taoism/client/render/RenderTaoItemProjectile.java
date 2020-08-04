@@ -1,6 +1,6 @@
 package com.jackiecrazi.taoism.client.render;
 
-import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityThrownWeapon;
+import com.jackiecrazi.taoism.common.entity.projectile.EntityTaoProjectile;
 import com.jackiecrazi.taoism.common.item.TaoItems;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3i;
 
-public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Render<T> {
+public class RenderTaoItemProjectile<T extends EntityTaoProjectile> extends Render<T> {
     private final int index;
     private final RenderItem itemRenderer;
     private final Vec3i rot;
@@ -80,7 +80,7 @@ public class RenderTaoItemProjectile<T extends EntityThrownWeapon> extends Rende
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
      */
-    protected ResourceLocation getEntityTexture(EntityThrownWeapon entity) {
+    protected ResourceLocation getEntityTexture(EntityTaoProjectile entity) {
         return TextureMap.LOCATION_BLOCKS_TEXTURE;
     }
 }

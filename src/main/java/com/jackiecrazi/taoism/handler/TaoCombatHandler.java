@@ -155,6 +155,7 @@ public class TaoCombatHandler {
                 } else
                     semeCap.setSwing(0);
             }
+            //System.out.println("damage is to be dealt by "+seme+" to "+uke);
             //if(seme.world.isRemote)return;
             /*
             idle parry
@@ -165,6 +166,7 @@ public class TaoCombatHandler {
             while this sounds bad for low pos modifier weapons, it means they can bounce around. Hyper-mobile combat!
              */
             ItemStack defend = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
+            //System.out.println("parrying stack is "+defend);
             float atk = TaoCombatUtils.postureAtk(uke, seme, attack, e.getAmount());
             float def = TaoCombatUtils.postureDef(uke, seme, defend, e.getAmount());
             //some entities just can't parry.
@@ -174,8 +176,8 @@ public class TaoCombatHandler {
                 e.setCanceled(true);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()), true);
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(seme, uke, Math.min(2, 5 * atk * atkDef / semeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(uke, seme, Math.min(2, 5 * atk * def / ukeCap.getMaxPosture()), true);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
                     if (uke instanceof EntityPlayer)
@@ -188,6 +190,9 @@ public class TaoCombatHandler {
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend, e.getAmount());
+                } else if (TaoCombatUtils.isShield(defend) && ukeCap.getParryCounter() > CombatConfig.shieldThreshold) {
+                    //parry invframes
+                    ukeCap.setParryCounter(0);
                 }
                 EnumHand other = uke.getHeldItemMainhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
                 if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {

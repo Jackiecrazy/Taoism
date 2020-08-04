@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityOrbitDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
@@ -34,7 +35,9 @@ public class GouLianQiang extends TaoWeapon {
     if the target is not facing the attacker, instantly trip
     if the target is unaware of attacker, instantly down
 
-    Execution: grab enemy with hook and slam them to the other side, then follow up with a heart stab that deals a *lot* of damage
+    Execution:
+    grab enemy with hook and slam them to the other side, using the reaction force to leap
+     then follow up with a heart stab that deals a *lot* of damage
      */
 
     public GouLianQiang() {
@@ -47,11 +50,6 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
-    }
-
-    @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 1.4f;
     }
@@ -59,11 +57,6 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
-    }
-
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND && isCharged(attacker, stack))
-            splash(attacker, stack, 120);
     }
 
     @Override
@@ -75,8 +68,30 @@ public class GouLianQiang extends TaoWeapon {
     }
 
     @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 6f;
+    }
+
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND && isCharged(attacker, stack))
+            splash(attacker, stack, 120);
+    }
+
+    @Override
     public int getDamageType(ItemStack is) {
         return getHand(is) == EnumHand.OFF_HAND ? 1 : 2;
+    }
+
+    @Override
+    public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
+        super.chargeWeapon(attacker, item);
+        setBuff(attacker, item, "flipOverID", 0);
+    }
+
+    @Override
+    public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
+        super.dischargeWeapon(elb, item);
+        setBuff(elb, item, "flipOverID", 0);
     }
 
     @Override
@@ -91,26 +106,67 @@ public class GouLianQiang extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.OFF_HAND ? 0.1f : 1f;
+        return getHand(item) == EnumHand.OFF_HAND && !isCharged(attacker, item) ? 0.1f : 1f;
+    }
+
+    @Override
+    public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (isCharged(attacker, stack) && getBuff(stack, "flipOverID") != 0) {
+            ds.setDamageIsAbsolute().setDamageBypassesArmor();
+            return orig * 10;
+        }
+        return super.hurtStart(ds, attacker, target, stack, orig);
     }
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0 || isCharged(attacker, stack))) {
+        if (isCharged(attacker, stack)) return target.getTotalArmorValue();
+        if (getHand(stack) == EnumHand.MAIN_HAND && (TaoCasterData.getTaoCap(target).getDownTimer() > 0)) {
             //ignore half armor when downed
             return target.getTotalArmorValue() / 2;
         }
         return super.armorIgnoreAmount(ds, attacker, target, stack, orig);
     }
 
+    @Override
+    public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        attacker.motionY += 1;
+        attacker.velocityChanged = true;
+        TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture(), true, true, attacker);
+        return 0;
+    }
+
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (isCharged(attacker, stack) && !attacker.world.isRemote) {
+            //begin the flip sequence
+            if (getBuff(stack, "flipOverID") == 0) {
+                setBuff(attacker, stack, "flipOverID", target.getEntityId());
+                TaoCasterData.getTaoCap(attacker).startRecordingDamage();
+                TaoCasterData.getTaoCap(target).startRecordingDamage();
+                EntityOrbitDummy epd = new EntityOrbitDummy(attacker.world, attacker, target);
+                //epd.shoot(attacker, 0, 0, 0.0F, 0.5f, 0.0F);
+                //epd.setPositionAndUpdate(target.posX, target.posY, target.posZ);
+                epd.motionY = 1;
+                attacker.world.spawnEntity(epd);
+                TaoCasterData.getTaoCap(attacker).setForcedLookAt(target);
+            } else {
+                setBuff(attacker, stack, "flipOverID", 0);
+                TaoCasterData.getTaoCap(attacker).stopRecordingDamage(attacker);
+                TaoCasterData.getTaoCap(attacker).setForcedLookAt(null);
+                TaoCasterData.getTaoCap(attacker).consumeQi(4, 5);
+//                for (Entity e : attacker.world.getEntitiesWithinAABBExcludingEntity(attacker, attacker.getEntityBoundingBox().grow(16))) {
+//                    if (e != target) NeedyLittleThings.knockBack(e, attacker, 2, true);
+//                }
+                dischargeWeapon(attacker, stack);
+            }
+        }
         if (getHand(stack) == EnumHand.OFF_HAND) {
             //main function. Check if previous move is also right click on the same target and trip if so
-            if (!NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) && getLastAttackedRangeSq(stack)!=0) {
+            if (!NeedyLittleThings.isFacingEntity(target, attacker, 90) || (!getLastMove(stack).isLeftClick() && getLastAttackedEntity(attacker.world, stack) == target) && getLastAttackedRangeSq(stack) != 0) {
                 //we're going on a trip on our favourite hooked... ship?
                 setLastAttackedRangeSq(attacker, stack, 0);
                 TaoCasterData.getTaoCap(target).consumePosture((float) Math.min(TaoCasterData.getTaoCap(target).getMaxPosture() / 2d, getDamageAgainst(attacker, target, stack)), true, true, attacker);
-            }else setLastAttackedRangeSq(attacker, stack, 1);
+            } else setLastAttackedRangeSq(attacker, stack, 1);
         }
     }
 

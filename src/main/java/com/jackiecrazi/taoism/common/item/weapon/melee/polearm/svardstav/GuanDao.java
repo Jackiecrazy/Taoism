@@ -156,7 +156,7 @@ public class GuanDao extends TaoWeapon {
         gettagfast(item).setLong("chargedAtTime", 0);
         gettagfast(item).setLong("startAt", 0);
         //spawn a barrage of mdzgh
-        multiHit(elb, item, elb, 10 + getBuff(item), 1);
+        scheduleExtraAction(elb, item, elb, 10 + getBuff(item), 1);
         setBuff(item, 0);
     }
 
@@ -180,8 +180,12 @@ public class GuanDao extends TaoWeapon {
     public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack is, boolean recharged, float amount) {
         if (getHand(is) == EnumHand.OFF_HAND) {
             return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, 120);
-        }
-        else return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, -120);
+        } else return recharged && NeedyLittleThings.isFacingEntity(defender, attacker, -120);
+    }
+
+    @Override
+    public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        return (getHand(item) != EnumHand.OFF_HAND || !NeedyLittleThings.isFacingEntity(attacker, target, 90)) && super.canAttack(ds, attacker, target, item, orig);
     }
 
     @Override

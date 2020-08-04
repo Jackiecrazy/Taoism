@@ -6,6 +6,9 @@ import com.jackiecrazi.taoism.client.render.RenderTetheredTaoItemProjectile;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.entity.fx.EntityEvidence;
 import com.jackiecrazi.taoism.common.entity.fx.EntityFear;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityBaseball;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityOrbitDummy;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityPhysicsDummy;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -54,6 +57,8 @@ public class ClientProxy extends CommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntityKusarigamaShot.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 6, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 0, 0), 1.5f, 1.5f, 4.5f, EnumHand.OFF_HAND));
         RenderingRegistry.registerEntityRenderingHandler(EntityWhiplash.class, manager -> new RenderTetheredTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1.5f, null));
         RenderingRegistry.registerEntityRenderingHandler(EntityPhysicsDummy.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1));
+        RenderingRegistry.registerEntityRenderingHandler(EntityBaseball.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1));
+        RenderingRegistry.registerEntityRenderingHandler(EntityOrbitDummy.class, manager -> new RenderTaoItemProjectile<>(manager, 4, Minecraft.getMinecraft().getRenderItem(), new Vec3i(0, 90, 0), 1));
         RenderingRegistry.registerEntityRenderingHandler(EntityEvidence.class, RenderNothing::new);
         RenderingRegistry.registerEntityRenderingHandler(EntityFear.class, RenderNothing::new);
     }

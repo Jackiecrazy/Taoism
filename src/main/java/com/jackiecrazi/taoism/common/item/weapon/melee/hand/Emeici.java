@@ -1,14 +1,18 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.hand;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -26,7 +30,7 @@ public class Emeici extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, false, true};
 
     public Emeici() {
-        super(1, 2, 5f, 0.1f);
+        super(1, 1, 5f, 0.1f);
     }
 
 
@@ -52,6 +56,10 @@ public class Emeici extends TaoWeapon {
     @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         setBuff(elb, stack, "facing", -1);
+        if (elb instanceof EntityPlayer) {
+            EnumHand hand = elb.getHeldItemOffhand() == stack ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
+            TaoCombatUtils.rechargeHand(elb, hand, 1, true);
+        }
     }
 
     @Override
@@ -78,6 +86,7 @@ public class Emeici extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        setLastAttackedRangeSq(attacker, stack, (float) NeedyLittleThings.getDistSqCompensated(attacker, target));
         setBuff(attacker, stack, "crit", 0);
         setBuff(attacker, stack, "facing", attacker.getAdjustedHorizontalFacing().getIndex());
     }
@@ -90,5 +99,12 @@ public class Emeici extends TaoWeapon {
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2;
+    }
+
+    @Override
+    public float newCooldown(EntityLivingBase elb, ItemStack is) {
+        if (getLastAttackedRangeSq(is) > 4)
+            return 0;
+        return 0.5f;
     }
 }
