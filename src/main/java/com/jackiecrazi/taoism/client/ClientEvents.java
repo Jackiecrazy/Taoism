@@ -203,7 +203,7 @@ public class ClientEvents {
             KeyBinding.unPressAllKeys();
             return;
         }
-        if (itsc.getQi() > 0) {
+        if (itsc.getQi() > 0 && itsc.isInCombatMode()) {
             final boolean onSprint = mc.gameSettings.keyBindSprint.isPressed();
             if (mi.leftKeyDown && (!tapped[0] || onSprint)) {
                 if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE || onSprint) {
@@ -241,7 +241,7 @@ public class ClientEvents {
             return;
         }
 
-        if (itsc.getQi() > 0) {
+        if (itsc.getQi() > 0 && itsc.isInCombatMode()) {
             if (mi.jump && !jump) {
                 //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
                 Taoism.net.sendToServer(new PacketJump());
@@ -283,10 +283,17 @@ public class ClientEvents {
             rangesq *= rangesq;
             if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
                 mc.pointedEntity = null;
-                Vec3d look= mc.player.getLook(1).scale(3);
+                Vec3d look = mc.player.getLook(1).scale(3);
                 mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
+                return;
             }
         }
+//        if (!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player) && (mc.gameSettings.keyBindAttack.isKeyDown() || mc.gameSettings.keyBindUseItem.isKeyDown()) && (leftClickAt == 0 || rightClickAt == 0)) {
+//            GameSettings gs = Minecraft.getMinecraft().gameSettings;
+//            MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isKeyDown());
+//            Taoism.net.sendToServer(new PacketMakeMove(move));
+//            leftClickAt = rightClickAt = 0;
+//        }
     }
 
     @SubscribeEvent
@@ -298,10 +305,18 @@ public class ClientEvents {
             rangesq *= rangesq;
             if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
                 mc.pointedEntity = null;
-                Vec3d look= mc.player.getLook(1).scale(3);
+                Vec3d look = mc.player.getLook(1).scale(3);
                 mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
+                return;
             }
         }
+//        if (!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player) && (mc.gameSettings.keyBindAttack.isKeyDown() || mc.gameSettings.keyBindUseItem.isKeyDown()) && (leftClickAt == 0 || rightClickAt == 0)) {
+//            GameSettings gs = Minecraft.getMinecraft().gameSettings;
+//            MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isKeyDown());
+//            Taoism.net.sendToServer(new PacketMakeMove(move));
+//            System.out.println("dep");
+//            leftClickAt = rightClickAt = 1;
+//        }
     }
 
     @SubscribeEvent
@@ -314,7 +329,7 @@ public class ClientEvents {
                 rangesq *= rangesq;
                 if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
                     mc.pointedEntity = null;
-                    Vec3d look= mc.player.getLook(1).scale(3);
+                    Vec3d look = mc.player.getLook(1).scale(3);
                     mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
                 }
             }
@@ -329,7 +344,14 @@ public class ClientEvents {
                     //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
-            }
+            }// else leftClickAt = 0;
+            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
+                rightClickAt++;
+                if (rightClickAt == CHARGE) {
+                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
+                }
+            }// else rightClickAt = 0;
         }
     }
 
@@ -365,7 +387,7 @@ public class ClientEvents {
                 rangesq *= rangesq;
                 if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
                     mc.pointedEntity = null;
-                    Vec3d look= mc.player.getLook(1).scale(3);
+                    Vec3d look = mc.player.getLook(1).scale(3);
                     mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
                 }
             }
@@ -484,68 +506,68 @@ public class ClientEvents {
                 int width = sr.getScaledWidth();
                 int height = sr.getScaledHeight();
                 //if (gamesettings.thirdPersonView == 0) {
-                    mc.getTextureManager().bindTexture(hud);
-                    float targetQiLevel = cap.getQi();
-                    boolean closeEnough = true;
-                    if (targetQiLevel > currentQiLevel) {
-                        currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 20);
-                        closeEnough = false;
-                    }
-                    if (targetQiLevel < currentQiLevel) {
-                        currentQiLevel -= Math.min(0.1, (currentQiLevel - targetQiLevel) / 20);
-                        closeEnough = !closeEnough;
-                    }
-                    if (closeEnough)
-                        currentQiLevel = targetQiLevel;
-                    int qi = (int) (currentQiLevel);
-                    float qiExtra = currentQiLevel - qi;
-                    //System.out.println(currentQiLevel);
-                    //System.out.println(qi);
-                    if (qi != 0 || qiExtra != 0f) {
-                        //render qi bar
+                mc.getTextureManager().bindTexture(hud);
+                float targetQiLevel = cap.getQi();
+                boolean closeEnough = true;
+                if (targetQiLevel > currentQiLevel) {
+                    currentQiLevel += Math.min(0.1, (targetQiLevel - currentQiLevel) / 20);
+                    closeEnough = false;
+                }
+                if (targetQiLevel < currentQiLevel) {
+                    currentQiLevel -= Math.min(0.1, (currentQiLevel - targetQiLevel) / 20);
+                    closeEnough = !closeEnough;
+                }
+                if (closeEnough)
+                    currentQiLevel = targetQiLevel;
+                int qi = (int) (currentQiLevel);
+                float qiExtra = currentQiLevel - qi;
+                //System.out.println(currentQiLevel);
+                //System.out.println(qi);
+                if (qi != 0 || qiExtra != 0f) {
+                    //render qi bar
+                    GlStateManager.pushMatrix();
+                    //GlStateManager.bindTexture(mc.renderEngine.getTexture(qibar).getGlTextureId());
+                    //bar
+                    GlStateManager.pushMatrix();
+                    GlStateManager.enableBlend();
+                    GlStateManager.enableAlpha();
+                    //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra *(GRADIENTE.length)), 0, GRADIENTE.length - 1)];
+                    //GlStateManager.color(red(c), green(c), blue(c));
+                    GlStateManager.color(1, 1, 1, qi > 0 ? 1 : qiExtra);
+                    mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), 0, 0, 64, 64);//+(int)(qiExtra*32)
+                    GlStateManager.popMatrix();
+
+                    if (qi > 0) {
+                        //overlay
                         GlStateManager.pushMatrix();
-                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qibar).getGlTextureId());
-                        //bar
-                        GlStateManager.pushMatrix();
-                        GlStateManager.enableBlend();
-                        GlStateManager.enableAlpha();
-                        //int c = GRADIENTE[MathHelper.clamp((int) (qiExtra *(GRADIENTE.length)), 0, GRADIENTE.length - 1)];
-                        //GlStateManager.color(red(c), green(c), blue(c));
-                        GlStateManager.color(1, 1, 1, qi > 0 ? 1 : qiExtra);
-                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), 0, 0, 64, 64);//+(int)(qiExtra*32)
+                        GlStateManager.color(qiExtra, qiExtra, qiExtra, qiExtra);
+                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
+                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), ((qi + 1) * 64) % 256, Math.floorDiv((qi + 1), 4) * 64, 64, 64);
+                        //GlStateManager.resetColor();
+                        //mc.renderEngine.bindTexture();
                         GlStateManager.popMatrix();
 
-                        if (qi > 0) {
-                            //overlay
-                            GlStateManager.pushMatrix();
-                            GlStateManager.color(qiExtra, qiExtra, qiExtra, qiExtra);
-                            //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), ((qi + 1) * 64) % 256, Math.floorDiv((qi + 1), 4) * 64, 64, 64);
-                            //GlStateManager.resetColor();
-                            //mc.renderEngine.bindTexture();
-                            GlStateManager.popMatrix();
-
-                            //overlay layer 2
-                            GlStateManager.pushMatrix();
-                            GlStateManager.color(1f, 1f, 1f);
-                            //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
-                            mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
-                            //GlStateManager.resetColor();
-                            //mc.renderEngine.bindTexture();
-                            GlStateManager.popMatrix();
-                        }
-                        GlStateManager.disableAlpha();
-                        GlStateManager.disableBlend();
+                        //overlay layer 2
+                        GlStateManager.pushMatrix();
+                        GlStateManager.color(1f, 1f, 1f);
+                        //GlStateManager.bindTexture(mc.renderEngine.getTexture(qihud[qi]).getGlTextureId());
+                        mc.ingameGUI.drawTexturedModalRect(Math.min(HudConfig.client.qi.x, width - 64), Math.min(HudConfig.client.qi.y, height - 64), (qi * 64) % 256, Math.floorDiv(qi, 4) * 64, 64, 64);
+                        //GlStateManager.resetColor();
+                        //mc.renderEngine.bindTexture();
                         GlStateManager.popMatrix();
                     }
+                    GlStateManager.disableAlpha();
+                    GlStateManager.disableBlend();
+                    GlStateManager.popMatrix();
+                }
 
-                    //render posture bar if not full
-                    if (cap.getPosture() < cap.getMaxPosture() || cap.getDownTimer() > 0)
-                        drawPostureBarreAt(player, width / 2, height - 57);
-                    Entity look = getEntityLookedAt(player);
-                    if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && (TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() || TaoCasterData.getTaoCap((EntityLivingBase) look).getDownTimer() > 0)) {
-                        drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
-                    }
+                //render posture bar if not full
+                if (cap.getPosture() < cap.getMaxPosture() || cap.getDownTimer() > 0)
+                    drawPostureBarreAt(player, width / 2, height - 57);
+                Entity look = getEntityLookedAt(player);
+                if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && (TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() || TaoCasterData.getTaoCap((EntityLivingBase) look).getDownTimer() > 0)) {
+                    drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
+                }
                 //}
             }
     }

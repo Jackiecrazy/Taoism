@@ -26,6 +26,8 @@ public class Kampilan extends TaoWeapon {
     //relentless and intimidating weapon, with a decent reach and defense but low trickery potential
     //high attack speed, has a big sweep, sinawalis at 3 chi, converts knockback to extra damage at 6 chi,
     // and follows up with 2 extra attacks at 9 chi
+
+    //execution: 5 omnidirectional slashes that add several
     public Kampilan() {
         super(1, 1.6d, 6d, 1f);
         this.setQiAccumulationRate(0.20f);

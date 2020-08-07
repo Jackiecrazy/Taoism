@@ -67,7 +67,7 @@ public class Tonfa extends TaoWeapon {
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(I18n.format("tonfa.main"));
         tooltip.add(I18n.format("tonfa.off"));
-        tooltip.add(I18n.format("tonfa.parry"));
+        //tooltip.add(I18n.format("tonfa.parry"));
         tooltip.add(I18n.format("tonfa.reset"));
         tooltip.add(I18n.format("tonfa.defbreak"));
     }

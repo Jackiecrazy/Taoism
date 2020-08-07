@@ -5,16 +5,20 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.api.allthedamagetypes.DamageSourceBleed;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityOrbitDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
@@ -30,7 +34,8 @@ public class BohemianEarspoon extends TaoWeapon {
     about prime time to add relative distance manipulators, you know?
 
     Execution:
-    impale the mob on the spearhead and do a 360 turn that bashes enemies back, then pierce for 5x bleed damage
+    circle slash knocking enemies back, then impale the next enemy hit above you, dealing 2x bleed damage per second, until they die
+    others will be enraptured (bound+rooted) for the duration and spooked when the enemy dies
      */
 
     private final PartDefinition[] parts = {
@@ -62,19 +67,19 @@ public class BohemianEarspoon extends TaoWeapon {
         if (e instanceof EntityLivingBase && onHand) {
             EntityLivingBase elb = (EntityLivingBase) e;
             if (!w.isRemote) {
-                if (getLastMove(stack).isLeftClick() && elb.getLastAttackedEntity() != null && getLastAttackedRangeSq(stack) != 0) {
-                    EntityLivingBase target = elb.getLastAttackedEntity();
+                if (getCurrentMove(stack).isLeftClick() && getLastAttackedEntity(w, stack) != null && getLastAttackedRangeSq(stack) != 0) {
+                    Entity target = getLastAttackedEntity(w, stack);
                     if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
-                            if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
+                            if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2 && target instanceof EntityLivingBase) {
                                 //too close! Rip out innards for double damage
-                                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) getDamageAgainst(elb, target, stack));
+                                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) getDamageAgainst(elb, (EntityLivingBase) target, stack));
                                 setLastAttackedRangeSq(elb, stack, 0);
                             }
                             //a new challenger is approaching!
-                            target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.02;
-                            target.motionY += ((target.posY) - elb.posY) * 0.02;
-                            target.motionZ += (target.posZ - (elb.posZ + 0.5D)) * 0.02;
+                            target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.05;
+                            target.motionY += ((target.posY) - elb.posY) * 0.05;
+                            target.motionZ += (target.posZ - (elb.posZ + 0.5D)) * 0.05;
                             target.velocityChanged = true;
                         }
                     } else {
@@ -82,19 +87,52 @@ public class BohemianEarspoon extends TaoWeapon {
                     }
                 }
             }
-            if (isCharged(elb, stack) && getBuff(stack, "stop") != 1) {
-                if (!w.isRemote) {
-                    if (getBuff(stack, "rotate") > 36) {
-                        setBuff(elb, stack, "stop", 1);
-                    }else if (getBuff(stack, "rotate") == 18) {
-                        for(EntityLivingBase target:w.getEntitiesWithinAABB(EntityLivingBase.class,elb.getEntityBoundingBox().grow(16))){
-                            if(target!=elb) TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND, DamageSourceBleed.causeEntityBleedingDamage(elb));
+            if (isCharged(elb, stack)) {
+                if (getBuff(stack, "stop") != 1)
+                    if (!w.isRemote) {
+                        if (getBuff(stack, "rotate") >= 17) {
+                            setBuff(elb, stack, "stop", 1);
+                        } else if (getBuff(stack, "rotate") == 1) {
+                            splash(elb, stack, 360);
+                        }
+                        setBuff(elb, stack, "rotate", getBuff(stack, "rotate") + 1);
+                    } else {
+                        elb.rotationYaw += 20;
+                        elb.rotationPitch = 0;
+                    }
+                Entity target = w.getEntityByID(getBuff(stack, "flipOverID"));
+                if (target instanceof EntityLivingBase) {
+                    EntityLivingBase targ = (EntityLivingBase) target;
+                    if (getBuff(stack, "align") == 1 || (Math.abs(targ.posZ - e.posZ) < 0.5 && Math.abs(targ.posX - e.posX) < 0.5)) {
+                        setBuff(elb, stack, "align", 1);
+                        targ.setPositionAndUpdate(e.posX, targ.posY, e.posZ);
+                        final int impaleTimer = getBuff(stack, "impaleTimer");
+                        if (targ.ticksExisted % 20 == 0) {
+                            targ.hurtResistantTime = 0;
+                            targ.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), impaleTimer * (float) getDamageAgainst(elb, targ, stack));
+                            TaoCombatUtils.attack(elb, targ, EnumHand.MAIN_HAND, DamageSourceBleed.causeEntityBleedingDamage(elb));
+                            setBuff(elb, stack, "impaleTimer", impaleTimer + 1);
+                        }
+                        if (impaleTimer > 9 || targ.getHealth() <= 0) {
+                            dischargeWeapon(elb, stack);
+                            TaoCasterData.getTaoCap(targ).setRootTime(0);
+                        } else TaoCasterData.getTaoCap(targ).setRootTime(1000);
+                        if (w instanceof WorldServer) {
+                            ((WorldServer) w).spawnParticle(EnumParticleTypes.DRIP_LAVA, targ.posX, targ.posY + targ.height / 2, targ.posZ, 1, targ.width / 4, targ.height / 4, targ.width / 4, 0.5f);
+                        }
+                        for (EntityLivingBase audience : w.getEntitiesWithinAABB(EntityLivingBase.class, e.getEntityBoundingBox().grow(16))) {
+                            if (audience != e) {
+                                if (targ.getHealth() > 0 && impaleTimer < 10) {
+                                    TaoCasterData.getTaoCap(audience).setBindTime(100);
+                                    TaoCasterData.getTaoCap(audience).setRootTime(100);
+                                } else {
+                                    TaoCasterData.getTaoCap(audience).setBindTime(0);
+                                    TaoCasterData.getTaoCap(audience).setRootTime(0);
+                                    TaoPotionUtils.fear(audience, elb, 100 + (20 - impaleTimer) * 10);
+                                }
+                            }
                         }
                     }
-                    setBuff(elb, stack, "rotate", getBuff(stack, "rotate") + 1);
-                } else {
-                    elb.rotationYaw += 10;
-                    elb.rotationPitch = 0;
                 }
             }
         }
@@ -115,8 +153,9 @@ public class BohemianEarspoon extends TaoWeapon {
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND && attacker.getLastAttackedEntity() != null) {
+        if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0) {
             splash(attacker, stack, 120);
+            setLastAttackedRangeSq(attacker, stack, 0);
         }
     }
 
@@ -132,6 +171,9 @@ public class BohemianEarspoon extends TaoWeapon {
         setBuff(attacker, item, "rotation", 999);
         setBuff(attacker, item, "rotate", 0);
         setBuff(attacker, item, "stop", 0);
+        setBuff(attacker, item, "flipOverID", 0);
+        setBuff(attacker, item, "impaleTimer", 0);
+        setBuff(attacker, item, "align", 0);
     }
 
     @Override
@@ -139,6 +181,8 @@ public class BohemianEarspoon extends TaoWeapon {
         super.dischargeWeapon(elb, item);
         setBuff(elb, item, "rotation", 999);
         setBuff(elb, item, "stop", 1);
+        TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
+        TaoCasterData.getTaoCap(elb).consumeQi(4, 5);
     }
 
     @Override
@@ -155,6 +199,10 @@ public class BohemianEarspoon extends TaoWeapon {
         dischargeWeapon(elb, stack);
     }
 
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return Event.Result.DENY;
+    }
+
 //    public float newCooldown(EntityLivingBase elb, ItemStack item) {
 //        if (getHand(item) == EnumHand.MAIN_HAND) {
 //            float max = Math.max(getLastLastAttackedRangeSq(item), getLastAttackedRangeSq(item));
@@ -165,23 +213,45 @@ public class BohemianEarspoon extends TaoWeapon {
 //        return 0f;
 //    }
 
-    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return Event.Result.DENY;
-    }
-
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         float max = Math.max((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
         float min = Math.min((float) attacker.getDistanceSq(target), getLastAttackedRangeSq(item));
         float lastAttackRange = 1 + min / (max * 2f);
-        return getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f;
+        return (getHand(item) == EnumHand.MAIN_HAND ? lastAttackRange : 0.5f);
+    }
+
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (isCharged(attacker, stack) && getHand(stack) == EnumHand.OFF_HAND) return orig * 2;
+        return super.knockback(attacker, target, stack, orig);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 1f, true);
-            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), 0);
-        } else {
+        if (isCharged(attacker, stack) && getBuff(stack, "stop") == 1) {
+            //impale and raise above
+            if (getBuff(stack, "align") == 0) {
+                if (getBuff(stack, "flipOverID") == 0) {
+                    setBuff(attacker, stack, "flipOverID", target.getEntityId());
+                    setBuff(attacker, stack, "impaleTimer", 0);
+                    TaoCasterData.getTaoCap(attacker).startRecordingDamage();
+                    EntityOrbitDummy epd = new EntityOrbitDummy(attacker.world, attacker, target);
+                    epd.motionY = 1;
+                    attacker.world.spawnEntity(epd);
+                    //target.setPosition(attacker.posX, attacker.posY+5, attacker.posZ);
+                    TaoCasterData.getTaoCap(attacker).setForcedLookAt(target);
+                } else {
+                    setBuff(attacker, stack, "flipOverID", 0);
+                    TaoCasterData.getTaoCap(attacker).stopRecordingDamage(attacker);
+                    TaoCasterData.getTaoCap(attacker).setForcedLookAt(null);
+//                for (Entity e : attacker.world.getEntitiesWithinAABBExcludingEntity(attacker, attacker.getEntityBoundingBox().grow(16))) {
+//                    if (e != target) NeedyLittleThings.knockBack(e, attacker, 2, true);
+//                }
+                    dischargeWeapon(attacker, stack);
+                }
+            }
+        }
+        if (getHand(stack) == EnumHand.MAIN_HAND) {
             setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }
     }

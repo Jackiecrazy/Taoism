@@ -10,6 +10,7 @@ import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -64,7 +65,7 @@ public class TaoCombatHandler {
     public static void iHaveAWifeAndChildren(LivingAttackEvent e) {
         if (TaoCombatUtils.isDirectDamage(e.getSource()) && TaoCombatUtils.isMeleeDamage(e.getSource()) && e.getSource().getTrueSource() instanceof EntityLivingBase) {
             EntityLivingBase p = (EntityLivingBase) e.getSource().getTrueSource();
-            if (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving()) {
+            if (p.isPotionActive(TaoPotion.FEAR) || p.isPotionActive(TaoPotion.DISORIENT) || (p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != null && p.world.getEntityByID(TaoCasterData.getTaoCap(p).getTauntID()) != e.getEntityLiving())) {
                 //you may only attack the target that taunted you
                 e.setCanceled(true);
                 return;
@@ -176,8 +177,8 @@ public class TaoCombatHandler {
                 e.setCanceled(true);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(2, 5 * atk * atkDef / semeCap.getMaxPosture()), true);
-                NeedyLittleThings.knockBack(uke, seme, Math.min(2, 5 * atk * def / ukeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
                     if (uke instanceof EntityPlayer)

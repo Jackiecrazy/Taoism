@@ -260,7 +260,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                     TaoCombatUtils.taoWeaponAttack(e, p, offhand, false, true);
                 }
                 float temp = p.getCooledAttackStrength(0.5f);
-                p.randomUnused1 = temp;
+                //p.randomUnused1 = temp;
                 p.swingArm(handIn);
                 TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp, true);
                 TaoCasterData.getTaoCap(p).setOffhandCool(0);

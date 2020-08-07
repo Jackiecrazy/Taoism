@@ -188,7 +188,7 @@ public class TaoPotion extends Potion {
     }
 
     @SubscribeEvent
-    public static void taunt(LivingSetAttackTargetEvent e) {
+    public static void rageAndFear(LivingSetAttackTargetEvent e) {
         if (e.getEntityLiving() instanceof EntityLiving && e.getTarget() != null) {
             EntityLiving el = (EntityLiving) e.getEntityLiving();
             if (el.isPotionActive(MobEffects.BLINDNESS) && CombatConfig.blindMobs) {

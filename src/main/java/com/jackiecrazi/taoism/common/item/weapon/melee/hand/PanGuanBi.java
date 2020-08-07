@@ -58,6 +58,8 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(I18n.format("panguanbi.switch"));
+        tooltip.add(I18n.format("panguanbi.lunge"));
         tooltip.add(I18n.format("panguanbi.detonation"));
         tooltip.add(I18n.format("panguanbi.sneak"));
         tooltip.add(I18n.format("panguanbi.normal"));
@@ -130,8 +132,10 @@ public class PanGuanBi extends TaoWeapon {
 
     @Override
     public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        if (getLastAttackedRangeSq(is) > 4)
+        if (getLastAttackedRangeSq(is) > 4) {
+            setLastAttackedRangeSq(elb, is, 0);
             return 0;
+        }
         return 0.5f;
     }
 

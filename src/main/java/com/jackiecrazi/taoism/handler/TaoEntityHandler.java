@@ -20,6 +20,7 @@ import com.jackiecrazi.taoism.networking.AttackPacketDenier;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -32,7 +33,6 @@ import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -121,10 +121,10 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
-    public static void bigBrother(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
-        if(event.getHandler() instanceof NetHandlerPlayServer) {
+    public static void bigBrother(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        if(event.getHandler() instanceof NetHandlerPlayClient) {
             Taoism.logger.debug("registered cooldown packet eater");
-            event.getManager().channel().pipeline().addBefore("packet_handler", "cooldown_eater", new AttackPacketDenier(event));
+            event.getManager().channel().pipeline().addBefore("packet_handler", "nommer", new AttackPacketDenier(event));//.addBefore("packet_handler", "cooldown_eater", new AttackPacketDenier(event));
         }
     }
 
@@ -156,8 +156,8 @@ public class TaoEntityHandler {
 //                elb.motionX *= 1 + ((qi - 3) / 14);
 //                elb.motionZ *= 1 + ((qi - 3) / 14);
 //            }
-            elb.velocityChanged = true;
         }
+        //elb.velocityChanged = true;
     }
 
     @SubscribeEvent

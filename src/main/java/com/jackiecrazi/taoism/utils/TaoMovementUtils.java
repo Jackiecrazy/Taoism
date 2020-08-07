@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.compat.TaoCompat;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -258,10 +259,14 @@ public class TaoMovementUtils {
             z *= 0.6 * multiplier;
 
             //NeedyLittleThings.setSize(elb, min, min);
-
-            elb.addVelocity(x, y, z);
+            if (!TaoCompat.isMovePlusLoaded || !elb.onGround) {
+                elb.addVelocity(x, y, z);
+                elb.velocityChanged = true;
+            }
+//            elb.motionX=x;
+//            elb.motionY=y;
+//            elb.motionZ=z;
             itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-            elb.velocityChanged = true;
             TaoCasterData.forceUpdateTrackingClients(elb);
             return true;
         }

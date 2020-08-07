@@ -65,7 +65,7 @@ public class TaoCombatUtils {
     }
 
     public static void attackIndirectly(EntityLivingBase elb, Entity proxy, Entity target, EnumHand hand) {
-        attack(elb, target, hand, new EntityDamageSourceTaoIndirect(elb instanceof EntityPlayer ? "player" : "mob", proxy, elb));
+        attack(elb, target, hand, EntityDamageSourceTaoIndirect.causeProxyDamage(elb, proxy));
     }
 
     public static void attack(EntityLivingBase elb, Entity target, EnumHand hand, DamageSource ds) {

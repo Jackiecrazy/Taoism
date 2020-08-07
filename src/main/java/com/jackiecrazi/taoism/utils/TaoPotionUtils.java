@@ -60,6 +60,11 @@ public class TaoPotionUtils {
 
     public static void fear(EntityLivingBase elb, EntityLivingBase applier, int duration) {
         attemptAddPot(elb, new PotionEffect(TaoPotion.FEAR, duration, 0), false);
+        if (elb instanceof EntityLiving) {
+            EntityLiving el = (EntityLiving) elb;
+            el.getNavigator().clearPath();
+            el.setAttackTarget(null);
+        }
         if (!elb.world.isRemote) {
             EntityFear f = new EntityFear(elb.world, elb.posX, elb.posY, elb.posZ, applier, elb);
             elb.world.spawnEntity(f);

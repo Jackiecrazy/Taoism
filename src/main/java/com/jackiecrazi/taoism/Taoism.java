@@ -4,6 +4,7 @@ import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.block.TaoBlocks;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.item.TaoItems;
+import com.jackiecrazi.taoism.compat.TaoCompat;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
 import com.jackiecrazi.taoism.crafting.TaoCrafting;
@@ -113,6 +114,7 @@ public class Taoism {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        TaoCompat.checkCompatStatus();
         proxy.init(event);
     }
 

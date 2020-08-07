@@ -17,7 +17,7 @@ public class EntityOrbitDummy extends EntityPhysicsDummy {
     public EntityOrbitDummy(World worldIn, EntityLivingBase dude, Entity attachTo) {
         super(worldIn, dude, attachTo);
         setPosition(attachTo.posX, attachTo.posY, attachTo.posZ);
-        dist = dude.getDistance(attachTo);
+        dist = dude.getDistanceSq(attachTo);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class EntityOrbitDummy extends EntityPhysicsDummy {
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if (target != null && !target.isDead && getThrower() != null) {
+        if (target != null && !target.isDead && getThrower() != null && (!(target instanceof EntityLivingBase) || TaoCasterData.getTaoCap((EntityLivingBase) target).getRootTime() == 0)) {
 //            if (getThrower() != null && getPosition().getY() == getThrower().getPosition().getY()) {
 //                flip = true;
 //            }

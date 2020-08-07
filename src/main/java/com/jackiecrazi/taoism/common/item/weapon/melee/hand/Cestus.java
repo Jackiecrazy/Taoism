@@ -114,7 +114,7 @@ public class Cestus extends TaoWeapon {
         tooltip.add(I18n.format("cestus.armor"));
         tooltip.add(I18n.format("cestus.debuff"));
         tooltip.add(I18n.format("cestus.damage"));
-        tooltip.add(I18n.format("cestus.riposte"));
+        //tooltip.add(I18n.format("cestus.riposte"));
     }
 
     @Override

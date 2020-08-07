@@ -27,6 +27,10 @@ public class Qiang extends TaoWeapon {
     highly dependent on footwork and facing your opponent.
     Primary method of avoidance is side dodge/jump/slide, then close in distance
     TODO holding some type of spear upward allows you to throw it like a javelin. Prepare sidearm.
+
+    Execution: every attack becomes three piercing cuts that hit in a straight line,
+    mobs hit will be impaled in front of you, unable to move
+    If there are 10 mobs impaled on the spear or
      */
 
     private final PartDefinition[] parts = {
@@ -58,19 +62,24 @@ public class Qiang extends TaoWeapon {
         return (1d + (getHand(stack) == EnumHand.MAIN_HAND ? Math.sqrt(getLastAttackedRangeSq(stack)) / 6f : 0)) - 4d;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0f) {
-            splash(attacker, stack, 120);
-            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), 0);
-        }
-    }
-
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("qiang.stab"));
         tooltip.add(I18n.format("qiang.recharge"));
         tooltip.add(I18n.format("qiang.bash"));
+    }
+
+    @Override
+    public float getTrueReach(EntityLivingBase p, ItemStack is) {
+        return 6f;
+    }
+
+    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0f) {
+            splash(attacker, stack, 120);
+            setLastAttackedRangeSq(attacker, attacker.getHeldItemMainhand(), 0);
+        }
     }
 
     @Override
@@ -83,10 +92,14 @@ public class Qiang extends TaoWeapon {
         return getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 54f;
     }
 
+    @Override
+    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (getHand(stack) == EnumHand.OFF_HAND) return orig * 2;
+        return super.knockback(attacker, target, stack, orig);
+    }
+
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 1f, true);
-        } else {
+        if (getHand(stack) == EnumHand.MAIN_HAND) {
             setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }
     }
@@ -95,10 +108,5 @@ public class Qiang extends TaoWeapon {
         super.afterSwing(elb, is);
         EnumHand other = getHand(is) == EnumHand.OFF_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
         TaoCombatUtils.rechargeHand(elb, other, 0.5f, true);
-    }
-
-    @Override
-    public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return 6f;
     }
 }

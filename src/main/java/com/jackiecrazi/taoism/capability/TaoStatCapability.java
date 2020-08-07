@@ -625,7 +625,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     public void setDownTimer(int time) {
         if (time < 0) time = 0;
         EntityLivingBase elb = e.get();
-        if (elb != null && time == 0) {
+        if (elb != null && time == 0 && time != down) {
             elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
             elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
         }
@@ -651,7 +651,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     public void setRootTime(int time) {
         EntityLivingBase elb = e.get();
         if (elb != null)
-            if (time == 0) {
+            if (time == 0 && root != 0) {
                 //elb.setNoGravity(false);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
             } else if (root == 0 && !(elb instanceof EntityPlayer)) {
@@ -705,7 +705,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (target != null) {
             float damage = getRecordedDamage();
             setRecordedDamage(0);
-            DamageSource ds = new EntityDamageSourceTaoIndirect(elb instanceof EntityPlayer? "player":"mob", null, elb).setDamageBypassesArmor().setDamageIsAbsolute();
+            DamageSource ds = EntityDamageSourceTaoIndirect.causeProxyDamage(elb, null).setDamageBypassesArmor().setDamageIsAbsolute();
             if (elb != null) {
                 if (elb == target) return;//bootleg invulnerability!
                 ItemStack is = TaoCombatUtils.getAttackingItemStackSensitive(elb);

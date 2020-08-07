@@ -227,13 +227,17 @@ item.misericorde.name=Misericorde
 misericorde.stagger=ignores all armor and inflicts double damage on staggered targets
 
 item.panguanbi.name=Judge's Pen
+panguanbi.switch=attack timer is immediately reset when switching in
+panguanbi.lunge=cooldown is halved if enemy is within 2 blocks
 panguanbi.detonation=every fourth hit attacks a pressure point, causing effects according to your stance:
 panguanbi.sneak=sneaking: deal 4 posture damage and exhaust for 3 seconds
 panguanbi.normal=standing: bind and root for 1.5 seconds
 panguanbi.jump=airborne: instantly deal 4 bleed damage and extends bleed I for 3 seconds
-panguanbi.variation=by varying stances for the first three hits one can detonate more damage and extend effect duration, up to triple their original
+panguanbi.variation=by varying stances for the first three hits one can increase damage and effect duration, up to triple their original
 
 item.emeici.name=Emeici
+emeici.switch=attack timer is immediately reset when switching in
+emeici.lunge=cooldown is halved if enemy is within 2 blocks
 emeici.spin=if the attacker does not face the same cardinal direction as the last hit:
 emeici.crit=crit for 1.5x damage and deal 3 posture damage
 

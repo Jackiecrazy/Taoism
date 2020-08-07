@@ -91,7 +91,9 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
         super.dischargeWeapon(elb, item);
+        TaoCasterData.getTaoCap(elb).toggleCombatMode(true);
         setBuff(elb, item, "flipOverID", 0);
+        TaoCasterData.getTaoCap(elb).consumeQi(4, 5);
     }
 
     @Override
@@ -131,6 +133,11 @@ public class GouLianQiang extends TaoWeapon {
     @Override
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         attacker.motionY += 1;
+        attacker.motionZ+=(target.posZ-attacker.posZ)*0.1;
+        attacker.motionX+=(target.posX-attacker.posX)*0.1;
+        //attacker.posZ=target.posZ;
+        //attacker.posX=target.posX;
+        TaoCasterData.getTaoCap(attacker).toggleCombatMode(false);
         attacker.velocityChanged = true;
         TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture(), true, true, attacker);
         return 0;
@@ -153,7 +160,6 @@ public class GouLianQiang extends TaoWeapon {
                 setBuff(attacker, stack, "flipOverID", 0);
                 TaoCasterData.getTaoCap(attacker).stopRecordingDamage(attacker);
                 TaoCasterData.getTaoCap(attacker).setForcedLookAt(null);
-                TaoCasterData.getTaoCap(attacker).consumeQi(4, 5);
 //                for (Entity e : attacker.world.getEntitiesWithinAABBExcludingEntity(attacker, attacker.getEntityBoundingBox().grow(16))) {
 //                    if (e != target) NeedyLittleThings.knockBack(e, attacker, 2, true);
 //                }
