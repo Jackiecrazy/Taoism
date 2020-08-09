@@ -177,8 +177,8 @@ public class TaoCombatHandler {
                 e.setCanceled(true);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()), true);
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true);
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 3 * atk * atkDef / semeCap.getMaxPosture()), true, false);
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true, false);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
                     if (uke instanceof EntityPlayer)

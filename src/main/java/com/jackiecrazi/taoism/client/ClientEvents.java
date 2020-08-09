@@ -355,6 +355,9 @@ public class ClientEvents {
         }
     }
 
+    /**
+     * thank you based coolAlias
+     */
     @SubscribeEvent
     public static void zTarget(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
@@ -366,7 +369,7 @@ public class ClientEvents {
                 double dx = player.posX - e.posX;
                 double dz = player.posZ - e.posZ;
                 double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.getEyeHeight())), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.height/2f)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
                 double distance = player.getDistance(e);
                 float rYaw = (float) (angle - player.rotationYaw);
                 while (rYaw > 180) {

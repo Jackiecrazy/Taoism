@@ -68,7 +68,7 @@ public class TaoStatCapability implements ITaoStatCapability {
      */
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
-        float nausea = !(elb instanceof EntityPlayer) && elb.getActivePotionEffect(MobEffects.NAUSEA) == null ? 0 : (elb.getActivePotionEffect(MobEffects.NAUSEA).getAmplifier() + 1) * 0.05f;
+        float nausea = elb instanceof EntityPlayer || elb.getActivePotionEffect(MobEffects.NAUSEA) == null ? 0 : (elb.getActivePotionEffect(MobEffects.NAUSEA).getAmplifier() + 1) * 0.05f;
         float armorMod = 1f - ((float) elb.getTotalArmorValue() / 40f);
         float healthMod = elb.getHealth() / elb.getMaxHealth();
         if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
@@ -792,7 +792,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (elb == null) return;
         elb.dismountRidingEntity();
         if (attacker != null) {
-            NeedyLittleThings.knockBack(elb, attacker, 1.5f, true);
+            NeedyLittleThings.knockBack(elb, attacker, 1.5f, true, false);
         }
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));

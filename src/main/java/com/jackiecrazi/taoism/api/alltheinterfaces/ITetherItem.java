@@ -27,19 +27,22 @@ public interface ITetherItem {
                         distsq = toBeMoved.getDistanceSq(moveTowards);
                         point = moveTowards.getPositionVector().add(offset);
                     }
+                }else if (moveTowards != null) {
+                    distsq = toBeMoved.getDistanceSq(moveTowards);
+                    point = moveTowards.getPositionVector();
                 }
                 //update the entity's relative position to the point
                 //if the distance is below tether length, do nothing
                 //if the distance is above tether length, apply centripetal force to the point
                 if (getTetherLength(stack) * getTetherLength(stack) < distsq && point != null) {
-                    toBeMoved.motionX += (point.x - toBeMoved.posX) * 0.05;
-                    toBeMoved.motionY += (point.y - toBeMoved.posY) * 0.05;
-                    toBeMoved.motionZ += (point.z - toBeMoved.posZ) * 0.05;
+                    toBeMoved.motionX += (point.x - toBeMoved.posX) * 0.01;
+                    toBeMoved.motionY += (point.y - toBeMoved.posY) * 0.01;
+                    toBeMoved.motionZ += (point.z - toBeMoved.posZ) * 0.01;
                 }
-                if (shouldRepel(stack) && getTetherLength(stack) * getTetherLength(stack) < distsq && point != null) {
-                    toBeMoved.motionX -= (point.x - toBeMoved.posX) * 0.05;
-                    toBeMoved.motionY -= (point.y - toBeMoved.posY) * 0.05;
-                    toBeMoved.motionZ -= (point.z - toBeMoved.posZ) * 0.05;
+                if (shouldRepel(stack) && getTetherLength(stack) * getTetherLength(stack) > distsq*2 && point != null) {
+                    toBeMoved.motionX -= (point.x - toBeMoved.posX) * 0.01;
+                    toBeMoved.motionY -= (point.y - toBeMoved.posY) * 0.01;
+                    toBeMoved.motionZ -= (point.z - toBeMoved.posZ) * 0.01;
                 }
                 if (getTetherLength(stack) == 0 && moveTowards != null) {//special case to help with catching up to entities
                     //System.out.println(target.getDistanceSq(e));
@@ -69,7 +72,7 @@ public interface ITetherItem {
     double getTetherLength(ItemStack stack);
 
     default boolean shouldRepel(ItemStack stack) {
-        return false;
+        return true;
     }
 
     default boolean renderTether(ItemStack stack) {

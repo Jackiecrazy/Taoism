@@ -77,18 +77,23 @@ public class NeedyLittleThings {
     /**
      * knocks the target back, with regards to the attacker's relative angle to the target, and adding y knockback
      */
-    public static void knockBack(Entity to, Entity from, float strength, boolean considerRelativeAngle) {
+    public static void knockBack(Entity to, Entity from, float strength, boolean considerRelativeAngle, boolean bypassAllChecks) {
         Vec3d distVec = to.getPositionVector().subtractReverse(from.getPositionVector()).normalize();
-        if (to instanceof EntityLivingBase) {
+        if (to instanceof EntityLivingBase && !bypassAllChecks) {
             if (considerRelativeAngle)
                 knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
             else
                 NeedyLittleThings.knockBack(((EntityLivingBase) to), from, (float) strength * 0.5F, (double) MathHelper.sin(from.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(from.rotationYaw * 0.017453292F)));
         } else {
             //eh
-            to.motionX = distVec.x * strength;
-            to.motionY = distVec.y * strength;
-            to.motionZ = distVec.z * strength;
+            if (considerRelativeAngle) {
+                to.motionX = distVec.x * -strength;
+                to.motionY = distVec.y * -strength;
+                if (to.motionY < 0 && to.onGround) to.motionY = 0.1;
+                to.motionZ = distVec.z * -strength;
+            } else {
+                to.addVelocity(-MathHelper.sin(-from.rotationYaw * 0.017453292F - (float) Math.PI) * 0.5, 0.1, -MathHelper.cos(-from.rotationYaw * 0.017453292F - (float) Math.PI) * 0.5);
+            }
             to.velocityChanged = true;
         }
     }
@@ -159,6 +164,22 @@ public class NeedyLittleThings {
         return new RayTraceResult(end, EnumFacing.UP);
     }
 
+    /**
+     * modified getdistancesq to account for thicc mobs
+     */
+    public static double getDistSqCompensated(Entity from, Entity to) {
+        double x = from.posX - to.posX;
+        x = Math.max(Math.abs(x) - ((from.width / 2) + (to.width / 2)), 0);
+        //stupid inconsistent game
+        double y = (from.posY + from.height / 2) - (to.posY + to.height / 2);
+        y = Math.max(Math.abs(y) - (from.height / 2 + to.height / 2), 0);
+        double z = from.posZ - to.posZ;
+        z = Math.max(Math.abs(z) - (from.width / 2 + to.width / 2), 0);
+        double me = x * x + y * y + z * z;
+        double you = from.getDistanceSq(to);
+        return Math.min(me, you);
+    }
+
     public static Entity raytraceEntity(World world, EntityLivingBase attacker, double range) {
         Vec3d start = attacker.getPositionEyes(0.5f);
         Vec3d look = attacker.getLookVec().scale(range + 2);
@@ -219,7 +240,7 @@ public class NeedyLittleThings {
     public static Vec3d getClosestAirSpot(Vec3d from, Vec3d to, Entity e) {
         Vec3d ret = to;
         //extend the to vector slightly to make it hit what it originally hit
-        to=to.add(to.subtract(from).normalize().scale(2));
+        to = to.add(to.subtract(from).normalize().scale(2));
         double widthParse = e.width / 2;
         double heightParse = e.height;
         if (widthParse <= 0.5) widthParse = 0;
@@ -506,22 +527,6 @@ public class NeedyLittleThings {
             ret.getTagCompound().setString("SkullOwner", p.getDisplayNameString());
         }
         return ret;
-    }
-
-    /**
-     * modified getdistancesq to account for thicc mobs
-     */
-    public static double getDistSqCompensated(Entity from, Entity to) {
-        double x = from.posX - to.posX;
-        x = Math.max(Math.abs(x) - ((from.width / 2) + (to.width / 2)), 0);
-        //stupid inconsistent game
-        double y = (from.posY + from.height / 2) - (to.posY + to.height / 2);
-        y = Math.max(Math.abs(y) - (from.height / 2 + to.height / 2), 0);
-        double z = from.posZ - to.posZ;
-        z = Math.max(Math.abs(z) - (from.width / 2 + to.width / 2), 0);
-        double me = x * x + y * y + z * z;
-        double you = from.getDistanceSq(to);
-        return Math.min(me, you);
     }
 
     /**

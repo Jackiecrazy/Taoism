@@ -188,7 +188,7 @@ public class QingLongJi extends TaoWeapon {
             return;
         }
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            NeedyLittleThings.knockBack(target, attacker, 0.3f, true);
+            NeedyLittleThings.knockBack(target, attacker, 0.3f, true, true);
             if (isReversed(stack)) {
                 //crescent cut!
                 TaoPotionUtils.forceBleed(target, attacker, chi * 4, 0, TaoPotionUtils.POTSTACKINGMETHOD.ADD);

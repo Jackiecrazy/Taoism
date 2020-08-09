@@ -106,7 +106,7 @@ public class BlackSnake extends TaoWeapon {
     @Override
     public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (attacker.isSneaking()) {
-            NeedyLittleThings.knockBack(attacker, target, -orig*1.5f, true);
+            NeedyLittleThings.knockBack(attacker, target, -orig*1.5f, true, false);
             TaoCasterData.getTaoCap(target).setBindTime(10);
             return -orig*1.5f;
         }

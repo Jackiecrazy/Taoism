@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherItem;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.physics.EntityOrbitDummy;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
@@ -14,6 +15,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -21,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class GouLianQiang extends TaoWeapon {
+public class GouLianQiang extends TaoWeapon implements ITetherItem {
     /*
     A spear weapon that specializes in hooking and grabbing. High range and speed, medium combo and defense, low power
     Reference: a guisarme can be used to catch incoming blades
@@ -86,12 +88,12 @@ public class GouLianQiang extends TaoWeapon {
     public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
         super.chargeWeapon(attacker, item);
         setBuff(attacker, item, "flipOverID", 0);
+        setBuff(attacker, item, "heartStab",0);
     }
 
     @Override
     public void dischargeWeapon(EntityLivingBase elb, ItemStack item) {
         super.dischargeWeapon(elb, item);
-        TaoCasterData.getTaoCap(elb).toggleCombatMode(true);
         setBuff(elb, item, "flipOverID", 0);
         TaoCasterData.getTaoCap(elb).consumeQi(4, 5);
     }
@@ -132,15 +134,26 @@ public class GouLianQiang extends TaoWeapon {
 
     @Override
     public float onStoppedRecording(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        attacker.motionY += 1;
-        attacker.motionZ += (target.posZ - attacker.posZ) * 0.1;
-        attacker.motionX += (target.posX - attacker.posX) * 0.1;
+        attacker.motionY += 2;
+        //TaoCasterData.getTaoCap(attacker).toggleCombatMode(false);
+        //attacker.motionZ += (target.posZ - attacker.posZ) * 0.1;
+        //attacker.motionX += (target.posX - attacker.posX) * 0.1;
         //attacker.posZ=target.posZ;
         //attacker.posX=target.posX;
-        TaoCasterData.getTaoCap(attacker).toggleCombatMode(false);
         attacker.velocityChanged = true;
+        setBuff(attacker, item, "heartStab",1);
         TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture(), true, true, attacker);
         return 0;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if(e instanceof EntityLivingBase) {
+            updateTetheringVelocity(stack, (EntityLivingBase) e);
+            if(isCharged((EntityLivingBase)e,stack)&&getBuff(stack, "heartStab")>0&&e.motionY<0)
+                e.motionY=-0.5;
+        }
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
@@ -180,5 +193,36 @@ public class GouLianQiang extends TaoWeapon {
         super.afterSwing(elb, is);
         if (getHand(is) == EnumHand.OFF_HAND && TaoCombatUtils.getHandCoolDown(elb, EnumHand.MAIN_HAND) < 0.5f)//
             TaoCombatUtils.rechargeHand(elb, EnumHand.MAIN_HAND, 0.5f, true);
+    }
+
+    @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
+            TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Entity getTetheringEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+        return isCharged(wielder, stack) && getBuff(stack, "heartStab") != 0 ? wielder : null;
+    }
+
+    @Nullable
+    @Override
+    public Vec3d getTetheredOffset(ItemStack stack, @Nullable EntityLivingBase wielder) {
+        return null;//Vec3d.ZERO;
+    }
+
+    @Nullable
+    @Override
+    public Entity getTetheredEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+        return wielder.world.getEntityByID(getBuff(stack, "flipOverID"));
+    }
+
+    @Override
+    public double getTetherLength(ItemStack stack) {
+        return 1;
     }
 }

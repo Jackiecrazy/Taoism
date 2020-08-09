@@ -133,7 +133,6 @@ public class ChangChui extends TaoWeapon {
             TaoCasterData.getTaoCap(target).setCannonballTime(100);
             TaoCasterData.getTaoCap(attacker).consumeQi(4, 0);
             dischargeWeapon(attacker, item);
-            //TODO baseball
         }
     }
 

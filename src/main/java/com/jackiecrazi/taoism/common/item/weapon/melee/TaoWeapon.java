@@ -297,9 +297,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
                 applyEffects(stack, target, attacker, chi);
                 gettagfast(stack).setBoolean("effect", false);
             }
-            if (!gettagfast(stack).getBoolean("spawning")) {
+            if (!gettagfast(stack).getBoolean("spawning") && gettagfast(stack).getLong("multiHitTill") < attacker.world.getTotalWorldTime()) {
                 gettagfast(stack).setBoolean("spawning", true);
-                queueExtraMoves(stack, target, attacker, chi);
+                followUp(stack, target, attacker, chi);
                 gettagfast(stack).setBoolean("spawning", false);
             }
         }
@@ -650,9 +650,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         }
         //System.out.println(ret);
         return super.canHarvestBlock(state, stack);
-    }    @Override
-    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return 1;
     }
 
     public int getItemEnchantability(ItemStack stack) {
@@ -689,6 +686,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
         }
         return changed;
+    }    @Override
+    public int getComboLength(EntityLivingBase wielder, ItemStack is) {
+        return 1;
     }
 
     public double attackDamage(ItemStack stack) {
@@ -952,7 +952,14 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     protected void scheduleExtraAction(EntityLivingBase attacker, ItemStack stack, Entity target, int duration, int interval) {
+        if (isDummy(stack) && attacker.getHeldItemMainhand() != stack) {//better safe than sorry...
+            //forward it to the main item, then do nothing as the main item will forward it back.
+            scheduleExtraAction(attacker, attacker.getHeldItemMainhand(), target, duration, interval);
+            setBuff(attacker, attacker.getHeldItemMainhand(), "multiHitHand", -1);
+            return;
+        }
         if (gettagfast(stack).getLong("multiHitTill") < attacker.world.getTotalWorldTime()) {
+            setBuff(attacker, stack, "multiHitHand", 1);
             stack.setTagInfo("multiHitTarget", new NBTTagInt(target.getEntityId()));
             stack.setTagInfo("multiHitFrom", new NBTTagLong(attacker.world.getTotalWorldTime()));
             stack.setTagInfo("multiHitTill", new NBTTagLong(attacker.world.getTotalWorldTime() + duration));
@@ -964,7 +971,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (NeedyLittleThings.getDistSqCompensated(elb, victim) < getReach(elb, stack) * getReach(elb, stack)) {
             TaoCombatUtils.rechargeHand(elb, getHand(stack), 1, false);
             victim.hurtResistantTime = 0;
-            TaoCombatUtils.taoWeaponAttack(victim, elb, stack, getHand(stack) == EnumHand.MAIN_HAND, false);
+            TaoCombatUtils.taoWeaponAttack(victim, elb, stack, isTwoHanded(stack) ? getBuff(stack, "multiHitHand") > 0 : getHand(stack) == EnumHand.MAIN_HAND, false);
         }
     }
 
@@ -1020,10 +1027,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return 1f;
     }
 
-//    public EnumPhase getPhase(final ItemStack stack){
-//
-//    }
-
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         updateWielderDataStart(stack, attacker, target);
         target.hurtResistantTime = 0;
@@ -1038,6 +1041,10 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public float hurtStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return orig;
     }
+
+//    public EnumPhase getPhase(final ItemStack stack){
+//
+//    }
 
     @Override
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
@@ -1074,7 +1081,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * spawns entities etc.
      */
-    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void followUp(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
 
     }
 

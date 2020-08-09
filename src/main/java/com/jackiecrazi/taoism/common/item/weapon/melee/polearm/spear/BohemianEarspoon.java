@@ -92,7 +92,7 @@ public class BohemianEarspoon extends TaoWeapon {
                 if (target instanceof EntityLivingBase) {
                     if (getBuff(stack, "stop") == 0)
                         if (!w.isRemote) {
-                            if (getBuff(stack, "rotate") >= 17) {
+                            if (getBuff(stack, "rotate") >= 18) {
                                 setBuff(elb, stack, "stop", 1);
                             } else
                                 splash(elb, stack, 30);
@@ -180,6 +180,7 @@ public class BohemianEarspoon extends TaoWeapon {
         setBuff(attacker, item, "rotate", 0);
         setBuff(attacker, item, "stop", 0);
         setBuff(attacker, item, "flipOverID", -1);
+        setBuff(attacker, item, "dummyID", -1);
         setBuff(attacker, item, "impaleTimer", 0);
         setBuff(attacker, item, "align", 0);
     }
@@ -240,10 +241,7 @@ public class BohemianEarspoon extends TaoWeapon {
             //impale and raise above
             if (getBuff(stack, "flipOverID") == -1) {
                 setBuff(attacker, stack, "flipOverID", target.getEntityId());
-                setBuff(attacker, stack, "impaleTimer", 0);
                 TaoCasterData.getTaoCap(attacker).startRecordingDamage();
-            } else {
-                dischargeWeapon(attacker, stack);
             }
         }
         if (getHand(stack) == EnumHand.MAIN_HAND) {

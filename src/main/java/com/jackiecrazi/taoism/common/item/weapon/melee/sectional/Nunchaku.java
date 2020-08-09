@@ -217,7 +217,7 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void followUp(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (!getCurrentMove(stack).isSneakPressed() && getLastMove(stack).isSneakPressed()) {//low high
             //8-spin!
             scheduleExtraAction(attacker, stack, target, 4, 2);

@@ -248,7 +248,7 @@ public class Karambit extends TaoWeapon {
     }
 
     @Override
-    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void followUp(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack)) {
             scheduleExtraAction(attacker, stack, target, 20, 20);
         }

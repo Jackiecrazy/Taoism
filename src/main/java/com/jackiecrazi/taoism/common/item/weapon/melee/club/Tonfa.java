@@ -82,7 +82,7 @@ public class Tonfa extends TaoWeapon {
         if (isCharged(elb, stack) && (getLastAttackedEntity(elb.world, stack) != target || elb.world.getTotalWorldTime() - lastAttackTime(elb, stack) > 10) && getHand(stack) == EnumHand.MAIN_HAND) {
             TaoCombatUtils.attack(elb, target, EnumHand.MAIN_HAND);
             TaoCombatUtils.attack(elb, target, EnumHand.OFF_HAND);
-            NeedyLittleThings.knockBack(elb, target, 1f, true);
+            NeedyLittleThings.knockBack(elb, target, 1f, true, false);
             if (elb.motionY > 0.1) {
                 elb.motionY = 0.1;
                 elb.velocityChanged = true;
@@ -158,7 +158,7 @@ public class Tonfa extends TaoWeapon {
     }
 
     @Override
-    protected void queueExtraMoves(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+    protected void followUp(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND)
             scheduleExtraAction(attacker, stack, target, 3, 3);
     }
