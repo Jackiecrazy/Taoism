@@ -3,7 +3,10 @@ package com.jackiecrazi.taoism.common.entity.fx;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherAnchor;
 import com.jackiecrazi.taoism.potions.TaoPotion;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -65,20 +68,16 @@ public class EntityFear extends Entity implements ITetherAnchor {
                 double x = posX - feared.posX;
                 double z = posZ - feared.posZ;
                 int pos = x > 0 ? 1 : -1;
-                x = x == 0 ? pos : 40*wuss.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() / x;
+                x = x == 0 ? pos : 40 * wuss.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() / x;
                 double y = wuss.onGround ? 0 : 0.02;
                 pos = z > 0 ? 1 : -1;
-                z = z == 0 ? pos : 40*wuss.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() / z;
+                z = z == 0 ? pos : 40 * wuss.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() / z;
                 move(MoverType.SELF, x * 0.05, y * 0.05, z * 0.05);
                 markVelocityChanged();
                 float rotate = NeedyLittleThings.deg((float) MathHelper.atan2(x, z));
                 if (wuss.getActivePotionEffect(TaoPotion.FEAR) == null)
                     setDead();
-                if (wuss instanceof EntityLiving) {
-                    ((EntityLiving) wuss).setAttackTarget(null);
-                    //((EntityLiving) wuss).getLookHelper().setLookPositionWithEntity(this, 30, 30);
-                    rotationYaw = wuss.rotationYaw = -rotate;
-                }
+                rotationYaw = wuss.rotationYaw = -rotate;
             } else setDead();
             updateTetheringVelocity();
         }

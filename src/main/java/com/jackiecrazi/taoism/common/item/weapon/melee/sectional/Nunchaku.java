@@ -122,6 +122,9 @@ public class Nunchaku extends TaoWeapon {
         tooltip.add(I18n.format("nunchaku.smash"));
         tooltip.add(I18n.format("nunchaku.sweep"));
         tooltip.add(I18n.format("nunchaku.spin"));
+        tooltip.add(I18n.format("nunchaku.atkspd"));
+        tooltip.add(I18n.format("nunchaku.knockback"));
+
     }
 
     @Override

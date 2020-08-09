@@ -36,6 +36,7 @@ public class Staff extends TaoWeapon {
 
     public Staff() {
         super(0, 1.4f, 6f, 0.8f);
+        setUnlocalizedName("taostaff");
     }
 
     @Override

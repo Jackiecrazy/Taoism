@@ -340,6 +340,7 @@ public class TaoCombatUtils {
     }
 
     public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
+        if (elb.isHandActive()) return elb.getHeldItem(elb.getActiveHand());
         return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
     }
 

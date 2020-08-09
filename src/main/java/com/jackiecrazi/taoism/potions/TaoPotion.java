@@ -75,11 +75,13 @@ public class TaoPotion extends Potion {
     public static Potion ENRAGE = null;
     /**
      * records all dealt damage to the entity without negating them, then reapply 20%(*level) when it runs out
+     * killing the target before the time runs out will spread it all around
      */
     public static Potion DEATHMARK = null;
     /**
-     * when time up, deal double its potency squared in magic damage
-     * Discretion is advised.
+     * when time up, deal double its square in damage
+     * using emeici: also detonate upon stacking to level 4, mobs caught in the explosion are slowed, weakened, and nauseated
+     * the length of these debuffs and the size of the explosion increases with potency
      */
     public static Potion REFLUENCE = null;
     /**

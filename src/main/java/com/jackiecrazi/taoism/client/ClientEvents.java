@@ -345,13 +345,13 @@ public class ClientEvents {
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }// else leftClickAt = 0;
-            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
-                rightClickAt++;
-                if (rightClickAt == CHARGE) {
-                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
-                }
-            }// else rightClickAt = 0;
+//            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
+//                rightClickAt++;
+//                if (rightClickAt == CHARGE) {
+//                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+//                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
+//                }
+//            }// else rightClickAt = 0;
         }
     }
 

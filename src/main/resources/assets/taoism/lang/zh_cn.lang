@@ -171,6 +171,8 @@ nunchaku.flick=上-上: 抽，攻速极高
 nunchaku.smash=上-下: 劈, 造成1.5倍伤害并附加短暂缓慢
 nunchaku.sweep=下-下: 扫，攻击身前90度扇形区域
 nunchaku.spin=下-上: 旋，造成三次攻击40%%的伤害
+nunchaku.atkspd=每次成功攻击增加0.1攻速，上限2，最多持续五秒
+nunchaku.knockback=击退被转化为额外伤害
 
 item.ropedart.name=绳镖
 ropedart.parry=在镖头未丢出的情况下主手无法招架
@@ -217,7 +219,7 @@ bullwhip.sneak=潜行时普攻会把敌人拉进来并附加半秒缓慢、虚�
 bullwhip.sneakboom=若敌人被鞭头击中，三种效果的时长延至两秒
 
 item.blacksnake.name=黑蛇鞭
-blacksnake.armor=伤害计算目标1.5倍的护甲
+blacksnake.armor=鞭击计算目标1.5倍的护甲
 blacksnake.sonicboom=普攻为距离5的鞭击，击中距离4以外的敌人时造成 1(+chi/3) 倍的暴击伤害
 blacksnake.blackjack=若敌人在距离2内，近战普攻附加1.5秒缓慢和虚弱
 blacksnake.sneak=潜行时鞭击将会把两人拉向中间，造成半秒束缚
