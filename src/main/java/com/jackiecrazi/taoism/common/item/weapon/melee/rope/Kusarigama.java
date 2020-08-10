@@ -1,20 +1,27 @@
 package com.jackiecrazi.taoism.common.item.weapon.melee.rope;
 
+import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherItem;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityKusarigamaShot;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.config.CombatConfig;
+import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -22,7 +29,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Kusarigama extends TaoWeapon {
+public class Kusarigama extends TaoWeapon implements ITetherItem {
     private static final boolean[] harvestList = {false, false, false, true};
     private static final PartDefinition[] parts = {
             StaticRefs.HEAD,
@@ -44,9 +51,9 @@ public class Kusarigama extends TaoWeapon {
      * redesign:
      * offhand defense multiplier goes from 3x to 1x with more windup, on offhand parry it'll inflict brief mining fatigue
      * crits on mining fatigue enemies, main hand defense at 1.5 so you have to be over half charge to parry on off
-     * right click throws the weighted chain with speed and max range depending on charge
+     * right click throws the weighted chain with speed and max range depending on charge, follow-ups do some extra damage
      * dashing into the enemy at full charge engages tether
-     * parrying the tethered enemy gives them weakness and mining fatigue, you consistently crit with main hand
+     * parrying the tethered enemy gives them weakness, mining fatigue is constantly applied
      * the tether breaks and returns after 6+(qi) blows have been traded, a successful hit on you counts as three hits
      * if the enemy tries to escape, deal good posture damage depending on trade count and pull them back slightly
      * right click to retrieve the ball for the same effect
@@ -83,26 +90,36 @@ public class Kusarigama extends TaoWeapon {
                 && e.world.getEntityByID(gettagfast(stack).getInteger("dartID")) == null) {
             gettagfast(stack).removeTag("dartID");
         }
+        if (e instanceof EntityLivingBase) {
+            EntityLivingBase elb = (EntityLivingBase) e;
+            updateTetheringVelocity(stack, elb);
+            final Entity engaged = getTetheringEntity(stack, elb);
+            if (engaged != null && (NeedyLittleThings.getDistSqCompensated(engaged, elb) > 36 || getBuff(stack, "blowsLeft") < 1))
+                disengage(elb, stack);
+            if (engaged instanceof EntityLivingBase)
+                TaoPotionUtils.attemptAddPot((EntityLivingBase) engaged, new PotionEffect(MobEffects.MINING_FATIGUE, 20), false);
+        }
     }
 
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack is) {
         if (!elb.world.isRemote) {
             if (getHand(is) == EnumHand.OFF_HAND) {
-                if (!isThrown(is)) {
+                if (isEngaged(is)) {
+                    disengage(elb, is);
+                } else if (!isThrown(is)) {
                     EntityKusarigamaShot eks = new EntityKusarigamaShot(elb.world, elb, getHand(is));
                     eks.shoot(elb, elb.rotationPitch, elb.rotationYaw, 0.0F, (getMaxChargeTime() - is.getItemDamage()) / (float) getMaxChargeTime(), 0.0F);
                     elb.world.spawnEntity(eks);
                     gettagfast(elb.getHeldItemMainhand()).setInteger("dartID", eks.getEntityId());
-                } else {
-                    if (elb.isSneaking()) {
-                        EntityKusarigamaShot erd = getBall(is, elb);
-                        if (erd != null) erd.setDead();
-                    }
                 }
             }
         }
         return super.onEntitySwing(elb, is);
+    }
+
+    private boolean isEngaged(ItemStack is) {
+        return gettagfast(is).getInteger("tether") > 0;
     }
 
     @Override
@@ -118,12 +135,16 @@ public class Kusarigama extends TaoWeapon {
         tooltip.add(I18n.format("kusarigama.followup"));
         tooltip.add(I18n.format("kusarigama.parry"));
         tooltip.add(I18n.format("kusarigama.critfollowup"));
+        tooltip.add(I18n.format("kusarigama.tether"));
+        tooltip.add(I18n.format("kusarigama.tethertick"));
+        tooltip.add(I18n.format("kusarigama.escape"));
+        tooltip.add(I18n.format("kusarigama.pulldown"));
         tooltip.add(I18n.format("kusarigama.harvest"));
     }
 
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? 0 : 3;
+        return getHand(is) == EnumHand.OFF_HAND ? 0 : 2;
     }
 
     /**
@@ -135,13 +156,25 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold && stack.getItemDamage() == 0) {
+            setBuff(elb, stack, "tether", collidingEntity.getEntityId());
+            setBuff(elb, stack, "blowsLeft", 6 + TaoCasterData.getTaoCap(elb).getQiFloored());
+            stack.setItemDamage(getMaxChargeTime());
+            elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_LEASHKNOT_PLACE, SoundCategory.PLAYERS, 1, 1);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public int getMaxChargeTime() {
         return 40;
     }
 
     @Override
     protected int chargePerTick(ItemStack is) {
-        return isThrown(is) ? 0 : 1;
+        return isThrown(is) || isEngaged(is) ? 0 : 1;
     }
 
     @Override
@@ -151,17 +184,19 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        EntityKusarigamaShot ball = getBall(item, defender);
-        if (ball != null) {
-            TaoCasterData.getTaoCap(attacker).setBindTime(ball.getCharge());
-            defender.world.playSound(null, defender.posX, defender.posY, defender.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+        if (defender.getEntityId() == getBuff(item, "tether")) {
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.WEAKNESS, 20), false);
+            setBuff(defender, item, "blowsLeft", getBuff(item, "blowsLeft") - 1);
+            //defender.world.playSound(null, defender.posX, defender.posY, defender.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+        }
+        if (getHand(item) == EnumHand.OFF_HAND) {
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.MINING_FATIGUE, getMaxChargeTime() - item.getItemDamage()), false);
+            item.setItemDamage(getMaxChargeTime());
         }
     }
 
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        if (defender != null && TaoCasterData.getTaoCap(defender).getBindTime() > 0)
-            return super.postureDealtBase(attacker, defender, item, amount) * 2;
         return super.postureDealtBase(attacker, defender, item, amount);
     }
 
@@ -172,7 +207,7 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        return TaoCasterData.getTaoCap(target).getBindTime() > 0 ? Event.Result.ALLOW : Event.Result.DENY;
+        return target.isPotionActive(MobEffects.MINING_FATIGUE) ? Event.Result.ALLOW : Event.Result.DENY;
     }
 
     @Override
@@ -196,12 +231,37 @@ public class Kusarigama extends TaoWeapon {
     }
 
     @Override
+    public float onBeingHurt(DamageSource ds, EntityLivingBase defender, ItemStack item, float amount) {
+        setBuff(defender, item, "blowsLeft", getBuff(item, "blowsLeft") - 3);
+        return super.onBeingHurt(ds, defender, item, amount);
+    }
+
+    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         setBuff(attacker, stack, "hitCharge", 0);
         if (getHand(stack) == EnumHand.OFF_HAND) {
             setBuff(attacker, stack, "hitCharge", getMaxChargeTime() - stack.getItemDamage());
             attacker.getHeldItemMainhand().setItemDamage(getMaxChargeTime());
         }
+        setBuff(attacker, stack, "blowsLeft", getBuff(stack, "blowsLeft") - 1);
+    }
+
+    @Override
+    public Entity getTetheringEntity(ItemStack stack, EntityLivingBase wielder) {
+        return wielder.world.getEntityByID(getBuff(stack, "tether"));
+    }
+
+    private void disengage(EntityLivingBase elb, ItemStack is) {
+        EntityKusarigamaShot erd = getBall(is, elb);
+        if (erd != null) erd.setDead();
+        Entity e = elb.world.getEntityByID(getBuff(is, "tether"));
+        if (e instanceof EntityLivingBase) {
+            int leftover = getBuff(is, "blowsLeft");
+            e.attackEntityFrom(DamageSource.FALL, leftover);
+            TaoCasterData.getTaoCap((EntityLivingBase) e).consumePosture(leftover, true);
+        }
+        setBuff(elb, is, "tether", -1);
+        setBuff(elb, is, "blowsLeft", 0);
     }
 
     private EntityKusarigamaShot getBall(ItemStack is, EntityLivingBase elb) {
@@ -212,6 +272,28 @@ public class Kusarigama extends TaoWeapon {
 
     private int getBallID(ItemStack is) {
         return gettagfast(is).getInteger("dartID");
+    }
+
+    @Nullable
+    @Override
+    public Vec3d getTetheredOffset(ItemStack stack, EntityLivingBase wielder) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Entity getTetheredEntity(ItemStack stack, EntityLivingBase wielder) {
+        return getHand(stack) == EnumHand.OFF_HAND ? wielder : null;
+    }
+
+    @Override
+    public double getTetherLength(ItemStack stack) {
+        return 6;
+    }
+
+    @Override
+    public boolean renderTether(ItemStack stack) {
+        return true;
     }
 
     @Override
@@ -231,6 +313,6 @@ public class Kusarigama extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return getHand(item) == EnumHand.OFF_HAND ? 1 + (item.getItemDamage() / 20f) : 1f;
+        return getHand(item) == EnumHand.OFF_HAND ? 1 + (item.getItemDamage() / 20f) : 1.5f;
     }
 }

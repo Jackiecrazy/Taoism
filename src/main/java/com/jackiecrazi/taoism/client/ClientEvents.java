@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
+import com.jackiecrazi.taoism.api.alltheinterfaces.ITetherItem;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.capability.TaoStatCapability;
@@ -20,10 +21,9 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -113,16 +113,6 @@ public class ClientEvents {
         ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
     }
 
-    @SubscribeEvent
-    public static void color(ColorHandlerEvent.Item e) {
-        //e.getItemColors().registerItemColorHandler(ProjectileTinter.INSTANCE, TaoItems.prop);
-    }
-
-//    @SubscribeEvent
-//    public static void squish(ItemTooltipEvent e){
-//        e.getToolTip().removeIf(s -> (s.startsWith(TextFormatting.BLUE) && !KeyBindOverlord.isShiftDown())||());
-//    }
-
     //attacks when out of range, charges for l'execution
     @SubscribeEvent
     public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
@@ -139,6 +129,11 @@ public class ClientEvents {
             }
         }
     }
+
+//    @SubscribeEvent
+//    public static void squish(ItemTooltipEvent e){
+//        e.getToolTip().removeIf(s -> (s.startsWith(TextFormatting.BLUE) && !KeyBindOverlord.isShiftDown())||());
+//    }
 
     @SubscribeEvent
     public static void down(RenderLivingEvent.Pre event) {
@@ -174,6 +169,23 @@ public class ClientEvents {
                 GlStateManager.rotate(screw * 7 + event.getPartialRenderTick(), MathHelper.sin((float) (event.getEntity().posX)), MathHelper.sin((float) (event.getEntity().posY)), MathHelper.sin((float) (-event.getEntity().posZ)));
                 GlStateManager.translate(-event.getX(), -event.getY() - event.getEntity().height / 2, -event.getZ());
             }
+//            EntityLivingBase e=event.getEntity();
+//            if (e != null) {
+//                final ItemStack offhand = e.getHeldItemOffhand();
+//                if (offhand.getItem() instanceof ITetherItem) {
+//                    ITetherItem ir = (ITetherItem) offhand.getItem();
+//                    if (ir.renderTether(offhand) && ir.getTetheringEntity(offhand, e) != null && ir.getTetheredEntity(offhand, e) != null) {
+//                        renderTether(ir.getTetheredEntity(offhand, e), ir.getTetheringEntity(offhand, e), event.getPartialRenderTick(), EnumHand.OFF_HAND);
+//                    }
+//                }
+//                final ItemStack main = e.getHeldItemMainhand();
+//                if (main.getItem() instanceof ITetherItem) {
+//                    ITetherItem ir = (ITetherItem) main.getItem();
+//                    if (ir.renderTether(main) && ir.getTetheringEntity(main, e) != null && ir.getTetheredEntity(main, e) != null) {
+//                        renderTether(ir.getTetheredEntity(main, e), ir.getTetheringEntity(main, e), event.getPartialRenderTick(), EnumHand.MAIN_HAND);
+//                    }
+//                }
+//            }
         }
     }
 
@@ -355,6 +367,134 @@ public class ClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void lasso(RenderWorldLastEvent event) {
+        EntityLivingBase e = Minecraft.getMinecraft().player;
+        if (e != null) {
+            final ItemStack offhand = e.getHeldItemOffhand();
+            if (offhand.getItem() instanceof ITetherItem) {
+                ITetherItem ir = (ITetherItem) offhand.getItem();
+                if (ir.renderTether(offhand) && ir.getTetheringEntity(offhand, e) != null && ir.getTetheredEntity(offhand, e) != null) {
+                    renderTether(ir.getTetheredEntity(offhand, e), ir.getTetheringEntity(offhand, e), event.getPartialTicks(), EnumHand.OFF_HAND);
+                }
+            }
+            final ItemStack main = e.getHeldItemMainhand();
+            if (main.getItem() instanceof ITetherItem) {
+                ITetherItem ir = (ITetherItem) main.getItem();
+                if (ir.renderTether(main) && ir.getTetheringEntity(main, e) != null && ir.getTetheredEntity(main, e) != null) {
+                    renderTether(ir.getTetheredEntity(main, e), ir.getTetheringEntity(main, e), event.getPartialTicks(), EnumHand.MAIN_HAND);
+                }
+            }
+        }
+    }
+
+    private static void renderTether(Entity thrower, Entity bound, double partialTicks, EnumHand renderOnHand) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-thrower.prevPosX - (thrower.posX - thrower.prevPosX) * partialTicks, -thrower.prevPosY - (thrower.posY - thrower.prevPosY) * partialTicks, -thrower.prevPosZ - (thrower.posZ - thrower.prevPosZ) * partialTicks);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+//            GlStateManager.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+//            GlStateManager.rotate((float) (this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+//
+//            GlStateManager.disableRescaleNormal();
+//            GlStateManager.popMatrix();
+        int handSide = 1;
+
+        float swingProgress = 0;//thrower.getSwingProgress(partialTicks);
+        float sinSwing = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+        float throwerYawRenderTick = 0;
+        if (thrower instanceof EntityLivingBase) {
+            EntityLivingBase elb = (EntityLivingBase) thrower;
+            handSide = (elb.getPrimaryHand() == EnumHandSide.RIGHT) == (renderOnHand == EnumHand.MAIN_HAND) ? 1 : -1;
+            throwerYawRenderTick = (elb.prevRenderYawOffset + (elb.renderYawOffset - elb.prevRenderYawOffset) * (float) partialTicks) * 0.017453292F;
+        }
+        double sinThrowerYaw = MathHelper.sin(throwerYawRenderTick);
+        double cosThrowerYaw = MathHelper.cos(throwerYawRenderTick);
+        double handOffset = (double) handSide * 0.35D;
+        double throwerSpotX;
+        double throwerSpotY;
+        double throwerSpotZ;
+        double eyeHeight;
+
+        if ((Minecraft.getMinecraft().getRenderManager().options == null || Minecraft.getMinecraft().getRenderManager().options.thirdPersonView <= 0) && thrower == Minecraft.getMinecraft().player) {
+            float fov = Minecraft.getMinecraft().getRenderManager().options.fovSetting;
+            fov = fov / 100.0F;
+            Vec3d vec3d = new Vec3d((double) handSide * -0.36D * (double) fov, -0.045D * (double) fov, 0.4D);
+            vec3d = vec3d.rotatePitch(-(thrower.prevRotationPitch + (thrower.rotationPitch - thrower.prevRotationPitch) * (float) partialTicks) * 0.017453292F);
+            vec3d = vec3d.rotateYaw(-(thrower.prevRotationYaw + (thrower.rotationYaw - thrower.prevRotationYaw) * (float) partialTicks) * 0.017453292F);
+            vec3d = vec3d.rotateYaw(sinSwing * 0.5F);
+            vec3d = vec3d.rotatePitch(-sinSwing * 0.7F);
+            throwerSpotX = thrower.prevPosX + (thrower.posX - thrower.prevPosX) * partialTicks + vec3d.x;
+            throwerSpotY = thrower.prevPosY + (thrower.posY - thrower.prevPosY) * partialTicks + vec3d.y;
+            throwerSpotZ = thrower.prevPosZ + (thrower.posZ - thrower.prevPosZ) * partialTicks + vec3d.z;
+            eyeHeight = thrower.getEyeHeight() - 0.06;
+        } else {
+            throwerSpotX = thrower.prevPosX + (thrower.posX - thrower.prevPosX) * partialTicks - cosThrowerYaw * handOffset - sinThrowerYaw * 0.8D;
+            throwerSpotY = thrower.prevPosY + (double) thrower.getEyeHeight() + (thrower.posY - thrower.prevPosY) * (double) partialTicks - 0.45D;
+            throwerSpotZ = thrower.prevPosZ + (thrower.posZ - thrower.prevPosZ) * partialTicks - sinThrowerYaw * handOffset + cosThrowerYaw * 0.8D;
+            eyeHeight = thrower.isSneaking() ? -0.1875D : 0.0D;
+        }
+
+        double projSpotX = bound.prevPosX + (bound.posX - bound.prevPosX) * partialTicks;
+        double projSpotY = bound.prevPosY + bound.height / 2 + (bound.posY - bound.prevPosY) * partialTicks + 0.25D;
+        double projSpotZ = bound.prevPosZ + (bound.posZ - bound.prevPosZ) * partialTicks;
+        double lengthX = (throwerSpotX - projSpotX);
+        double lengthY = (throwerSpotY - projSpotY) + eyeHeight;
+        double lengthZ = (throwerSpotZ - projSpotZ);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        int maxVertices = 1;
+
+        for (int vertexCount = 0; vertexCount <= maxVertices; ++vertexCount) {
+            float vertexIncrement = (float) vertexCount / (float) maxVertices;
+            bufferbuilder.pos(bound.posX + lengthX * (double) vertexIncrement, bound.posY + bound.height / 2 + lengthY * (double) (vertexIncrement * vertexIncrement + vertexIncrement) * 0.5D + 0.25D, bound.posZ + lengthZ * (double) vertexIncrement).color(0, 0, 0, 255).endVertex();
+            //bufferbuilder.pos(bound.posX + (double) vertexIncrement, bound.posY + (double) (vertexIncrement * vertexIncrement + vertexIncrement) * 0.5D + 0.25D, bound.posZ + (double) vertexIncrement).color(0, 0, 0, 255).endVertex();
+        }
+
+        tessellator.draw();
+        GlStateManager.enableLighting();
+        GlStateManager.enableTexture2D();
+        GlStateManager.popMatrix();
+//        Vec3d vec = bound.getPositionEyes((float) partialTicks);
+//        Vec3d pvec = thrower.getPositionEyes((float) partialTicks);
+//        double vx = vec.x;
+//        double vy = vec.y;
+//        double vz = vec.z;
+//        double px = pvec.x;
+//        double py = pvec.y;
+//        double pz = pvec.z;
+//
+//        GL11.glPushMatrix();
+//        GL11.glDisable(GL11.GL_LIGHTING);
+//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//        GL11.glDisable(GL11.GL_DEPTH_TEST);
+//
+//
+//        GL11.glLineWidth(2);
+//        GL11.glTranslated(-px, -py, -pz);
+//        GL11.glColor3f(0.5f, 0.5f, 0.5f);
+//
+//        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//        GL11.glHint( GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST );
+//        GL11.glBegin(GL11.GL_LINE_STRIP);
+//
+//        GL11.glVertex3d(px, py, pz);
+//        GL11.glVertex3d(vx, vy, vz);
+//
+//        GL11.glEnd();
+//        //GL11.glEnable(GL11.GL_LIGHTING);
+//        GL11.glEnable(GL11.GL_TEXTURE_2D);
+//        GL11.glEnable(GL11.GL_DEPTH_TEST);
+//        //GL11.glDisable(GL11.GL_LINE_SMOOTH);
+//        GL11.glPopMatrix();
+    }
+
+    @SubscribeEvent
+    public static void color(ColorHandlerEvent.Item e) {
+        //e.getItemColors().registerItemColorHandler(ProjectileTinter.INSTANCE, TaoItems.prop);
+    }
+
     /**
      * thank you based coolAlias
      */
@@ -369,7 +509,7 @@ public class ClientEvents {
                 double dx = player.posX - e.posX;
                 double dz = player.posZ - e.posZ;
                 double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.height/2f)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+                double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (e.posY + (e.height / 2f)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
                 double distance = player.getDistance(e);
                 float rYaw = (float) (angle - player.rotationYaw);
                 while (rYaw > 180) {
@@ -692,10 +832,6 @@ public class ClientEvents {
         return BinaryMachiavelli.getInteger(a, 8, 15) / 255f;
     }
 
-    private static float blue(int a) {
-        return BinaryMachiavelli.getInteger(a, 0, 7) / 255f;
-    }
-
 	/*@SubscribeEvent
 	public static void colorize(ColorHandlerEvent event){
 		Taoism.logger.debug("this is being called");
@@ -711,6 +847,10 @@ public class ClientEvents {
         bufferbuilder.pos(x, y + 0, (double)this.zLevel).tex((float)(textureX + 0) * 0.00390625F, (float)(textureY + 0) * 0.00390625F).endVertex();
         tessellator.draw();
     }*/
+
+    private static float blue(int a) {
+        return BinaryMachiavelli.getInteger(a, 0, 7) / 255f;
+    }
 
     public static RayTraceResult raycast(Entity e, double len) {
         Vec3d vec = new Vec3d(e.posX, e.posY, e.posZ);

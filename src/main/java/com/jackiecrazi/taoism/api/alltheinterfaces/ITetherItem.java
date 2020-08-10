@@ -61,21 +61,21 @@ public interface ITetherItem {
         }
     }
 
-    Entity getTetheringEntity(ItemStack stack, @Nullable EntityLivingBase wielder);
+    Entity getTetheringEntity(ItemStack stack, EntityLivingBase wielder);
 
     @Nullable
-    Vec3d getTetheredOffset(ItemStack stack, @Nullable EntityLivingBase wielder);
+    Vec3d getTetheredOffset(ItemStack stack, EntityLivingBase wielder);
 
     @Nullable
-    Entity getTetheredEntity(ItemStack stack, @Nullable EntityLivingBase wielder);
+    Entity getTetheredEntity(ItemStack stack, EntityLivingBase wielder);
 
     double getTetherLength(ItemStack stack);
 
     default boolean shouldRepel(ItemStack stack) {
-        return true;
+        return false;
     }
 
     default boolean renderTether(ItemStack stack) {
-        return true;
+        return false;
     }
 }

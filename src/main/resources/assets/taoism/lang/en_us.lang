@@ -196,9 +196,13 @@ rapier.riposte=inflicts a critical hit if you recently dodged or parried, or if 
 
 item.kusarigama.name=Kusarigama
 kusarigama.ball=weighted chain in offhand accumulates speed over 2 seconds, alt attack to release towards an enemy
-kusarigama.followup=following up this attack with the sickle will deal up to an extra 50%% damage based on charge
-kusarigama.parry=the chain cannot parry, but if the projectile is between you and the enemy when you parry, bind enemy for (charge) ticks
-kusarigama.critfollowup=attacking a bound enemy with the sickle will crit for double damage and consume double posture
+kusarigama.followup=following up a chain strike with the sickle will deal up to an extra 50%% damage based on charge
+kusarigama.parry=the chain's parrying efficiency increases with charge, and consumes charge to inflict an equivalent duration of mining fatigue on parry
+kusarigama.critfollowup=a strike on an enemy with mining fatigue will crit for double damage
+kusarigama.tether=at full speed, dodge into an enemy to entangle them, disallowing them from leaving a 6-block radius
+kusarigama.tethertick=an entangled enemy constantly has mining fatigue and will be weakened on parry
+kusarigama.escape=entanglement ends when both sides attack more than 6(+chi) times in total, with a successful hit on you counting as 3 attacks
+kusarigama.pulldown=if enemy tries to escape or chain retrieved by alt attacking, deal untraded blows as posture and tripping damage
 kusarigama.harvest=functions as shears
 
 item.executionersword.name=Executioner's Sword

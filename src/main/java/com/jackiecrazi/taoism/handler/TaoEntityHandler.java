@@ -43,6 +43,7 @@ import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -71,6 +72,8 @@ public class TaoEntityHandler {
             for (int i = 0; i < IElemental.ATTRIBUTES.length; i++) {
                 elb.getAttributeMap().registerAttribute(IElemental.ATTRIBUTES[i]);
             }
+            if(!(elb instanceof EntityPlayer))
+                elb.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         }
     }
 
@@ -238,10 +241,21 @@ public class TaoEntityHandler {
 //                elb.motionZ *= 0.7;
 //            } else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
 //        }
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0;// || elb.world.getClosestPlayerToEntity(elb, 16) != null;
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(elb);
         }
+    }
+
+    @SubscribeEvent
+    public static void track(PlayerEvent.StartTracking e){
+        if(e.getTarget() instanceof EntityLivingBase)
+            TaoCasterData.updateCasterData((EntityLivingBase) e.getTarget());
+    }
+
+    @SubscribeEvent
+    public static void untrack(PlayerEvent.StopTracking e){
+
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

@@ -96,7 +96,7 @@ public class RenderTetheredTaoItemProjectile<T extends EntityThrownWeapon> exten
             tessellator.draw();
             GlStateManager.enableLighting();
             GlStateManager.enableTexture2D();
-            super.doRender(entity, x, y, z, entityYaw, partialTicks);
+            //super.doRender(entity, x, y, z, entityYaw, partialTicks);
         }
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }

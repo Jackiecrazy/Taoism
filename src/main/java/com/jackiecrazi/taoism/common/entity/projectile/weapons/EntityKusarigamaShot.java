@@ -92,4 +92,6 @@ public class EntityKusarigamaShot extends EntityThrownWeapon implements ITetherA
     public double getTetherLength() {
         return 0;
     }
+
+
 }

@@ -62,6 +62,16 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
     }
 
     @Override
+    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
+        super.onUpdate(stack, w, e, slot, onHand);
+        if (e instanceof EntityLivingBase) {
+            updateTetheringVelocity(stack, (EntityLivingBase) e);
+            if (isCharged((EntityLivingBase) e, stack) && getBuff(stack, "heartStab") > 0 && e.motionY < 0)
+                e.motionY = -0.5;
+        }
+    }
+
+    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("goulianqiang.trip"));
@@ -72,6 +82,15 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         return 6f;
+    }
+
+    @Override
+    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
+        if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
+            TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
+            return true;
+        }
+        return false;
     }
 
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
@@ -88,7 +107,7 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
     public void chargeWeapon(EntityLivingBase attacker, ItemStack item) {
         super.chargeWeapon(attacker, item);
         setBuff(attacker, item, "flipOverID", 0);
-        setBuff(attacker, item, "heartStab",0);
+        setBuff(attacker, item, "heartStab", 0);
     }
 
     @Override
@@ -141,19 +160,9 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
         //attacker.posZ=target.posZ;
         //attacker.posX=target.posX;
         attacker.velocityChanged = true;
-        setBuff(attacker, item, "heartStab",1);
+        setBuff(attacker, item, "heartStab", 1);
         TaoCasterData.getTaoCap(target).consumePosture(TaoCasterData.getTaoCap(target).getMaxPosture(), true, true, attacker);
         return 0;
-    }
-
-    @Override
-    public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
-        super.onUpdate(stack, w, e, slot, onHand);
-        if(e instanceof EntityLivingBase) {
-            updateTetheringVelocity(stack, (EntityLivingBase) e);
-            if(isCharged((EntityLivingBase)e,stack)&&getBuff(stack, "heartStab")>0&&e.motionY<0)
-                e.motionY=-0.5;
-        }
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
@@ -196,28 +205,19 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
     }
 
     @Override
-    protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
-        if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
-            TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Entity getTetheringEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Entity getTetheringEntity(ItemStack stack, EntityLivingBase wielder) {
         return isCharged(wielder, stack) && getBuff(stack, "heartStab") != 0 ? wielder : null;
     }
 
     @Nullable
     @Override
-    public Vec3d getTetheredOffset(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Vec3d getTetheredOffset(ItemStack stack, EntityLivingBase wielder) {
         return null;//Vec3d.ZERO;
     }
 
     @Nullable
     @Override
-    public Entity getTetheredEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Entity getTetheredEntity(ItemStack stack, EntityLivingBase wielder) {
         return wielder.world.getEntityByID(getBuff(stack, "flipOverID"));
     }
 

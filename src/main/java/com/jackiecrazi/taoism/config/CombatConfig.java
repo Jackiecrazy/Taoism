@@ -42,8 +42,8 @@ public class CombatConfig {
     public static int timeBetweenAttacks = 20;
     @Config.Comment("Number of ticks between each forced client update of the entity's various stats.")
     public static int mobUpdateInterval = 100;
-    @Config.Comment("Number of enforced ticks between each mob attack, because slimes.")
-    public static int mobForcedCooldown = 10;
+    @Config.Comment("Number of enforced ticks between each mob attack, because slimes. This is modified by attack speed, so by default mobs attack twice per second.")
+    public static int mobForcedCooldown = 40;
     @Config.Comment("Number of seconds after a qi add for which your qi will not decrease.")
     public static int qiGrace = 10;
     @Config.Comment("Additional items eligible for parrying. See printParryList for easy registration.")

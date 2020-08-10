@@ -231,24 +231,29 @@ public class Qiang extends TaoWeapon implements ITetherItem {
     }
 
     @Override
-    public Entity getTetheringEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Entity getTetheringEntity(ItemStack stack, EntityLivingBase wielder) {
         return isCharged(wielder, stack) && getLastAttackedEntity(wielder.world, stack) != null ? wielder : null;
     }
 
     @Nullable
     @Override
-    public Vec3d getTetheredOffset(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Vec3d getTetheredOffset(ItemStack stack, EntityLivingBase wielder) {
         return null;//Vec3d.ZERO;
     }
 
     @Nullable
     @Override
-    public Entity getTetheredEntity(ItemStack stack, @Nullable EntityLivingBase wielder) {
+    public Entity getTetheredEntity(ItemStack stack, EntityLivingBase wielder) {
         return getLastAttackedEntity(wielder.world, stack);
     }
 
     @Override
     public double getTetherLength(ItemStack stack) {
         return getBuff(stack, "heartStab") > 0 ? 1 : 5;
+    }
+
+    @Override
+    public boolean shouldRepel(ItemStack stack) {
+        return true;
     }
 }
