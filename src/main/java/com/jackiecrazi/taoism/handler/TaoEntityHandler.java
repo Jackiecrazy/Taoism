@@ -102,8 +102,6 @@ public class TaoEntityHandler {
         }
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
-            if (elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED) == null)
-                elb.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
             TaoCasterData.updateCasterData(elb);
             elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());

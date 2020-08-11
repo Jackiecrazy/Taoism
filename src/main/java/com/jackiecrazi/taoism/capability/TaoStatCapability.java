@@ -243,7 +243,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         } else setQiGracePeriod(-diff);
 
         if (!(elb instanceof EntityPlayer))
-            setSwing(getSwing() + ticks * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue());
+            if (elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED) != null)
+                setSwing(getSwing() + ticks * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue());
+            else setSwing(getSwing() + ticks * 2);
         setLastUpdatedTime(elb.world.getTotalWorldTime());
         sync();
     }
@@ -654,7 +656,7 @@ public class TaoStatCapability implements ITaoStatCapability {
             if (time == 0 && root != 0) {
                 //elb.setNoGravity(false);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-            } else if (root == 0 && time!=0 && !(elb instanceof EntityPlayer)) {
+            } else if (root == 0 && time != 0 && !(elb instanceof EntityPlayer)) {
                 //elb.setNoGravity(true);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
