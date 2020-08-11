@@ -37,6 +37,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
@@ -241,7 +242,8 @@ public class TaoEntityHandler {
 //                elb.motionZ *= 0.7;
 //            } else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
 //        }
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0;// || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        mustUpdate = elb.world instanceof WorldServer && !((WorldServer) elb.world).getEntityTracker().getTrackingPlayers(elb).isEmpty();
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(elb);
         }
@@ -249,8 +251,10 @@ public class TaoEntityHandler {
 
     @SubscribeEvent
     public static void track(PlayerEvent.StartTracking e) {
-        if (e.getTarget() instanceof EntityLivingBase)
+        if (e.getTarget() instanceof EntityLivingBase) {
+            //System.out.println("track");
             TaoCasterData.updateCasterData((EntityLivingBase) e.getTarget());
+        }
     }
 
     @SubscribeEvent

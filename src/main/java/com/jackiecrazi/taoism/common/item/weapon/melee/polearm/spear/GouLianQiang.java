@@ -86,10 +86,10 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
 
     @Override
     protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
-        if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
-            TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
-            return true;
-        }
+//        if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
+//            TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
+//            return true;
+//        }
         return false;
     }
 

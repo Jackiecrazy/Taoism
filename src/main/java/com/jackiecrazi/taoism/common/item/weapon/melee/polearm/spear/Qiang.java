@@ -75,8 +75,8 @@ public class Qiang extends TaoWeapon implements ITetherItem {
             updateTetheringVelocity(stack, elb);
             final Entity last = getLastAttackedEntity(w, stack);
             if (isCharged(elb, stack)) {
-                if (TaoCasterData.getTaoCap(elb).getQi() < 5 && last == null) dischargeWeapon(elb, stack);
-                if (last != null) {
+                if ((TaoCasterData.getTaoCap(elb).getQi() < 5) && last == null) dischargeWeapon(elb, stack);
+                if (last != null && getBuff(stack, "kill") == 0) {
                     last.motionY = 0.05;
                     last.velocityChanged = true;
                 }
@@ -107,7 +107,6 @@ public class Qiang extends TaoWeapon implements ITetherItem {
     protected boolean onCollideWithEntity(EntityLivingBase elb, Entity collidingEntity, ItemStack stack) {
         if (isCharged(elb, stack) && getBuff(stack, "heartStab") > 0) {
             TaoCombatUtils.attack(elb, collidingEntity, EnumHand.MAIN_HAND);
-            dischargeWeapon(elb, stack);
             return true;
         }
         return false;
@@ -130,6 +129,7 @@ public class Qiang extends TaoWeapon implements ITetherItem {
         super.chargeWeapon(attacker, item);
         setBuff(attacker, item, "chargeHitHand", 0);
         setBuff(attacker, item, "heartStab", -1);
+        setBuff(attacker, item, "kill", 0);
         setLastAttackedEntity(item, null);
     }
 
@@ -138,6 +138,7 @@ public class Qiang extends TaoWeapon implements ITetherItem {
         super.dischargeWeapon(elb, item);
         setBuff(elb, item, "chargeHitHand", 0);
         setBuff(elb, item, "heartStab", -1);
+        setBuff(elb, item, "kill", 0);
         TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
     }
 
@@ -154,16 +155,6 @@ public class Qiang extends TaoWeapon implements ITetherItem {
             }
         elb.motionY = 0.2;
         elb.velocityChanged = true;
-        if (victim instanceof EntityLivingBase) {
-            EntityLivingBase target = (EntityLivingBase) victim;
-            if (target.getHealth() <= 0) {
-                TaoCasterData.getTaoCap(target).startRecordingDamage();
-                EntityBaseball epd = new EntityBaseball(elb.world, elb, target);
-                epd.setPosition(target.posX, target.posY, target.posZ);
-                epd.shoot(elb, 90, 0, 0.0F, 1.5f, 0.0F);
-                elb.world.spawnEntity(epd);
-            }
-        }
     }
 
     @Override
@@ -173,11 +164,16 @@ public class Qiang extends TaoWeapon implements ITetherItem {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return isCharged(attacker, item) && getBuff(item, "heartStab") > 0 ? 5 : 1.5f;
+        if (isCharged(attacker, item) && getBuff(item, "heartStab") > 0) {
+            dischargeWeapon(attacker, item);
+            return 5;
+        }
+        return 1.5f;
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        if (isCharged(attacker, item) && getBuff(item, "heartStab") <= 0) return 1f;
         return getHand(item) == EnumHand.OFF_HAND ? 0.5f : 1 + (float) NeedyLittleThings.getDistSqCompensated(attacker, target) / 54f;
     }
 
@@ -199,6 +195,8 @@ public class Qiang extends TaoWeapon implements ITetherItem {
             setLastAttackedRangeSq(attacker, stack, (float) attacker.getDistanceSq(target));
         }
         if (isCharged(attacker, stack)) {
+            if (!TaoCasterData.getTaoCap(target).isRecordingDamage())
+                TaoCasterData.getTaoCap(target).startRecordingDamage();
             TaoCasterData.getTaoCap(attacker).setForcedLookAt(target);
             if (getHand(stack) == EnumHand.OFF_HAND) {
                 TaoMovementUtils.kick(attacker, target);
@@ -210,12 +208,12 @@ public class Qiang extends TaoWeapon implements ITetherItem {
     @Override
     protected void followUp(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack))
-            if (target.getHealth() > 0 && TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5)) {
+            if (TaoCasterData.getTaoCap(target).getRecordedDamage() < target.getHealth() && TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5)) {
                 setBuff(attacker, stack, "chargeHitHand", getHand(stack) == EnumHand.MAIN_HAND ? 1 : -1);
                 scheduleExtraAction(attacker, stack, target, 4, 2);
             } else {
                 //end with a massive slam
-                TaoCasterData.getTaoCap(target).startRecordingDamage();
+                setBuff(attacker, stack, "kill", 1);
                 EntityBaseball epd = new EntityBaseball(attacker.world, attacker, target);
                 epd.setPosition(target.posX, target.posY, target.posZ);
                 epd.shoot(attacker, 90, attacker.rotationYaw, 0.0F, 1.5f, 0.0F);

@@ -627,7 +627,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         EntityLivingBase elb = e.get();
         if (elb != null && time == 0 && time != down) {
             elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-            elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
+            //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
         }
         down = time;
     }
@@ -654,7 +654,7 @@ public class TaoStatCapability implements ITaoStatCapability {
             if (time == 0 && root != 0) {
                 //elb.setNoGravity(false);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
-            } else if (root == 0 && !(elb instanceof EntityPlayer)) {
+            } else if (root == 0 && time!=0 && !(elb instanceof EntityPlayer)) {
                 //elb.setNoGravity(true);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
                 elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "rooted", -1, 2));
@@ -796,8 +796,8 @@ public class TaoStatCapability implements ITaoStatCapability {
         }
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(STOPMOVING);
         elb.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).applyModifier(new AttributeModifier(STOPMOVING, "downed", -1, 2));
-        elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
-        elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(ARMORDOWN, "downed", -9, 0));
+        //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
+        //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(ARMORDOWN, "downed", -9, 0));
         setDownTimer(MAXDOWNTIME);
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();

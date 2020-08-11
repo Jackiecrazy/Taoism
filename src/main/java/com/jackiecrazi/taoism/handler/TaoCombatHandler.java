@@ -337,6 +337,8 @@ public class TaoCombatHandler {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             int ignoreAmnt = 0;
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
+            if(TaoCasterData.getTaoCap(uke).getDownTimer()>0)
+                ignoreAmnt+=9;
             if (stack.getItem() instanceof ICombatManipulator) {
                 ignoreAmnt += ((ICombatManipulator) stack.getItem()).armorIgnoreAmount(e.getSource(), seme, uke, stack, e.getAmount());
             }

@@ -46,7 +46,12 @@ public class EntityOrbitDummy extends EntityPhysicsDummy {
 //                flip = true;
 //            }
             //if (!flip) motionY = 0.1;
-            if (getThrower().getDistanceSq(target) > dist && !(prevPosY > getThrower().posY && posY < getThrower().posY)) {
+
+            if((prevPosY > getThrower().posY && posY < getThrower().posY)){
+                setDead();
+                return;
+            }
+            if (getThrower().getDistanceSq(target) > dist) {
                 motionX += (getThrower().posX - target.posX) * 0.05;
                 motionY += (getThrower().posY - target.posY) * 0.05;
                 motionZ += (getThrower().posZ - target.posZ) * 0.05;
