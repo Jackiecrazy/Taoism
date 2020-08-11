@@ -72,8 +72,6 @@ public class TaoEntityHandler {
             for (int i = 0; i < IElemental.ATTRIBUTES.length; i++) {
                 elb.getAttributeMap().registerAttribute(IElemental.ATTRIBUTES[i]);
             }
-            if(!(elb instanceof EntityPlayer))
-                elb.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         }
     }
 
@@ -103,11 +101,13 @@ public class TaoEntityHandler {
         }
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
+            if (elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED) == null)
+                elb.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
             TaoCasterData.updateCasterData(elb);
             elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
             TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
-            if (elb instanceof EntityZombie || elb instanceof EntitySkeleton) {
+            if (e.forceSpawn && (elb instanceof EntityZombie || elb instanceof EntitySkeleton)) {
                 if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
                     Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
                     elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
@@ -125,7 +125,7 @@ public class TaoEntityHandler {
 
     @SubscribeEvent
     public static void bigBrother(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        if(event.getHandler() instanceof NetHandlerPlayClient) {
+        if (event.getHandler() instanceof NetHandlerPlayClient) {
             Taoism.logger.debug("registered cooldown packet eater");
             event.getManager().channel().pipeline().addBefore("packet_handler", "nommer", new AttackPacketDenier(event));//.addBefore("packet_handler", "cooldown_eater", new AttackPacketDenier(event));
         }
@@ -248,13 +248,13 @@ public class TaoEntityHandler {
     }
 
     @SubscribeEvent
-    public static void track(PlayerEvent.StartTracking e){
-        if(e.getTarget() instanceof EntityLivingBase)
+    public static void track(PlayerEvent.StartTracking e) {
+        if (e.getTarget() instanceof EntityLivingBase)
             TaoCasterData.updateCasterData((EntityLivingBase) e.getTarget());
     }
 
     @SubscribeEvent
-    public static void untrack(PlayerEvent.StopTracking e){
+    public static void untrack(PlayerEvent.StopTracking e) {
 
     }
 

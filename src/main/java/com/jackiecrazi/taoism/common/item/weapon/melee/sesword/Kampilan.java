@@ -27,7 +27,16 @@ public class Kampilan extends TaoWeapon {
     //high attack speed, has a big sweep, sinawalis at 3 chi, converts knockback to extra damage at 6 chi,
     // and follows up with 2 extra attacks at 9 chi
 
-    //execution: 5 omnidirectional slashes that add several
+    //execution: 妖蛇噬月
+    //wind, earthquake, rain, eclipse
+    //hornbill, crocodile, monitor, bakunawa
+    /*
+    mobs are collected towards you with a vortex of wind at slowly accelerating speeds
+    attack again to begin the series with an earthquake that sends mobs flying and obscures the moon （坤风）
+    mobs will be frozen in the air and damage recording turned on. You have 6 combos of 3, or 18 hits （山晷）
+    each hit in this state will accumulate a ball of qi above your head. On the 21st hit,
+    fling all enemies away; the orb splits into several tracking shots that go after the hit entities （月雨）
+     */
     public Kampilan() {
         super(1, 1.6d, 6d, 1f);
         this.setQiAccumulationRate(0.20f);

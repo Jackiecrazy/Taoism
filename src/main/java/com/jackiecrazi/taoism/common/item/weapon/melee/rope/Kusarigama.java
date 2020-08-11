@@ -94,7 +94,7 @@ public class Kusarigama extends TaoWeapon implements ITetherItem {
             EntityLivingBase elb = (EntityLivingBase) e;
             updateTetheringVelocity(stack, elb);
             final Entity engaged = getTetheringEntity(stack, elb);
-            if (engaged != null && (NeedyLittleThings.getDistSqCompensated(engaged, elb) > 36 || getBuff(stack, "blowsLeft") < 1))
+            if (engaged == null || NeedyLittleThings.getDistSqCompensated(engaged, elb) > 36 || getBuff(stack, "blowsLeft") < 1)
                 disengage(elb, stack);
             if (engaged instanceof EntityLivingBase)
                 TaoPotionUtils.attemptAddPot((EntityLivingBase) engaged, new PotionEffect(MobEffects.MINING_FATIGUE, 20), false);

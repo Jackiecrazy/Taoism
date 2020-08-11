@@ -243,7 +243,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         } else setQiGracePeriod(-diff);
 
         if (!(elb instanceof EntityPlayer))
-            setSwing(getSwing() + ticks*(float)elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue());
+            setSwing(getSwing() + ticks * (float) elb.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue());
         setLastUpdatedTime(elb.world.getTotalWorldTime());
         sync();
     }
