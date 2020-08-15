@@ -35,6 +35,7 @@ public class Taoism {
     private static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
     private static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
     public static final String MODID = "taoism";
+
     public static final String VERSION = "2.0";
     public static final Random unirand = new Random();
     public static final CreativeTabs tabWea = new CreativeTabs("taoWea") {
