@@ -28,6 +28,10 @@ public class TaoMovementUtils {
     private static Method jump = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70664_aZ", Void.TYPE);
     private static EnumFacing[] intToFacing = {EnumFacing.EAST, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN, EnumFacing.SOUTH, EnumFacing.NORTH};
 
+    public static boolean isDodging(EntityLivingBase elb) {
+        return TaoCasterData.getTaoCap(elb).getRollCounter() < CombatConfig.rollThreshold;
+    }
+
     public static boolean shouldStick(EntityLivingBase elb) {
         return (TaoCasterData.getTaoCap(elb).getQi() > 3
                 && willHitWall(elb))
