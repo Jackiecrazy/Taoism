@@ -36,6 +36,10 @@ public class NeedyLittleThings {
         return e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ;
     }
 
+    public static Vec3d getVelVec(Entity e) {
+        return new Vec3d(e.motionX, e.motionY, e.motionZ);
+    }
+
     public static void setSize(Entity e, float width, float height) {
         if (e instanceof IEntityMultiPart || e instanceof MultiPartEntityPart) {
             return; //let the sleeping dragons lie
