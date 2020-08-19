@@ -198,7 +198,7 @@ public class Nunchaku extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         gettagfast(stack).setFloat("kb", orig);
         return 0;
     }

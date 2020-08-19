@@ -112,7 +112,7 @@ public class Bullwhip extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getBuff(stack, "boomer") == 1) {
             if (!attacker.isSneaking()) {
                 //TaoPotionUtils.attemptAddPot(target, new PotionEffect(TaoPotion.DISORIENT, 20), false);
@@ -122,7 +122,7 @@ public class Bullwhip extends TaoWeapon {
         if (attacker.isSneaking()) {
             return -orig * 3;
         }
-        return super.knockback(attacker, target, stack, orig) * 1.2f;
+        return super.onKnockingBack(attacker, target, stack, orig) * 1.2f;
     }
 
     @Override

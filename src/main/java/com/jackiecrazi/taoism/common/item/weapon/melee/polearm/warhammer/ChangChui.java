@@ -137,7 +137,7 @@ public class ChangChui extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return getHand(stack) == EnumHand.OFF_HAND ? 0 : orig * 1.5f;
     }
 

@@ -43,6 +43,7 @@ public class TaoCombatHandler {
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
     public static boolean modCall;
     private static boolean abort = false;
+    private static ItemStack defend;
 
     //offhand handler for puny mod weapons that don't have it already
     //"puny" here defined as weapons that can't attack from offhand
@@ -166,7 +167,7 @@ public class TaoCombatHandler {
             so big posture=less knockback=standing tank
             while this sounds bad for low pos modifier weapons, it means they can bounce around. Hyper-mobile combat!
              */
-            ItemStack defend = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
+            defend = TaoCombatUtils.getParryingItemStack(seme, uke, e.getAmount());
             //System.out.println("parrying stack is "+defend);
             float atk = TaoCombatUtils.postureAtk(uke, seme, attack, e.getAmount());
             float def = TaoCombatUtils.postureDef(uke, seme, defend, e.getAmount());
@@ -219,12 +220,6 @@ public class TaoCombatHandler {
         }
     }
 
-    //critical hit check
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void vibeCheck(CriticalHitEvent e) {
-        //critted = e.getDamageModifier() > 1f && (e.getResult() == Event.Result.ALLOW || (e.isVanillaCritical() && e.getResult() == Event.Result.DEFAULT));
-    }
-
     //by config option, will also replace the idiotic chance to resist knock with ratio resist. Somewhat intrusive.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void knockKnockWhosThere(LivingKnockBackEvent e) {
@@ -234,17 +229,23 @@ public class TaoCombatHandler {
         }
         if (!modCall && CombatConfig.modifyKnockBackCode) {
             e.setCanceled(true);
-            NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ());
+            NeedyLittleThings.knockBack(e.getEntityLiving(), e.getAttacker(), e.getOriginalStrength(), e.getOriginalRatioX(), 0, e.getOriginalRatioZ(), false);
             return;
         }
         if (e.getOriginalAttacker() instanceof EntityLivingBase) {
             EntityLivingBase seme = (EntityLivingBase) e.getOriginalAttacker();
             EntityLivingBase uke = e.getEntityLiving();
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
+            float f=e.getOriginalStrength();
             if (stack.getItem() instanceof ICombatManipulator && TaoCasterData.getTaoCap(uke).getDownTimer() == 0) {//down timer check needed to prevent loops
-                e.setStrength(((ICombatManipulator) stack.getItem()).knockback(seme, uke, stack, e.getOriginalStrength()));
+                f=((ICombatManipulator) stack.getItem()).onKnockingBack(seme, uke, stack, f);
             }
+            if (defend.getItem() instanceof ICombatManipulator && TaoCasterData.getTaoCap(uke).getDownTimer() == 0) {//down timer check needed to prevent loops
+                f=((ICombatManipulator) defend.getItem()).onBeingKnockedBack(seme, uke, defend, f);
+            }
+            e.setStrength(f);
         }
+        //since knockback is ignored when mounted, it becomes extra posture instead
         //if (e.getStrength() == 0) e.setCanceled(true);
     }
 
@@ -337,8 +338,8 @@ public class TaoCombatHandler {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             int ignoreAmnt = 0;
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
-            if(TaoCasterData.getTaoCap(uke).getDownTimer()>0)
-                ignoreAmnt+=9;
+            if (TaoCasterData.getTaoCap(uke).getDownTimer() > 0)
+                ignoreAmnt += 9;
             if (stack.getItem() instanceof ICombatManipulator) {
                 ignoreAmnt += ((ICombatManipulator) stack.getItem()).armorIgnoreAmount(e.getSource(), seme, uke, stack, e.getAmount());
             }

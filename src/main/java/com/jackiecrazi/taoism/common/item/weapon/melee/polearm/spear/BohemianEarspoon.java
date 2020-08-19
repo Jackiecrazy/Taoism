@@ -71,10 +71,14 @@ public class BohemianEarspoon extends TaoWeapon {
                     Entity target = getLastAttackedEntity(w, stack);
                     if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
                         if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack)) {
-                            if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2 && target instanceof EntityLivingBase) {
-                                //too close! Rip out innards for double damage
-                                target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) getDamageAgainst(elb, (EntityLivingBase) target, stack));
-                                setLastAttackedRangeSq(elb, stack, 0);
+                            Entity toMove = target;
+                            if (target instanceof EntityLivingBase) {
+                                toMove = TaoCasterData.getTaoCap(elb).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) target).getPosture() ? elb : target;
+                                if (target.getDistanceSq(elb) < getLastAttackedRangeSq(stack) / 2) {
+                                    //too close! Rip out innards for double damage
+                                    target.attackEntityFrom(DamageSourceBleed.causeEntityBleedingDamage(elb), 2f * (float) getDamageAgainst(elb, (EntityLivingBase) target, stack));
+                                    setLastAttackedRangeSq(elb, stack, 0);
+                                }
                             }
                             //a new challenger is approaching!
                             target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.05;
@@ -231,9 +235,9 @@ public class BohemianEarspoon extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack) && getHand(stack) == EnumHand.OFF_HAND) return orig * 2;
-        return super.knockback(attacker, target, stack, orig);
+        return super.onKnockingBack(attacker, target, stack, orig);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

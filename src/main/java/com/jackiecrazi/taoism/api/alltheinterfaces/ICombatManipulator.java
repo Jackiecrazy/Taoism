@@ -36,7 +36,13 @@ public interface ICombatManipulator {
      * this is called on LivingKnockBackEvent
      * @return a new knockback if necessary
      */
-    float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+    float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
+
+    /**
+     * this is called on LivingKnockBackEvent
+     * @return a new knockback if necessary
+     */
+    float onBeingKnockedBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig);
 
     /**
      * this is called on LivingHurtEvent, before armor reductions

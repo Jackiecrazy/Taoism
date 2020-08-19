@@ -20,6 +20,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
@@ -641,6 +642,10 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setBindTime(int time) {
+        if (bind != 0 && e.get() != null) {
+            TaoCombatUtils.rechargeHand(e.get(), EnumHand.MAIN_HAND, 0, true);
+            TaoCombatUtils.rechargeHand(e.get(), EnumHand.OFF_HAND, 0, true);
+        }
         bind = time;
     }
 

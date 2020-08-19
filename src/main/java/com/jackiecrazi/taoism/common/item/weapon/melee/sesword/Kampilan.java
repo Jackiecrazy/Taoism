@@ -102,7 +102,7 @@ public class Kampilan extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
         if (TaoCasterData.getTaoCap(attacker).getQiFloored() < 5)
             return orig;
         knock = orig;

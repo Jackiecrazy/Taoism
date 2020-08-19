@@ -85,7 +85,7 @@ public class Lance extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return orig * (1 + MathHelper.sqrt(NeedyLittleThings.getSpeedSq(attacker)) * chargeAndLookCos(attacker));
     }
 

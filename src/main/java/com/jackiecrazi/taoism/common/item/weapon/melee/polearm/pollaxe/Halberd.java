@@ -77,8 +77,8 @@ public class Halberd extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return isCharged(attacker, stack)?0: super.knockback(attacker, target, stack, orig);
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return isCharged(attacker, stack)?0: super.onKnockingBack(attacker, target, stack, orig);
     }
 
     @Override

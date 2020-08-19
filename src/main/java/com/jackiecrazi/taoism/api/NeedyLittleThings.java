@@ -85,9 +85,9 @@ public class NeedyLittleThings {
         Vec3d distVec = to.getPositionVector().subtractReverse(from.getPositionVector()).normalize();
         if (to instanceof EntityLivingBase && !bypassAllChecks) {
             if (considerRelativeAngle)
-                knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z);
+                knockBack((EntityLivingBase) to, from, strength, distVec.x, distVec.y, distVec.z, false);
             else
-                NeedyLittleThings.knockBack(((EntityLivingBase) to), from, (float) strength * 0.5F, (double) MathHelper.sin(from.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(from.rotationYaw * 0.017453292F)));
+                NeedyLittleThings.knockBack(((EntityLivingBase) to), from, (float) strength * 0.5F, (double) MathHelper.sin(from.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(from.rotationYaw * 0.017453292F)),false);
         } else {
             //eh
             if (considerRelativeAngle) {
@@ -101,17 +101,21 @@ public class NeedyLittleThings {
             to.velocityChanged = true;
         }
     }
-
+    
     /**
      * knockback in EntityLivingBase except it makes sense and the resist is factored into the event
      */
-    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double yRatio, double zRatio) {
+    public static void knockBack(EntityLivingBase to, Entity from, float strength, double xRatio, double yRatio, double zRatio, boolean bypassEventCheck) {
         TaoCombatHandler.modCall = true;
-        net.minecraftforge.event.entity.living.LivingKnockBackEvent event = net.minecraftforge.common.ForgeHooks.onLivingKnockBack(to, from, strength * (float) (1 - to.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue()), xRatio, zRatio);
-        if (event.isCanceled()) return;
-        strength = event.getStrength();
-        xRatio = event.getRatioX();
-        zRatio = event.getRatioZ();
+        if(!bypassEventCheck) {
+            net.minecraftforge.event.entity.living.LivingKnockBackEvent event = net.minecraftforge.common.ForgeHooks.onLivingKnockBack(to, from, strength * (float) (1 - to.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue()), xRatio, zRatio);
+            if (event.isCanceled()) return;
+            strength = event.getStrength();
+            xRatio = event.getRatioX();
+            zRatio = event.getRatioZ();
+        }else{
+            strength *= (float) (1 - to.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getAttributeValue());
+        }
         if (strength != 0f) {
             to.isAirBorne = true;
             float pythagora = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);

@@ -235,7 +235,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return !isDartAttack(stack) && getHand(stack) == EnumHand.MAIN_HAND ? orig * 1.2f : orig;
     }
 

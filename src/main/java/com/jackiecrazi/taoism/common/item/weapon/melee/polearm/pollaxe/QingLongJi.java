@@ -176,10 +176,10 @@ public class QingLongJi extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (gettagfast(stack).getBoolean("release"))
             return orig + getChargedTime(attacker, stack) / 20f;
-        return super.knockback(attacker, target, stack, orig);
+        return super.onKnockingBack(attacker, target, stack, orig);
     }
 
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {

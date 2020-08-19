@@ -106,7 +106,7 @@ qinglongji.atkspd=攻速随气增加，最高1.9
 qinglongji.oscillate=两种攻击冷却独立，且成功攻击会使另一种攻击冷却减半
 qinglongji.qi=只有交替攻击才会积攒气
 
-item.tonfa.name=鸳鸯拐
+item.tonfa.name=卜字拐
 tonfa.main=主手中高速旋击，造成两次伤害
 tonfa.off=副手中重拳出击，附加短暂缓慢与虚弱
 tonfa.parry=招架时获得0.3层气
@@ -142,7 +142,7 @@ maul.impact=普攻击退翻倍，对墙边的敌人造成1.5倍伤害
 maul.nail=右击将敌人打入地面，造成最多一秒的禁锢效果
 maul.hardness=敌人脚下方块的采掘等级不能超过自己气的一半
 
-item.staff.name=齐眉棍
+item.taostaff.name=齐眉棍
 staff.flick=在地上时，普攻根据气挑飞地上的敌人，为自己附加短暂的跳跃效果
 staff.smash=若敌人在空中，将其击落造成额外跌落伤害
 staff.doink=在空中时，攻击地上的敌人会将自己挑的更高
@@ -333,4 +333,8 @@ earth7.inscription=乱石穿空
 earth8.inscription=黄沙百战
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
-earth11.inscription=大花棉袄
+earth11.inscription=大花棉袄item.taostaff.name=Quarterstaff
+kusarigama.tether=at full speed, dodge into an enemy to entangle them, disallowing them from leaving a 6-block radius
+kusarigama.tethertick=an entangled enemy constantly has mining fatigue and will be weakened on parry
+kusarigama.escape=entanglement ends when both sides attack more than 6(+chi) times in total, with a successful hit on you counting as 3 attacks
+kusarigama.pulldown=if enemy tries to escape or chain retrieved by alt attacking, deal untraded blows as posture and tripping damageitem.taostaff.name=Quarterstaff

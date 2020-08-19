@@ -767,7 +767,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     }
 
-    protected double getDamageAgainst(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
+    protected final double getDamageAgainst(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack) {
         return NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, attacker, getHand(stack)) + EnchantmentHelper.getModifierForCreature(stack, target.getCreatureAttribute());
     }
 
@@ -998,6 +998,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
+    public abstract float postureMultiplierDefend(@Nullable Entity attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount);
+
+    @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {
         if (getHand(stack) == EnumHand.OFF_HAND) {
             TaoCasterData.getTaoCap(elb).setOffhandCool(2);
@@ -1033,7 +1036,12 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        return orig;
+    }
+
+    @Override
+    public float onBeingKnockedBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         return orig;
     }
 

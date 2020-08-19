@@ -218,9 +218,9 @@ public class Kusarigama extends TaoWeapon implements ITetherItem {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (getHand(stack) == EnumHand.OFF_HAND) return 0;
-        return super.knockback(attacker, target, stack, orig);
+        return super.onKnockingBack(attacker, target, stack, orig);
     }
 
     @Override

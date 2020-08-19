@@ -241,9 +241,9 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    public float knockback(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+    public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 0) {
-            return super.knockback(attacker, target, stack, orig) * 4;
+            return super.onKnockingBack(attacker, target, stack, orig) * 4;
         }
         TaoCasterData.getTaoCap(target).consumePosture(orig, true);
         return 0;
