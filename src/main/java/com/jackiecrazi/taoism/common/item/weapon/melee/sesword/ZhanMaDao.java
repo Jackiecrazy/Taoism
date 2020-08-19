@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Zanbato extends TaoWeapon {
+public class ZhanMaDao extends TaoWeapon {
     /**
      * large two-handed blade to counter cavalry. High power and defense, medium combo and range, low speed
      * Two handed!
@@ -29,7 +29,7 @@ public class Zanbato extends TaoWeapon {
      * Upon their death, this spreads all around EXCEPT to the mobs you've recently attacked
      */
 
-    public Zanbato() {
+    public ZhanMaDao() {
         super(3, 1.2, 7, 1);
     }
 

@@ -16,20 +16,26 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.desword.Rapier;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Cestus;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.Emeici;
 import com.jackiecrazi.taoism.common.item.weapon.melee.hand.PanGuanBi;
+import com.jackiecrazi.taoism.common.item.weapon.melee.hand.YuanYangYue;
 import com.jackiecrazi.taoism.common.item.weapon.melee.pick.ChickenSickle;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.MonkSpade;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Halberd;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.Pollaxe;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe.QingLongJi;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.BohemianEarspoon;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.GouLianQiang;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Lance;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.spear.Qiang;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff.Staff;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.svardstav.GuanDao;
+import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.BecDeCorbin;
 import com.jackiecrazi.taoism.common.item.weapon.melee.polearm.warhammer.ChangChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.Kusarigama;
 import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sectional.Nunchaku;
 import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.Kampilan;
+import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.LiuYeDao;
+import com.jackiecrazi.taoism.common.item.weapon.melee.sesword.ZhanMaDao;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.BlackSnake;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.Bullwhip;
 import com.jackiecrazi.taoism.common.item.weapon.melee.whip.CatNineTails;
@@ -69,7 +75,13 @@ public class TaoItems {
             blacksnake,
             misericorde,
             emeici,
-            panguanbi;
+            panguanbi,
+            lance,
+            liuyedao,
+            becdecorbin,
+            yuanyangyue,
+            monkspade,
+            zhanmadao;
 
 
     //public static ItemDummy part = new ItemDummy();
@@ -116,6 +128,12 @@ public class TaoItems {
         misericorde = new Misericorde();
         panguanbi = new PanGuanBi();
         emeici = new Emeici();
+        lance = new Lance();
+        liuyedao = new LiuYeDao();
+        becdecorbin = new BecDeCorbin();
+        yuanyangyue = new YuanYangYue();
+        monkspade = new MonkSpade();
+        zhanmadao = new ZhanMaDao();
         prop = new ItemProjectileProp();
         e.getRegistry().register(kampilan);
         e.getRegistry().register(cestus);
@@ -147,6 +165,12 @@ public class TaoItems {
         e.getRegistry().register(misericorde);
         e.getRegistry().register(panguanbi);
         e.getRegistry().register(emeici);
+        e.getRegistry().register(lance);
+        e.getRegistry().register(liuyedao);
+        e.getRegistry().register(becdecorbin);
+        e.getRegistry().register(yuanyangyue);
+        e.getRegistry().register(monkspade);
+        e.getRegistry().register(zhanmadao);
         e.getRegistry().register(prop);
         //weapon
         //e.getRegistry().register(weap);

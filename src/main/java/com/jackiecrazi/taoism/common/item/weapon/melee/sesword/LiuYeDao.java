@@ -25,8 +25,8 @@ import java.util.List;
  * damage is amplified up to 1.5x if you attack right as cooldown ends
  * knockback on both sides converted into posture damage; the victim, upon taking damage, also has knockback converted into armor pierce
  */
-public class Liuyedao extends TaoWeapon {
-    public Liuyedao() {
+public class LiuYeDao extends TaoWeapon {
+    public LiuYeDao() {
         super(1, 1.6, 5, 0.7f);
     }
 
