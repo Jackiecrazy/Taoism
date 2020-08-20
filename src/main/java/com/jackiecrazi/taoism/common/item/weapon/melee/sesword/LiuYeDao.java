@@ -52,26 +52,28 @@ public class LiuYeDao extends TaoWeapon {
 
     @Override
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+        gettagfast(stack).setFloat("cont", getCoolDownUncapped(attacker, getHand(stack), 0.5f));
         splash(attacker, stack, 120);
     }
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        if (TaoCombatUtils.getHandCoolDown(attacker, getHand(item)) > 0.9)
-            return MathHelper.clamp(2.5f - getCoolDownUncapped(attacker, getHand(item), 0.5f), 1, 1.5f);
+        if (TaoCasterData.getTaoCap(attacker).getSwing() > 0.9) {
+            float debug = gettagfast(item).getFloat("cont");
+            return MathHelper.clamp(2.5f - debug, 1, 1.5f);
+        }
         return 1;
     }
 
     @Override
     public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         TaoCasterData.getTaoCap(target).consumePosture(orig, true);
-        gettagfast(stack).setInteger("kb", (int) orig*3);
         return 0;
     }
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return gettagfast(item).getInteger("kb");
+        return (int) MathHelper.clamp(5 / (gettagfast(item).getFloat("cont") + 0.01), 0, 5);
     }
 
     @Override

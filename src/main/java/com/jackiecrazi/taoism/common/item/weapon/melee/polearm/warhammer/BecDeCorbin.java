@@ -60,8 +60,8 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
-        if (defender != null && attacker != null)
-            return gettagfast(item).getFloat("kbBuff") + amount * (1.5f - TaoCasterData.getTaoCap(defender).getPosture() / (2 * TaoCasterData.getTaoCap(defender).getMaxPosture()));
+        if (defender != null && attacker != null && getHand(item) == EnumHand.MAIN_HAND)
+            return amount * (1.5f - TaoCasterData.getTaoCap(defender).getPosture() / (TaoCasterData.getTaoCap(defender).getMaxPosture()));
         return super.postureDealtBase(attacker, defender, item, amount);
     }
 
@@ -83,6 +83,11 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return TaoCasterData.getTaoCap(attacker).getQiFloored();
+        return getHand(item) == EnumHand.OFF_HAND ? TaoCasterData.getTaoCap(attacker).getQiFloored() : 0;
+    }
+
+    @Override
+    public boolean isTwoHanded(ItemStack is) {
+        return true;
     }
 }

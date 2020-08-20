@@ -33,6 +33,8 @@ import java.util.List;
 public class NeedyLittleThings {
 
     public static double getSpeedSq(Entity e) {
+        if(e.isRiding())
+        return e.getLowestRidingEntity().motionX * e.getLowestRidingEntity().motionX + e.getLowestRidingEntity().motionY * e.getLowestRidingEntity().motionY + e.getLowestRidingEntity().motionZ * e.getLowestRidingEntity().motionZ;
         return e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ;
     }
 

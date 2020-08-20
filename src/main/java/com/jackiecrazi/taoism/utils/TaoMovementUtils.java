@@ -197,6 +197,7 @@ public class TaoMovementUtils {
     }
 
     public static void kick(EntityLivingBase elb, EntityLivingBase uke) {
+        if (elb.isRidingOrBeingRiddenBy(uke)) return;
         uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
         TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
         for (int i = 0; i < 10; ++i) {

@@ -12,12 +12,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -76,16 +78,16 @@ public class MonkSpade extends TaoWeapon {
 
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        TaoPotionUtils.attemptAddPot(attacker, TaoPotionUtils.stackPot(attacker, new PotionEffect(MobEffects.SLOWNESS, 20), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
+        TaoPotionUtils.attemptAddPot(attacker, TaoPotionUtils.stackPot(attacker, new PotionEffect(MobEffects.SLOWNESS, 40), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
         if (attacker.isPotionActive(MobEffects.SLOWNESS) && attacker.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(attacker).getMaxPosture()) {
-            TaoCasterData.getTaoCap(attacker).setBindTime(100);
+            TaoCasterData.getTaoCap(attacker).setRootTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;
-            int buryToY = (int) attacker.posY;
+            double buryToY = attacker.posY;
             if (attacker.posY < 2) return;//don't bonk enemies out of the world
             for (int x = (int) (attacker.posX - attacker.width); x <= (int) (attacker.posX + attacker.width); x++) {
                 for (int z = (int) (attacker.posZ - attacker.width); z <= (int) (attacker.posZ + attacker.width); z++) {
-                    for (int y = (int) attacker.posY; y >= attacker.height / 2; y--) {
+                    for (double y = attacker.posY; y > attacker.height / 2; y--) {
                         if (y < 2) break;
                         blocksQueried++;
                         BlockPos bp = new BlockPos(x, y, z);
@@ -100,22 +102,22 @@ public class MonkSpade extends TaoWeapon {
                 }
             }
             if (airBlocks == blocksQueried) return;
-            attacker.setPositionAndUpdate(attacker.posX, buryToY, attacker.posZ);
+            attacker.setPositionAndUpdate(attacker.posX, Math.max(buryToY, attacker.posY - attacker.height / 2), attacker.posZ);
         }
     }
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
-        TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(MobEffects.SLOWNESS, 10), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
+        TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(MobEffects.SLOWNESS, 30), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
         if (target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getMaxPosture()) {
             TaoCasterData.getTaoCap(target).setBindTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;
-            int buryToY = (int) target.posY;
+            double buryToY = target.posY;
             if (target.posY < 2) return;//don't bonk enemies out of the world
             for (int x = (int) (target.posX - target.width); x <= (int) (target.posX + target.width); x++) {
                 for (int z = (int) (target.posZ - target.width); z <= (int) (target.posZ + target.width); z++) {
-                    for (int y = (int) target.posY; y >= target.height / 2; y--) {
+                    for (double y = target.posY; y > target.height / 2; y--) {
                         if (y < 2) break;
                         blocksQueried++;
                         BlockPos bp = new BlockPos(x, y, z);
@@ -130,8 +132,18 @@ public class MonkSpade extends TaoWeapon {
                 }
             }
             if (airBlocks == blocksQueried) return;
-            target.setPositionAndUpdate(target.posX, buryToY, target.posZ);
+            target.setPositionAndUpdate(target.posX, Math.max(buryToY, attacker.posY - attacker.height / 2), target.posZ);
         }
+    }
+
+    @Override
+    public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
+        return target.getCreatureAttribute() == EnumCreatureAttribute.UNDEAD && TaoCasterData.getTaoCap(target).getRootTime() > 0 ? Event.Result.ALLOW : Event.Result.DEFAULT;
+    }
+
+    @Override
+    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return 2;
     }
 
     @Override
@@ -147,7 +159,7 @@ public class MonkSpade extends TaoWeapon {
                 if (!getCurrentMove(stack).isLeftClick() && getLastAttackedEntity(w, stack) != null) {
                     Entity target = getLastAttackedEntity(w, stack);
                     if (NeedyLittleThings.isFacingEntity(elb, target, 90)) {
-                        if (target.getDistanceSq(elb) < getReach(elb, elb.getHeldItemMainhand())) {
+                        if (target.getDistanceSq(elb) < getReach(elb, elb.getHeldItemMainhand()) * getReach(elb, elb.getHeldItemMainhand())) {
                             //a new challenger is approaching!
                             target.motionX += (target.posX - (elb.posX + 0.5D)) * 0.05;
                             target.motionY += ((target.posY) - elb.posY) * 0.05;
@@ -161,5 +173,10 @@ public class MonkSpade extends TaoWeapon {
             }
 
         }
+    }
+
+    @Override
+    public boolean isTwoHanded(ItemStack is) {
+        return true;
     }
 }

@@ -45,9 +45,19 @@ public class YuanYangYue extends TaoWeapon {
         if (getBuff(item, "lastParryTime") == 0) {
             defender.motionX = -defender.motionX;
             defender.motionZ = -defender.motionZ;
-            gettagfast(item).setInteger("lastParryTime", attacker.ticksExisted);
+            gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
         } else gettagfast(item).setInteger("lastParryTime", 0);
         super.onParry(attacker, defender, item, amount);
+    }
+
+    @Override
+    public void onOtherHandParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        if (getBuff(item, "lastParryTime") == 0) {
+            defender.motionX = -defender.motionX;
+            defender.motionZ = -defender.motionZ;
+            gettagfast(item).setInteger("lastParryTime", defender.ticksExisted);
+        } else gettagfast(item).setInteger("lastParryTime", 0);
+        super.onOtherHandParry(attacker, defender, item, amount);
     }
 
     @Override
