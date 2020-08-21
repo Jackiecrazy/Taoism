@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "  s",
+    " s ",
+    "a  "
+  ],
+  "key":
+  {
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "nuggetIron"
+    },
+    "a":
+    {
+      "item": "minecraft:iron_sword"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:zhanmadao"
+  }
+}

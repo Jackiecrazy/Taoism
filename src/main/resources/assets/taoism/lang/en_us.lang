@@ -73,7 +73,7 @@ karambit.harvest=functions as shears
 
 item.chui.name=Spherical Mace
 chui.leap=crits deal double damage
-chui.stagger=deals 1.5x damage against stagger targets
+chui.stagger=deals 1.5x damage against staggered targets
 chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration increases by half a second every level
 
 item.cestus.name=Cestus
@@ -217,7 +217,7 @@ exesword.head=targets killed in this manner are guaranteed to drop a head
 
 item.bullwhip.name=Bullwhip
 bullwhip.armor=damage treats target as having 1.5x the armor it has
-bullwhip.knockback=normal attack lashes in range 7 with slightly more knockback
+bullwhip.knockback=lashes in range 7 with slightly more knockback
 bullwhip.sonicboom=if it hits an entity at least 6 blocks away, deal half damage in an area and disorient enemies for 1 second in a sonic boom
 bullwhip.sneak=while sneaking, normal attack will draw the opponent in, applying half a second of slowness, weakness and bind
 bullwhip.sneakboom=if enemy is hit by sonic boom, these debuffs are lengthened to 2 seconds
@@ -246,6 +246,41 @@ emeici.switch=attack timer is immediately reset when switching in
 emeici.lunge=cooldown is halved if enemy is within 2 blocks
 emeici.spin=if the attacker does not face the same cardinal direction as the last hit:
 emeici.crit=crit for 1.5x damage and deal 3 posture damage
+
+item.monkspade.name=Monk Spade
+monkspade.slow=attacking will extend slowness by 1.5 seconds, while parrying will extend it by 2 seconds
+monkspade.bury=if 5x(slowness duration)>enemy posture, bury them halfway into the ground
+monkspade.hardness=blocks underneath must have harvest level less than half your chi
+monkspade.crit=further attacks on buried undead will crit for double damage
+monkspade.deny=right click to deny an entity from approaching you as long as you are facing it
+monkspade.harvest=functions as both axe and shovel
+
+item.becdecorbin.name=Bec de Corbin
+becdecorbin.stagger=inflicts double damage against staggered targets
+becdecorbin.knockback=normal attack has more knockback, alt attack inverts knockback
+becdecorbin.scaling=posture damage dealt scales with percentage of missing posture from enemy, up to 1.5x
+becdecorbin.armpen=alt attack pierces up to 10 armor points depending on opponent's missing health
+
+item.yuanyangyue.name=Deer Horn Knife
+yuanyangyue.parry=knockback from parrying is inverted, and you parry the next attack in 1.5 seconds for free
+yuanyangyue.riposte=attack a target to consume this buff and bind them for the remaining duration
+yuanyangyue.crit=crits against bound targets
+
+item.liuyedao.name=Willow-Leaf Saber
+liuyedao.sweep=sweeps in a 120 degree area
+liuyedao.posture=knockback converted to posture damage for both combatants
+liuyedao.cool=by attacking right as the cooldown ends, deal up to 1.5x damage and ignore up to 5 armor
+
+item.lance.name=Lance
+lance.hands=one-handed when mounted and for 3 seconds after dismounting, two-handed otherwise
+lance.mount=automatically sweep a 20 degree cone after 1.5 seconds of charging on horseback or when moving at high speed without dodge frames
+lance.joust=damage, posture damage, and knockback scale with speed
+lance.alt=when dismounted, right-click to charge in the selected direction, with dodge frames removed
+
+item.zhanmadao.name=Zhanmadao
+zhanmadao.chop=normal attack hits enemies up to 60 degrees above or below, dealing 1.3x damage to riding or ridden targets
+zhanmadao.cleave=alt attack hits enemies up to 60 degrees to either side
+zhamnadao.crit=alternating attacks crit for 1.5x damage
 
 item.projectile_prop.name=just a prop, don't mind me...
 

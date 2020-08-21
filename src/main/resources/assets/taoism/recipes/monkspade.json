@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "  a",
+    " s ",
+    "i  "
+  ],
+  "key":
+  {
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "i":
+    {
+      "item": "minecraft:iron_shovel"
+    },
+    "a":
+    {
+      "item": "minecraft:iron_axe"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:monkspade"
+  }
+}

@@ -4,12 +4,14 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -17,11 +19,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * horseback hammer that punches through armor with speed. High power, middling range and speed, low combo and defense
+ * horseback hammer that punches through armor. High power, middling range and speed, low combo and defense
  * range 4, speed 1.4, two-handed, crit deals double
  * normal attack has higher knockback on dismounted targets, and converts knockback into posture for mounted targets
  * the less posture they have, the more posture is deducted
- * right click is a pierce that ignores armor based on your qi, and inflicts negative knockback
+ * right click is a pierce that ignores armor based on missing health, and inflicts negative knockback
  * both actions will stab a staggered target for crit damage
  */
 public class BecDeCorbin extends TaoWeapon {
@@ -31,7 +33,12 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(TextFormatting.DARK_RED+I18n.format("weapon.hands")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_GREEN+I18n.format("weapon.disshield")+TextFormatting.RESET);
+        tooltip.add(I18n.format("becdecorbin.stagger"));
+        tooltip.add(I18n.format("becdecorbin.knockback"));
+        tooltip.add(I18n.format("becdecorbin.scaling"));
+        tooltip.add(I18n.format("becdecorbin.armpen"));
     }
 
     @Override
@@ -51,10 +58,6 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (target.isRiding()) {
-            gettagfast(stack).setFloat("kbBuff", orig * 1.2f);
-            return 0;
-        }
         return super.onKnockingBack(attacker, target, stack, orig) * (getHand(stack) == EnumHand.OFF_HAND ? -1.2f : 1.2f);
     }
 
@@ -83,11 +86,16 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return getHand(item) == EnumHand.OFF_HAND ? TaoCasterData.getTaoCap(attacker).getQiFloored() : 0;
+        return getHand(item) == EnumHand.OFF_HAND ? (int) ((1 - target.getHealth() / target.getMaxHealth()) * 10) : 0;
     }
 
     @Override
     public boolean isTwoHanded(ItemStack is) {
         return true;
+    }
+
+    @Override
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
+        return !attacker.onGround;
     }
 }

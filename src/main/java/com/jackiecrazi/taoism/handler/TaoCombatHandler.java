@@ -236,16 +236,26 @@ public class TaoCombatHandler {
             EntityLivingBase seme = (EntityLivingBase) e.getOriginalAttacker();
             EntityLivingBase uke = e.getEntityLiving();
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
-            float f=e.getOriginalStrength();
+            float f = e.getOriginalStrength();
             if (stack.getItem() instanceof ICombatManipulator && TaoCasterData.getTaoCap(uke).getDownTimer() == 0) {//down timer check needed to prevent loops
-                f=((ICombatManipulator) stack.getItem()).onKnockingBack(seme, uke, stack, f);
+                f = ((ICombatManipulator) stack.getItem()).onKnockingBack(seme, uke, stack, f);
             }
             if (defend.getItem() instanceof ICombatManipulator && TaoCasterData.getTaoCap(uke).getDownTimer() == 0) {//down timer check needed to prevent loops
-                f=((ICombatManipulator) defend.getItem()).onBeingKnockedBack(seme, uke, defend, f);
+                f = ((ICombatManipulator) defend.getItem()).onBeingKnockedBack(seme, uke, defend, f);
             }
             e.setStrength(f);
         }
         //since knockback is ignored when mounted, it becomes extra posture instead
+        if (e.getEntityLiving().isRiding()) {
+            int divisor = 1;
+            for (Entity ride = e.getEntityLiving(); ride != null && ride.isRiding(); ride = ride.getRidingEntity()) {
+                divisor++;
+            }
+            for (Entity ride = e.getEntityLiving(); ride != null && ride.isRiding(); ride = ride.getRidingEntity()) {
+                if (ride instanceof EntityLivingBase)
+                    TaoCasterData.getTaoCap((EntityLivingBase) ride).consumePosture(e.getStrength() / divisor, true);
+            }
+        }
         //if (e.getStrength() == 0) e.setCanceled(true);
     }
 

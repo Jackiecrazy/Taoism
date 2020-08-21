@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    " s",
+    "nn"
+  ],
+  "key":
+  {
+    "n":
+    {
+      "type": "forge:ore_dict",
+      "ore": "nuggetIron"
+    },
+    "s":
+    {
+      "item": "minecraft:iron_sword"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:liuyedao"
+  }
+}

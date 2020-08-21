@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -27,8 +29,8 @@ import java.util.List;
 /**
  * A defensive two-handed weapon that focuses on defense and disabling the enemy
  * range 5, damage 5, attack speed 1.2, posture multiplier 0.8
- * attack entity or parry their attack to shovel earth onto them, stacking/extending slowness? Dirt can be removed by moving around
- * when dirt squared exceeds max posture, the enemy will be rooted and buried halfway into the ground for some number of seconds
+ * attack entity or parry their attack to shovel earth onto them, extending slowness
+ * when slowness duration * 5 exceeds max posture, the enemy will be rooted and buried halfway into the ground for some number of seconds
  * attacking the entity now, if it is undead, will crit for double damage
  * right click will push a mob without damage. They cannot approach you as long as you face them, like ghiavarina.
  * the two moves work differently on terrain. Normally the spade functions as an axe and a shovel rolled into one,
@@ -43,7 +45,13 @@ public class MonkSpade extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(TextFormatting.DARK_RED+I18n.format("weapon.hands")+TextFormatting.RESET);
+        tooltip.add(I18n.format("monkspade.slow"));
+        tooltip.add(I18n.format("monkspade.bury"));
+        tooltip.add(I18n.format("monkspade.hardness"));
+        tooltip.add(I18n.format("monkspade.crit"));
+        tooltip.add(I18n.format("monkspade.deny"));
+        tooltip.add(I18n.format("monkspade.harvest"));
     }
 
     @Override
@@ -79,7 +87,7 @@ public class MonkSpade extends TaoWeapon {
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         TaoPotionUtils.attemptAddPot(attacker, TaoPotionUtils.stackPot(attacker, new PotionEffect(MobEffects.SLOWNESS, 40), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
-        if (attacker.isPotionActive(MobEffects.SLOWNESS) && attacker.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(attacker).getMaxPosture()) {
+        if (attacker.isPotionActive(MobEffects.SLOWNESS) && attacker.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(attacker).getPosture()) {
             TaoCasterData.getTaoCap(attacker).setRootTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;
@@ -109,7 +117,7 @@ public class MonkSpade extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(MobEffects.SLOWNESS, 30), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
-        if (target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getMaxPosture()) {
+        if (target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getPosture()) {
             TaoCasterData.getTaoCap(target).setBindTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;

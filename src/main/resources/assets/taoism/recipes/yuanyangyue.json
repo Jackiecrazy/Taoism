@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    " nn",
+    "nsn",
+    "nn "
+  ],
+  "key":
+  {
+    "n":
+    {
+      "type": "forge:ore_dict",
+      "ore": "nuggetIron"
+    },
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:yuanyangyue"
+  }
+}

@@ -99,7 +99,6 @@ public class ClientEvents {
     private static boolean jump = false, sneak = false;
     private static int leftClickAt = 0, rightClickAt = 0;
     private static float currentQiLevel = 0;
-    private static float currentRotation = 0;
 
     @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
@@ -350,13 +349,13 @@ public class ClientEvents {
                 rightClickAt = 0;
                 return;
             }
-            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
-                leftClickAt++;
-                if (leftClickAt == CHARGE) {
-                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
-                }
-            }// else leftClickAt = 0;
+//            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
+//                leftClickAt++;
+//                if (leftClickAt == CHARGE) {
+//                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+//                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+//                }
+//            }
 //            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
 //                rightClickAt++;
 //                if (rightClickAt == CHARGE) {

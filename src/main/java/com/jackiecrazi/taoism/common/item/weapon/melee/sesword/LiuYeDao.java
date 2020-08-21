@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -32,6 +33,9 @@ public class LiuYeDao extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(I18n.format("liuyedao.sweep"));
+        tooltip.add(I18n.format("liuyedao.posture"));
+        tooltip.add(I18n.format("liuyedao.cool"));
 
     }
 
@@ -59,8 +63,7 @@ public class LiuYeDao extends TaoWeapon {
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         if (TaoCasterData.getTaoCap(attacker).getSwing() > 0.9) {
-            float debug = gettagfast(item).getFloat("cont");
-            return MathHelper.clamp(2.5f - debug, 1, 1.5f);
+            return MathHelper.clamp(2.5f - gettagfast(item).getFloat("cont"), 1, 1.5f);
         }
         return 1;
     }
@@ -73,7 +76,10 @@ public class LiuYeDao extends TaoWeapon {
 
     @Override
     public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return (int) MathHelper.clamp(5 / (gettagfast(item).getFloat("cont") + 0.01), 0, 5);
+        if (TaoCasterData.getTaoCap(attacker).getSwing() > 0.9) {
+            return (int) MathHelper.clamp(5 / (gettagfast(item).getFloat("cont") + 0.01), 0, 5);
+        }
+        return 0;
     }
 
     @Override

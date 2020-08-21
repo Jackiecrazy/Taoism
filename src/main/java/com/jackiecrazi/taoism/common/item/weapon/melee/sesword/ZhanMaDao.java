@@ -4,11 +4,13 @@ import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -23,27 +25,29 @@ public class ZhanMaDao extends TaoWeapon {
      * Left click is a high damage chop that additionally hits all entities riding or being ridden by the target
      * Right click is a 120 degree slash at half damage
      * Consecutive alternating attacks crit
-     *
+     * <p>
      * execution: bakusaiga!
      * Heavy attack an opponent. The opponent's HP will now begin to decrease at an alarming rate.
      * Upon their death, this spreads all around EXCEPT to the mobs you've recently attacked
      */
 
     public ZhanMaDao() {
-        super(3, 1.2, 7, 1);
+        super(3, 1.2, 6, 1);
     }
 
     @Override
     protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
             splash(attacker, stack, 30, 120);
-        }
-        else splash(attacker, stack, 120, 30);
+        } else splash(attacker, stack, 120, 30);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(TextFormatting.DARK_RED+ I18n.format("weapon.hands")+TextFormatting.RESET);
+        tooltip.add(I18n.format("zhanmadao.chop"));
+        tooltip.add(I18n.format("zhanmadao.cleave"));
+        tooltip.add(I18n.format("zhanmadao.crit"));
     }
 
     @Override
@@ -77,8 +81,8 @@ public class ZhanMaDao extends TaoWeapon {
     }
 
     @Override
-    public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return super.critDamage(attacker, target, item);
+    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
+        return (target.isRiding() || target.isBeingRidden()) && getHand(item) == EnumHand.MAIN_HAND ? 1.3f : 1;
     }
 
     @Override

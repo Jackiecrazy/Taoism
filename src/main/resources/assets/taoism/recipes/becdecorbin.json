@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "  a",
+    " sn",
+    "s  "
+  ],
+  "key":
+  {
+    "s":
+    {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "a":
+    {
+      "type": "forge:ore_dict",
+      "ore": "blockIron"
+    },
+    "n":
+    {
+      "type": "forge:ore_dict",
+      "ore": "nuggetIron"
+    }
+  },
+  "result":
+  {
+    "item": "taoism:becdecorbin"
+  }
+}

@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -32,7 +33,9 @@ public class YuanYangYue extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add(I18n.format("yuanyangyue.parry"));
+        tooltip.add(I18n.format("yuanyangyue.riposte"));
+        tooltip.add(I18n.format("yuanyangyue.crit"));
     }
 
     @Override
@@ -67,7 +70,7 @@ public class YuanYangYue extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(@Nullable Entity attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
-        if (defender != null && getBuff(item, "lastParryTime") + 20 > defender.ticksExisted) {
+        if (defender != null && getBuff(item, "lastParryTime") + 30 > defender.ticksExisted) {
             return 0;
         }
         return 0.6f;
@@ -75,7 +78,7 @@ public class YuanYangYue extends TaoWeapon {
 
     @Override
     public Event.Result critCheck(EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float crit, boolean vanCrit) {
-        if (getBuff(item, "lastParryTime") + 20 > attacker.ticksExisted || TaoCasterData.getTaoCap(target).getBindTime() > 0)
+        if (getBuff(item, "lastParryTime") + 30 > attacker.ticksExisted || TaoCasterData.getTaoCap(target).getBindTime() > 0)
             return Event.Result.ALLOW;
         return super.critCheck(attacker, target, item, crit, vanCrit);
     }

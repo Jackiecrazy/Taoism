@@ -217,7 +217,7 @@ public class TaoCombatUtils {
                     if (dealDamage) {
                         if (kbamnt > 0) {
                             if (targetEntity instanceof EntityLivingBase) {
-                                NeedyLittleThings.knockBack(((EntityLivingBase) targetEntity), player, (float) kbamnt * 0.5F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)),false);
+                                NeedyLittleThings.knockBack(((EntityLivingBase) targetEntity), player, (float) kbamnt * 0.5F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), 0, (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)), false);
                                 //((EntityLivingBase) targetEntity).knockBack(player, (float) kbamnt * 0.5F, (double) MathHelper.sin(player.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(player.rotationYaw * 0.017453292F)));
                             } else {
                                 targetEntity.addVelocity((double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * (float) kbamnt * 0.5F), 0.1D, (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * (float) kbamnt * 0.5F));
@@ -440,7 +440,7 @@ public class TaoCombatUtils {
 
     public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
         if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold) return 0;
-        return (defender.onGround ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
+        return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
                 (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : isShield(defend) ? CombatConfig.defaultMultiplierPostureShield : CombatConfig.defaultMultiplierPostureDefend);
     }
 
