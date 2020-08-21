@@ -9,6 +9,7 @@ import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.TaoConfigs;
 import com.jackiecrazi.taoism.crafting.TaoCrafting;
 import com.jackiecrazi.taoism.potions.TaoPotion;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -121,6 +122,7 @@ public class Taoism {
     @EventHandler
     public void postinit(FMLPostInitializationEvent event) {
             CombatConfig.printParryList();
+        TaoCombatUtils.updateLists();
         proxy.postinit(event);
     }
 

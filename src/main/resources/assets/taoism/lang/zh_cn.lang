@@ -195,10 +195,14 @@ rapier.combo=普攻可连击三次
 rapier.riposte=在敌人攻击后或你招架或闪避后造成暴击伤害
 
 item.kusarigama.name=锁镰
-kusarigama.ball=副手在两秒内蓄力至最大速度，右击放出距离6的铁球
+kusarigama.ball=副手在两秒内蓄力至最大速度，右击丢出距离6的铁球
 kusarigama.followup=铁球击中敌人后，用镰刀攻击可根据蓄力额外造成最多50%%的伤害
-kusarigama.parry=副手无法招架，但若招架时铁球在二者之间，束缚敌人等同于蓄力的时间
-kusarigama.critfollowup=镰刀对被束缚的敌人暴击，造成双倍伤害和双倍架势消耗
+kusarigama.parry=锁链的招架效率根据蓄力提升，并会消耗蓄力附加等量时长的挖掘疲劳
+kusarigama.critfollowup=攻击带有挖掘疲劳的敌人时造成双倍暴击伤害
+kusarigama.tether=最大速度时可闪避穿过敌人开启缠斗状态，阻止敌人离开超过6方块
+kusarigama.tethertick=被缠住的敌人会被持续附加挖掘疲劳，且招架其攻击后可令其获得虚弱
+kusarigama.escape=缠斗会在双方总共攻击6（+气）后结束，你受到伤害时算作三次攻击
+kusarigama.pulldown=若右击收回链球或敌人试图逃跑，将剩余的攻击次数转换为架势伤害和少量跌落伤害
 kusarigama.harvest=可以作为剪刀使用
 
 item.executionersword.name=诛戮之剑
@@ -220,7 +224,7 @@ bullwhip.sneakboom=若敌人被鞭头击中，三种效果的时长延至两秒
 
 item.blacksnake.name=黑蛇鞭
 blacksnake.armor=鞭击计算目标1.5倍的护甲
-blacksnake.sonicboom=普攻为距离5的鞭击，击中距离4以外的敌人时造成 1(+chi/3) 倍的暴击伤害
+blacksnake.sonicboom=普攻为距离5的鞭击，击中距离4以外的敌人时造成 1(+气/3) 倍的暴击伤害
 blacksnake.blackjack=若敌人在距离2内，近战普攻附加1.5秒缓慢和虚弱
 blacksnake.sneak=潜行时鞭击将会把两人拉向中间，造成半秒束缚
 blacksnake.sneakboom=若暴击，额外造成近战效果
@@ -242,6 +246,41 @@ emeici.switch=装备时立刻重置冷却
 emeici.lunge=若敌人在两方块内冷却减半
 emeici.spin=若攻击者的基本方向和上次攻击不同：
 emeici.crit=造成1.5倍暴击伤害和3点架势伤害
+
+item.monkspade.name=Monk Spade
+monkspade.slow=attacking will extend slowness by 1.5 seconds, while parrying will extend it by 2 seconds
+monkspade.bury=if 5x(slowness duration)>enemy posture, bury them halfway into the ground
+monkspade.hardness=blocks underneath must have harvest level less than half your chi
+monkspade.crit=further attacks on buried undead will crit for double damage
+monkspade.deny=right click to deny an entity from approaching you as long as you are facing it
+monkspade.harvest=functions as both axe and shovel
+
+item.becdecorbin.name=Bec de Corbin
+becdecorbin.stagger=inflicts double damage against staggered targets
+becdecorbin.knockback=normal attack has more knockback, alt attack inverts knockback
+becdecorbin.scaling=posture damage dealt scales with percentage of missing posture from enemy, up to 1.5x
+becdecorbin.armpen=alt attack pierces up to 10 armor points depending on opponent's missing health
+
+item.yuanyangyue.name=Deer Horn Knife
+yuanyangyue.parry=knockback from parrying is inverted, and you parry the next attack in 1.5 seconds for free
+yuanyangyue.riposte=attack a target to consume this buff and bind them for the remaining duration
+yuanyangyue.crit=crits against bound targets
+
+item.liuyedao.name=Willow-Leaf Saber
+liuyedao.sweep=sweeps in a 120 degree area
+liuyedao.posture=knockback converted to posture damage for both combatants
+liuyedao.cool=by attacking right as the cooldown ends, deal up to 1.5x damage and ignore up to 5 armor
+
+item.lance.name=Lance
+lance.hands=one-handed when mounted and for 3 seconds after dismounting, two-handed otherwise
+lance.mount=automatically sweep a 20 degree cone after 1.5 seconds of charging on horseback or when moving at high speed without dodge frames
+lance.joust=damage, posture damage, and knockback scale with speed
+lance.alt=when dismounted, right-click to charge in the selected direction
+
+item.zhanmadao.name=Horse Slayer
+zhanmadao.chop=normal attack hits enemies up to 60 degrees above or below, dealing 1.3x damage to riding or ridden targets
+zhanmadao.cleave=alt attack hits enemies up to 60 degrees to either side
+zhamnadao.crit=alternating attacks crit for 1.5x damage
 
 item.projectile_prop.name=舞台道具不要在意
 
@@ -265,7 +304,6 @@ effect.taoresolution=意志
 
 <Blocks>=
 tile.TaoisticAnvil.name=
-
 
 <GUI>=
 itemGroup.taoWea=御灵武器
@@ -333,8 +371,4 @@ earth7.inscription=乱石穿空
 earth8.inscription=黄沙百战
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
-earth11.inscription=大花棉袄item.taostaff.name=Quarterstaff
-kusarigama.tether=at full speed, dodge into an enemy to entangle them, disallowing them from leaving a 6-block radius
-kusarigama.tethertick=an entangled enemy constantly has mining fatigue and will be weakened on parry
-kusarigama.escape=entanglement ends when both sides attack more than 6(+chi) times in total, with a successful hit on you counting as 3 attacks
-kusarigama.pulldown=if enemy tries to escape or chain retrieved by alt attacking, deal untraded blows as posture and tripping damageitem.taostaff.name=Quarterstaff
+earth11.inscription=大花棉袄

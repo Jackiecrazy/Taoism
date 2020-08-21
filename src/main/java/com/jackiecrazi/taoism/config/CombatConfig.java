@@ -1,6 +1,7 @@
 package com.jackiecrazi.taoism.config;
 
 import com.jackiecrazi.taoism.Taoism;
+import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemShield;
@@ -16,11 +17,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class CombatConfig {
     @Config.Comment("Posture consumed per projectile parried.")
     public static float posturePerProjectile = 0.5f;
-    @Config.Comment("Posture multiplier when using a weapon not from Taoism.")
+    @Config.Comment("Posture multiplier when not defined in combatItems.")
     public static float defaultMultiplierPostureDefend = 1.4f;
-    @Config.Comment("Posture multiplier when using a shield as defined in shieldItems.")
-    public static float defaultMultiplierPostureShield = 1f;
-    @Config.Comment("Posture multiplier when using a weapon not from Taoism. This is multiplied by the weapon's attack damage.")
+    @Config.Comment("Posture multiplier when not defined in combatItems. This is multiplied by the weapon's attack damage.")
     public static float defaultMultiplierPostureAttack = 0.15f;
     @Config.Comment("Posture damage from punching with an empty hand.")
     public static float defaultPostureKenshiro = 0.5f;
@@ -46,10 +45,8 @@ public class CombatConfig {
     public static int mobForcedCooldown = 40;
     @Config.Comment("Number of seconds after a qi add for which your qi will not decrease.")
     public static int qiGrace = 10;
-    @Config.Comment("Additional items eligible for parrying. See printParryList for easy registration.")
-    public static String[] parryCapableItems = {"example:thing1", "example:thing2"};
-    @Config.Comment("Shields. Shields are prioritized over other items when parrying. See printShieldList for easy registration.")
-    public static String[] shieldItems = {"example:thing1", "example:thing2"};
+    @Config.Comment("Additional items eligible for parrying. Format should be name, attack posture consumption, defense multiplier, is shield. Invalid fields will be filled in with defaultMultiplierPostureAttack and defaultMultiplierPostureDefend. See printParryList for easy registration.")
+    public static String[] combatItems = {"example:sword, 3.5, 1.5, false", "example:shield, 0.3, 0.6, true"};
     @Config.Comment("Changes chance based knockback resist to percentage based knockback resist, which I think makes more sense.")
     public static boolean modifyKnockBackCode = true;
     @Config.Comment("Whether being hit by a staggering attack while your posture is above a quarter would protect you from sudden stagger.")
@@ -58,10 +55,8 @@ public class CombatConfig {
     public static boolean taoWeaponHitEntity = true;
     @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disabled by default because some mods expect the hitter to be a player.")
     public static boolean weaponHitEntity = false;
-    @Config.Comment("Toggling this option will print the list of parry eligible items based on items registered as swords and axes. It's a little expensive, so remember to turn it off again!")
+    @Config.Comment("Toggling this option will print the list of axes, swords, and shields. It's a little expensive, so remember to turn it off again!")
     public static boolean printParryList = true;
-    @Config.Comment("Toggling this option will print the list of parry eligible shields. It's a little expensive, so remember to turn it off again!")
-    public static boolean printShieldList = true;
     @Config.Comment("Whether mobs lose their attack target and planned path when blinded")
     public static boolean blindMobs = true;
     @Config.Comment("Whether mobs that kill you don't despawn so you can come back and exact some vengeance later")
@@ -71,14 +66,7 @@ public class CombatConfig {
         if (printParryList)
             Taoism.logger.info("beginning generation of the parry list:");
         for (Item item : Item.REGISTRY) {
-            if (item instanceof ItemSword || item instanceof ItemAxe) {
-                System.out.println(item.getRegistryName().toString());
-            }
-        }
-        if (printShieldList)
-            Taoism.logger.info("beginning generation of the shield list:");
-        for (Item item : Item.REGISTRY) {
-            if (item instanceof ItemShield) {
+            if (item instanceof ItemSword || item instanceof ItemAxe||item instanceof ItemShield) {
                 System.out.println(item.getRegistryName().toString());
             }
         }
@@ -87,15 +75,11 @@ public class CombatConfig {
     @Mod.EventBusSubscriber(modid = Taoism.MODID)
     private static class EventHandler {
 
-        /**
-         * Inject the new values and save to the config file when the config has been changed from the GUI.
-         *
-         * @param event The event
-         */
         @SubscribeEvent
         public static void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
             if (event.getModID().equals(Taoism.MODID)) {
                 ConfigManager.sync(Taoism.MODID, Config.Type.INSTANCE);
+                TaoCombatUtils.updateLists();
             }
         }
     }

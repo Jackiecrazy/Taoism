@@ -22,25 +22,66 @@ import net.minecraft.init.Enchantments;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntitySelectors;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
+import java.util.HashMap;
+
 public class TaoCombatUtils {
+    private static class CombatInfo {
+        private final float attackPostureMultiplier, defensePostureMultiplier;
+        private final boolean isShield;
+
+        private CombatInfo(float attack, float defend, boolean shield) {
+            attackPostureMultiplier = attack;
+            defensePostureMultiplier = defend;
+            isShield = shield;
+        }
+    }
+
+    private static CombatInfo DEFAULT = new CombatInfo(1, 1, false);
+
     /**
      * Copied from EntityArrow, because kek.
      */
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
+
+    private static HashMap<Item, CombatInfo> combatList;
+
+    public static void updateLists() {
+        DEFAULT = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
+        combatList = new HashMap<>();
+        for (String s : CombatConfig.combatItems) {
+            String[] val = s.split(",");
+            String name = val[0];
+            float attack = CombatConfig.defaultMultiplierPostureAttack;
+            float defend = CombatConfig.defaultMultiplierPostureDefend;
+            boolean shield = false;
+            if (val.length > 1)
+                try {
+                    attack = Float.parseFloat(val[1].trim());
+                } catch (NumberFormatException ignored) {
+                }
+            if (val.length > 2)
+                try {
+                    defend = Float.parseFloat(val[2].trim());
+                } catch (NumberFormatException ignored) {
+                }
+            if (val.length > 3)
+                shield = Boolean.parseBoolean(val[3].trim());
+            if (Item.getByNameOrId(name) != null)
+                combatList.put(Item.getByNameOrId(name), new CombatInfo(attack, defend, shield));
+        }
+    }
 
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
         ItemStack main = elb.getHeldItemMainhand();
@@ -187,7 +228,7 @@ public class TaoCombatUtils {
 
                     damage = damage + damageMods;
                     boolean sword = false;
-                    double speed = (double) (player.distanceWalkedModified - player.prevDistanceWalkedModified);
+                    double speed = (player.distanceWalkedModified - player.prevDistanceWalkedModified);
 
                     if (recharged && !crit && !knockback && player.onGround && speed < (double) player.getAIMoveSpeed()) {
 
@@ -310,7 +351,7 @@ public class TaoCombatUtils {
 
                         player.addExhaustion(0.1F);
                     } else {
-                        player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
+                        player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
 
                         if (burning) {
                             targetEntity.extinguish();
@@ -366,10 +407,7 @@ public class TaoCombatUtils {
 
     public static boolean isShield(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
-        for (String s : CombatConfig.shieldItems) {
-            if (s.equals(i.getItem().getRegistryName().toString())) return true;
-        }
-        return false;
+        return combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
     }
 
     public static float getCooldownPeriod(EntityLivingBase elb) {
@@ -390,20 +428,26 @@ public class TaoCombatUtils {
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shields
-        if (isShield(off) && (offRec || TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold) && facing) {
-            return off;
-        }
-        if (isShield(main) && (mainRec || TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold) && facing) {
-            return main;
-        }
-        //parries
-        if (isValidWeapon(main) && mainRec && facing) {
+        boolean halt = false;
+        if (isShield(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
             ret = main;
-            defMult = CombatConfig.defaultMultiplierPostureDefend;
+            defMult = postureDef(elb, attacker, ret, amount);
+            halt = true;
         }
-        if (isValidWeapon(off) && offRec && facing) {
+        if (isShield(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
             ret = off;
-            defMult = CombatConfig.defaultMultiplierPostureDefend;
+            defMult = postureDef(elb, attacker, ret, amount);
+            halt = true;
+        }
+        if (halt) return ret;
+        //parries
+        if (isValidWeapon(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
+            ret = main;
+            defMult = postureDef(elb, attacker, ret, amount);
+        }
+        if (isValidWeapon(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
+            ret = off;
+            defMult = postureDef(elb, attacker, ret, amount);
         }
         //mainhand
         if (main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec, amount) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
@@ -421,27 +465,24 @@ public class TaoCombatUtils {
 
     public static boolean isValidWeapon(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
-        for (String s : CombatConfig.parryCapableItems) {
-            if (s.equals(i.getItem().getRegistryName().toString())) return true;
-        }
-        return false;
+        return combatList.containsKey(i.getItem());
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        float ret = attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : amount * CombatConfig.defaultMultiplierPostureAttack;
+        float ret = attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
+                amount * CombatConfig.defaultMultiplierPostureAttack;
         if (attack.isEmpty()) {//bare hand 1.5x
             ret = CombatConfig.defaultPostureKenshiro;
         }
         if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
-        if (attacker instanceof EntityPlayer)
-            ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
+        else ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
         return ret;
     }
 
-    public static float postureDef(EntityLivingBase defender, EntityLivingBase attacker, ItemStack defend, float amount) {
+    public static float postureDef(EntityLivingBase defender, Entity attacker, ItemStack defend, float amount) {
         if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold) return 0;
         return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
-                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : isShield(defend) ? CombatConfig.defaultMultiplierPostureShield : CombatConfig.defaultMultiplierPostureDefend);
+                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
     }
 
     public static boolean isMeleeDamage(DamageSource ds) {

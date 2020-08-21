@@ -77,10 +77,10 @@ public class Lance extends TaoWeapon {
                 if (getBuff(stack, "charge") > 30) {
                     Vec3d vel = e.getLook(1).normalize().scale(getReach((EntityLivingBase) e, stack));
                     //System.out.println(vel);
-                    splash((EntityLivingBase) e, e.getRidingEntity(), stack, 360, 360, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, (e.getRidingEntity() != null ? e.getRidingEntity() : e).getEntityBoundingBox().expand(vel.x, vel.y, vel.z), TaoCombatUtils.VALID_TARGETS::test));
+                    splash((EntityLivingBase) e, e.getRidingEntity(), stack, 360, 360, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, (e.getRidingEntity() != null ? e.getRidingEntity() : e).getEntityBoundingBox().expand(vel.x, vel.y, vel.z).grow(1), TaoCombatUtils.VALID_TARGETS::test));
                 }
             } else if (NeedyLittleThings.getSpeedSq(e) > 1 && !TaoMovementUtils.isDodging((EntityLivingBase) e) && chargeAndLookCos(e) > 0.86) {
-                splash((EntityLivingBase) e, stack, 20);
+                splash((EntityLivingBase) e, null, stack, 20, 20, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, e.getEntityBoundingBox().grow(getReach((EntityLivingBase)e, stack)), TaoCombatUtils.VALID_TARGETS::test));
             }else setBuff((EntityLivingBase) e, stack, "charge", 0);
         }
     }
@@ -88,9 +88,12 @@ public class Lance extends TaoWeapon {
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
         if (isDummy(stack)) {
-            if (TaoCombatUtils.getCooledAttackStrengthOff(elb, 1) > 0.9)
-                TaoMovementUtils.attemptSlide(elb);
-            TaoCasterData.getTaoCap(elb).setRollCounter(CombatConfig.rollThreshold);
+            if (TaoCombatUtils.getCooledAttackStrengthOff(elb, 1) > 0.9){
+                Vec3d v = elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
+                elb.motionX += (1.5) * v.x;
+                elb.motionZ += (1.5) * v.z;
+                elb.velocityChanged = true;
+            }
         }
         return super.onEntitySwing(elb, stack);
     }

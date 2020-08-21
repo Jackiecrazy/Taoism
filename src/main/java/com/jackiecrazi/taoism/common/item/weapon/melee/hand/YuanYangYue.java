@@ -90,4 +90,11 @@ public class YuanYangYue extends TaoWeapon {
             TaoCombatUtils.rechargeHand(elb, hand, 1, true);
         }
     }
+
+    @Override
+    protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        int bindTime = 30 - attacker.ticksExisted + getBuff(stack, "lastParryTime");
+        if (bindTime > 0) TaoCasterData.getTaoCap(target).setBindTime(bindTime);
+        gettagfast(stack).setInteger("lastParryTime", 0);
+    }
 }
