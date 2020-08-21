@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.networking;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
+import com.jackiecrazi.taoism.config.CombatConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -38,6 +39,7 @@ public class PacketChargeWeapon implements IMessage {
         public IMessage onMessage(final PacketChargeWeapon message,
                                   MessageContext ctx) {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
+                if (!CombatConfig.superSecretSetting) return;
                 final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
                 ItemStack heldItem = thePlayer.getHeldItem(message.h);

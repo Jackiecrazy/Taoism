@@ -349,13 +349,13 @@ public class ClientEvents {
                 rightClickAt = 0;
                 return;
             }
-//            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
-//                leftClickAt++;
-//                if (leftClickAt == CHARGE) {
-//                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-//                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
-//                }
-//            }
+            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
+                leftClickAt++;
+                if (leftClickAt == CHARGE) {
+                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
+                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
+                }
+            }
 //            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
 //                rightClickAt++;
 //                if (rightClickAt == CHARGE) {

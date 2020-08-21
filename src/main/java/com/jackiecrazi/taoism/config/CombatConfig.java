@@ -63,6 +63,9 @@ public class CombatConfig {
     public static boolean blindMobs = true;
     @Config.Comment("Whether mobs that kill you don't despawn so you can come back and exact some vengeance later")
     public static boolean revengePreventDespawn = true;
+    @Config.Comment("oooooooo")
+    public static boolean superSecretSetting = false;
+
 
     public static void printParryList() {
         if (printParryList)
