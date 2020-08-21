@@ -152,10 +152,10 @@ staff.swipe=右击横扫并击退身前120度扇形区域的敌人
 staff.oscillate=两种攻击冷却独立，主手攻击可连击一次
 
 item.guandao.name=偃月刀
-guandao.crit=暴击冷却减半并劈砍身前120度扇形区域
+guandao.crit=暴击冷却减半并横扫身前120度扇形区域
 guandao.attack=普攻横扫身前90度扇形区域
 guandao.alt=右击横扫身后120度扇形区域
-guandao.stack=交替使用攻击叠加一层月光，最多12层
+guandao.stack=交替使用攻击叠加一层月光，最多8层
 guandao.moonlight=每层附带0.1攻速和10%%伤害，持续五秒，叠加时重置持续时间
 
 item.bohemianearspoon.name=狩猎枪
@@ -247,40 +247,40 @@ emeici.lunge=若敌人在两方块内冷却减半
 emeici.spin=若攻击者的基本方向和上次攻击不同：
 emeici.crit=造成1.5倍暴击伤害和3点架势伤害
 
-item.monkspade.name=Monk Spade
-monkspade.slow=attacking will extend slowness by 1.5 seconds, while parrying will extend it by 2 seconds
-monkspade.bury=if 5x(slowness duration)>enemy posture, bury them halfway into the ground
-monkspade.hardness=blocks underneath must have harvest level less than half your chi
-monkspade.crit=further attacks on buried undead will crit for double damage
-monkspade.deny=right click to deny an entity from approaching you as long as you are facing it
-monkspade.harvest=functions as both axe and shovel
+item.monkspade.name=月牙铲
+monkspade.slow=攻击延长1.5秒，招架延长两秒缓慢
+monkspade.bury=若缓慢的五倍时长高过目标架势，将其埋入土中并禁锢五秒
+monkspade.hardness=敌人脚下方块的采掘等级不能超过自己气的一半
+monkspade.crit=被安葬的亡灵将会受到双倍暴击伤害
+monkspade.deny=右击使用月牙阻止目标靠近
+monkspade.harvest=可以作为铲子和斧头使用
 
-item.becdecorbin.name=Bec de Corbin
-becdecorbin.stagger=inflicts double damage against staggered targets
-becdecorbin.knockback=normal attack has more knockback, alt attack inverts knockback
-becdecorbin.scaling=posture damage dealt scales with percentage of missing posture from enemy, up to 1.5x
-becdecorbin.armpen=alt attack pierces up to 10 armor points depending on opponent's missing health
+item.becdecorbin.name=渡鸦喙
+becdecorbin.stagger=对击倒的目标造成双倍暴击伤害
+becdecorbin.knockback=普攻击退更高，副手攻击则会将敌人拉进来
+becdecorbin.scaling=架势伤害根据目标已损失架势增加，最多1.5倍
+becdecorbin.armpen=副手攻击的破甲根据目标已损失生命增加，最多10点
 
-item.yuanyangyue.name=Deer Horn Knife
-yuanyangyue.parry=knockback from parrying is inverted, and you parry the next attack in 1.5 seconds for free
-yuanyangyue.riposte=attack a target to consume this buff and bind them for the remaining duration
-yuanyangyue.crit=crits against bound targets
+item.yuanyangyue.name=鸳鸯钺
+yuanyangyue.parry=招架后接近敌人并可在下1.5秒内免费招架一次
+yuanyangyue.riposte=伤害目标消耗此强化造成剩余时长的束缚
+yuanyangyue.crit=对被束缚的目标造成暴击伤害
 
-item.liuyedao.name=Willow-Leaf Saber
-liuyedao.sweep=sweeps in a 120 degree area
-liuyedao.posture=knockback converted to posture damage for both combatants
-liuyedao.cool=by attacking right as the cooldown ends, deal up to 1.5x damage and ignore up to 5 armor
+item.liuyedao.name=柳叶刀
+liuyedao.sweep=横扫身前120度扇形区域
+liuyedao.posture=双方的架势伤害均会被转化成架势伤害
+liuyedao.cool=若在冷却后立刻进行下一次攻击，造成最多1.5倍的伤害和最多5点破甲
 
-item.lance.name=Lance
-lance.hands=one-handed when mounted and for 3 seconds after dismounting, two-handed otherwise
-lance.mount=automatically sweep a 20 degree cone after 1.5 seconds of charging on horseback or when moving at high speed without dodge frames
-lance.joust=damage, posture damage, and knockback scale with speed
-lance.alt=when dismounted, right-click to charge in the selected direction
+item.lance.name=马槊
+lance.hands=马上和下马三秒内为单手武器，其余时间为双手武器
+lance.mount=在马上冲锋1.5秒后或在高速运动时自动攻击身前的敌人
+lance.joust=伤害，架势伤害，和击退根据速度而提升
+lance.alt=若双手使用，右击可发起一次冲锋
 
-item.zhanmadao.name=Horse Slayer
-zhanmadao.chop=normal attack hits enemies up to 60 degrees above or below, dealing 1.3x damage to riding or ridden targets
-zhanmadao.cleave=alt attack hits enemies up to 60 degrees to either side
-zhamnadao.crit=alternating attacks crit for 1.5x damage
+item.zhanmadao.name=斩马刀
+zhanmadao.chop=普攻为120度的竖劈，对骑乘或被骑乘的目标造成1.3倍伤害
+zhanmadao.cleave=右击横扫120度的扇形区域
+zhamnadao.crit=主副手交替使用时造成暴击伤害
 
 item.projectile_prop.name=舞台道具不要在意
 

@@ -47,6 +47,8 @@ public class CombatConfig {
     public static int qiGrace = 10;
     @Config.Comment("Additional items eligible for parrying. Format should be name, attack posture consumption, defense multiplier, is shield. Invalid fields will be filled in with defaultMultiplierPostureAttack and defaultMultiplierPostureDefend. See printParryList for easy registration.")
     public static String[] combatItems = {"example:sword, 3.5, 1.5, false", "example:shield, 0.3, 0.6, true"};
+    @Config.Comment("Here you can define custom max posture for mobs. Format is name, max posture. Armor is still calculated.")
+    public static String[] customPosture = {"example:dragon, 100", "example:ghast, 8"};
     @Config.Comment("Changes chance based knockback resist to percentage based knockback resist, which I think makes more sense.")
     public static boolean modifyKnockBackCode = true;
     @Config.Comment("Whether being hit by a staggering attack while your posture is above a quarter would protect you from sudden stagger.")

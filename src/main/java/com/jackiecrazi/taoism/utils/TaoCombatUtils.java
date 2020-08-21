@@ -56,10 +56,12 @@ public class TaoCombatUtils {
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
 
     private static HashMap<Item, CombatInfo> combatList;
+    public static HashMap<String, Float> customPosture;
 
     public static void updateLists() {
         DEFAULT = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
         combatList = new HashMap<>();
+        customPosture = new HashMap<>();
         for (String s : CombatConfig.combatItems) {
             String[] val = s.split(",");
             String name = val[0];
@@ -80,6 +82,14 @@ public class TaoCombatUtils {
                 shield = Boolean.parseBoolean(val[3].trim());
             if (Item.getByNameOrId(name) != null)
                 combatList.put(Item.getByNameOrId(name), new CombatInfo(attack, defend, shield));
+        }
+        for(String s: CombatConfig.customPosture){
+            try{
+                String[] val = s.split(",");
+                customPosture.put(val[0], Float.parseFloat(val[1]));
+            }catch(Exception e){
+                Taoism.logger.warn("improperly formatted custom posture definition "+s+"!");
+            }
         }
     }
 

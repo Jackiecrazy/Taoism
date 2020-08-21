@@ -52,6 +52,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.Iterator;
 import java.util.List;
@@ -102,11 +103,14 @@ public class TaoEntityHandler {
         }
         if (e instanceof EntityLivingBase) {
             EntityLivingBase elb = (EntityLivingBase) e;
+            if (EntityRegistry.getEntry(elb.getClass()) != null && TaoCombatUtils.customPosture.containsKey(EntityRegistry.getEntry(elb.getClass()).getName()))
+                elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(TaoCombatUtils.customPosture.get(EntityRegistry.getEntry(elb.getClass()).getName()));
+            else
+                elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.updateCasterData(elb);
-            elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
-            TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
+            //TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
             TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
-            if (e.forceSpawn && (elb instanceof EntityZombie || elb instanceof EntitySkeleton)) {
+            if (!e.forceSpawn && (elb instanceof EntityZombie || elb instanceof EntitySkeleton)) {
                 if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
                     Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
                     elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));

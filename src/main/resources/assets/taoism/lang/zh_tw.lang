@@ -142,7 +142,7 @@ maul.impact=普攻擊退翻倍，對牆邊的敵人造成1.5倍傷害
 maul.nail=右擊將敵人打入地面，造成最多一秒的禁錮效果
 maul.hardness=敵人腳下方塊的採掘等級不能超過自己氣的一半
 
-item.staff.name=齊眉棍
+item.taostaff.name=齊眉棍
 staff.flick=在地上時，普攻根據氣挑飛地上的敵人，為自己附加短暫的跳躍效果
 staff.smash=若敵人在空中，將其擊落造成額外跌落傷害
 staff.doink=在空中時，攻擊地上的敵人會將自己挑的更高
@@ -155,7 +155,7 @@ item.guandao.name=偃月刀
 guandao.crit=暴擊冷卻減半並劈砍身前120度扇形區域
 guandao.attack=普攻橫掃身前90度扇形區域
 guandao.alt=右擊橫掃身後120度扇形區域
-guandao.stack=交替使用攻擊疊加一層月光，最多12層
+guandao.stack=交替使用攻擊疊加一層月光，最多8層
 guandao.moonlight=每層附帶0.1攻速和10%%傷害，持續五秒，疊加時重置持續時間
 
 item.bohemianearspoon.name=狩獵槍
@@ -193,10 +193,14 @@ rapier.combo=普攻可連擊三次
 rapier.riposte=在敵人攻擊後或你招架或閃避後造成暴擊傷害
 
 item.kusarigama.name=鎖鐮
-kusarigama.ball=副手在兩秒內蓄力至最大速度，右擊放出距離6的鐵球
+kusarigama.ball=副手在兩秒內蓄力至最大速度，右擊丟出距離6的鐵球
 kusarigama.followup=鐵球擊中敵人後，用鐮刀攻擊可根據蓄力額外造成最多50%%的傷害
-kusarigama.parry=副手無法招架，但若招架時鐵球在二者之間，束縛敵人等同於蓄力的時間
-kusarigama.critfollowup=鐮刀對被束縛的敵人暴擊，造成雙倍傷害和雙倍架勢消耗
+kusarigama.parry=鎖鏈的招架效率根據蓄力提升，並會消耗蓄力附加等量時長的挖掘疲勞
+kusarigama.critfollowup=攻擊帶有挖掘疲勞的敵人時造成雙倍暴擊傷害
+kusarigama.tether=最大速度時可閃避穿過敵人開啟纏斗狀態，阻止敵人離開超過6方塊
+kusarigama.tethertick=被纏住的敵人會被持續附加挖掘疲勞，且招架其攻擊後可令其獲得虛弱
+kusarigama.escape=纏鬥會在雙方總共攻擊6（+氣）後結束，你受到傷害時算作三次攻擊
+kusarigama.pulldown=若右擊收回鏈球或敵人試圖逃跑，將剩餘的攻擊次數轉換為架勢傷害和少量跌落傷害
 kusarigama.harvest=可以作為剪刀使用
 
 item.executionersword.name=誅戮之劍
@@ -240,6 +244,41 @@ emeici.switch=裝備時立刻重置冷卻
 emeici.lunge=若敵人在兩方塊內冷卻減半
 emeici.spin=若攻擊者的基本方向和上次攻擊不同：
 emeici.crit=造成1.5倍暴擊傷害和3點架勢傷害
+
+item.monkspade.name=月牙鏟
+monkspade.slow=攻擊延長1.5秒，招架延長兩秒緩慢
+monkspade.bury=若緩慢的五倍時長高過目標架勢，將其埋入土中並禁錮五秒
+monkspade.hardness=敵人腳下方塊的採掘等級不能超過自己氣的一半
+monkspade.crit=被埋葬的亡靈將會受到雙倍暴擊傷害
+monkspade.deny=右擊使用月牙阻止目標靠近
+monkspade.harvest=可以作為鏟子和斧頭使用
+
+item.becdecorbin.name=渡鴉喙
+becdecorbin.stagger=對擊倒的目標造成雙倍暴擊傷害
+becdecorbin.knockback=普攻擊退更高，副手攻擊則會將敵人拉進來
+becdecorbin.scaling=架勢傷害根據目標已損失架勢增加，最多1.5倍
+becdecorbin.armpen=副手攻擊的破甲根據目標已損失生命增加，最多10點
+
+item.yuanyangyue.name=鴛鴦鉞
+yuanyangyue.parry=招架後接近敵人並可在下1.5秒內免費招架一次
+yuanyangyue.riposte=傷害目標消耗此強化造成剩餘時長的束縛
+yuanyangyue.crit=對被束縛的目標造成暴擊傷害
+
+item.liuyedao.name=柳葉刀
+liuyedao.sweep=橫掃身前120度扇形區域
+liuyedao.posture=雙方的架勢傷害均會被轉化成架勢傷害
+liuyedao.cool=若在冷卻後立刻進行下一次攻擊，造成最多1.5倍的傷害和最多5點破甲
+
+item.lance.name=馬槊
+lance.hands=馬上和下馬三秒內為單手武器，其餘時間為雙手武器
+lance.mount=在馬上沖鋒1.5秒後或在高速運動時自動攻擊身前的敵人
+lance.joust=傷害，架勢傷害，和擊退根據速度而提升
+lance.alt=若雙手使用，右擊可發起一次沖鋒
+
+item.zhanmadao.name=斬馬刀
+zhanmadao.chop=普攻為120度的豎劈，對騎乘或被騎乘的目標造成1.3倍傷害
+zhanmadao.cleave=右擊橫掃120度的扇形區域
+zhamnadao.crit=主副手交替使用時造成暴擊傷害
 
 item.projectile_prop.name=舞台道具不要在意
 
