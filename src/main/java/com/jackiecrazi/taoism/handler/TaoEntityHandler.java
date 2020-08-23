@@ -108,13 +108,17 @@ public class TaoEntityHandler {
             else
                 elb.getEntityAttribute(TaoEntities.MAXPOSTURE).setBaseValue(Math.ceil(elb.width) * Math.ceil(elb.height) * 10);
             TaoCasterData.updateCasterData(elb);
-            //TaoCasterData.getTaoCap(elb).setPosture(TaoCasterData.getTaoCap(elb).getMaxPosture());
-            TaoCasterData.getTaoCap(elb).setForcedLookAt(null);
-            if (!e.forceSpawn && (elb instanceof EntityZombie || elb instanceof EntitySkeleton)) {
-                if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
-                    Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
-                    elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
+            final ITaoStatCapability cap = TaoCasterData.getTaoCap(elb);
+            cap.setForcedLookAt(null);
+            if(cap.isFirstSpawn()) {
+                cap.setPosture(cap.getMaxPosture());
+                if (!e.isAddedToWorld() && (elb instanceof EntityZombie || elb instanceof EntitySkeleton)) {
+                    if (GeneralConfig.weaponSpawnChance > 0 && elb.getHeldItemMainhand().isEmpty() && Taoism.unirand.nextInt(GeneralConfig.weaponSpawnChance) == 0) {
+                        Item add = TaoWeapon.listOfWeapons.get(Taoism.unirand.nextInt(TaoWeapon.listOfWeapons.size()));
+                        elb.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(add));
+                    }
                 }
+                cap.__setFirstSpawn();
             }
             if (elb instanceof EntityLiving && !((EntityLiving) elb).isAIDisabled()) {
                 EntityLiving el = (EntityLiving) e;

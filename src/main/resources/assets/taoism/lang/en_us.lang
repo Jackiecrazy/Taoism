@@ -280,7 +280,7 @@ lance.alt=when dismounted, right-click to charge in the selected direction
 item.zhanmadao.name=Horse Slayer
 zhanmadao.chop=normal attack hits enemies up to 60 degrees above or below, dealing 1.3x damage to riding or ridden targets
 zhanmadao.cleave=alt attack hits enemies up to 60 degrees to either side
-zhamnadao.crit=alternating attacks crit for 1.5x damage
+zhanmadao.crit=alternating attacks crit for 1.5x damage
 
 item.projectile_prop.name=just a prop, don't mind me...
 

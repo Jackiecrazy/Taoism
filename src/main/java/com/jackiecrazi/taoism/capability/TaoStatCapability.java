@@ -43,7 +43,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private int lcd, pcd, scd, qcd;
     private int down, bind, root;
     private long timey;
-    private boolean swi, protecc, off, recording, sprint, head;
+    private boolean swi, protecc, off, recording, sprint, head, initialBonus;
     private int parry, dodge, protec;
     private float prevWidth, prevHeight;
     private WeakReference<ItemStack> lastTickOffhand;
@@ -93,10 +93,10 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setFloat("qi", getQi());
         nbt.setFloat("ling", getLing());
         nbt.setFloat("swing", getSwing());
-        nbt.setFloat("posture", getPosture());
         nbt.setInteger("parry", getParryCounter());
         nbt.setInteger("combo", getComboSequence());
         nbt.setFloat("maxling", getMaxLing());
+        nbt.setFloat("posture", getPosture());
         nbt.setFloat("maxposture", getMaxPosture());
         nbt.setInteger("lcd", getLingRechargeCD());
         nbt.setInteger("pcd", getPostureRechargeCD());
@@ -124,6 +124,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setInteger("spinny", cannonball);
         nbt.setInteger("lookingAt", zTarget);
         nbt.setBoolean("head", head);
+        nbt.setBoolean("first", initialBonus);
         return nbt;
     }
 
@@ -136,11 +137,11 @@ public class TaoStatCapability implements ITaoStatCapability {
         setQi(nbt.getFloat("qi"));
         setLing(nbt.getFloat("ling"));
         setSwing(nbt.getFloat("swing"));
-        setPosture(nbt.getFloat("posture"));
         setParryCounter(nbt.getInteger("parry"));
         setComboSequence((nbt.getInteger("combo")));
         setMaxLing(nbt.getFloat("maxling"));
         setMaxPosture(nbt.getFloat("maxposture"));
+        setPosture(nbt.getFloat("posture"));
         setLingRechargeCD(nbt.getInteger("lcd"));
         setPostureRechargeCD(nbt.getInteger("pcd"));
         setStaminaRechargeCD(nbt.getInteger("scd"));
@@ -167,6 +168,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         zTarget = nbt.getInteger("lookingAt");
         cannonball = nbt.getInteger("spinny");
         head = nbt.getBoolean("head");
+        initialBonus = nbt.getBoolean("first");
     }
 
     private void setPrevSizes(float width, float height) {
@@ -188,9 +190,12 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (getForcedLookAt() != null && getForcedLookAt().isDead) {
             setForcedLookAt(null);
         }
-        float percentage = getPosture() / getMaxPosture();
-        setMaxPosture(getMaxPosture(elb));//a horse has 20 posture right off the bat, just saying
-        setPosture(getMaxPosture() * percentage);
+        float maxPos = getMaxPosture(elb);
+        if (maxPos != maxPosture) {
+            float percentage = getPosture() / getMaxPosture();
+            setMaxPosture(maxPos);//a horse has 20 posture right off the bat, just saying
+            setPosture(getMaxPosture() * percentage);
+        }
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         setMaxLing(10f);
         if (elb.onGround && getJumpState() != ITaoStatCapability.JUMPSTATE.GROUNDED) {
@@ -792,6 +797,16 @@ public class TaoStatCapability implements ITaoStatCapability {
     @Override
     public void setMustDropHead(boolean toggle) {
         head = toggle;
+    }
+
+    @Override
+    public boolean isFirstSpawn() {
+        return !initialBonus;
+    }
+
+    @Override
+    public void __setFirstSpawn() {
+        initialBonus=true;
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

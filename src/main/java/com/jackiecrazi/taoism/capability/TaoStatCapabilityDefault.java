@@ -413,6 +413,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public boolean isFirstSpawn() {
+        return false;
+    }
+
+    @Override
+    public void __setFirstSpawn() {
+
+    }
+
+    @Override
     public NBTTagCompound serializeNBT() {
         return null;
     }

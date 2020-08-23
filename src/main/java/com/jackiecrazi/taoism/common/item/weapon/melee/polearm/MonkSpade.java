@@ -118,7 +118,7 @@ public class MonkSpade extends TaoWeapon {
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(MobEffects.SLOWNESS, 30), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
         if (target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getPosture()) {
-            TaoCasterData.getTaoCap(target).setBindTime(100);
+            TaoCasterData.getTaoCap(target).setRootTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;
             double buryToY = target.posY;

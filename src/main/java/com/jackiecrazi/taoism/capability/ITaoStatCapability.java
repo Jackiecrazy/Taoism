@@ -250,4 +250,8 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
     boolean willDropHead();
 
     void setMustDropHead(boolean toggle);
+
+    boolean isFirstSpawn();
+
+    void __setFirstSpawn();
 }

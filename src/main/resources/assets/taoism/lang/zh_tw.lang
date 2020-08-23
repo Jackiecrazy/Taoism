@@ -278,7 +278,7 @@ lance.alt=若雙手使用，右擊可發起一次沖鋒
 item.zhanmadao.name=斬馬刀
 zhanmadao.chop=普攻為120度的豎劈，對騎乘或被騎乘的目標造成1.3倍傷害
 zhanmadao.cleave=右擊橫掃120度的扇形區域
-zhamnadao.crit=主副手交替使用時造成暴擊傷害
+zhanmadao.crit=主副手交替使用時造成暴擊傷害
 
 item.projectile_prop.name=舞台道具不要在意
 

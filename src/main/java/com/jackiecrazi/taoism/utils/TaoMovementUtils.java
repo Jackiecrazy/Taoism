@@ -112,14 +112,14 @@ public class TaoMovementUtils {
 
     public static boolean attemptJump(EntityLivingBase elb) {
         //if you're on the ground, I'll let vanilla handle you
-        if (elb.onGround) return false;
+        if (elb.onGround||elb.isRiding()) return false;
         ITaoStatCapability itsc = TaoCasterData.getTaoCap(elb);
         if (!itsc.isInCombatMode()) return false;
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
         Entity ent = collidingEntity(elb);
-        if (ent instanceof EntityLivingBase && !elb.isRidingOrBeingRiddenBy(ent)) {
+        if (ent instanceof EntityLivingBase) {
             kick(elb, (EntityLivingBase) ent);
         } else {
             //if you're exhausted or just jumped, you can't jump again
@@ -197,7 +197,7 @@ public class TaoMovementUtils {
     }
 
     public static void kick(EntityLivingBase elb, EntityLivingBase uke) {
-        if (elb.isRidingOrBeingRiddenBy(uke)) return;
+        if (elb.isRiding()) return;
         uke.attackEntityFrom(DamageSource.FALLING_BLOCK, 1);
         TaoCasterData.getTaoCap(uke).consumePosture(5, true, elb);
         for (int i = 0; i < 10; ++i) {
