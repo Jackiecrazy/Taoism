@@ -43,7 +43,7 @@ public class TaoCombatHandler {
     private static final UUID noArmor = UUID.fromString("603114fc-164b-4d43-874c-3148eebde245");
     public static boolean modCall;
     private static boolean abort = false;
-    private static ItemStack defend;
+    private static ItemStack defend = ItemStack.EMPTY;
 
     //offhand handler for puny mod weapons that don't have it already
     //"puny" here defined as weapons that can't attack from offhand
@@ -262,6 +262,7 @@ public class TaoCombatHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void resetGeorge(LivingKnockBackEvent e) {//what? George?
         modCall = false;
+        defend = ItemStack.EMPTY;
     }
 
     //absorbs, pierces and deflects are calculated before armor
