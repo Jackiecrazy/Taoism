@@ -1,5 +1,6 @@
 package com.jackiecrazi.taoism;
 
+import com.jackiecrazi.taoism.command.CommandQi;
 import com.jackiecrazi.taoism.common.CommonProxy;
 import com.jackiecrazi.taoism.common.block.TaoBlocks;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
@@ -23,6 +24,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -124,6 +126,11 @@ public class Taoism {
             CombatConfig.printParryList();
         TaoCombatUtils.updateLists();
         proxy.postinit(event);
+    }
+
+    @EventHandler
+    public static void commands(FMLServerStartingEvent e){
+        e.registerServerCommand(new CommandQi());
     }
 
 }

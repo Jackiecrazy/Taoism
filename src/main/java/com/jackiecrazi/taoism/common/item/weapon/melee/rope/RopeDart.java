@@ -212,7 +212,7 @@ public class RopeDart extends TaoWeapon {
 
     @Override
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
-        return attacker != target && (isThrown(item) || getHand(item) == EnumHand.OFF_HAND);
+        return super.canAttack(ds, attacker, target, item, orig) && (isThrown(item) || getHand(item) == EnumHand.OFF_HAND);
     }
 
     @Override

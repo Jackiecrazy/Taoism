@@ -66,7 +66,7 @@ public class CombatConfig {
 //    @Config.Comment("oooooooo")
 //    public static boolean superSecretSetting = false;
     @Config.Comment("percentage chance that a mob will parry an incoming attack")
-    public static double mobParryChance=0.6;
+    public static double mobParryChance=0.7;
 
     public static void printParryList() {
         if (printParryList)

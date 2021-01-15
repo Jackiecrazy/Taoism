@@ -17,9 +17,11 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import com.jackiecrazi.taoism.config.GeneralConfig;
 import com.jackiecrazi.taoism.networking.AttackPacketDenier;
+import com.jackiecrazi.taoism.networking.PacketRequestUpdate;
 import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoMovementUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -291,9 +293,13 @@ public class TaoEntityHandler {
                     TaoCasterData.forceUpdateTrackingClients(p);
                 }
             }
-            for(Entity a:p.world.getEntitiesWithinAABBExcludingEntity(p, p.getEntityBoundingBox().grow(8))){
-                if(a instanceof EntityLivingBase && p.canEntityBeSeen(a))
-                    TaoCasterData.updateCasterData((EntityLivingBase) a);
+//            for(Entity a:p.world.getEntitiesWithinAABBExcludingEntity(p, p.getEntityBoundingBox().grow(16))){
+//                if(a instanceof EntityLivingBase && p.canEntityBeSeen(a))
+//                    TaoCasterData.updateCasterData((EntityLivingBase) a);
+//            }
+            //purely client side
+            if(p.world.isRemote && Minecraft.getMinecraft().pointedEntity instanceof EntityLivingBase){
+                Taoism.net.sendToServer(new PacketRequestUpdate((EntityLivingBase) Minecraft.getMinecraft().pointedEntity));
             }
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
@@ -333,7 +339,7 @@ public class TaoEntityHandler {
                         p.motionY = vec.y * speed;
                         p.motionZ = vec.z * speed;
                     } else if (!p.isSneaking() && p.motionY < 0) {
-                        float factor = 0.7f;
+                        float factor = 0.8f;
                         p.fallDistance = 0.1f;
                         if(TaoMovementUtils.isInBulletTime(p)) {
                             factor=0.3f;
@@ -354,6 +360,7 @@ public class TaoEntityHandler {
                 }
                 //if (p.world.isRemote) return;
                 if (Taoism.getAtk(p) == 1) {
+                    cap.consumePosture(0, false);//proc a cooldown after attacking
                     if (!cap.isSwitchIn()) {
 //                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriod(p))
 //                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));

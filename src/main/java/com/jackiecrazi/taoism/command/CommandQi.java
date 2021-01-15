@@ -1,12 +1,12 @@
 package com.jackiecrazi.taoism.command;
 
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandQi extends CommandBase {
     @Override

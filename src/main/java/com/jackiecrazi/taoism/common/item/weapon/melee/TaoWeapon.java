@@ -283,15 +283,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         chi = itsc.getQiFloored();
         swing = !(attacker instanceof EntityPlayer) || itsc.getSwing() >= 0.9f;
         if (swing) {
-            if (!gettagfast(stack).getBoolean("connect")) {
-                gettagfast(stack).setBoolean("connect", true);
-                if (getHand(stack) != null && !attacker.world.isRemote && !isCharged(attacker, attacker.getHeldItemMainhand()) && !isCharged(attacker, attacker.getHeldItemOffhand())) {
-                    float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
-                    itsc.addQi(baseQi);
-                    TaoCasterData.forceUpdateTrackingClients(attacker);
-                }
-                oncePerHit(attacker, target, stack);
-            }
             if (!gettagfast(stack).getBoolean("effect")) {
                 gettagfast(stack).setBoolean("effect", true);
                 applyEffects(stack, target, attacker, chi);
@@ -1011,10 +1002,19 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     }
 
     @Override
-    public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+    public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        if (!gettagfast(stack).getBoolean("connect")) {
+            gettagfast(stack).setBoolean("connect", true);
+            if (getHand(stack) != null && !attacker.world.isRemote && !isCharged(attacker, attacker.getHeldItemMainhand()) && !isCharged(attacker, attacker.getHeldItemOffhand())) {
+                float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
+                TaoCasterData.getTaoCap(attacker).addQi(baseQi);
+                TaoCasterData.forceUpdateTrackingClients(attacker);
+            }
+            oncePerHit(attacker, target, stack);
+        }
 //        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
 //            return false;
-        if (isTwoHanded(item) && getHand(item) == EnumHand.OFF_HAND && !isDummy(item)) return false;
+        if (isTwoHanded(stack) && getHand(stack) == EnumHand.OFF_HAND && !isDummy(stack)) return false;
         return attacker != target; //getReach(attacker, item) * getReach(attacker, item) > NeedyLittleThings.getDistSqCompensated(attacker, target); //screw it.
     }
 

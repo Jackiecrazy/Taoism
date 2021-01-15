@@ -414,7 +414,7 @@ public class TaoCombatUtils {
 
     public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
         if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
-        return MathHelper.clamp(((float) Taoism.getAtk(elb) + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+        return MathHelper.clamp((TaoCasterData.getTaoCap(elb).getSwing() + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
     }
 
     public static boolean isShield(ItemStack i) {
@@ -433,7 +433,7 @@ public class TaoCombatUtils {
             if (ep.getCooldownTracker().hasCooldown(main.getItem())) main = ItemStack.EMPTY;
             if (ep.getCooldownTracker().hasCooldown(off.getItem())) off = ItemStack.EMPTY;
         }
-        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance;
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && (elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance);
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         //System.out.println("main is " + mainRec + ", off is " + offRec);
         //System.out.println("main is " + getCooledAttackStrength(elb, 0.5f) + ", off is " + getCooledAttackStrengthOff(elb, 0.5f));
