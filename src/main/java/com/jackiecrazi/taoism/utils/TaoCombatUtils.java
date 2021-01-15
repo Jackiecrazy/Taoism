@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.utils;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Multimap;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
@@ -83,12 +84,12 @@ public class TaoCombatUtils {
             if (Item.getByNameOrId(name) != null)
                 combatList.put(Item.getByNameOrId(name), new CombatInfo(attack, defend, shield));
         }
-        for(String s: CombatConfig.customPosture){
-            try{
+        for (String s : CombatConfig.customPosture) {
+            try {
                 String[] val = s.split(",");
                 customPosture.put(val[0], Float.parseFloat(val[1]));
-            }catch(Exception e){
-                Taoism.logger.warn("improperly formatted custom posture definition "+s+"!");
+            } catch (Exception e) {
+                Taoism.logger.warn("improperly formatted custom posture definition " + s + "!");
             }
         }
     }
@@ -189,8 +190,9 @@ public class TaoCombatUtils {
                 IAttributeInstance toUse = new AttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
                 IAttributeInstance att = player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
                 toUse.setBaseValue(att.getBaseValue());
+                final Multimap<String, AttributeModifier> exclude = player.getHeldItemMainhand().getAttributeModifiers(EntityEquipmentSlot.MAINHAND);
                 for (AttributeModifier am : att.getModifiers()) {
-                    if (!am.getName().equals("Weapon modifier"))
+                    if (!exclude.containsValue(am))
                         toUse.applyModifier(am);
                     //System.out.println(toUse.getAttributeValue());
                 }
@@ -431,7 +433,7 @@ public class TaoCombatUtils {
             if (ep.getCooldownTracker().hasCooldown(main.getItem())) main = ItemStack.EMPTY;
             if (ep.getCooldownTracker().hasCooldown(off.getItem())) off = ItemStack.EMPTY;
         }
-        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 180);
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance;
         boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
         //System.out.println("main is " + mainRec + ", off is " + offRec);
         //System.out.println("main is " + getCooledAttackStrength(elb, 0.5f) + ", off is " + getCooledAttackStrengthOff(elb, 0.5f));
@@ -439,23 +441,23 @@ public class TaoCombatUtils {
         ItemStack ret = ItemStack.EMPTY;
         //shields
         boolean halt = false;
-        if (isShield(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
+        if (isShield(main) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (mainRec && facing && defMult > postureDef(elb, attacker, main, amount)))) {
             ret = main;
             defMult = postureDef(elb, attacker, ret, amount);
             halt = true;
         }
-        if (isShield(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
+        if (isShield(off) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (offRec && facing && defMult > postureDef(elb, attacker, off, amount)))) {
             ret = off;
             defMult = postureDef(elb, attacker, ret, amount);
             halt = true;
         }
         if (halt) return ret;
         //parries
-        if (isValidWeapon(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
+        if (isValidCombatItem(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
             ret = main;
             defMult = postureDef(elb, attacker, ret, amount);
         }
-        if (isValidWeapon(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
+        if (isValidCombatItem(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
             ret = off;
             defMult = postureDef(elb, attacker, ret, amount);
         }
@@ -473,7 +475,7 @@ public class TaoCombatUtils {
         return ret;
     }
 
-    public static boolean isValidWeapon(ItemStack i) {
+    public static boolean isValidCombatItem(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         return combatList.containsKey(i.getItem());
     }

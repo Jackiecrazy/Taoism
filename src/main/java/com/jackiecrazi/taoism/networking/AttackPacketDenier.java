@@ -29,7 +29,7 @@ public class AttackPacketDenier extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if(player==null)player=Minecraft.getMinecraft().player;
-        if (msg instanceof CPacketAnimation && player.isSwingInProgress && player.swingingHand == EnumHand.OFF_HAND && (player.getHeldItemOffhand().getItem() instanceof TaoWeapon || TaoCombatUtils.isValidWeapon(player.getHeldItemOffhand()))) {
+        if (msg instanceof CPacketAnimation && player.isSwingInProgress && player.swingingHand == EnumHand.OFF_HAND && (player.getHeldItemOffhand().getItem() instanceof TaoWeapon || TaoCombatUtils.isValidCombatItem(player.getHeldItemOffhand()))) {
             //nom
         } else
             super.write(ctx, msg, promise);

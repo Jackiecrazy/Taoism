@@ -35,6 +35,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
@@ -248,8 +249,8 @@ public class TaoEntityHandler {
 //                elb.motionZ *= 0.7;
 //            } else TaoCasterData.getTaoCap(e.getEntityLiving()).stopRecordingDamage(elb.getRevengeTarget());
 //        }
-        boolean mustUpdate = itsc.getRollCounter() < CombatConfig.rollThreshold || itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0 || elb.world.getClosestPlayerToEntity(elb, 16) != null;
-        mustUpdate = elb.world instanceof WorldServer && !((WorldServer) elb.world).getEntityTracker().getTrackingPlayers(elb).isEmpty();
+        boolean mustUpdate = itsc.getDownTimer() > 0 || itsc.getPosInvulTime() > 0;// || elb.world.getClosestPlayerToEntity(elb, 16) != null;
+        //boolean mustUpdate = elb.world instanceof WorldServer && !((WorldServer) elb.world).getEntityTracker().getTrackingPlayers(elb).isEmpty();
         if (elb.ticksExisted % CombatConfig.mobUpdateInterval == 0 || mustUpdate) {
             TaoCasterData.updateCasterData(elb);
         }
@@ -290,6 +291,10 @@ public class TaoEntityHandler {
                     TaoCasterData.forceUpdateTrackingClients(p);
                 }
             }
+            for(Entity a:p.world.getEntitiesWithinAABBExcludingEntity(p, p.getEntityBoundingBox().grow(8))){
+                if(a instanceof EntityLivingBase && p.canEntityBeSeen(a))
+                    TaoCasterData.updateCasterData((EntityLivingBase) a);
+            }
         } else {
             //update max stamina, posture and ling. The other mobs don't have HUDs, so their caster data only need to be recalculated when needed
             //qi 1+ gives slow fall
@@ -328,8 +333,12 @@ public class TaoEntityHandler {
                         p.motionY = vec.y * speed;
                         p.motionZ = vec.z * speed;
                     } else if (!p.isSneaking() && p.motionY < 0) {
-                        p.fallDistance = 0; //since you're being a floaty boi, I can't let you get cheap crits
-                        p.motionY *= 3 / cap.getQi();//standardized!
+                        float factor = 0.7f;
+                        p.fallDistance = 0.1f;
+                        if(TaoMovementUtils.isInBulletTime(p)) {
+                            factor=0.3f;
+                        }
+                        p.motionY *= factor;//standardized!
                     } else p.fallDistance = 0.1f;//for da critz
                 }
             }

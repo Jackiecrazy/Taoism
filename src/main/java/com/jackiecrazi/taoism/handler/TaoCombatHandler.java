@@ -50,7 +50,7 @@ public class TaoCombatHandler {
     @SubscribeEvent
     public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
         if (e.getEntityPlayer().world.isRemote) return;
-        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidWeapon(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
+        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidCombatItem(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
             if (lastRightClickTime.getOrDefault(e.getEntityPlayer().getEntityId(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
                 if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
                     TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
@@ -93,20 +93,21 @@ public class TaoCombatHandler {
         if (ent == null) return;
         if (e.getRayTraceResult().entityHit instanceof EntityLivingBase) {
             EntityLivingBase uke = (EntityLivingBase) e.getRayTraceResult().entityHit;
-            if (TaoCasterData.getTaoCap(uke).getRollCounter() < CombatConfig.rollThreshold)
+            ITaoStatCapability cap = TaoCasterData.getTaoCap(uke);
+            if (cap.getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
-            ItemStack perrier = TaoCombatUtils.getParryingItemStack(ent, uke, 1);
-            if (EntityList.getKey(ent) != null && EntityList.getKey(ent).getResourceDomain().equals(Taoism.MODID)) {
-                perrier = TaoCombatUtils.getShield(ent, uke, 1);
-            }
+            ItemStack perrier = TaoCombatUtils.getShield(ent, uke, 1);
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !perrier.isEmpty()) {
-                if (TaoCasterData.getTaoCap(uke).getQi() * TaoCasterData.getTaoCap(uke).getQi() / 2f > NeedyLittleThings.getSpeedSq(ent) && TaoCasterData.getTaoCap(uke).consumePosture(CombatConfig.posturePerProjectile, false) == 0) {
+                boolean free = cap.getParryCounter() < CombatConfig.shieldThreshold;
+                if (cap.consumePosture(free ? 0 : CombatConfig.posturePerProjectile, false) == 0) {
                     Vec3d look = uke.getLookVec();
                     ent.motionX = look.x;
                     ent.motionY = look.y;
                     ent.motionZ = look.z;
                     ent.velocityChanged = true;
                     e.setCanceled(true);//seriously, who thought loading rooftops with a ton of archers was a good idea?
+                    if (!free)
+                        cap.setParryCounter(0);
                 }
             }
         }
@@ -157,8 +158,6 @@ public class TaoCombatHandler {
                 } else
                     semeCap.setSwing(0);
             }
-            //System.out.println("damage is to be dealt by "+seme+" to "+uke);
-            //if(seme.world.isRemote)return;
             /*
             idle parry
             knockback distributed between both units depending on their max posture
@@ -171,10 +170,8 @@ public class TaoCombatHandler {
             //System.out.println("parrying stack is "+defend);
             float atk = TaoCombatUtils.postureAtk(uke, seme, attack, e.getAmount());
             float def = TaoCombatUtils.postureDef(uke, seme, defend, e.getAmount());
-            //some entities just can't parry.
-            //suck it, wither.
-            boolean smart = uke instanceof EntityPlayer || uke instanceof IAmVerySmart;
-            if ((!smart || !defend.isEmpty()) && (ukeCap.consumePosture(atk * def, true, seme) == 0f) && smart) {
+            //posture is consumed *regardless* of parry
+            if (ukeCap.consumePosture(atk * def, true, seme) == 0f && !defend.isEmpty()) {
                 e.setCanceled(true);
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
@@ -182,6 +179,7 @@ public class TaoCombatHandler {
                 NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 3 * atk * def / ukeCap.getMaxPosture()), true, false);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
+                    //shield is disabled
                     if (uke instanceof EntityPlayer)
                         ((EntityPlayer) uke).getCooldownTracker().setCooldown(defend.getItem(), 60);
                     uke.world.setEntityState(uke, (byte) 30);

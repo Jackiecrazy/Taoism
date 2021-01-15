@@ -3,6 +3,7 @@ package com.jackiecrazi.taoism.handler;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.command.CommandQi;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,9 +11,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod.EventBusSubscriber(modid = Taoism.MODID)
+
 public class TaoCapabilityHandler {
     public static final ResourceLocation TAOCAP = new ResourceLocation(Taoism.MODID, "stuff");
 
@@ -34,5 +37,10 @@ public class TaoCapabilityHandler {
         ITaoStatCapability oldd = event.getOriginal().getCapability(TaoCasterData.CAP, null);
         if(neww!=null&&oldd!=null)
         neww.copy(oldd);
+    }
+
+    @Mod.EventHandler
+    public static void commands(FMLServerStartingEvent e){
+        e.registerServerCommand(new CommandQi());
     }
 }

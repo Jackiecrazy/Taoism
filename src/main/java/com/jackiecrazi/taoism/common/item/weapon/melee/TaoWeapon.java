@@ -625,6 +625,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
             gettagfast(stack).setBoolean("connect", false);
         }
+//        if(!elb.onGround &&(!(elb instanceof EntityPlayer) | Taoism.proxy.isBreakingBlock((EntityPlayer) elb))&&elb.motionY<0&&TaoCasterData.getTaoCap(elb).consumeQi(0.05f, 3)) {
+//            TaoMovementUtils.attemptJump(elb);
+//        }
         return super.onEntitySwing(elb, stack);
     }
 

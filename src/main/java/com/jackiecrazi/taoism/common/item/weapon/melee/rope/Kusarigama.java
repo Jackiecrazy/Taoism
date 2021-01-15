@@ -180,11 +180,6 @@ public class Kusarigama extends TaoWeapon implements ITetherItem {
     }
 
     @Override
-    public boolean canBlock(EntityLivingBase defender, Entity attacker, ItemStack item, boolean recharged, float amount) {
-        return getHand(item) == EnumHand.MAIN_HAND && super.canBlock(defender, attacker, item, recharged, amount);
-    }
-
-    @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (defender.getEntityId() == getBuff(item, "tether")) {
             TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.WEAKNESS, 20), false);

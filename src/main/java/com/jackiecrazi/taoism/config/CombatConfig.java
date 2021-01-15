@@ -39,7 +39,7 @@ public class CombatConfig {
     public static int ssptime = 20;
     @Config.Comment("Maximum number of ticks between two attacks for it to be considered as part of the same combo.")
     public static int timeBetweenAttacks = 20;
-    @Config.Comment("Number of ticks between each forced client update of the entity's various stats.")
+    @Config.Comment("Number of ticks between each forced client update of the entity's various stats. Entities in sight will update every tick.")
     public static int mobUpdateInterval = 100;
     @Config.Comment("Number of enforced ticks between each mob attack, because slimes. This is modified by attack speed, so by default mobs attack twice per second.")
     public static int mobForcedCooldown = 40;
@@ -63,9 +63,10 @@ public class CombatConfig {
     public static boolean blindMobs = true;
     @Config.Comment("Whether mobs that kill you don't despawn so you can come back and exact some vengeance later")
     public static boolean revengePreventDespawn = true;
-    @Config.Comment("oooooooo")
-    public static boolean superSecretSetting = false;
-
+//    @Config.Comment("oooooooo")
+//    public static boolean superSecretSetting = false;
+    @Config.Comment("percentage chance that a mob will parry an incoming attack")
+    public static double mobParryChance=0.6;
 
     public static void printParryList() {
         if (printParryList)

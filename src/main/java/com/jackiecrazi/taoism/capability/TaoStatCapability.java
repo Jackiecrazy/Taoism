@@ -596,7 +596,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public boolean isInCombatMode() {
-        return sprint;
+        return sprint || !(e.get() instanceof EntityPlayer);
     }
 
     @Override

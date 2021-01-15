@@ -39,7 +39,7 @@ public class PacketChargeWeapon implements IMessage {
         public IMessage onMessage(final PacketChargeWeapon message,
                                   MessageContext ctx) {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
-                if (!CombatConfig.superSecretSetting) return;
+                //if (!CombatConfig.superSecretSetting) return;
                 final EntityPlayerMP thePlayer = (EntityPlayerMP) Taoism.proxy
                         .getPlayerEntityFromContext(ctx);
                 ItemStack heldItem = thePlayer.getHeldItem(message.h);

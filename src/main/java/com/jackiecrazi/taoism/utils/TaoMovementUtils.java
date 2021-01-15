@@ -176,6 +176,11 @@ public class TaoMovementUtils {
         return true;
     }
 
+    public static boolean isInBulletTime(EntityLivingBase elb){
+        ITaoStatCapability cap=TaoCasterData.getTaoCap(elb);
+        return cap.getRollCounter()<20+2*cap.getQi();
+    }
+
     /**
      * Checks the +x, -x, +y, -y, +z, -z, in that order
      *

@@ -10,6 +10,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -79,7 +80,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     protected double speed(ItemStack stack) {
-        double ret = super.speed(stack) + 4f;
+        double ret = super.speed(stack) + 4d;
         if (getHand(stack) == EnumHand.OFF_HAND) {
             ret /= 1.2d;
         }
@@ -139,7 +140,7 @@ public class Staff extends TaoWeapon {
             if (attacker.onGround || attacker.isSneaking()) {
                 if (target.onGround) {
                     target.addVelocity(0, chi / 15f, 0);
-                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(Potion.getPotionFromResourceLocation("jump_boost"), 20, chi / 4), false);
+                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.JUMP_BOOST, 20, chi / 4), false);
                 } else {
                     NeedyLittleThings.knockBack(target, attacker, 1f, true, false);
                     target.motionY = 0;
