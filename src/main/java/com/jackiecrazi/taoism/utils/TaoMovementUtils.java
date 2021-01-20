@@ -101,6 +101,7 @@ public class TaoMovementUtils {
         if (!itsc.isInCombatMode()) return false;
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
+        itsc.consumePosture(0, false);
         itsc.setRollCounter(0);
         itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
         Vec3d v = elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
@@ -277,7 +278,7 @@ public class TaoMovementUtils {
 //            elb.motionY=y;
 //            elb.motionZ=z;
             itsc.setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
-            TaoCasterData.forceUpdateTrackingClients(elb);
+            itsc.consumePosture(0, false);
             return true;
         }
         return false;

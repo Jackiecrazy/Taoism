@@ -28,7 +28,7 @@ public class CombatConfig {
     @Config.Comment("Cooldown after using spirit power before it starts recharging, currently unused.")
     public static int lingCD = 20;
     @Config.Comment("Cooldown after using posture before it starts recharging.")
-    public static int postureCD = 20;
+    public static int postureCD = 30;
     @Config.Comment("Number of ticks after a roll for which the player is considered to be rolling.")
     public static int rollThreshold = 15;
     @Config.Comment("Number of ticks after a roll for which the player cannot roll again.")

@@ -70,14 +70,14 @@ public class TaoStatCapability implements ITaoStatCapability {
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
         float nausea = elb instanceof EntityPlayer || elb.getActivePotionEffect(MobEffects.NAUSEA) == null ? 0 : (elb.getActivePotionEffect(MobEffects.NAUSEA).getAmplifier() + 1) * 0.05f;
-        float armorMod = Math.max(1f - ((float) elb.getTotalArmorValue() / 40f),0);
+        float armorMod = Math.max(1f - ((float) elb.getTotalArmorValue() / 40f), 0);
         float healthMod = elb.getHealth() / elb.getMaxHealth();
         if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
             return TaoCasterData.getTaoCap(elb).getMaxPosture() * armorMod * posMult * healthMod / (1.5f * MAXDOWNTIME);
         }
         if (posMult < 0)
-            return (ticks) * posMult / (armorMod * armorMod * healthMod);
-        return ((ticks * 0.2f) * armorMod * armorMod * posMult * healthMod) - nausea;
+            return (ticks) * posMult / (armorMod * healthMod);
+        return ((ticks * 0.2f) * armorMod * posMult * healthMod) - nausea;
     }
 
     /**
@@ -192,9 +192,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         }
         float maxPos = getMaxPosture(elb);
         if (maxPos != maxPosture) {
-            float percentage = getPosture() / getMaxPosture();
             setMaxPosture(maxPos);//a horse has 20 posture right off the bat, just saying
-            setPosture(getMaxPosture() * percentage);
         }
         //brings it to a tidy sum of 10 for the player, 20 with full armor.
         setMaxLing(10f);
@@ -497,9 +495,8 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setMaxPosture(float amount) {
-        float percentage = posture / maxPosture;
         maxPosture = amount;
-        setPosture(percentage * amount);
+        setPosture(posture);
     }
 
     @Override
@@ -806,7 +803,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void __setFirstSpawn() {
-        initialBonus=true;
+        initialBonus = true;
     }
 
     private void beatDown(EntityLivingBase attacker, float overflow) {

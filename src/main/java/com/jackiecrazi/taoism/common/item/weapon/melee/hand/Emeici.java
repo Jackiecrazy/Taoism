@@ -44,7 +44,7 @@ public class Emeici extends TaoWeapon {
 
     @Override
     public float getTrueReach(EntityLivingBase elb, ItemStack is) {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class Emeici extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         super.attackStart(ds, attacker, target, stack, orig);
-        if(getLastAttackedEntity(attacker.world, stack)!=target){
+        if (getLastAttackedEntity(attacker.world, stack) != target) {
             setBuff(attacker, stack, "facing", -1);
         }
     }

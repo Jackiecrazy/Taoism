@@ -360,7 +360,8 @@ public class TaoEntityHandler {
                 }
                 //if (p.world.isRemote) return;
                 if (Taoism.getAtk(p) == 1) {
-                    cap.consumePosture(0, false);//proc a cooldown after attacking
+                    //proc a cooldown after attacking
+                    cap.consumePosture(0, false);
                     if (!cap.isSwitchIn()) {
 //                    if(cap.getSwing()>1/NeedyLittleThings.getCooldownPeriod(p))
 //                    cap.addQi((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, p, EnumHand.MAIN_HAND));

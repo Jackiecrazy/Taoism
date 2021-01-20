@@ -97,6 +97,7 @@ public class TaoCombatHandler {
             if (cap.getRollCounter() < CombatConfig.rollThreshold)
                 e.setCanceled(true);
             ItemStack perrier = TaoCombatUtils.getShield(ent, uke, 1);
+            if (cap.getQi() > 5) perrier = TaoCombatUtils.getParryingItemStack(ent, uke, 1);
             if (!uke.world.isRemote && NeedyLittleThings.isFacingEntity(uke, ent, 120) && !perrier.isEmpty()) {
                 boolean free = cap.getParryCounter() < CombatConfig.shieldThreshold;
                 if (cap.consumePosture(free ? 0 : CombatConfig.posturePerProjectile, false) == 0) {
@@ -173,10 +174,6 @@ public class TaoCombatHandler {
             //posture is consumed *regardless* of parry
             if (ukeCap.consumePosture(atk * def, true, seme) == 0f && !defend.isEmpty()) {
                 e.setCanceled(true);
-                //parry, both parties are knocked back slightly
-                float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
-                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 2 * atk * atkDef / (semeCap.getMaxPosture())), true, false);
-                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 2 * atk * def / (ukeCap.getMaxPosture())), true, false);
                 //shield disabling
                 if (TaoCombatUtils.isShield(defend) && attack.getItem().canDisableShield(attack, defend, uke, seme)) {
                     //shield is disabled
@@ -190,7 +187,8 @@ public class TaoCombatHandler {
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
                 if (defend.getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend, e.getAmount());
-                } else if (TaoCombatUtils.isShield(defend) && ukeCap.getParryCounter() > CombatConfig.shieldThreshold) {
+                }
+                if (TaoCombatUtils.isShield(defend) && ukeCap.getParryCounter() > CombatConfig.shieldThreshold) {
                     //parry invframes
                     ukeCap.setParryCounter(0);
                 }
@@ -198,6 +196,10 @@ public class TaoCombatHandler {
                 if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {
                     ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other), e.getAmount());
                 }
+                //parry, both parties are knocked back slightly
+                float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
+                NeedyLittleThings.knockBack(seme, uke, Math.min(1.5f, 2 * atk * atkDef / (semeCap.getMaxPosture())), true, false);
+                NeedyLittleThings.knockBack(uke, seme, Math.min(1.5f, 2 * atk * def / (ukeCap.getMaxPosture())), true, false);
             }
             TaoCasterData.forceUpdateTrackingClients(uke);
         }

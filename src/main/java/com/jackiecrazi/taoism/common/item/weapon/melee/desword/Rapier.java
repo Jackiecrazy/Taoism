@@ -84,7 +84,7 @@ public class Rapier extends TaoWeapon {
 
     @Override
     public float damageStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        if (TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
+        if (isCharged(attacker, stack) && TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             //heart stab!
             dischargeWeapon(attacker, stack);
             return Math.min(target.getHealth(), orig * 10);
