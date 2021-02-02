@@ -644,7 +644,7 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setBindTime(int time) {
-        if (bind != 0 && e.get() != null) {
+        if (bind > 0 && e.get() != null) {
             TaoCombatUtils.rechargeHand(e.get(), EnumHand.MAIN_HAND, 0, true);
             TaoCombatUtils.rechargeHand(e.get(), EnumHand.OFF_HAND, 0, true);
         }

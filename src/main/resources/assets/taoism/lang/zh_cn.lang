@@ -273,8 +273,8 @@ liuyedao.cool=若在冷却后立刻进行下一次攻击，造成最多1.5倍的
 
 item.lance.name=马槊
 lance.hands=马上和下马三秒内为单手武器，其余时间为双手武器
-lance.mount=在马上冲锋1.5秒后或在高速运动时自动攻击身前的敌人
-lance.joust=伤害，架势伤害，和击退根据速度而提升
+lance.mount=在马上冲锋1.5秒后达到最大值
+lance.joust=伤害，架势伤害，和击退根据速度或马上冲锋时间而提升
 lance.alt=若双手使用，右击可发起一次冲锋
 
 item.zhanmadao.name=斩马刀

@@ -14,10 +14,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -52,13 +55,13 @@ public class Lance extends TaoWeapon {
     @Override
     public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
         if (attacker == null) return super.postureDealtBase(attacker, defender, item, amount);
-        return super.postureDealtBase(attacker, defender, item, amount) * (1 + (getBuff(item, "charge") / 20f) * chargeAndLookCos(attacker));
+        return super.postureDealtBase(attacker, defender, item, amount) + 5f * (float) (Math.min(2, Math.max(0.5 + NeedyLittleThings.getSpeedSq(attacker), 1 + getBuff(item, "charge") / 30f)) * chargeAndLookCos(attacker));
     }
 
     @Override
     public void onUpdate(ItemStack stack, World w, Entity e, int slot, boolean onHand) {
         super.onUpdate(stack, w, e, slot, onHand);
-        if (!w.isRemote && e instanceof EntityLivingBase) {
+        if (!w.isRemote && getHand(stack) == EnumHand.MAIN_HAND && e instanceof EntityLivingBase) {
             if (e.isRiding()) {
                 setBuff((EntityLivingBase) e, stack, "couch", 1);
             } else if (getBuff(stack, "couch") == 1) {
@@ -71,22 +74,24 @@ public class Lance extends TaoWeapon {
                     setBuff((EntityLivingBase) e, stack, "couch", 0);
                 }
             }
-            //System.out.println(chargeAndLookCos(e));
+//            //System.out.println(chargeAndLookCos(e));
             if ((e.isRiding()) && ((EntityLivingBase) e).moveForward != 0 && chargeAndLookCos(e) > 0.86) {
                 if (getBuff(stack, "rot") == -1 || Math.abs(getBuff(stack, "rot")) - Math.abs(e.rotationYaw) < 10) {
-                    setBuff((EntityLivingBase) e, stack, "charge", getBuff(stack, "charge") + 1);
+                    setBuff((EntityLivingBase) e, stack, "charge", Math.min(30, getBuff(stack, "charge") + 1));
                     setBuff((EntityLivingBase) e, stack, "rot", (int) e.rotationYaw);
-                }else{
+                } else {
                     setBuff((EntityLivingBase) e, stack, "charge", 0);
                     setBuff((EntityLivingBase) e, stack, "rot", -1);
                 }
-                if (getBuff(stack, "charge") > 30) {
-                    Vec3d vel = e.getLook(1).normalize().scale(getReach((EntityLivingBase) e, stack));
-                    //System.out.println(vel);
-                    splash((EntityLivingBase) e, e.getRidingEntity(), stack, 360, 360, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, (e.getRidingEntity() != null ? e.getRidingEntity() : e).getEntityBoundingBox().expand(vel.x, vel.y, vel.z).grow(1), TaoCombatUtils.VALID_TARGETS::test));
+                if (getBuff(stack, "charge") >= 30) {
+                    ((WorldServer) w).spawnParticle(EnumParticleTypes.CRIT, e.posX, e.posY, e.posZ, 5, e.width * 2, e.height / 2, e.width * 2, 0.5f);
+//                    System.out.println("doot");
+//                    Vec3d vel = e.getLook(1).normalize().scale(getReach((EntityLivingBase) e, stack));
+//                    //System.out.println(vel);
+//                    splash((EntityLivingBase) e, e.getRidingEntity(), stack, 360, 360, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, (e.getRidingEntity() != null ? e.getRidingEntity() : e).getEntityBoundingBox().expand(vel.x, vel.y, vel.z).grow(1), TaoCombatUtils.VALID_TARGETS::test));
                 }
-            } else if (NeedyLittleThings.getSpeedSq(e) > 1 && !TaoMovementUtils.isDodging((EntityLivingBase) e) && chargeAndLookCos(e) > 0.86) {
-                splash((EntityLivingBase) e, null, stack, 20, 20, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, e.getEntityBoundingBox().grow(getReach((EntityLivingBase) e, stack)), TaoCombatUtils.VALID_TARGETS::test));
+//            } else if (NeedyLittleThings.getSpeedSq(e) > 1 && !TaoMovementUtils.isDodging((EntityLivingBase) e) && chargeAndLookCos(e) > 0.86) {
+//                splash((EntityLivingBase) e, null, stack, 20, 20, ((EntityLivingBase) e).world.getEntitiesInAABBexcluding(null, e.getEntityBoundingBox().grow(getReach((EntityLivingBase) e, stack)), TaoCombatUtils.VALID_TARGETS::test));
             } else {
                 setBuff((EntityLivingBase) e, stack, "charge", 0);
                 setBuff((EntityLivingBase) e, stack, "rot", -1);
@@ -97,10 +102,10 @@ public class Lance extends TaoWeapon {
     @Override
     public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
         if (isDummy(stack)) {
-            if (TaoCombatUtils.getCooledAttackStrengthOff(elb, 1) > 0.9) {
+            if (elb.onGround && TaoCombatUtils.getCooledAttackStrengthOff(elb, 1) > 0.9) {
                 Vec3d v = elb.getLookVec().subtract(0, elb.getLookVec().y, 0).normalize();
-                elb.motionX += (1.5) * v.x;
-                elb.motionZ += (1.5) * v.z;
+                elb.motionX += (2) * v.x;
+                elb.motionZ += (2) * v.z;
                 elb.velocityChanged = true;
             }
         }
@@ -115,12 +120,12 @@ public class Lance extends TaoWeapon {
 
     @Override
     public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return 1 + MathHelper.clamp(getBuff(item, "charge") / 20f, 0, 1) * chargeAndLookCos(attacker);
+        return (float) (Math.min(2, Math.max(0.5 + NeedyLittleThings.getSpeedSq(attacker), 1 + getBuff(item, "charge") / 30f)) * chargeAndLookCos(attacker));
     }
 
     @Override
     public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return orig * ((1 + getBuff(stack, "charge") / 20f) * chargeAndLookCos(attacker));
+        return orig * (float) (Math.min(2, Math.max(0.5 + NeedyLittleThings.getSpeedSq(attacker), 1 + getBuff(stack, "charge") / 30f)) * chargeAndLookCos(attacker));
     }
 
     @Override
@@ -131,8 +136,8 @@ public class Lance extends TaoWeapon {
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("lance.hands") + TextFormatting.RESET);
-        tooltip.add(I18n.format("lance.mount"));
         tooltip.add(I18n.format("lance.joust"));
+        tooltip.add(I18n.format("lance.mount"));
         tooltip.add(I18n.format("lance.alt"));
     }
 
