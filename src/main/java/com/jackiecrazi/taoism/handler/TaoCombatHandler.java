@@ -148,6 +148,8 @@ public class TaoCombatHandler {
             }
             if (ds.getImmediateSource() != ds.getTrueSource())
                 return;//indirect attacks, like kusarigama and rope dart, cannot be parried at this point
+            if (!TaoCombatUtils.isMeleeDamage(ds))//
+                return;//check one more time for cat
             if (ukeCap.getDownTimer() > 0) return;//downed things are defenseless
             if (ukeCap.isRecordingDamage()) return;//prevent parries when being executed, and makes it look better
             //slime, I despise thee.

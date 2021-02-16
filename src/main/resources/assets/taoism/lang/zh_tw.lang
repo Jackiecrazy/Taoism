@@ -370,4 +370,5 @@ earth7.inscription=亂石穿空
 earth8.inscription=黃沙百戰
 earth9.inscription=山河破碎
 earth10.inscription=天地以合
-earth11.inscription=大花棉襖
+earth11.inscription=大花棉襖nunchaku.atkspd=attack speed raises by 0.1 every consecutive strike up to 7 hits, lasting 5 seconds
+nunchaku.knockback=knockback is converted into extra damage

@@ -45,7 +45,7 @@ public class MonkSpade extends TaoWeapon {
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(TextFormatting.DARK_RED+I18n.format("weapon.hands")+TextFormatting.RESET);
+        tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("monkspade.slow"));
         tooltip.add(I18n.format("monkspade.bury"));
         tooltip.add(I18n.format("monkspade.hardness"));
@@ -87,7 +87,7 @@ public class MonkSpade extends TaoWeapon {
     @Override
     public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         TaoPotionUtils.attemptAddPot(attacker, TaoPotionUtils.stackPot(attacker, new PotionEffect(MobEffects.SLOWNESS, 40), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
-        if (attacker.isPotionActive(MobEffects.SLOWNESS) && attacker.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(attacker).getPosture()) {
+        if (attacker.onGround && attacker.isPotionActive(MobEffects.SLOWNESS) && attacker.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(attacker).getPosture()) {
             TaoCasterData.getTaoCap(attacker).setRootTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;
@@ -117,7 +117,7 @@ public class MonkSpade extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(MobEffects.SLOWNESS, 30), TaoPotionUtils.POTSTACKINGMETHOD.ONLYADD), false);
-        if (target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getPosture()) {
+        if (target.onGround && target.isPotionActive(MobEffects.SLOWNESS) && target.getActivePotionEffect(MobEffects.SLOWNESS).getDuration() / 4 > TaoCasterData.getTaoCap(target).getPosture()) {
             TaoCasterData.getTaoCap(target).setRootTime(100);
             int blocksQueried = 0;
             int airBlocks = 0;

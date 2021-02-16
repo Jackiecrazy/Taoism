@@ -2,6 +2,7 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.pollaxe;
 
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityAxeCleave;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.potions.TaoPotion;
@@ -73,12 +74,12 @@ public class Halberd extends TaoWeapon {
     }
 
     protected double speed(ItemStack stack) {
-        return getHand(stack) == EnumHand.OFF_HAND ? 0.2 - 4d : super.speed(stack);
+        return getHand(stack) == EnumHand.OFF_HAND ? 0.1 - 4d : super.speed(stack);
     }
 
     @Override
     public float onKnockingBack(EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
-        return isCharged(attacker, stack)?0: super.onKnockingBack(attacker, target, stack, orig);
+        return isCharged(attacker, stack) ? 0 : super.onKnockingBack(attacker, target, stack, orig);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        return getHand(item) == EnumHand.MAIN_HAND ? 2f : 1f;
+        return getHand(item) == EnumHand.MAIN_HAND || TaoCasterData.getTaoCap(target).getDownTimer() > 0 ? 2f : 1f;
     }
 
     @Override
@@ -134,12 +135,8 @@ public class Halberd extends TaoWeapon {
         float doot = super.hurtStart(ds, attacker, target, item, orig);
         if (getHand(item) == EnumHand.OFF_HAND) {
             float effectiveLevel = (float) TaoPotionUtils.getEffectiveLevel(target, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR);
-            ds.setDamageBypassesArmor();
             target.removeActivePotionEffect(TaoPotion.ARMORBREAK);
-            item.setTagInfo("lastDootLevel", new NBTTagFloat(effectiveLevel / 10f));
-            if (isCharged(attacker, item))
-                return doot + (effectiveLevel * 5f);
-            return doot + (effectiveLevel * 2f);
+            return doot + (effectiveLevel);
         }
         return doot;
     }
@@ -147,12 +144,25 @@ public class Halberd extends TaoWeapon {
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
-            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 200, isCharged(attacker, stack) ? 5 : 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 200, getQiFromStack(stack) > 5 ? 1 : 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
         }
     }
 
     @Override
-    public float newCooldown(EntityLivingBase elb, ItemStack is) {
-        return getHand(is) == EnumHand.OFF_HAND ? gettagfast(is).getFloat("lastDootLevel") : super.newCooldown(elb, is);
+    public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
+        super.attackStart(ds, attacker, target, stack, orig);
+        if (getHand(stack) == EnumHand.MAIN_HAND) {
+            TaoPotionUtils.attemptAddPot(target, TaoPotionUtils.stackPot(target, new PotionEffect(TaoPotion.ARMORBREAK, 200, 0), TaoPotionUtils.POTSTACKINGMETHOD.MAXDURATION), true);
+        }else{
+            ds.setDamageBypassesArmor();
+        }
+    }
+
+    @Override
+    public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
+        if (defender != null) {
+            return super.postureDealtBase(attacker, defender, item, amount) * (1 + (float) (TaoPotionUtils.getEffectiveLevel(defender, TaoPotion.ARMORBREAK, SharedMonsterAttributes.ARMOR) / 10f));
+        }
+        return super.postureDealtBase(attacker, defender, item, amount);
     }
 }

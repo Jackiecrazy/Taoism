@@ -132,9 +132,9 @@ pollaxe.oscillate=performing either attack recharges the other hand by half, one
 
 item.halberd.name=Halberd
 halberd.leap=crits deal double damage
-halberd.cleave=chops through enemy armor, stacking armor break II for 3 seconds
-halberd.stab=right click to stab the target, detonating armor break for 2 points of armor piercing damage per level of potency
-halberd.stab.cooldown=each layer of armor break detonated will reduce the cooldown for this attack by 1 second
+halberd.cleave=stacks armor break I for 3 seconds on normal attack, and another 1 (2 above 5 chi) level on successful strike
+halberd.stab=each layer of armor break will cause the opponent to consume 10% more posture when parrying the normal attack
+halberd.stab.cooldown=right click to stab the target, bypassing defense and detonating armor break for 1 point of armor piercing damage per level of potency, doubled if staggered
 
 item.changchui.name=Maul
 maul.leap=crits deal double damage
