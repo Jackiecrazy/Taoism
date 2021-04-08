@@ -4,7 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
-public interface IStaminaPostureManipulable {
+public interface IQiPostureManipulable {
     /*
     melee attacks deal posture damage when hitting an entity, more if it's blocking.
     ranged attacks must be blocked with a shield unless a perk or word of god says otherwise.
@@ -46,4 +46,6 @@ public interface IStaminaPostureManipulable {
     float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount);
 
     float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount);
+
+    float getQiAccumulationRate(ItemStack is);
 }

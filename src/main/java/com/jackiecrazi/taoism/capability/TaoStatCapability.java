@@ -49,7 +49,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private WeakReference<ItemStack> lastTickOffhand;
     private JUMPSTATE state = JUMPSTATE.GROUNDED;
     private ClingData cd = new ClingData(false, false, false, false);
-    private int recordTimer = 0, cannonball = 0, taunt = -1;
+    private int recordTimer = 0, cannonball = 0, taunt = -1, downCount = 0;
 
     TaoStatCapability(EntityLivingBase elb) {
         e = new WeakReference<>(elb);
@@ -125,6 +125,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         nbt.setInteger("lookingAt", zTarget);
         nbt.setBoolean("head", head);
         nbt.setBoolean("first", initialBonus);
+        nbt.setInteger("downCount", getDownCount());
         return nbt;
     }
 
@@ -169,6 +170,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         cannonball = nbt.getInteger("spinny");
         head = nbt.getBoolean("head");
         initialBonus = nbt.getBoolean("first");
+        setDownCount(nbt.getInteger("downCount"));
     }
 
     private void setPrevSizes(float width, float height) {
@@ -212,9 +214,9 @@ public class TaoStatCapability implements ITaoStatCapability {
         if (getDownTimer() > 0) {
             setDownTimer(getDownTimer() - ticks);
             if (getDownTimer() <= 0) {
-                int overflow = -getDownTimer();
                 setDownTimer(0);
-                addPosture(getPostureRegenAmount(elb, overflow));
+                setDownCount(0);
+                setPosture(getMaxPosture());
             } else if (elb.motionY > 0 && (!elb.noClip || !elb.world.isAirBlock(elb.getPosition().down()))) {
                 elb.motionY = -0.1;
                 elb.velocityChanged = true;
@@ -376,6 +378,8 @@ public class TaoStatCapability implements ITaoStatCapability {
     public float consumePosture(float amount, boolean canStagger, boolean force, @Nullable EntityLivingBase assailant) {
         if (getDownTimer() > 0 || getPosInvulTime() > 0)
             return 0;//cancel all posture reduction when downed so you get back up with a buffer
+        if (!force)
+            amount = (float) Math.min(amount, getMaxPosture() * CombatConfig.hardCapPercent);
         float prevPos = posture;
         posture -= amount;
         EntityLivingBase elb = e.get();
@@ -462,6 +466,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         setSwitchIn(from.isSwitchIn());
         setProtected(from.isProtected());
         setDownTimer(from.getDownTimer());
+        setDownCount(from.getDownCount());
         setRollCounter(from.getRollCounter());
         setPostureRechargeCD(from.getPostureRechargeCD());
         setStaminaRechargeCD(from.getStaminaRechargeCD());
@@ -635,6 +640,21 @@ public class TaoStatCapability implements ITaoStatCapability {
             //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
         }
         down = time;
+    }
+
+    @Override
+    public int getDownCount() {
+        return downCount;
+    }
+
+    @Override
+    public void setDownCount(int time) {
+        downCount = time;
+        if (downCount <= 0) {
+            setDownTimer(0);
+            downCount = 0;
+            setPosture(getMaxPosture());
+        }
     }
 
     @Override
@@ -818,6 +838,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
         //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(ARMORDOWN, "downed", -9, 0));
         setDownTimer(MAXDOWNTIME);
+        setDownTimer(CombatConfig.staggerCounter);
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
         if (elb.isBeingRidden()) {

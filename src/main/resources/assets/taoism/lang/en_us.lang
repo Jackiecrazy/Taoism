@@ -79,7 +79,7 @@ chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration 
 item.cestus.name=Cestus
 cestus.armor=naturally adds 2 armor points
 cestus.debuff=inflicts slow I at 3 chi, slow II at 6 chi, and blindness at 9 chi
-cestus.damage=damage increases by 1 per chi level except at levels 3 and 6, then by 2 for every level beyond 7
+cestus.damage=damage increases by 1 per chi level except at levels 3 and 6
 cestus.riposte=when parrying, gain 0.3 chi
 
 item.kampilan.name=Kampilan

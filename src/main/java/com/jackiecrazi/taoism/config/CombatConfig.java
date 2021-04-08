@@ -21,8 +21,8 @@ public class CombatConfig {
     public static float defaultMultiplierPostureDefend = 1.4f;
     @Config.Comment("Posture multiplier when not defined in combatItems. This is multiplied by the weapon's attack damage.")
     public static float defaultMultiplierPostureAttack = 0.15f;
-    @Config.Comment("Posture damage from punching with an empty hand.")
-    public static float defaultPostureKenshiro = 0.5f;
+    @Config.Comment("Posture damage multiplier for empty hands. Notice many mobs are technically empty-handed!")
+    public static float defaultPostureKenshiro = 1.3f;
     @Config.Comment("Posture multiplier for mobs and NPCs, as they don't deal much per hit.")
     public static float basePostureMob = 2f;
     @Config.Comment("Cooldown after using spirit power before it starts recharging, currently unused.")
@@ -37,6 +37,12 @@ public class CombatConfig {
     public static int shieldThreshold = 16;
     @Config.Comment("Number of ticks one should be protected for after sudden stagger prevention activates.")
     public static int ssptime = 20;
+    @Config.Comment("Staggered entities that take more than this number of hits will stand back up immediately. The staggering hit also counts.")
+    @Config.RangeInt(min = 1)
+    public static int staggerCounter = 3;
+    @Config.Comment("No attack can remove more than this percentage of max posture in one hit. Special staggers, such as the rider falling off a staggered steed, ignore this setting.")
+    @Config.RangeDouble(min = 0, max = 1)
+    public static double hardCapPercent = 0.4;
     @Config.Comment("Maximum number of ticks between two attacks for it to be considered as part of the same combo.")
     public static int timeBetweenAttacks = 20;
     @Config.Comment("Number of ticks between each forced client update of the entity's various stats. Entities in sight will update every tick.")

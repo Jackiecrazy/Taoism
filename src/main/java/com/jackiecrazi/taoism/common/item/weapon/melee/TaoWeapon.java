@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IStaminaPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded, IMove {
+public abstract class TaoWeapon extends Item implements IAmModular, IElemental, IRange, ICombatManipulator, IQiPostureManipulable, ICombo, IDamageType, ISpecialSwitchIn, IChargeableWeapon, ITwoHanded, IMove {
     public static final ArrayList<Item> listOfWeapons = new ArrayList<>();
     protected static final UUID QI_MODIFIER = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130003");
     protected static final UUID QI_EXECUTION = UUID.fromString("8e948b44-7560-11ea-bc55-0242ac130013");
@@ -481,7 +481,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         if (equipmentSlot == EntityEquipmentSlot.MAINHAND) {
             multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", attackDamage(stack) - 1, 0));
             multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", speed(stack), 0));
-            multimap.put(TaoEntities.QIRATE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getQiAccumulationRate(stack) * (1 + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING, stack) / 4f), 0));
             multimap.put(EntityPlayer.REACH_DISTANCE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", getTrueReach(null, stack) - 3, 0));
             multimap.put(TaoEntities.MAXPOSTURE.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, stack) / 10f, 1));
             multimap.put(TaoEntities.POSREGEN.getName(), new AttributeModifier(QI_MODIFIER, "Weapon modifier", EnchantmentHelper.getEnchantmentLevel(Enchantments.MENDING, stack) / 5f, 1));
@@ -680,7 +679,9 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             }
         }
         return changed;
-    }    @Override
+    }
+
+    @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
         return 1;
     }
@@ -693,8 +694,8 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return speed - 4d;
     }
 
-    protected float getQiAccumulationRate(ItemStack is) {
-        return isCharged(null, is) ? 0 : qiRate;
+    public float getQiAccumulationRate(ItemStack is) {
+        return qiRate * (1 + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING, is) / 4f);
     }
 
     /**
@@ -883,7 +884,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         gettagfast(item).setBoolean("charge", false);
         gettagfast(item).setLong("chargedAtTime", 0);
         gettagfast(item).setLong("startAt", 0);
-        elb.getEntityAttribute(TaoEntities.QIRATE).removeModifier(QI_EXECUTION);
     }
 
     @Override
@@ -1005,11 +1005,11 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     public boolean canAttack(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         if (!gettagfast(stack).getBoolean("connect")) {
             gettagfast(stack).setBoolean("connect", true);
-            if (getHand(stack) != null && !attacker.world.isRemote && !isCharged(attacker, attacker.getHeldItemMainhand()) && !isCharged(attacker, attacker.getHeldItemOffhand())) {
-                float baseQi = ((float) NeedyLittleThings.getAttributeModifierHandSensitive(TaoEntities.QIRATE, attacker, getHand(stack)));
-                TaoCasterData.getTaoCap(attacker).addQi(baseQi);
-                TaoCasterData.forceUpdateTrackingClients(attacker);
-            }
+//            if (getHand(stack) != null && !attacker.world.isRemote && !isCharged(attacker, attacker.getHeldItemMainhand()) && !isCharged(attacker, attacker.getHeldItemOffhand())) {
+//                float baseQi = ((float) (getHand(stack) == EnumHand.OFF_HAND ? TaoCombatUtils.getCooldownPeriodOff(attacker) : TaoCombatUtils.getCooldownPeriod(attacker)));
+//                TaoCasterData.getTaoCap(attacker).addQi(baseQi);
+//                TaoCasterData.forceUpdateTrackingClients(attacker);
+//            }
             oncePerHit(attacker, target, stack);
         }
 //        if (NeedyLittleThings.raytraceEntity(attacker.world, attacker, 5) == target && NeedyLittleThings.getDistSqCompensated(attacker, target) > getReach(attacker, item) * getReach(attacker, item))
@@ -1105,8 +1105,6 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     protected int getBuff(ItemStack is, String name) {
         return gettagfast(is).getInteger(name);
     }
-
-
 
 
     public int getCombo(EntityLivingBase wielder, ItemStack is) {

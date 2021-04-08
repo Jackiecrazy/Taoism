@@ -151,6 +151,10 @@ public interface ITaoStatCapability extends INBTSerializable<NBTTagCompound> {
 
     void setDownTimer(int time);
 
+    int getDownCount();
+
+    void setDownCount(int time);
+
     int getBindTime();
 
     void setBindTime(int time);

@@ -69,7 +69,6 @@ public class TaoEntityHandler {
             EntityLivingBase elb = (EntityLivingBase) e.getEntity();
             elb.getAttributeMap().registerAttribute(TaoEntities.DEFLECT);
             elb.getAttributeMap().registerAttribute(TaoEntities.ABLATION);
-            elb.getAttributeMap().registerAttribute(TaoEntities.QIRATE);
             elb.getAttributeMap().registerAttribute(TaoEntities.LINGREGEN);
             elb.getAttributeMap().registerAttribute(TaoEntities.POSREGEN);
             elb.getAttributeMap().registerAttribute(TaoEntities.HEAL);

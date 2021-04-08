@@ -173,7 +173,6 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     protected void endScheduledAction(EntityLivingBase elb, Entity victim, ItemStack stack, int interval) {
-        elb.getEntityAttribute(TaoEntities.QIRATE).removeModifier(QI_EXECUTION);
     }
 
     @Override

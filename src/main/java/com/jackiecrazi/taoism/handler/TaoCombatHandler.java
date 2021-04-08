@@ -2,9 +2,8 @@ package com.jackiecrazi.taoism.handler;
 
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IAmVerySmart;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ICombatManipulator;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IQiPostureManipulable;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.TaoEntities;
@@ -130,10 +129,14 @@ public class TaoCombatHandler {
                 return;//only physical attacks can be parried
             EntityLivingBase seme = (EntityLivingBase) ds.getTrueSource();
             TaoCasterData.updateCasterData(seme);
-            if (seme.getLastAttackedEntity() == uke && seme.getLastAttackedEntityTime() == seme.ticksExisted) {
-                //attacking the same entity repeatedly in a single tick! Abort! Abort!
-                abort = true;
-                return;
+            boolean firstAttack = true;
+            if (seme.getLastAttackedEntityTime() == seme.ticksExisted) {
+                firstAttack = false;
+                if (seme.getLastAttackedEntity() == uke) {
+                    //attacking the same entity repeatedly in a single tick! Abort! Abort!
+                    abort = true;
+                    return;
+                }
             }
             ITaoStatCapability semeCap = TaoCasterData.getTaoCap(seme);
             ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
@@ -146,6 +149,11 @@ public class TaoCombatHandler {
                 ICombatManipulator icm = (ICombatManipulator) attack.getItem();
                 icm.attackStart(ds, seme, uke, attack, e.getAmount());
             }
+            if (attack.getItem() instanceof IQiPostureManipulable) {
+                IQiPostureManipulable icm = (IQiPostureManipulable) attack.getItem();
+                semeCap.addQi(icm.getQiAccumulationRate(attack));
+            } else
+                semeCap.addQi((semeCap.isOffhandAttack() ? TaoCombatUtils.getCooldownPeriodOff(seme) : TaoCombatUtils.getCooldownPeriod(seme)) / 80);
             if (ds.getImmediateSource() != ds.getTrueSource())
                 return;//indirect attacks, like kusarigama and rope dart, cannot be parried at this point
             if (!TaoCombatUtils.isMeleeDamage(ds))//
@@ -187,16 +195,16 @@ public class TaoCombatHandler {
                     uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
                 //reset cooldown
                 TaoCombatUtils.rechargeHand(uke, uke.getHeldItemOffhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND, 0.5f, true);
-                if (defend.getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) defend.getItem()).onParry(seme, uke, defend, e.getAmount());
+                if (defend.getItem() instanceof IQiPostureManipulable) {
+                    ((IQiPostureManipulable) defend.getItem()).onParry(seme, uke, defend, e.getAmount());
                 }
                 if (TaoCombatUtils.isShield(defend) && ukeCap.getParryCounter() > CombatConfig.shieldThreshold) {
                     //parry invframes
                     ukeCap.setParryCounter(0);
                 }
                 EnumHand other = uke.getHeldItemMainhand() == defend ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
-                if (uke.getHeldItem(other).getItem() instanceof IStaminaPostureManipulable) {
-                    ((IStaminaPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other), e.getAmount());
+                if (uke.getHeldItem(other).getItem() instanceof IQiPostureManipulable) {
+                    ((IQiPostureManipulable) uke.getHeldItem(other).getItem()).onOtherHandParry(seme, uke, uke.getHeldItem(other), e.getAmount());
                 }
                 //parry, both parties are knocked back slightly
                 float atkDef = TaoCombatUtils.postureDef(seme, uke, attack, e.getAmount());
@@ -299,7 +307,7 @@ public class TaoCombatHandler {
 
         ITaoStatCapability ukeCap = TaoCasterData.getTaoCap(uke);
         boolean posBreak = false;
-        //if posture is broken, damage increased, ignores deflection/absorption
+        //if posture is broken, ignores deflection/absorption
         if (ukeCap.getDownTimer() > 0) {
             if (ds.getTrueSource() != null && ds.getTrueSource() instanceof EntityLivingBase) {
                 EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
@@ -309,6 +317,7 @@ public class TaoCombatHandler {
                 seme.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ENTITY_GENERIC_BIG_FALL, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, 0.75f + Taoism.unirand.nextFloat() * 0.5f);
             }
             //System.out.println("FATALITY!");
+            ukeCap.setDownCount(ukeCap.getDownCount() - 1);
             posBreak = true;
         }
         if (ds.isUnblockable()) {

@@ -82,7 +82,7 @@ public class Ken extends TaoWeapon {
     }
 
     @Override
-    protected float getQiAccumulationRate(ItemStack is) {
+    public float getQiAccumulationRate(ItemStack is) {
         return qiRate;
     }
 

@@ -103,9 +103,6 @@ public class Cestus extends TaoWeapon {
         int level = getQiFromStack(stack);
         int stuff = Math.floorDiv(level, 3);
         ret += (level - stuff);
-        if (level > 7) {
-            ret += (level - 7);
-        }
         return ret;
     }
 

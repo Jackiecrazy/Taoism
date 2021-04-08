@@ -8,7 +8,7 @@ import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.allthedamagetypes.EntityDamageSourceTaoIndirect;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IMove;
-import com.jackiecrazi.taoism.api.alltheinterfaces.IStaminaPostureManipulable;
+import com.jackiecrazi.taoism.api.alltheinterfaces.IQiPostureManipulable;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.config.CombatConfig;
@@ -462,13 +462,13 @@ public class TaoCombatUtils {
             defMult = postureDef(elb, attacker, ret, amount);
         }
         //mainhand
-        if (main.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec, amount) && ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+        if (main.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec, amount) && ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
             //System.out.println("using main hand for parry");
-            defMult = ((IStaminaPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
+            defMult = ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
             ret = main;
         }
         //offhand
-        if (off.getItem() instanceof IStaminaPostureManipulable && ((IStaminaPostureManipulable) off.getItem()).canBlock(elb, attacker, off, offRec, amount) && ((IStaminaPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+        if (off.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) off.getItem()).canBlock(elb, attacker, off, offRec, amount) && ((IQiPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
             //System.out.println("using off hand for parry");
             ret = off;
         }
@@ -481,10 +481,10 @@ public class TaoCombatUtils {
     }
 
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        float ret = attack.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
+        float ret = attack.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
                 amount * CombatConfig.defaultMultiplierPostureAttack;
         if (attack.isEmpty()) {//bare hand 1.5x
-            ret = CombatConfig.defaultPostureKenshiro;
+            ret *= CombatConfig.defaultPostureKenshiro;
         }
         if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
         else ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
@@ -495,7 +495,7 @@ public class TaoCombatUtils {
         if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold)
             return 0;
         return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
-                (defend.getItem() instanceof IStaminaPostureManipulable ? ((IStaminaPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
+                (defend.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
     }
 
     public static boolean isMeleeDamage(DamageSource ds) {

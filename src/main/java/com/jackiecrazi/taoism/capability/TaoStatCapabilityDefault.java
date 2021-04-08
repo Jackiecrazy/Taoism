@@ -313,6 +313,16 @@ public class TaoStatCapabilityDefault implements ITaoStatCapability {
     }
 
     @Override
+    public int getDownCount() {
+        return 0;
+    }
+
+    @Override
+    public void setDownCount(int time) {
+
+    }
+
+    @Override
     public int getBindTime() {
         return 0;
     }

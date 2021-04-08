@@ -23,7 +23,6 @@ public class TaoEntities {
     public static final IAttribute POSREGEN = (new RangedAttribute(null, "generic.postureRegen", 1.0D, 0, Double.MAX_VALUE)).setDescription("Posture Regeneration").setShouldWatch(true);
     public static final IAttribute HEAL = (new RangedAttribute(null, "generic.healRate", 1.0D, 0, Double.MAX_VALUE)).setDescription("Health Regeneration Multiplier").setShouldWatch(true);
     public static final IAttribute LINGREGEN = (new RangedAttribute(null, "generic.lingRegen", 1.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Ling Regeneration").setShouldWatch(true);
-    public static final IAttribute QIRATE = (new RangedAttribute(null, "generic.qiGen", 0.0D, -Double.MAX_VALUE, Double.MAX_VALUE)).setDescription("Qi Accumulation Rate").setShouldWatch(true);
     public static final IAttribute MAXPOSTURE = (new RangedAttribute(null, "taoism.maxPosture", 10.0D, 0, Double.MAX_VALUE)).setDescription("Max Posture").setShouldWatch(true);
     private static int id = 0;
 
