@@ -37,7 +37,7 @@ public class CombatConfig {
     public static int shieldThreshold = 16;
     @Config.Comment("Number of ticks one should be protected for after sudden stagger prevention activates.")
     public static int ssptime = 20;
-    @Config.Comment("Staggered entities that take more than this number of hits will stand back up immediately. The staggering hit also counts.")
+    @Config.Comment("Staggered entities that take more than this number of hits will stand back up immediately.")
     @Config.RangeInt(min = 1)
     public static int staggerCounter = 3;
     @Config.Comment("No attack can remove more than this percentage of max posture in one hit. Special staggers, such as the rider falling off a staggered steed, ignore this setting.")

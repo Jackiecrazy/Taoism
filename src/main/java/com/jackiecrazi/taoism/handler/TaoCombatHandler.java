@@ -189,6 +189,7 @@ public class TaoCombatHandler {
                     //shield is disabled
                     if (uke instanceof EntityPlayer)
                         ((EntityPlayer) uke).getCooldownTracker().setCooldown(defend.getItem(), 60);
+                    else ukeCap.setBindTime(20);
                     uke.world.setEntityState(uke, (byte) 30);
                     uke.world.playSound(null, uke.posX, uke.posY, uke.posZ, SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS, 0.25f + Taoism.unirand.nextFloat() * 0.5f, (1 - (ukeCap.getPosture() / ukeCap.getMaxPosture())) + Taoism.unirand.nextFloat() * 0.5f);
                 } else

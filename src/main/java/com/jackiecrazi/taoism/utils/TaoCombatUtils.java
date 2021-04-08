@@ -38,26 +38,13 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import java.util.HashMap;
 
 public class TaoCombatUtils {
-    private static class CombatInfo {
-        private final float attackPostureMultiplier, defensePostureMultiplier;
-        private final boolean isShield;
-
-        private CombatInfo(float attack, float defend, boolean shield) {
-            attackPostureMultiplier = attack;
-            defensePostureMultiplier = defend;
-            isShield = shield;
-        }
-    }
-
-    private static CombatInfo DEFAULT = new CombatInfo(1, 1, false);
-
     /**
      * Copied from EntityArrow, because kek.
      */
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
-
-    private static HashMap<Item, CombatInfo> combatList;
     public static HashMap<String, Float> customPosture;
+    private static CombatInfo DEFAULT = new CombatInfo(1, 1, false);
+    private static HashMap<Item, CombatInfo> combatList;
 
     public static void updateLists() {
         DEFAULT = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
@@ -427,6 +414,7 @@ public class TaoCombatUtils {
     }
 
     public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
+        if (TaoCasterData.getTaoCap(elb).getBindTime() > 0) return ItemStack.EMPTY;
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
         if (elb instanceof EntityPlayer) {
             EntityPlayer ep = (EntityPlayer) elb;
@@ -508,5 +496,16 @@ public class TaoCombatUtils {
 
     public static boolean isDirectDamage(DamageSource ds) {
         return "player".equals(ds.damageType) || "mob".equals(ds.damageType);
+    }
+
+    private static class CombatInfo {
+        private final float attackPostureMultiplier, defensePostureMultiplier;
+        private final boolean isShield;
+
+        private CombatInfo(float attack, float defend, boolean shield) {
+            attackPostureMultiplier = attack;
+            defensePostureMultiplier = defend;
+            isShield = shield;
+        }
     }
 }

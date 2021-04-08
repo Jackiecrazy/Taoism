@@ -649,8 +649,9 @@ public class TaoStatCapability implements ITaoStatCapability {
 
     @Override
     public void setDownCount(int time) {
+        int temp = downCount;
         downCount = time;
-        if (downCount <= 0) {
+        if (downCount <= 0 && temp > 0) {
             setDownTimer(0);
             downCount = 0;
             setPosture(getMaxPosture());
@@ -838,7 +839,7 @@ public class TaoStatCapability implements ITaoStatCapability {
         //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMORDOWN);
         //elb.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(new AttributeModifier(ARMORDOWN, "downed", -9, 0));
         setDownTimer(MAXDOWNTIME);
-        setDownTimer(CombatConfig.staggerCounter);
+        setDownCount(CombatConfig.staggerCounter+1);
         elb.world.playSound(null, elb.posX, elb.posY, elb.posZ, SoundEvents.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.PLAYERS, Taoism.unirand.nextFloat() * 0.4f + 0.8f, Taoism.unirand.nextFloat() * 0.4f + 0.8f);
         sync();
         if (elb.isBeingRidden()) {

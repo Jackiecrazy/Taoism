@@ -707,7 +707,9 @@ public class ClientEvents {
                 if (cap.getPosture() < cap.getMaxPosture() || cap.getDownTimer() > 0)
                     drawPostureBarreAt(player, width / 2, height - 57);
                 Entity look = getEntityLookedAt(player);
-                if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture && (TaoCasterData.getTaoCap((EntityLivingBase) look).getPosture() < TaoCasterData.getTaoCap((EntityLivingBase) look).getMaxPosture() || TaoCasterData.getTaoCap((EntityLivingBase) look).getDownTimer() > 0)) {
+                if (look instanceof EntityLivingBase && HudConfig.client.displayEnemyPosture) {
+                    ITaoStatCapability cappy = TaoCasterData.getTaoCap((EntityLivingBase) look);
+                    if(cappy.getPosture() < cappy.getMaxPosture() || cappy.getDownTimer() > 0)
                     drawPostureBarreAt((EntityLivingBase) look, width / 2, 20);//Math.min(HudConfig.client.enemyPosture.x, width - 64), Math.min(HudConfig.client.enemyPosture.y, height - 64));
                 }
                 //}
