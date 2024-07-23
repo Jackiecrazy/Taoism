@@ -153,7 +153,7 @@ public class TaoCombatHandler {
                 IQiPostureManipulable icm = (IQiPostureManipulable) attack.getItem();
                 semeCap.addQi(icm.getQiAccumulationRate(attack));
             } else
-                semeCap.addQi((semeCap.isOffhandAttack() ? TaoCombatUtils.getCooldownPeriodOff(seme) : TaoCombatUtils.getCooldownPeriod(seme)) / 80);
+                semeCap.addQi((semeCap.isOffhandAttack() ? TaoCombatUtils.getCooldownPeriodOff(seme) : TaoCombatUtils.getCooldownPeriod(seme)) / 40);
             if (ds.getImmediateSource() != ds.getTrueSource())
                 return;//indirect attacks, like kusarigama and rope dart, cannot be parried at this point
             if (!TaoCombatUtils.isMeleeDamage(ds))//
@@ -361,8 +361,10 @@ public class TaoCombatHandler {
             EntityLivingBase seme = ((EntityLivingBase) ds.getTrueSource());
             int ignoreAmnt = 0;
             ItemStack stack = TaoCombatUtils.getAttackingItemStackSensitive(seme);
-            if (TaoCasterData.getTaoCap(uke).getDownTimer() > 0)
+            if (TaoCasterData.getTaoCap(uke).getDownTimer() > 0) {
+                e.setAmount(e.getAmount()+uke.getMaxHealth()/10);
                 ignoreAmnt += 9;
+            }
             if (stack.getItem() instanceof ICombatManipulator) {
                 ignoreAmnt += ((ICombatManipulator) stack.getItem()).armorIgnoreAmount(e.getSource(), seme, uke, stack, e.getAmount());
             }

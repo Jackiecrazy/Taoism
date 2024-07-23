@@ -3,6 +3,9 @@ package com.jackiecrazi.taoism.common.item.weapon.melee.polearm.staff;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
+import com.jackiecrazi.taoism.capability.ITaoStatCapability;
+import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.capability.TaoStatCapability;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
@@ -12,7 +15,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
@@ -47,7 +49,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public int getComboLength(EntityLivingBase wielder, ItemStack is) {
-        return getHand(is) != EnumHand.OFF_HAND ? 2 : 1;
+        return 2;
     }
 
     @Override
@@ -79,32 +81,12 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    protected double speed(ItemStack stack) {
-        double ret = super.speed(stack) + 4d;
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            ret /= 1.2d;
-        }
-        ret -= 4d;
-        return ret;
-    }
-
-    @Override
-    //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
-        if (getHand(stack) == EnumHand.OFF_HAND) {
-            splash(attacker, stack, 120);
-        }
-    }
-
-    @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_RED + I18n.format("weapon.hands") + TextFormatting.RESET);
         tooltip.add(I18n.format("staff.flick"));
         tooltip.add(I18n.format("staff.smash"));
         tooltip.add(I18n.format("staff.doink"));
         tooltip.add(I18n.format("staff.throw"));
-        tooltip.add(I18n.format("staff.sneak"));
-        tooltip.add(I18n.format("staff.swipe"));
         tooltip.add(I18n.format("staff.oscillate"));
     }
 
@@ -125,40 +107,31 @@ public class Staff extends TaoWeapon {
     }
 
     @Override
-    public float damageMultiplier(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
-        //nerf offhand damage
-        float off = getHand(item) == EnumHand.OFF_HAND ? 0.7f : 1f;
-        return off;
-    }
-
-    @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        attacker.motionY = target.motionY = 0;
         if (getHand(stack) == EnumHand.OFF_HAND) {
-            float groundKB = attacker.onGround ? 0.5f : 1f;
-            NeedyLittleThings.knockBack(target, attacker, groundKB, true, false);
-        } else {
-            if (attacker.onGround || attacker.isSneaking()) {
-                if (target.onGround) {
-                    target.addVelocity(0, chi / 15f, 0);
-                    TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.JUMP_BOOST, 20, chi / 4), false);
-                } else {
-                    NeedyLittleThings.knockBack(target, attacker, 1f, true, false);
-                    target.motionY = 0;
-                    //target.addVelocity(0, -1-chi/5f, 0);
-                    target.hurtResistantTime = 0;
-//                    target.onGround=false;
-                    target.fallDistance += chi;
-                }
-                target.velocityChanged = true;
+            if (!attacker.isSneaking()) {
+                //ground-ground air flick
+                target.addVelocity(0, chi / 15f, 0);
+                TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.JUMP_BOOST, 20, chi / 4), false);
+                TaoCasterData.getTaoCap(attacker).setJumpState(ITaoStatCapability.JUMPSTATE.DODGING);
             } else {
-                if (target.onGround) {
-                    attacker.motionY = chi / 10f;
-                    attacker.velocityChanged = true;
-                } else {
-                    target.motionY = chi / 10f;
-                    target.velocityChanged = true;
-                }
+                //ground-air slam down
+                NeedyLittleThings.knockBack(target, attacker, 1f, true, false);
+                target.hurtResistantTime = 0;
+                target.fallDistance += chi;
+            }
+        } else {
+            if (!attacker.isSneaking()) {
+                //air-ground boost up
+                attacker.motionY = chi / 10f;
+            } else {
+                //air-air target knock
+                NeedyLittleThings.knockBack(target, attacker, 1f, true, false);
+                TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(MobEffects.JUMP_BOOST, 20, chi / 4), false);
             }
         }
+        attacker.velocityChanged = true;
+        target.velocityChanged = true;
     }
 }

@@ -8,6 +8,7 @@ import com.jackiecrazi.taoism.compat.TaoCompat;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.DamageSource;
@@ -119,9 +120,9 @@ public class TaoMovementUtils {
         //qi has to be nonzero
         if (itsc.getQi() == 0) return false;
         //mario mario, wherefore art thou mario? Ignores all other jump condition checks
-        Entity ent = collidingEntity(elb);
-        if (ent instanceof EntityLivingBase) {
-            kick(elb, (EntityLivingBase) ent);
+        List<Entity> ent = elb.world.getEntitiesInAABBexcluding(elb, elb.getEntityBoundingBox().grow(1), a-> a instanceof EntityMob);
+        if (!ent.isEmpty()) {
+            kick(elb, (EntityLivingBase) ent.get(0));
         } else {
             //if you're exhausted or just jumped, you can't jump again
             if ((itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.EXHAUSTED || itsc.getJumpState() == ITaoStatCapability.JUMPSTATE.JUMPING))

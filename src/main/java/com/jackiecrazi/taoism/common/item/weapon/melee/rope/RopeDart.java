@@ -163,7 +163,6 @@ public class RopeDart extends TaoWeapon {
         tooltip.add(I18n.format("ropedart.punch"));
         tooltip.add(I18n.format("ropedart.alt"));
         tooltip.add(I18n.format("ropedart.trick"));
-        tooltip.add(I18n.format("ropedart.accel"));
     }
 
     @Override

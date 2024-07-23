@@ -30,13 +30,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Random;
 
 @Mod(modid = Taoism.MODID, version = Taoism.VERSION)
 public class Taoism {
-    private static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
-    private static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
     public static final String MODID = "taoism";
     public static final String VERSION = "2.0";
     public static final Random unirand = new Random();
@@ -48,6 +47,8 @@ public class Taoism {
         }
 
     };
+    private static final Field atk = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
+    private static final Field bypassArmor = ObfuscationReflectionHelper.findField(DamageSource.class, "field_76374_o");
     @Mod.Instance(Taoism.MODID)
     public static Taoism INST = new Taoism();
     @SidedProxy(serverSide = "com.jackiecrazi.taoism.common.CommonProxy", clientSide = "com.jackiecrazi.taoism.client.ClientProxy")
@@ -55,11 +56,16 @@ public class Taoism {
     public static SimpleNetworkWrapper net;
     public static Logger logger = LogManager.getLogger(MODID);
 
-    public static void setBypassArmor(DamageSource ds, boolean value) {
-        try {
-            bypassArmor.setBoolean(ds, value);
-        } catch (Exception ignored) {
+    @EventHandler
+    public static void commands(FMLServerStartingEvent e) {
+        e.registerServerCommand(new CommandQi());
+    }
 
+    public static int getAtk(Entity e) {
+        try {
+            return atk.getInt(e);
+        } catch (Exception ignored) {
+            return 0;
         }
     }
 
@@ -68,14 +74,6 @@ public class Taoism {
             atk.setInt(e, cooldown);
         } catch (Exception ignored) {
 
-        }
-    }
-
-    public static int getAtk(Entity e) {
-        try {
-            return atk.getInt(e);
-        } catch (Exception ignored) {
-            return 0;
         }
     }
 	/*
@@ -99,6 +97,14 @@ public class Taoism {
 
 	 */
 
+    public static void setBypassArmor(DamageSource ds, boolean value) {
+        try {
+            bypassArmor.setBoolean(ds, value);
+        } catch (Exception ignored) {
+
+        }
+    }
+
     @EventHandler
     public void preinit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(TaoItems.class);
@@ -106,11 +112,19 @@ public class Taoism {
         MinecraftForge.EVENT_BUS.register(TaoCrafting.class);
         MinecraftForge.EVENT_BUS.register(TaoPotion.class);
         MinecraftForge.EVENT_BUS.register(TaoEntities.class);
+        String sep = System.getProperty("file.separator");
+        TaoCombatUtils.configFolder = event.getModConfigurationDirectory() + sep + "taoism";
         atk.setAccessible(true);
         bypassArmor.setAccessible(true);
 
         //MinecraftForge.EVENT_BUS.register(ClientProxy.class);
         TaoConfigs.init(event.getModConfigurationDirectory());
+        File stats = new File(TaoCombatUtils.configFolder + sep + "stats");
+        if(!stats.exists())
+            stats.mkdir();
+        File tags = new File(TaoCombatUtils.configFolder + sep + "tags");
+        if(!tags.exists())
+            tags.mkdir();
         net = NetworkRegistry.INSTANCE.newSimpleChannel("TaoistChannel");
         proxy.preinit(event);
     }
@@ -123,14 +137,9 @@ public class Taoism {
 
     @EventHandler
     public void postinit(FMLPostInitializationEvent event) {
-            CombatConfig.printParryList();
+        CombatConfig.printParryList();
         TaoCombatUtils.updateLists();
         proxy.postinit(event);
-    }
-
-    @EventHandler
-    public static void commands(FMLServerStartingEvent e){
-        e.registerServerCommand(new CommandQi());
     }
 
 }

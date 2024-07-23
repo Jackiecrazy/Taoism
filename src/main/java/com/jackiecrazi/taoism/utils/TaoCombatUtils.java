@@ -3,6 +3,11 @@ package com.jackiecrazi.taoism.utils;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
+import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import com.jackiecrazi.taoism.Taoism;
 import com.jackiecrazi.taoism.api.MoveCode;
 import com.jackiecrazi.taoism.api.NeedyLittleThings;
@@ -10,8 +15,10 @@ import com.jackiecrazi.taoism.api.allthedamagetypes.EntityDamageSourceTaoIndirec
 import com.jackiecrazi.taoism.api.alltheinterfaces.IMove;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IQiPostureManipulable;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
+import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.config.CombatConfig;
+import ibxm.Player;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -20,6 +27,7 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Enchantments;
+import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -34,51 +42,73 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public class TaoCombatUtils {
     /**
      * Copied from EntityArrow, because kek.
      */
     public static final Predicate<Entity> VALID_TARGETS = Predicates.and(EntitySelectors.CAN_AI_TARGET, EntitySelectors.IS_ALIVE, e -> e != null && !(e instanceof EntityHanging) && e.canBeCollidedWith());
+    private static final Gson gson = new Gson();
     public static HashMap<String, Float> customPosture;
+    public static String configFolder;
+    public static boolean suppress;
     private static CombatInfo DEFAULT = new CombatInfo(1, 1, false);
     private static HashMap<Item, CombatInfo> combatList;
+    private static HashMap<String, CombatInfo> archetypes;
 
-    public static void updateLists() {
-        DEFAULT = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
-        combatList = new HashMap<>();
-        customPosture = new HashMap<>();
-        for (String s : CombatConfig.combatItems) {
-            String[] val = s.split(",");
-            String name = val[0];
-            float attack = CombatConfig.defaultMultiplierPostureAttack;
-            float defend = CombatConfig.defaultMultiplierPostureDefend;
-            boolean shield = false;
-            if (val.length > 1)
-                try {
-                    attack = Float.parseFloat(val[1].trim());
-                } catch (NumberFormatException ignored) {
-                }
-            if (val.length > 2)
-                try {
-                    defend = Float.parseFloat(val[2].trim());
-                } catch (NumberFormatException ignored) {
-                }
-            if (val.length > 3)
-                shield = Boolean.parseBoolean(val[3].trim());
-            if (Item.getByNameOrId(name) != null)
-                combatList.put(Item.getByNameOrId(name), new CombatInfo(attack, defend, shield));
+    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand) {
+        attack(elb, target, hand, causeLivingDamage(elb));
+    }
+
+    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand, DamageSource ds) {
+        attackAtStrength(elb, target, hand, 1, ds);
+    }
+
+    public static void attack(EntityLivingBase from, Entity to, boolean offhand) {
+        if (offhand) {
+            swapHeldItems(from);
+            TaoCasterData.getTaoCap(from).setOffhandAttack(true);
         }
-        for (String s : CombatConfig.customPosture) {
-            try {
-                String[] val = s.split(",");
-                customPosture.put(val[0], Float.parseFloat(val[1]));
-            } catch (Exception e) {
-                Taoism.logger.warn("improperly formatted custom posture definition " + s + "!");
-            }
+        if (Taoism.getAtk(from) > 0) {
+            int temp = Taoism.getAtk(from);
+            if (from instanceof EntityPlayer) ((EntityPlayer) from).attackTargetEntityWithCurrentItem(to);
+            else from.attackEntityAsMob(to);
+            Taoism.setAtk(from, temp);
         }
+        if (offhand) {
+            swapHeldItems(from);
+            TaoCasterData.getTaoCap(from).setOffhandAttack(false);
+        }
+    }
+
+    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent, DamageSource ds) {
+        float temp = getHandCoolDown(elb, hand);
+        target.hurtResistantTime = 0;
+        rechargeHand(elb, hand, cooldownPercent, false);
+        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true, ds);
+        rechargeHand(elb, hand, temp, false);
+    }
+
+    public static void attackIndirectly(EntityLivingBase elb, Entity proxy, Entity target, EnumHand hand) {
+        attack(elb, target, hand, EntityDamageSourceTaoIndirect.causeProxyDamage(elb, proxy));
+    }
+
+    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
+        if (elb == null) return DamageSource.GENERIC;
+        if (elb instanceof EntityPlayer)
+            return DamageSource.causePlayerDamage((EntityPlayer) elb);
+        else return DamageSource.causeMobDamage(elb);
     }
 
     public static void executeMove(EntityLivingBase elb, byte moveCode) {
@@ -99,24 +129,26 @@ public class TaoCombatUtils {
         }
     }
 
-    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand) {
-        attack(elb, target, hand, causeLivingDamage(elb));
+    public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
+        if (elb.isHandActive()) return elb.getHeldItem(elb.getActiveHand());
+        return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
     }
 
-    public static void attackIndirectly(EntityLivingBase elb, Entity proxy, Entity target, EnumHand hand) {
-        attack(elb, target, hand, EntityDamageSourceTaoIndirect.causeProxyDamage(elb, proxy));
+    public static float getCooldownPeriod(EntityLivingBase elb) {
+        return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
     }
 
-    public static void attack(EntityLivingBase elb, Entity target, EnumHand hand, DamageSource ds) {
-        attackAtStrength(elb, target, hand, 1, ds);
+    public static float getCooldownPeriodOff(EntityLivingBase elb) {
+        return (float) (1.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
     }
 
-    public static void attackAtStrength(EntityLivingBase elb, Entity target, EnumHand hand, float cooldownPercent, DamageSource ds) {
-        float temp = getHandCoolDown(elb, hand);
-        target.hurtResistantTime = 0;
-        rechargeHand(elb, hand, cooldownPercent, false);
-        taoWeaponAttack(target, elb, elb.getHeldItem(hand), hand == EnumHand.MAIN_HAND, true, ds);
-        rechargeHand(elb, hand, temp, false);
+    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
+        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
+        return MathHelper.clamp((TaoCasterData.getTaoCap(elb).getSwing() + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
+    }
+
+    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
+        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
     }
 
     public static float getHandCoolDown(EntityLivingBase elb, EnumHand hand) {
@@ -128,6 +160,155 @@ public class TaoCombatUtils {
                     return getCooledAttackStrength(elb, 0.5f);
             }
         return 1f;
+    }
+
+    public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
+        if (TaoCasterData.getTaoCap(elb).getBindTime() > 0) return ItemStack.EMPTY;
+        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        if (elb instanceof EntityPlayer) {
+            EntityPlayer ep = (EntityPlayer) elb;
+            if (ep.getCooldownTracker().hasCooldown(main.getItem())) main = ItemStack.EMPTY;
+            if (ep.getCooldownTracker().hasCooldown(off.getItem())) off = ItemStack.EMPTY;
+        }
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && (elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance);
+        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        //System.out.println("main is " + mainRec + ", off is " + offRec);
+        //System.out.println("main is " + getCooledAttackStrength(elb, 0.5f) + ", off is " + getCooledAttackStrengthOff(elb, 0.5f));
+        float defMult = 42;//meaning of life, the universe and everything
+        ItemStack ret = ItemStack.EMPTY;
+        //shields
+        boolean halt = false;
+        if (isShield(main) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (mainRec && facing && defMult > postureDef(elb, attacker, main, amount)))) {
+            ret = main;
+            defMult = postureDef(elb, attacker, ret, amount);
+            halt = true;
+        }
+        if (isShield(off) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (offRec && facing && defMult > postureDef(elb, attacker, off, amount)))) {
+            ret = off;
+            defMult = postureDef(elb, attacker, ret, amount);
+            halt = true;
+        }
+        if (halt) return ret;
+        //parries
+        if (isValidCombatItem(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
+            ret = main;
+            defMult = postureDef(elb, attacker, ret, amount);
+        }
+        if (isValidCombatItem(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
+            ret = off;
+            defMult = postureDef(elb, attacker, ret, amount);
+        }
+        //mainhand
+        if (main.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec, amount) && ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
+            //System.out.println("using main hand for parry");
+            defMult = ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
+            ret = main;
+        }
+        //offhand
+        if (off.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) off.getItem()).canBlock(elb, attacker, off, offRec, amount) && ((IQiPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
+            //System.out.println("using off hand for parry");
+            ret = off;
+        }
+        return ret;
+    }
+
+    public static ItemStack getShield(Entity attacker, EntityLivingBase elb, float amount) {
+        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
+        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120);
+        ItemStack ret = ItemStack.EMPTY;
+        //shields
+        if (isShield(off) && offRec && facing) {
+            return off;
+        }
+        if (isShield(main) && mainRec && facing) {
+            return main;
+        }
+        return ret;
+    }
+
+    public static boolean isDirectDamage(DamageSource ds) {
+        return "player".equals(ds.damageType) || "mob".equals(ds.damageType);
+    }
+
+    public static boolean isMeleeDamage(DamageSource ds) {
+        return isPhysicalDamage(ds) && !ds.isProjectile();
+    }
+
+    public static boolean isPhysicalDamage(DamageSource ds) {
+        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
+    }
+
+    public static boolean isShield(ItemStack i) {
+        if (i.getItem().getRegistryName() == null) return false;
+        return combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
+    }
+
+    public static boolean isValidCombatItem(ItemStack i) {
+        if (i.getItem().getRegistryName() == null) return false;
+        return combatList.containsKey(i.getItem());
+    }
+
+    private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
+        if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, target))) return false;
+        ItemStack stack = player.getHeldItem(hand);
+        return stack.isEmpty() || !stack.getItem().onLeftClickEntity(stack, player, target);
+    }
+
+    @Nonnull
+    private static CombatInfo parseMeleeInfo(JsonObject obj) {
+        CombatInfo put = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
+        if (obj.has("attack")) put.attackPostureMultiplier = obj.get("attack").getAsFloat();
+        if (obj.has("defend")) put.defensePostureMultiplier = obj.get("defend").getAsFloat();
+        if (obj.has("shield")) put.isShield = obj.get("shield").getAsBoolean();
+        /*SweepInfo defaultSweep = GSON.fromJson(obj, SweepInfo.class);
+        put.sweeps[0] = defaultSweep;
+        for (SWEEPSTATE s : SWEEPSTATE.values()) {
+            int ord = s.ordinal();
+            JsonElement gottem = obj.get(s.name().toLowerCase(Locale.ROOT));
+            if (gottem == null || !gottem.isJsonObject()) {
+                if (GeneralConfig.debug)
+                    WarDance.LOGGER.debug("did not find " + s + ", generating defaults");
+                //"smartly" infer what kind of falling attack is wanted:
+                //cone->cleave, impact->impact, line->line, the others->none
+                if (s == SWEEPSTATE.FALLING)
+                    switch (defaultSweep.sweep) {
+                        case CONE -> {
+                            SweepInfo fresh = new SweepInfo(SWEEPTYPE.CLEAVE, defaultSweep.sweep_base, defaultSweep.sweep_scale);
+                            fresh.crit = true;
+                            put.sweeps[ord] = fresh;
+                        }
+                        case IMPACT, LINE -> put.sweeps[ord] = defaultSweep;
+                        default -> put.sweeps[ord] = DEFAULT_NONE;
+                    }
+                else put.sweeps[ord] = put.sweeps[0];
+                continue;
+            }
+            JsonObject sub = gottem.getAsJsonObject();
+            SweepInfo sweep = GSON.fromJson(sub, SweepInfo.class);
+            put.sweeps[ord] = sweep;
+        }*/
+        return put;
+    }
+
+    public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
+        float ret = attack.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) :
+                combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
+                amount * CombatConfig.defaultMultiplierPostureAttack;
+        if (attack.isEmpty()) {//bare hand 1.5x
+            ret *= CombatConfig.defaultPostureKenshiro;
+        }
+        if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
+        else ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
+        return ret;
+    }
+
+    public static float postureDef(EntityLivingBase defender, Entity attacker, ItemStack defend, float amount) {
+        if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold)
+            return 0;
+        return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
+                (defend.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) :
+                        combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
     }
 
     public static void rechargeHand(EntityLivingBase elb, EnumHand hand, float percent, boolean syncWithClient) {
@@ -146,6 +327,37 @@ public class TaoCombatUtils {
         }
     }
 
+    public static void swapHeldItems(EntityLivingBase e) {
+        //attributes = new ArrayList<>();
+        ItemStack main = e.getHeldItemMainhand(), off = e.getHeldItemOffhand();
+        int tssl = Taoism.getAtk(e);
+        suppress = true;
+        ITaoStatCapability cap = TaoCasterData.getTaoCap(e);
+        e.setHeldItem(EnumHand.MAIN_HAND, e.getHeldItemOffhand());
+        e.setHeldItem(EnumHand.OFF_HAND, main);
+//        int mbind = cap.getbi(InteractionHand.MAIN_HAND);
+//        cap.setHandBind(InteractionHand.MAIN_HAND, cap.getHandBind(InteractionHand.OFF_HAND));
+//        cap.setHandBind(InteractionHand.OFF_HAND, mbind);
+        //tried really hard to make this work, but it just causes more problems.
+        suppress = false;
+        e.getAttributeMap().removeAttributeModifiers(main.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
+        e.getAttributeMap().applyAttributeModifiers(off.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
+        e.getAttributeMap().removeAttributeModifiers(off.getAttributeModifiers(EntityEquipmentSlot.OFFHAND));
+        e.getAttributeMap().applyAttributeModifiers(main.getAttributeModifiers(EntityEquipmentSlot.OFFHAND));
+//        main.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).forEach((att, mod) -> Optional.ofNullable(e.getEntityAttribute(SharedMonsterAttributes.)).ifPresent((mai) -> mai.removeModifier(mod)));
+//        off.getAttributeModifiers(EntityEquipmentSlot.OFFHAND).forEach((att, mod) -> Optional.ofNullable(e.getAttribute(att)).ifPresent((mai) -> mai.removeModifier(mod)));
+//        main.getAttributeModifiers(EntityEquipmentSlot.OFFHAND).forEach((att, mod) -> Optional.ofNullable(e.getAttribute(att)).ifPresent((mai) -> {
+//            if (!mai.hasModifier(mod))
+//                mai.addTransientModifier(mod);
+//        }));
+//        off.getAttributeModifiers(EquipmentSlot.MAINHAND).forEach((att, mod) -> Optional.ofNullable(e.getAttribute(att)).ifPresent((mai) -> {
+//            if (!mai.hasModifier(mod))
+//                mai.addTransientModifier(mod);
+//        }));
+        Taoism.setAtk(e, cap.getOffhandCool());
+        cap.setOffhandCool(tssl);
+    }
+
     public static void taoWeaponAttack(Entity targetEntity, EntityLivingBase elb, ItemStack stack, boolean main, boolean updateOff) {
         taoWeaponAttack(targetEntity, elb, stack, main, updateOff, causeLivingDamage(elb));
     }
@@ -155,13 +367,6 @@ public class TaoCombatUtils {
             taoWeaponAttack(targetEntity, (EntityPlayer) elb, stack, main, updateOff, ds);
         else
             targetEntity.attackEntityFrom(ds, (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
-    }
-
-    public static DamageSource causeLivingDamage(EntityLivingBase elb) {
-        if (elb == null) return DamageSource.GENERIC;
-        if (elb instanceof EntityPlayer)
-            return DamageSource.causePlayerDamage((EntityPlayer) elb);
-        else return DamageSource.causeMobDamage(elb);
     }
 
     /**
@@ -365,142 +570,113 @@ public class TaoCombatUtils {
         TaoCasterData.getTaoCap(player).setOffhandAttack(false);
     }
 
-    private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
-        if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, target))) return false;
-        ItemStack stack = player.getHeldItem(hand);
-        return stack.isEmpty() || !stack.getItem().onLeftClickEntity(stack, player, target);
-    }
+    public static void updateLists() {
+        DEFAULT = new CombatInfo(CombatConfig.defaultMultiplierPostureAttack, CombatConfig.defaultMultiplierPostureDefend, false);
+        combatList = new HashMap<>();
+        archetypes = new HashMap<>();
+        customPosture = new HashMap<>();
+        if (configFolder != null) {
+            File folder = new File(TaoCombatUtils.configFolder);String sep = System.getProperty("file.separator");
+            if(!folder.exists())
+                folder.mkdir();
+            File stats = new File(TaoCombatUtils.configFolder + sep + "stats");
+            if(!stats.exists())
+                stats.mkdir();
+            File tags = new File(TaoCombatUtils.configFolder + sep + "tags");
+            if(!tags.exists())
+                tags.mkdir();
+            try {
+                for (File json : stats.listFiles(a ->
+                        Files.getFileExtension(a.getName()).equals("json"))) {
+                    JsonObject je = gson.fromJson(new JsonReader(new FileReader(json)), JsonObject.class);
+                    je.entrySet().forEach(entry -> {
+                        String name = entry.getKey();
+                        if (name.startsWith("#")) {//register tags separately
+                            try {
+                                name = name.substring(1);
+                                if (name.contains(":"))
+                                    name = name.substring(name.lastIndexOf(":")+1);
+                                JsonObject obj = entry.getValue().getAsJsonObject();
+                                CombatInfo put = parseMeleeInfo(obj);
+                                archetypes.put(name, put);
+                            } catch (Exception x) {
+                                Taoism.logger.error("malformed json under " + name + "!");
+                                x.printStackTrace();
+                            }
+                            return;
+                        }
+                        ResourceLocation i = new ResourceLocation(name);
+                        Item item = ForgeRegistries.ITEMS.getValue(i);
+                        if (item == null || item == Items.AIR) {
+                            return;
+                        }
+                        try {
+                            JsonObject obj = entry.getValue().getAsJsonObject();
+                            CombatInfo put = parseMeleeInfo(obj);
+                            combatList.put(item, put);
+                        } catch (Exception x) {
+                            Taoism.logger.error("malformed json under " + name + "!");
+                            x.printStackTrace();
+                        }
+                    });
+                }
+                for (File json : tags.listFiles(file -> Files.getFileExtension(file.getName()).equals("json"))) {
+                    JsonObject je = gson.fromJson(new JsonReader(new FileReader(json)), JsonObject.class);
+                    je.getAsJsonArray("values").forEach(a -> {
+                        JsonObject entry= a.getAsJsonObject();
+                        String name = entry.get("id").getAsString();
+                        ResourceLocation i = new ResourceLocation(name);
+                        Item item = ForgeRegistries.ITEMS.getValue(i);
+                        if (item == null || item == Items.AIR) {
+                            return;
+                        }
+                        String tag=Files.getNameWithoutExtension(json.getName());
+                        if(archetypes.containsKey(tag)){
+                            CombatInfo put = archetypes.get(tag);
+                            combatList.put(item, put);
+                        }
+                    });
+                }
+            } catch (Exception ignored) {
 
-    public static float getCooledAttackStrengthOff(EntityLivingBase elb, float adjustTicks) {
-        return MathHelper.clamp(((float) TaoCasterData.getTaoCap(elb).getOffhandCool() + adjustTicks) / getCooldownPeriodOff(elb), 0.0F, 1.0F);
-    }
-
-    public static float getCooldownPeriodOff(EntityLivingBase elb) {
-        return (float) (1.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.OFF_HAND) * 20.0D);
-    }
-
-    public static ItemStack getAttackingItemStackSensitive(EntityLivingBase elb) {
-        if (elb.isHandActive()) return elb.getHeldItem(elb.getActiveHand());
-        return TaoCasterData.getTaoCap(elb).isOffhandAttack() ? elb.getHeldItemOffhand() : elb.getHeldItemMainhand();
-    }
-
-    public static ItemStack getShield(Entity attacker, EntityLivingBase elb, float amount) {
-        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
-        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
-        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120);
-        ItemStack ret = ItemStack.EMPTY;
-        //shields
-        if (isShield(off) && offRec && facing) {
-            return off;
+            }
         }
-        if (isShield(main) && mainRec && facing) {
-            return main;
+        archetypes.clear();//save space
+        for (String s : CombatConfig.combatItems) {
+            String[] val = s.split(",");
+            String name = val[0];
+            float attack = CombatConfig.defaultMultiplierPostureAttack;
+            float defend = CombatConfig.defaultMultiplierPostureDefend;
+            boolean shield = false;
+            if (val.length > 1)
+                try {
+                    attack = Float.parseFloat(val[1].trim());
+                } catch (NumberFormatException ignored) {
+                }
+            if (val.length > 2)
+                try {
+                    defend = Float.parseFloat(val[2].trim());
+                } catch (NumberFormatException ignored) {
+                }
+            if (val.length > 3)
+                shield = Boolean.parseBoolean(val[3].trim());
+            if (Item.getByNameOrId(name) != null)
+                combatList.put(Item.getByNameOrId(name), new CombatInfo(attack, defend, shield));
         }
-        return ret;
-    }
-
-    public static float getCooledAttackStrength(EntityLivingBase elb, float adjustTicks) {
-        if (elb instanceof EntityPlayer) return ((EntityPlayer) elb).getCooledAttackStrength(adjustTicks);
-        return MathHelper.clamp((TaoCasterData.getTaoCap(elb).getSwing() + adjustTicks) / getCooldownPeriod(elb), 0.0F, 1.0F);
-    }
-
-    public static boolean isShield(ItemStack i) {
-        if (i.getItem().getRegistryName() == null) return false;
-        return combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
-    }
-
-    public static float getCooldownPeriod(EntityLivingBase elb) {
-        return (float) (20.0D / NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_SPEED, elb, EnumHand.MAIN_HAND));
-    }
-
-    public static ItemStack getParryingItemStack(Entity attacker, EntityLivingBase elb, float amount) {
-        if (TaoCasterData.getTaoCap(elb).getBindTime() > 0) return ItemStack.EMPTY;
-        ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
-        if (elb instanceof EntityPlayer) {
-            EntityPlayer ep = (EntityPlayer) elb;
-            if (ep.getCooldownTracker().hasCooldown(main.getItem())) main = ItemStack.EMPTY;
-            if (ep.getCooldownTracker().hasCooldown(off.getItem())) off = ItemStack.EMPTY;
+        for (String s : CombatConfig.customPosture) {
+            try {
+                String[] val = s.split(",");
+                customPosture.put(val[0], Float.parseFloat(val[1]));
+            } catch (Exception e) {
+                Taoism.logger.warn("improperly formatted custom posture definition " + s + "!");
+            }
         }
-        boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && (elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance);
-        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
-        //System.out.println("main is " + mainRec + ", off is " + offRec);
-        //System.out.println("main is " + getCooledAttackStrength(elb, 0.5f) + ", off is " + getCooledAttackStrengthOff(elb, 0.5f));
-        float defMult = 42;//meaning of life, the universe and everything
-        ItemStack ret = ItemStack.EMPTY;
-        //shields
-        boolean halt = false;
-        if (isShield(main) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (mainRec && facing && defMult > postureDef(elb, attacker, main, amount)))) {
-            ret = main;
-            defMult = postureDef(elb, attacker, ret, amount);
-            halt = true;
-        }
-        if (isShield(off) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (offRec && facing && defMult > postureDef(elb, attacker, off, amount)))) {
-            ret = off;
-            defMult = postureDef(elb, attacker, ret, amount);
-            halt = true;
-        }
-        if (halt) return ret;
-        //parries
-        if (isValidCombatItem(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
-            ret = main;
-            defMult = postureDef(elb, attacker, ret, amount);
-        }
-        if (isValidCombatItem(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
-            ret = off;
-            defMult = postureDef(elb, attacker, ret, amount);
-        }
-        //mainhand
-        if (main.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) main.getItem()).canBlock(elb, attacker, main, mainRec, amount) && ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount) <= defMult) {
-            //System.out.println("using main hand for parry");
-            defMult = ((IQiPostureManipulable) main.getItem()).postureMultiplierDefend(attacker, elb, main, amount);
-            ret = main;
-        }
-        //offhand
-        if (off.getItem() instanceof IQiPostureManipulable && ((IQiPostureManipulable) off.getItem()).canBlock(elb, attacker, off, offRec, amount) && ((IQiPostureManipulable) off.getItem()).postureMultiplierDefend(attacker, elb, off, amount) <= defMult) {
-            //System.out.println("using off hand for parry");
-            ret = off;
-        }
-        return ret;
-    }
-
-    public static boolean isValidCombatItem(ItemStack i) {
-        if (i.getItem().getRegistryName() == null) return false;
-        return combatList.containsKey(i.getItem());
-    }
-
-    public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
-        float ret = attack.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) : combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
-                amount * CombatConfig.defaultMultiplierPostureAttack;
-        if (attack.isEmpty()) {//bare hand 1.5x
-            ret *= CombatConfig.defaultPostureKenshiro;
-        }
-        if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
-        else ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
-        return ret;
-    }
-
-    public static float postureDef(EntityLivingBase defender, Entity attacker, ItemStack defend, float amount) {
-        if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold)
-            return 0;
-        return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
-                (defend.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) : combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
-    }
-
-    public static boolean isMeleeDamage(DamageSource ds) {
-        return isPhysicalDamage(ds) && !ds.isProjectile();
-    }
-
-    public static boolean isPhysicalDamage(DamageSource ds) {
-        return !ds.isFireDamage() && !ds.isMagicDamage() && !ds.isUnblockable() && !ds.isExplosion() && !ds.isDamageAbsolute();
-    }
-
-    public static boolean isDirectDamage(DamageSource ds) {
-        return "player".equals(ds.damageType) || "mob".equals(ds.damageType);
     }
 
     private static class CombatInfo {
-        private final float attackPostureMultiplier, defensePostureMultiplier;
-        private final boolean isShield;
+        private float attackPostureMultiplier;
+        private float defensePostureMultiplier;
+        private boolean isShield;
 
         private CombatInfo(float attack, float defend, boolean shield) {
             attackPostureMultiplier = attack;

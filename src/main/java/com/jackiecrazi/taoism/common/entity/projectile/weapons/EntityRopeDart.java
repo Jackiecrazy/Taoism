@@ -7,6 +7,7 @@ import com.jackiecrazi.taoism.common.item.weapon.melee.rope.RopeDart;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
@@ -15,6 +16,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.Objects;
 
 public class EntityRopeDart extends EntityThrownWeapon {
@@ -59,17 +61,15 @@ public class EntityRopeDart extends EntityThrownWeapon {
             Vec3d dudeVec = getThrower().getPositionVector().addVector(0, getThrower().getEyeHeight() - 0.1, 0);
             if (dudeVec.subtract(this.getPositionVector()).lengthSquared() < 1) {
                 if (hitStatus > 0) {
-                    motionX /= 10d;
-                    motionY /= 10d;
-                    motionZ /= 10d;
-                    updateHitStatus(-2);
-                    markVelocityChanged();
-                    onRecallTriggered = false;
+                    List<Entity> ent = world.getEntitiesWithinAABB(EntityMob.class, getThrower().getEntityBoundingBox().grow(8));
+                    if (!ent.isEmpty()) {
+                        shoot(ent.get(0).getPositionEyes(1).subtract(getPositionVector()), MathHelper.sqrt(NeedyLittleThings.getSpeedSq(this)), 0);
+                        updateHitStatus(-2);
+                        markVelocityChanged();
+                        onRecallTriggered = false;
+                    } else charge = 0;
                 }
             } else if (hitStatus == -2) {
-                motionX *= 8d;
-                motionY *= 8d;
-                motionZ *= 8d;
                 updateHitStatus(0);
                 markVelocityChanged();
             }
@@ -95,7 +95,6 @@ public class EntityRopeDart extends EntityThrownWeapon {
     @Override
     protected void onHitBlock(RayTraceResult rtr) {
         super.onHitBlock(rtr);
-        charge = 0;
         inGround = false;
         sync();
     }
@@ -148,9 +147,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
             //Vec3d newDir = getPositionVector().subtract(getThrower().getPositionVector().addVector(0, getThrower().getEyeHeight() - 0.1, 0)).normalize();
             shoot(newDir, Math.min(5, charge) * 0.1f + 0.5f, 0);//speed increases over 5 hits
             updateHitStatus(0);
-            if (TaoCasterData.getTaoCap((EntityLivingBase) seme).isOffhandAttack()) {
-                charge++;
-            }
+            charge++;
             velocityChanged = true;
             onRecallTriggered = false;
             sync();

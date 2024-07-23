@@ -289,7 +289,7 @@ public class TaoEntityHandler {
                         cap.setJumpState(ITaoStatCapability.JUMPSTATE.CLINGING);
                         cap.setClingDirections(new ITaoStatCapability.ClingData(TaoMovementUtils.collisionStatus(p)));
                     }
-                    TaoCasterData.forceUpdateTrackingClients(p);
+                    //TaoCasterData.forceUpdateTrackingClients(p);
                 }
             }
 //            for(Entity a:p.world.getEntitiesWithinAABBExcludingEntity(p, p.getEntityBoundingBox().grow(16))){

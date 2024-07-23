@@ -31,6 +31,7 @@ weapon.parry=this weapon cannot block or parry
 weapon.ignore=this weapon ignores parries and shields
 weapon.projectile=this weapon ignores parries
 weapon.disshield=this weapon disables shields when launching a leaping strike
+weapon.shield=shield: parries projectiles
 taoism.weaponReach=attack range: %.1f
 taoism.weaponDefMult=defense posture multiplier: %.2f
 taoism.weaponAttMult=attack posture consumption: %.2f
@@ -143,12 +144,10 @@ maul.nail=right click to hammer the entity one block into the ground, rooting it
 maul.hardness=blocks under the entity must have a harvest level less than (chi/2)
 
 item.taostaff.name=Quarterstaff
-staff.flick=a strike on a grounded target while grounded will flick them up, giving you a brief jump boost as well
-staff.smash=attacking an airborne target while grounded will pummel them down, dealing extra fall damage scaling with chi
-staff.doink=if you are airborne, attacking a grounded target will boost you higher, distance increased by chi
-staff.throw=if both you and the opponent are airborne, the opponent is flicked up, distance increased by chi
-staff.sneak=aerial behavior can be overridden by sneaking
-staff.swipe=right click to swing in a 120 degree sector, knocking enemies back slightly
+staff.flick=alt attacking a grounded target will flick them up, giving you a brief jump boost and resetting your jump
+staff.smash=alt attacking an airborne target will pummel them down, dealing extra fall damage scaling with chi
+staff.doink=attacking a grounded target will boost you up, distance increased by chi
+staff.throw=attacking an airborne target boosts them up, distance increased by chi
 staff.oscillate=the two attacks have separate cooldowns; normal attack can be chained twice
 
 item.guandao.name=Guan Dao
@@ -176,14 +175,13 @@ nunchaku.knockback=knockback is converted into extra damage
 
 item.ropedart.name=Rope Dart
 ropedart.parry=main hand cannot parry until dart is thrown
-ropedart.projectile=normal attack throws out the dart at base speed
+ropedart.projectile=normal attack throws out the dart at base speed, the dart will automatically seek out nearby enemies
 ropedart.attack=each successful attack with the dart increases its speed
 ropedart.pain=each level increases damage by 10%%, and above speed level 5 dart attacks ignore 5 armor
-ropedart.loss=hitting a block, or retrieving the dart via sneaking, resets its speed
+ropedart.loss=if the dart cannot find an enemy after returning, or upon retrieving the dart via sneaking, reset its speed
 ropedart.punch=while the dart is out, normal attack is a punch that deals more knockback
 ropedart.alt=right click to do a kick that consumes 1 posture to deal 4 posture damage to the target
-ropedart.trick=attacking while the dart is near the player additionally shoots it out in that direction
-ropedart.accel=kicks will additionally speed up the dart by 1 level
+ropedart.trick=attacking while the dart is near the player additionally shoots it out in that direction and adds 1 speed
 
 item.bian.name=Iron Whip
 bian.stagger=deals 1.5x damage against staggered targets

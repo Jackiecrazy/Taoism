@@ -39,7 +39,7 @@ public class CombatConfig {
     public static int ssptime = 20;
     @Config.Comment("Staggered entities that take more than this number of hits will stand back up immediately.")
     @Config.RangeInt(min = 1)
-    public static int staggerCounter = 3;
+    public static int staggerCounter = 1;
     @Config.Comment("No attack can remove more than this percentage of max posture in one hit. Special staggers, such as the rider falling off a staggered steed, ignore this setting.")
     @Config.RangeDouble(min = 0, max = 1)
     public static double hardCapPercent = 0.4;
@@ -75,11 +75,12 @@ public class CombatConfig {
     public static double mobParryChance=0.7;
 
     public static void printParryList() {
-        if (printParryList)
+        if (printParryList) {
             Taoism.logger.info("beginning generation of the parry list:");
-        for (Item item : Item.REGISTRY) {
-            if (item instanceof ItemSword || item instanceof ItemAxe||item instanceof ItemShield) {
-                System.out.println(item.getRegistryName().toString());
+            for (Item item : Item.REGISTRY) {
+                if (item instanceof ItemSword || item instanceof ItemAxe || item instanceof ItemShield) {
+                    System.out.println(item.getRegistryName().toString());
+                }
             }
         }
     }
