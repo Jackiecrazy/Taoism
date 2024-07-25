@@ -23,6 +23,11 @@ public class PacketExtendThyReach implements IMessage {
     public PacketExtendThyReach() {
     }
 
+    public PacketExtendThyReach(boolean mainHand, Entity entity) {
+        entityId = entity.getEntityId();
+        off = mainHand;
+    }
+
     public PacketExtendThyReach(int parEntityId, boolean mainHand) {
         entityId = parEntityId;
         off = mainHand;

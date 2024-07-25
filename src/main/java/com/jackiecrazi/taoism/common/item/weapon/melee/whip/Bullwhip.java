@@ -39,7 +39,7 @@ public class Bullwhip extends TaoWeapon {
     };
 
     public Bullwhip() {
-        super(1, 1.6, 6, 0.5f);
+        super(1, 1.6, 6, 1.6f);
     }
 
     @Override

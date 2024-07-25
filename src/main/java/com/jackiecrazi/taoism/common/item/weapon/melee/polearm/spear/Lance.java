@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class Lance extends TaoWeapon {
     public Lance() {
-        super(2, 1.3, 5, 1);
+        super(2, 1.3, 5, 3);
     }
 
     private static float chargeAndLookCos(Entity attacker) {
@@ -160,6 +160,6 @@ public class Lance extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1;
+        return 0.8f;
     }
 }

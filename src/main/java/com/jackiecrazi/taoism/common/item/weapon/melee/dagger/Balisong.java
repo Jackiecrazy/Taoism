@@ -41,7 +41,7 @@ public class Balisong extends TaoWeapon {
 
 
     public Balisong() {
-        super(2, 2, 5f, 0);
+        super(2, 2, 5f, 1.3f);
         setQiAccumulationRate(0.35f);
     }
 
@@ -171,11 +171,6 @@ public class Balisong extends TaoWeapon {
     @Override
     public float getTrueReach(EntityLivingBase p, ItemStack is) {
         if (isCharged(p, is)) return 16;
-        return 2f;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
         return 2f;
     }
 

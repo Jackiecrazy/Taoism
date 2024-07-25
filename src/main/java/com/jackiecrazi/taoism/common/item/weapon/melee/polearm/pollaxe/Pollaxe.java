@@ -47,7 +47,7 @@ public class Pollaxe extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Pollaxe() {
-        super(3, 1.2, 7, 1.3f);
+        super(3, 1.2, 7, 6f);
         this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
             if (elb != null) {
                 if (isDummy(stack)) return 1;
@@ -68,7 +68,7 @@ public class Pollaxe extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.5f;
+        return 0.7f;
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
@@ -232,7 +232,7 @@ public class Pollaxe extends TaoWeapon {
     }
 
     @Override
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (isCharged(attacker, stack) && getCombo(attacker, stack) == 2) {//third hit
             splash(attacker, stack, 360);
             dischargeWeapon(attacker, stack);

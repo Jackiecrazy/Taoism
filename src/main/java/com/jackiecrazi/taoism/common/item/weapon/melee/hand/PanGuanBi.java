@@ -38,17 +38,12 @@ public class PanGuanBi extends TaoWeapon {
      */
 
     public PanGuanBi() {
-        super(2, 1, 5f, 0.1f);
+        super(2, 1, 5f, 1.3f);
     }
 
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.4f;
     }
 
     @Override

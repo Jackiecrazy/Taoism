@@ -32,11 +32,11 @@ public class ZhanMaDao extends TaoWeapon {
      */
 
     public ZhanMaDao() {
-        super(3, 1.2, 6, 1);
+        super(3, 1.2, 6, 3.8f);
     }
 
     @Override
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.MAIN_HAND) {
             splash(attacker, stack, 30, 120);
         } else splash(attacker, stack, 120, 30);
@@ -72,7 +72,7 @@ public class ZhanMaDao extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1;
+        return 0.9f;
     }
 
     @Override

@@ -43,7 +43,7 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
      */
 
     public GouLianQiang() {
-        super(2, 1.4, 6d, 1f);
+        super(2, 1.4, 6d, 3f);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.4f;
+        return 0.8f;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class GouLianQiang extends TaoWeapon implements ITetherItem {
         return false;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && isCharged(attacker, stack))
             splash(attacker, stack, 120);
     }

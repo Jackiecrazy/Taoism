@@ -11,6 +11,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
@@ -39,14 +40,14 @@ public class Bian extends TaoWeapon {
     dealing remaining hp damage to the target
      */
     public Bian() {
-        super(0, 1.6, 6, 0.9f);
+        super(0, 1.6, 6, 4);
     }
 
     @Override
     protected void perkDesc(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add(TextFormatting.DARK_GREEN + I18n.format("weapon.disshield") + TextFormatting.RESET);
         tooltip.add(I18n.format("bian.stagger"));
-        //tooltip.add(I18n.format("bian.armpen"));
+        tooltip.add(I18n.format("bian.bind"));
         tooltip.add(I18n.format("bian.enfeeble"));
     }
 
@@ -75,9 +76,15 @@ public class Bian extends TaoWeapon {
     @Override
     public void attackStart(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack stack, float orig) {
         super.attackStart(ds, attacker, target, stack, orig);
+        TaoCasterData.getTaoCap(target).setBindTime(TaoCasterData.getTaoCap(attacker).getQiFloored()+7);
         if (isCharged(attacker, stack) && TaoCasterData.getTaoCap(target).getDownTimer() > 0) {
             gettagfast(stack).setBoolean("ouches", true);
         }
+    }
+
+    @Override
+    public void onParry(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
+        TaoCasterData.getTaoCap(attacker).setBindTime(TaoCasterData.getTaoCap(defender).getQiFloored()+7);
     }
 
     @Override

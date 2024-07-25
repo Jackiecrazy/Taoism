@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class BecDeCorbin extends TaoWeapon {
     public BecDeCorbin() {
-        super(2, 1.4, 6, 1);
+        super(2, 1.4, 6, 7);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class BecDeCorbin extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.4f;
+        return 0.7f;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class BecDeCorbin extends TaoWeapon {
     @Override
     public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
         if (defender != null && attacker != null && getHand(item) == EnumHand.MAIN_HAND)
-            return amount * (1.5f - TaoCasterData.getTaoCap(defender).getPosture() / (TaoCasterData.getTaoCap(defender).getMaxPosture()));
+            return itemPostureMultiplier * (1.5f - TaoCasterData.getTaoCap(defender).getPosture() / (TaoCasterData.getTaoCap(defender).getMaxPosture()));
         return super.postureDealtBase(attacker, defender, item, amount);
     }
 

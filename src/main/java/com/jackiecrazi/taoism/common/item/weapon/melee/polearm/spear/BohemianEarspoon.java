@@ -44,7 +44,7 @@ public class BohemianEarspoon extends TaoWeapon {
     };
 
     public BohemianEarspoon() {
-        super(2, 1.4, 6d, 1f);
+        super(2, 1.4, 6d, 2.7f);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BohemianEarspoon extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+        return 0.8f;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class BohemianEarspoon extends TaoWeapon {
         return 6f;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND && getLastAttackedRangeSq(stack) != 0) {
             splash(attacker, stack, 120);
             setLastAttackedRangeSq(attacker, stack, 0);

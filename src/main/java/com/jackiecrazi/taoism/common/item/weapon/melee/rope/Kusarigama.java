@@ -61,7 +61,7 @@ public class Kusarigama extends TaoWeapon implements ITetherItem {
      * execution: throw sickle out around the neck-analogue of the enemy, then pull yourself to them and do a spinning head slice
      */
     public Kusarigama() {
-        super(1, 1.5, 6, 1);
+        super(1, 1.5, 6, 2);
         this.addPropertyOverride(new ResourceLocation("offhand"), (stack, w, elb) -> {
             if (elb != null) {
                 if (getHand(stack) == EnumHand.OFF_HAND) {
@@ -312,6 +312,6 @@ public class Kusarigama extends TaoWeapon implements ITetherItem {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return getHand(item) == EnumHand.OFF_HAND ? 1 + (item.getItemDamage() / 20f) : 1.5f;
+        return getHand(item) == EnumHand.OFF_HAND ? 0.6f + (item.getItemDamage() / 20f) : 0.9f;
     }
 }

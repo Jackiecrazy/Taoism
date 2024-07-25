@@ -36,7 +36,7 @@ public class BlackSnake extends TaoWeapon {
     };
 
     public BlackSnake() {
-        super(1, 1.6, 6, 0.5f);
+        super(1, 1.6, 6, 1.6f);
     }
 
     @Override

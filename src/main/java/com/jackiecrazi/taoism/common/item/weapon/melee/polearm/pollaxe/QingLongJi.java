@@ -52,7 +52,7 @@ public class QingLongJi extends TaoWeapon {
      * -two dragons spiral each other while traveling forward, driving enemies into the ground
      */
     public QingLongJi() {
-        super(2, 1.2, 5.5d, 1f);
+        super(2, 1.2, 5.5d, 4f);
         this.addPropertyOverride(new ResourceLocation("invert"), (stack, world, ent) -> isReversed(stack) ? 1 : 0);
     }
 
@@ -67,7 +67,7 @@ public class QingLongJi extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+        return .8f;
     }
 
     @Override
@@ -121,7 +121,7 @@ public class QingLongJi extends TaoWeapon {
         return (gettagfast(is).getBoolean("release") ? 10 : 0) + (isCharged(p, is) ? 8 : 4f);
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (getHand(stack) == EnumHand.OFF_HAND){
             if (isCharged(attacker, stack)) splash(attacker, stack, 120);
             else splash(attacker, stack, 60 + chi * 6);

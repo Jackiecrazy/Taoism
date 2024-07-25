@@ -25,7 +25,7 @@ public class Misericorde extends TaoWeapon {
     Intended for use with knockdown weapons or extensive grappling.
      */
     public Misericorde() {
-        super(2, 2, 5, 0);
+        super(2, 2, 5, 1.3f);
     }
 
     @Override
@@ -68,10 +68,5 @@ public class Misericorde extends TaoWeapon {
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 2;
     }
 }

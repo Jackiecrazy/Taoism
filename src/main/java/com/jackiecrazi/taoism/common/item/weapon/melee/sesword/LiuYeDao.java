@@ -10,7 +10,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -28,7 +27,7 @@ import java.util.List;
  */
 public class LiuYeDao extends TaoWeapon {
     public LiuYeDao() {
-        super(1, 1.6, 5, 0.7f);
+        super(1, 1.6, 5, 2.5f);
     }
 
     @Override
@@ -51,11 +50,11 @@ public class LiuYeDao extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.3f;
+        return 0.8f;
     }
 
     @Override
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         gettagfast(stack).setFloat("cont", getCoolDownUncapped(attacker, getHand(stack), 0.5f));
         splash(attacker, stack, 120);
     }

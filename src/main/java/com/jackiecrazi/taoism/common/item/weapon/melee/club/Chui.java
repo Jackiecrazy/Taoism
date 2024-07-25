@@ -5,6 +5,7 @@ import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityChui;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
+import com.jackiecrazi.taoism.potions.TaoPotion;
 import com.jackiecrazi.taoism.utils.TaoPotionUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -29,7 +30,7 @@ public class Chui extends TaoWeapon {
     //execution
 
     public Chui() {
-        super(0, 1.2f, 8f, 1f);
+        super(0, 1.2f, 8f, 5);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class Chui extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.6f;
+        return 0.9f;
     }
 
     @Override
@@ -104,6 +105,8 @@ public class Chui extends TaoWeapon {
 
     @Override
     protected void applyEffects(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker, int chi) {
+        if (chi > 5)
+            TaoPotionUtils.attemptAddPot(attacker, new PotionEffect(TaoPotion.ENFEEBLE, chi * 10), false);
         TaoPotionUtils.attemptAddPot(target, new PotionEffect(MobEffects.SLOWNESS, chi * 10, chi / 3), false);
     }
 

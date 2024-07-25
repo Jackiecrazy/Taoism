@@ -49,7 +49,7 @@ public class BanFu extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public BanFu() {
-        super(3, 1.4, 7f, 1f);
+        super(3, 1.4, 7f, 4f);
         this.setHarvestLevel("axe", 2);
     }
 

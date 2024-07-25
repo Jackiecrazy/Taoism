@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class MonkSpade extends TaoWeapon {
     public MonkSpade() {
-        super(0, 1.2, 5, 1);
+        super(0, 1.2, 5, 5);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class MonkSpade extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(@Nullable Entity attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.8f;
+        return 0.9f;
     }
 
     @Override

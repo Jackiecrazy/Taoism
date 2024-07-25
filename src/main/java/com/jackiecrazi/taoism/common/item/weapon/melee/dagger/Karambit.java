@@ -55,18 +55,13 @@ public class Karambit extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, false, true};
 
     public Karambit() {
-        super(1, 2, 5f, 0);
+        super(1, 2, 5f, 1.3f);
         setQiAccumulationRate(0.35f);
     }
 
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 2f;//not all that good at defense now is it...
     }
 
     @Override

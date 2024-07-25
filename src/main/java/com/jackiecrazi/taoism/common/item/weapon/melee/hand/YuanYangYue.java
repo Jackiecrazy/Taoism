@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class YuanYangYue extends TaoWeapon {
     public YuanYangYue() {
-        super(1, 2, 5, 0.4f);
+        super(1, 2, 5, 2.1f);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class YuanYangYue extends TaoWeapon {
         if (defender != null && getBuff(item, "lastParryTime") + 30 > defender.ticksExisted) {
             return 0;
         }
-        return 0.6f;
+        return 0.7f;
     }
 
     @Override

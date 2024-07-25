@@ -41,7 +41,7 @@ public class Halberd extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, true, false};
 
     public Halberd() {
-        super(3, 1.3, 8, 1f);
+        super(3, 1.3, 8, 4f);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class Halberd extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.3f;
+        return 0.7f;
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {

@@ -28,24 +28,19 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -60,7 +55,6 @@ public class ClientEvents {
     //Reflection time!
     public static final Field zaHando = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187471_h");
     public static final Field okuyasu = ObfuscationReflectionHelper.findField(ItemRenderer.class, "field_187472_i");
-    private static final int ALLOWANCE = 7;
     private static final int[] GRADIENTE = {
             new Color(200, 37, 56).getRGB(),
             new Color(177, 52, 51).getRGB(),
@@ -81,15 +75,7 @@ public class ClientEvents {
             0x00FF00
     };
     private static final ResourceLocation hud = new ResourceLocation(Taoism.MODID, "textures/hud/yeet.png");
-    private static final int CHARGE = 50;
     private static final ResourceLocation newdark = new ResourceLocation(Taoism.MODID, "textures/hud/mega.png");
-    /**
-     * left, back, right
-     */
-    private static long[] lastTap = {0, 0, 0, 0};
-    private static boolean[] tapped = {false, false, false, false};
-    private static boolean jump = false, sneak = false;
-    private static int leftClickAt = 0, rightClickAt = 0;
     private static float currentQiLevel = 0;
 
     private static float blue(int a) {
@@ -271,75 +257,6 @@ public class ClientEvents {
                 }
                 //}
             }
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void doju(InputUpdateEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        MovementInput mi = e.getMovementInput();
-        final ITaoStatCapability itsc = TaoCasterData.getTaoCap(mc.player);
-        if (KeyBindOverlord.combatMode.getKeyConflictContext().isActive() && KeyBindOverlord.combatMode.isPressed()) {
-            mc.player.sendStatusMessage(new TextComponentTranslation("taoism.combat." + (itsc.isInCombatMode() ? "off" : "on")), true);
-            Taoism.net.sendToServer(new PacketToggleCombatMode());
-        }
-        if (itsc.getRootTime() > 0) {
-            //no moving while you're rooted!
-            KeyBinding.unPressAllKeys();
-            return;
-        }
-        if (itsc.getQi() > 0 && itsc.isInCombatMode()) {
-            final boolean onSprint = mc.gameSettings.keyBindSprint.isPressed();
-            if (mi.leftKeyDown && (!tapped[0] || onSprint)) {
-                if (mc.world.getTotalWorldTime() - lastTap[0] <= ALLOWANCE || onSprint) {
-                    Taoism.net.sendToServer(new PacketDodge(0));
-                }
-                lastTap[0] = mc.world.getTotalWorldTime();
-            }
-            tapped[0] = mi.leftKeyDown;
-            if (mi.backKeyDown && (!tapped[1] || onSprint)) {
-                if (mc.world.getTotalWorldTime() - lastTap[1] <= ALLOWANCE || onSprint) {
-                    Taoism.net.sendToServer(new PacketDodge(1));
-                }
-                lastTap[1] = mc.world.getTotalWorldTime();
-            }
-            tapped[1] = mi.backKeyDown;
-            if (mi.rightKeyDown && (!tapped[2] || onSprint)) {
-                if (mc.world.getTotalWorldTime() - lastTap[2] <= ALLOWANCE || onSprint) {
-                    Taoism.net.sendToServer(new PacketDodge(2));
-                }
-                lastTap[2] = mc.world.getTotalWorldTime();
-            }
-            tapped[2] = mi.rightKeyDown;
-            if (mi.forwardKeyDown && (!tapped[3] || onSprint)) {
-                if (mc.world.getTotalWorldTime() - lastTap[3] <= ALLOWANCE || onSprint) {
-                    Taoism.net.sendToServer(new PacketDodge(3));
-                }
-                lastTap[3] = mc.world.getTotalWorldTime();
-            }
-            tapped[3] = mi.forwardKeyDown;
-        }
-
-        if (itsc.getDownTimer() > 0) {
-            //no moving while you're down! (except for a safety roll)
-            KeyBinding.unPressAllKeys();
-            return;
-        }
-
-        if (itsc.getQi() > 0 && itsc.isInCombatMode()) {
-            if (mi.jump && !jump) {
-                //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-                Taoism.net.sendToServer(new PacketJump());
-                //}
-            }
-            jump = mi.jump;
-
-            if (mc.player.isSprinting() && mi.sneak && !sneak) {
-                //if(mc.world.getTotalWorldTime()-lastSneak<=ALLOWANCE){
-                Taoism.net.sendToServer(new PacketSlide());
-                //}
-            }
-            sneak = mi.sneak;
-        }
     }
 
     @SubscribeEvent
@@ -594,10 +511,14 @@ public class ClientEvents {
         mc.getTextureManager().bindTexture(Gui.ICONS);
     }
 
+
     public static Entity getEntityLookedAt(Entity e) {
+        return getEntityLookedAt(e, 16);
+    }
+
+    public static Entity getEntityLookedAt(Entity e, double finalDistance) {
         Entity foundEntity = null;
 
-        final double finalDistance = 16;
         double distance = finalDistance;
         RayTraceResult pos = raycast(e, finalDistance);
 
@@ -693,109 +614,11 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void longPress(TickEvent.ClientTickEvent e) {
-        if (e.phase == TickEvent.Phase.START) {
-            Minecraft mc = Minecraft.getMinecraft();
-            if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
-                IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
-                float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
-                rangesq *= rangesq;
-                if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
-                    mc.pointedEntity = null;
-                    Vec3d look = mc.player.getLook(1).scale(3);
-                    mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
-                }
-            }
-            if (Taoism.proxy.isBreakingBlock(mc.player)) {
-                leftClickAt = 0;
-                rightClickAt = 0;
-                return;
-            }
-//            if (mc.gameSettings.keyBindAttack.isKeyDown() && mc.player.getHeldItemMainhand().getItem() instanceof IChargeableWeapon) {
-//                leftClickAt++;
-//                if (leftClickAt == CHARGE) {
-//                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-//                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
-//                }
-//            }
-//            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
-//                rightClickAt++;
-//                if (rightClickAt == CHARGE) {
-//                    //mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
-//                    Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
-//                }
-//            }// else rightClickAt = 0;
-        }
-    }
-
-    @SubscribeEvent
     public static void model(ModelRegistryEvent e) {
         for (Item i : TaoWeapon.listOfWeapons) {
             regWeap(i);
         }
         regWeap(TaoItems.prop);
-    }
-
-    @SubscribeEvent
-    public static void noHit(InputEvent.KeyInputEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
-            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
-            float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
-            rangesq *= rangesq;
-            if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
-                mc.pointedEntity = null;
-                Vec3d look = mc.player.getLook(1).scale(3);
-                mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
-                return;
-            }
-        }
-//        if (!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player) && (mc.gameSettings.keyBindAttack.isKeyDown() || mc.gameSettings.keyBindUseItem.isKeyDown()) && (leftClickAt == 0 || rightClickAt == 0)) {
-//            GameSettings gs = Minecraft.getMinecraft().gameSettings;
-//            MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isKeyDown());
-//            Taoism.net.sendToServer(new PacketMakeMove(move));
-//            leftClickAt = rightClickAt = 0;
-//        }
-    }
-
-    @SubscribeEvent
-    public static void noHitMouse(InputEvent.MouseInputEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.pointedEntity != null && mc.player != null && mc.player.getHeldItemMainhand().getItem() instanceof IRange) {
-            IRange ir = (IRange) mc.player.getHeldItemMainhand().getItem();
-            float rangesq = ir.getReach(mc.player, mc.player.getHeldItemMainhand());
-            rangesq *= rangesq;
-            if (NeedyLittleThings.getDistSqCompensated(mc.pointedEntity, mc.player) > rangesq) {
-                mc.pointedEntity = null;
-                Vec3d look = mc.player.getLook(1).scale(3);
-                mc.objectMouseOver = new RayTraceResult(RayTraceResult.Type.MISS, look, null, new BlockPos(look));
-                return;
-            }
-        }
-//        if (!Taoism.proxy.isBreakingBlock(Minecraft.getMinecraft().player) && (mc.gameSettings.keyBindAttack.isKeyDown() || mc.gameSettings.keyBindUseItem.isKeyDown()) && (leftClickAt == 0 || rightClickAt == 0)) {
-//            GameSettings gs = Minecraft.getMinecraft().gameSettings;
-//            MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), gs.keyBindAttack.isKeyDown());
-//            Taoism.net.sendToServer(new PacketMakeMove(move));
-//            System.out.println("dep");
-//            leftClickAt = rightClickAt = 1;
-//        }
-    }
-
-    //attacks when out of range, charges for l'execution
-    @SubscribeEvent
-    public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
-        //System.out.println("hi");
-        EntityPlayer p = e.getEntityPlayer();
-        ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
-        if (i.getItem() instanceof IRange) {
-            //System.out.println("range!");
-            IRange icr = (IRange) i.getItem();
-            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
-            if (elb != null) {
-                //System.out.println("sending packet!");
-                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
-            }
-        }
     }
 
     public static RayTraceResult raycast(Entity e, double len) {
@@ -954,7 +777,7 @@ public class ClientEvents {
             GameSettings gs = Minecraft.getMinecraft().gameSettings;
             MoveCode move = new MoveCode(true, gs.keyBindForward.isKeyDown(), gs.keyBindBack.isKeyDown(), gs.keyBindLeft.isKeyDown(), gs.keyBindRight.isKeyDown(), gs.keyBindJump.isKeyDown(), gs.keyBindSneak.isKeyDown(), e.getButton() == 0);
             Taoism.net.sendToServer(new PacketMakeMove(move));
-            leftClickAt = rightClickAt = 0;
+            InputEvents.leftClickAt = InputEvents.rightClickAt = 0;
         }
     }
 

@@ -30,7 +30,7 @@ public class Emeici extends TaoWeapon {
     private static final boolean[] harvestList = {false, false, false, true};
 
     public Emeici() {
-        super(1, 1, 5f, 0.1f);
+        super(1, 1, 5f, 1.3f);
     }
 
 
@@ -50,9 +50,9 @@ public class Emeici extends TaoWeapon {
     @Override
     public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
         if (getBuff(item, "crit") == 1) {
-            return 3;
+            return 4;
         }
-        return 0.1f;
+        return 1.3f;
     }
 
     @Override
@@ -82,6 +82,14 @@ public class Emeici extends TaoWeapon {
     }
 
     @Override
+    public int armorIgnoreAmount(DamageSource ds, EntityLivingBase attacker, EntityLivingBase target, ItemStack item, float orig) {
+        if (getBuff(item, "crit") == 1) {
+            return 999;
+        }
+        return 0;
+    }
+
+    @Override
     public float critDamage(EntityLivingBase attacker, EntityLivingBase target, ItemStack item) {
         return 1.5f;
     }
@@ -96,11 +104,6 @@ public class Emeici extends TaoWeapon {
     @Override
     public PartDefinition[] getPartNames(ItemStack is) {
         return StaticRefs.SIMPLE;
-    }
-
-    @Override
-    public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 2;
     }
 
     @Override

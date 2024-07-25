@@ -43,7 +43,7 @@ public class ChangChui extends TaoWeapon {
      */
     //private final AttributeModifier
     public ChangChui() {
-        super(0, 1f, 8f, 1.5f);
+        super(0, 1f, 8f, 8f);
     }
 
 //    @Override
@@ -63,7 +63,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.6f;
+        return 0.7f;
     }
 
     public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
@@ -92,7 +92,7 @@ public class ChangChui extends TaoWeapon {
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
 //        if (getHand(stack) == EnumHand.OFF_HAND) {
 //            splash(attacker, stack, 120);
 //        }

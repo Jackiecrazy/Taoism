@@ -37,7 +37,7 @@ public class ExecutionerSword extends TaoWeapon {
      */
 
     public ExecutionerSword() {
-        super(1, 1.4, 5, 1);
+        super(1, 1.4, 5, 2.9f);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ExecutionerSword extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1;
+        return 0.9f;
     }
 
     @Override

@@ -60,8 +60,8 @@ public class TaoStatCapability implements ITaoStatCapability {
      */
     private static float getMaxPosture(EntityLivingBase elb) {
         double maxPosBeforeArmor = elb.getEntityAttribute(TaoEntities.MAXPOSTURE).getAttributeValue();
-        float armor = 1 + (elb.getTotalArmorValue() / 20f);
-        return Math.round(maxPosBeforeArmor * armor);
+        float armor = (elb.getTotalArmorValue() / 2f);
+        return Math.round(maxPosBeforeArmor + armor);
     }
 
     /**
@@ -70,7 +70,7 @@ public class TaoStatCapability implements ITaoStatCapability {
     private static float getPostureRegenAmount(EntityLivingBase elb, int ticks) {
         float posMult = (float) elb.getEntityAttribute(TaoEntities.POSREGEN).getAttributeValue();
         float nausea = elb instanceof EntityPlayer || elb.getActivePotionEffect(MobEffects.NAUSEA) == null ? 0 : (elb.getActivePotionEffect(MobEffects.NAUSEA).getAmplifier() + 1) * 0.05f;
-        float armorMod = Math.max(1f - ((float) elb.getTotalArmorValue() / 40f), 0);
+        float armorMod = 1;//Math.max(1f - ((float) elb.getTotalArmorValue() / 40f), 0);
         float healthMod = elb.getHealth() / elb.getMaxHealth();
         if (TaoCasterData.getTaoCap(elb).getDownTimer() > 0) {
             return TaoCasterData.getTaoCap(elb).getMaxPosture() * armorMod * posMult * healthMod / (1.5f * MAXDOWNTIME);

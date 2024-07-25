@@ -38,7 +38,7 @@ public class Kampilan extends TaoWeapon {
     fling all enemies away; the orb splits into several tracking shots that go after the hit entities （月雨）
      */
     public Kampilan() {
-        super(1, 1.6d, 6d, 1f);
+        super(1, 1.6d, 6d, 2.4f);
         this.setQiAccumulationRate(0.20f);
     }
 
@@ -54,12 +54,12 @@ public class Kampilan extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+        return 0.95f;
     }
 
     @Override
     //default attack code to AoE
-    protected void aoe(ItemStack stack, EntityLivingBase elb, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase elb, int chi) {
         if (isCharged(elb, stack) && !elb.world.isRemote) {
             if (TaoCasterData.getTaoCap(elb).consumeQi(0.5f, 5))
                 splash(elb, stack, 360);

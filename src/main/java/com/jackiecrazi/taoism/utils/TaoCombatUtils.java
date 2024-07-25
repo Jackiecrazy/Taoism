@@ -42,6 +42,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -64,8 +65,8 @@ public class TaoCombatUtils {
     public static String configFolder;
     public static boolean suppress;
     private static CombatInfo DEFAULT = new CombatInfo(1, 1, false);
-    private static HashMap<Item, CombatInfo> combatList;
-    private static HashMap<String, CombatInfo> archetypes;
+    private static HashMap<Item, CombatInfo> combatList = new HashMap<>();
+    private static HashMap<String, CombatInfo> archetypes = new HashMap<>();
 
     public static void attack(EntityLivingBase elb, Entity target, EnumHand hand) {
         attack(elb, target, hand, causeLivingDamage(elb));
@@ -244,9 +245,18 @@ public class TaoCombatUtils {
         return combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
     }
 
+    public static boolean isTwoHanded(ItemStack is) {
+        return is != null && !is.isEmpty() && combatList.getOrDefault(is.getItem(), DEFAULT).twoHanded;
+    }
+
     public static boolean isValidCombatItem(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
         return combatList.containsKey(i.getItem());
+    }
+
+    public static boolean isWeapon(ItemStack i) {
+        if (i.getItem().getRegistryName() == null) return false;
+        return !combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
     }
 
     private static boolean onPlayerAttackTarget(EntityPlayer player, Entity target, EnumHand hand) {
@@ -294,7 +304,7 @@ public class TaoCombatUtils {
     public static float postureAtk(EntityLivingBase defender, EntityLivingBase attacker, ItemStack attack, float amount) {
         float ret = attack.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) attack.getItem()).postureDealtBase(attacker, defender, attack, amount) :
                 combatList.containsKey(attack.getItem()) ? combatList.get(attack.getItem()).attackPostureMultiplier :
-                amount * CombatConfig.defaultMultiplierPostureAttack;
+                        amount * CombatConfig.defaultMultiplierPostureAttack;
         if (attack.isEmpty()) {//bare hand 1.5x
             ret *= CombatConfig.defaultPostureKenshiro;
         }
@@ -306,8 +316,7 @@ public class TaoCombatUtils {
     public static float postureDef(EntityLivingBase defender, Entity attacker, ItemStack defend, float amount) {
         if (TaoCasterData.getTaoCap(defender).getParryCounter() < CombatConfig.shieldThreshold)
             return 0;
-        return (defender.onGround || defender.isRiding() ? defender.isSneaking() ? 0.5f : 1f : 1.5f) *
-                (defend.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) :
+        return (defend.getItem() instanceof IQiPostureManipulable ? ((IQiPostureManipulable) defend.getItem()).postureMultiplierDefend(attacker, defender, defend, amount) :
                         combatList.getOrDefault(defend.getItem(), DEFAULT).defensePostureMultiplier);
     }
 
@@ -335,9 +344,9 @@ public class TaoCombatUtils {
         ITaoStatCapability cap = TaoCasterData.getTaoCap(e);
         e.setHeldItem(EnumHand.MAIN_HAND, e.getHeldItemOffhand());
         e.setHeldItem(EnumHand.OFF_HAND, main);
-//        int mbind = cap.getbi(InteractionHand.MAIN_HAND);
-//        cap.setHandBind(InteractionHand.MAIN_HAND, cap.getHandBind(InteractionHand.OFF_HAND));
-//        cap.setHandBind(InteractionHand.OFF_HAND, mbind);
+//        int mbind = cap.getbi(EnumHand.MAIN_HAND);
+//        cap.setHandBind(EnumHand.MAIN_HAND, cap.getHandBind(EnumHand.OFF_HAND));
+//        cap.setHandBind(EnumHand.OFF_HAND, mbind);
         //tried really hard to make this work, but it just causes more problems.
         suppress = false;
         e.getAttributeMap().removeAttributeModifiers(main.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
@@ -368,6 +377,129 @@ public class TaoCombatUtils {
         else
             targetEntity.attackEntityFrom(ds, (float) NeedyLittleThings.getAttributeModifierHandSensitive(SharedMonsterAttributes.ATTACK_DAMAGE, elb, main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
     }
+
+    /*public static void sweep(EntityLivingBase e, Entity ignore, EnumHand h, double reach) {
+        ItemStack stack = e.getHeldItem(h);
+        WeaponStats.SWEEPSTATE s = getSweepState(e);
+        WeaponStats.SweepInfo info = WeaponStats.getSweepInfo(stack, s);
+        //apply instantaneous damage multiplier
+        SkillUtils.modifyAttribute(e, Attributes.ATTACK_DAMAGE, main, info.getDamageScale() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL);
+        sweep(e, ignore, h, info.getType(), reach, info.getBase(), info.getScaling());
+        SkillUtils.removeAttribute(e, Attributes.ATTACK_DAMAGE, main);
+    }
+
+    public static void sweep(EntityLivingBase e, Entity ignore, EnumHand h, WeaponStats.SWEEPTYPE type, double reach, double base, double scaling) {
+        //no go cases
+        if (!GeneralConfig.betterSweep) return;//a shame, but alas
+        if (!CombatData.getCap(e).isCombatMode()) return;
+        if (CombatData.getCap(e).getHandBind(h) > 0) return;//don't even try dude
+        if (h == EnumHand.OFF_HAND) {
+            swapHeldItems(e);
+            CombatData.getCap(e).setOffhandAttack(true);
+        }
+        if (!PermissionData.getCap(e).canSweep()) type = WeaponStats.SWEEPTYPE.NONE;
+        double radius;
+
+        SweepEvent sre = new SweepEvent(e, h, e.getMainHandItem(), type, base, scaling);
+        MinecraftForge.EVENT_BUS.post(sre);
+        base = sre.getBase();
+        scaling = sre.getScaling();
+        radius = sre.getFinalizedWidth();
+        type = sre.getType();
+        if (sre.isCanceled() || type == WeaponStats.SWEEPTYPE.NONE || radius == 0) {
+            //no go, swap items back and stop
+            if (h == EnumHand.OFF_HAND) {
+                swapHeldItems(e);
+                CombatData.getCap(e).setOffhandAttack(false);
+            }
+            return;
+        }
+        if (e.getMainHandItem().getCapability(CombatManipulator.CAP).isPresent())
+            radius = e.getMainHandItem().getCapability(CombatManipulator.CAP).resolve().get().sweepArea(e, e.getMainHandItem());
+        float charge = Math.max(CombatUtils.getCooledAttackStrength(e, EnumHand.MAIN_HAND, 0.5f), CombatData.getCap(e).getCachedCooldown());
+        boolean hit = false;
+        isSweeping = ignore != null;
+        Vec3 starting = ignore == null ? GeneralUtils.raytraceAnything(e.level(), e, reach).getLocation() : ignore.position();
+        //grab everyone in "range"
+        for (Entity target : e.level().getEntities(e, e.getBoundingBox().inflate(reach * 2))) {
+            if (target == e) continue;
+            if (target.hasPassenger(e) || e.hasPassenger(target)) continue;//poor horse
+            if (target == ignore) {
+                if (radius > 0)
+                    hit = true;
+                continue;
+            }
+            if (!e.hasLineOfSight(target)) continue;
+            //type specific sweep checks
+            switch (type) {
+                case CONE -> {
+                    if (!GeneralUtils.isFacingEntity(e, target, (int) radius, 40)) continue;
+                    if (GeneralUtils.getDistSqCompensated(e, target) > reach * reach) continue;
+                }
+                case CLEAVE -> {
+                    if (!GeneralUtils.isFacingEntity(e, target, 40, (int) radius)) continue;
+                    if (GeneralUtils.getDistSqCompensated(e, target) > reach * reach) continue;
+                }
+                case IMPACT -> {
+                    if (GeneralUtils.getDistSqCompensated(target, starting) > radius * radius) continue;
+                }
+                case CIRCLE -> {
+                    if (GeneralUtils.getDistSqCompensated(target, e) > radius * radius) continue;
+                }
+                case LINE -> {
+                    Vec3 eye = e.getEyePosition(0.5F);
+                    Vec3 look = e.getLookAngle();
+                    Vec3 start = eye.add(look.scale(radius));
+                    Vec3 end = eye.add(look.scale(reach));
+                    if (!target.getBoundingBox().inflate(radius).intersects(start, end)) continue;
+                }
+            }
+
+            CombatUtils.setHandCooldown(e, EnumHand.MAIN_HAND, charge, false);
+            hit = true;
+            if (e instanceof Player)
+                ((Player) e).attack(target);
+            else e.doHurtTarget(target);
+            isSweeping = true;
+        }
+        //if (e instanceof Player && hit) {
+        //play sweep particles in different ways
+        ParticleType<ScalingParticleType> particle = FootworkParticles.SWEEP.get();
+        Vec3 look = e.getLookAngle();
+        starting = e.getEyePosition().add(look.scale(reach));
+        float offset = 0;//(float) look.scale(reach).y;
+        switch (type) {
+            case LINE -> {
+                particle = FootworkParticles.LINE.get();
+                //ParticleUtils.playSweepParticle(particle, e, e.getEyePosition().add(look.normalize()), 0, radius, Color.WHITE, offset);
+            }
+            case CIRCLE -> {
+                starting = e.position().add(look.x, 0, look.z);
+                particle = FootworkParticles.CIRCLE.get();
+                offset = e.getEyeHeight() / 2;
+            }
+            case CONE -> {
+                radius = Math.tan(GeneralUtils.rad((float) radius / 2)) * reach;
+                particle = h == EnumHand.OFF_HAND ? FootworkParticles.SWEEP_LEFT.get() : FootworkParticles.SWEEP.get();
+            }
+            case CLEAVE -> {
+                particle = FootworkParticles.CLEAVE.get();
+                radius = Math.tan(GeneralUtils.rad((float) radius / 2)) * reach;
+            }
+            case IMPACT -> {
+                particle = FootworkParticles.IMPACT.get();
+                offset = 0;
+            }
+        }
+        ParticleUtils.playSweepParticle(particle, e, starting, 0, radius, sre.getColor(), offset);
+        e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, e.getSoundSource(), 1.0F, 1.0F);
+        //}
+        isSweeping = false;
+        if (h == EnumHand.OFF_HAND) {
+            swapHeldItems(e);
+            CombatData.getCap(e).setOffhandAttack(false);
+        }
+    }*/
 
     /**
      * copy-pasted from EntityPlayer, as-is.
@@ -576,14 +708,15 @@ public class TaoCombatUtils {
         archetypes = new HashMap<>();
         customPosture = new HashMap<>();
         if (configFolder != null) {
-            File folder = new File(TaoCombatUtils.configFolder);String sep = System.getProperty("file.separator");
-            if(!folder.exists())
+            File folder = new File(TaoCombatUtils.configFolder);
+            String sep = System.getProperty("file.separator");
+            if (!folder.exists())
                 folder.mkdir();
             File stats = new File(TaoCombatUtils.configFolder + sep + "stats");
-            if(!stats.exists())
+            if (!stats.exists())
                 stats.mkdir();
             File tags = new File(TaoCombatUtils.configFolder + sep + "tags");
-            if(!tags.exists())
+            if (!tags.exists())
                 tags.mkdir();
             try {
                 for (File json : stats.listFiles(a ->
@@ -595,7 +728,7 @@ public class TaoCombatUtils {
                             try {
                                 name = name.substring(1);
                                 if (name.contains(":"))
-                                    name = name.substring(name.lastIndexOf(":")+1);
+                                    name = name.substring(name.lastIndexOf(":") + 1);
                                 JsonObject obj = entry.getValue().getAsJsonObject();
                                 CombatInfo put = parseMeleeInfo(obj);
                                 archetypes.put(name, put);
@@ -623,17 +756,20 @@ public class TaoCombatUtils {
                 for (File json : tags.listFiles(file -> Files.getFileExtension(file.getName()).equals("json"))) {
                     JsonObject je = gson.fromJson(new JsonReader(new FileReader(json)), JsonObject.class);
                     je.getAsJsonArray("values").forEach(a -> {
-                        JsonObject entry= a.getAsJsonObject();
+                        JsonObject entry = a.getAsJsonObject();
                         String name = entry.get("id").getAsString();
                         ResourceLocation i = new ResourceLocation(name);
                         Item item = ForgeRegistries.ITEMS.getValue(i);
                         if (item == null || item == Items.AIR) {
                             return;
                         }
-                        String tag=Files.getNameWithoutExtension(json.getName());
-                        if(archetypes.containsKey(tag)){
-                            CombatInfo put = archetypes.get(tag);
+                        String tag = Files.getNameWithoutExtension(json.getName());
+                        if (archetypes.containsKey(tag)) {
+                            CombatInfo put = archetypes.get(tag).clone();
                             combatList.put(item, put);
+                        }
+                        if (tag.equals("two_handed")) {
+                            combatList.get(item).setTwoHanded(true);
                         }
                     });
                 }
@@ -673,15 +809,43 @@ public class TaoCombatUtils {
         }
     }
 
+    public enum SWEEPTYPE {
+        NONE,
+        CONE,//horizontal fan area in front of the entity up to max range, base and scale add angle
+        CLEAVE,//cone but vertical
+        LINE,//1 block wide line up to max range, base and scale add to thickness
+        IMPACT,//splash at point of impact or furthest distance if no mob aimed, base and scale add radius
+        CIRCLE//splash with entity as center, ignores range, base and scale add radius
+    }
+
+    public enum SWEEPSTATE {
+        STANDING,
+        //RISING, //may implement some day
+        FALLING,
+        SNEAKING,
+        SPRINTING,//also while swimming
+        RIDING //no speed requirement
+    }
+
     private static class CombatInfo {
         private float attackPostureMultiplier;
         private float defensePostureMultiplier;
         private boolean isShield;
+        private boolean twoHanded;
 
         private CombatInfo(float attack, float defend, boolean shield) {
             attackPostureMultiplier = attack;
             defensePostureMultiplier = defend;
             isShield = shield;
+        }
+
+        public CombatInfo setTwoHanded(boolean two) {
+            twoHanded = two;
+            return this;
+        }
+
+        public CombatInfo clone() {
+            return new CombatInfo(attackPostureMultiplier, defensePostureMultiplier, isShield).setTwoHanded(twoHanded);
         }
     }
 }

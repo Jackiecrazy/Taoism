@@ -38,7 +38,7 @@ taoism.weaponAttMult=attack posture consumption: %.2f
 weapon.notenoughqi=You need nine levels of chi to charge an execution
 weapon.alreadycharged=This weapon is already charged
 weapon.discharge=This weapon has discharged
-weapon.spoiler=Executions aren't done yet! No spoilers!
+weapon.spoiler=Execution Activated!
 
 item.ken.name=Jian
 ken.combo=normal attack chains up to 3 times before recharging
@@ -75,7 +75,7 @@ karambit.harvest=functions as shears
 item.chui.name=Spherical Mace
 chui.leap=crits deal double damage
 chui.stagger=deals 1.5x damage against staggered targets
-chui.slow=inflicts slowness, potency increases by 1 every 3 levels and duration increases by half a second every level
+chui.slow=inflicts slowness and reduces max posture, potency increases by 1 every 3 levels and duration increases by half a second every level
 
 item.cestus.name=Cestus
 cestus.armor=naturally adds 2 armor points
@@ -185,7 +185,7 @@ ropedart.trick=attacking while the dart is near the player additionally shoots i
 
 item.bian.name=Iron Whip
 bian.stagger=deals 1.5x damage against staggered targets
-bian.armpen=ignores 1 point of armor every other chi level
+bian.bind=bind the target on attack or parry for 7+chi ticks
 bian.enfeeble=attacks reduce posture regeneration of the target for 2 seconds, reduction is greater at higher chi levels
 
 item.rapier.name=Rapier

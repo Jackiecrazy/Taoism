@@ -27,7 +27,7 @@ public class ChickenSickle extends TaoWeapon {
      * while hemorrhage is active, receiving a negative buff will add hemorrhage's duration and potency to it, consuming hemorrhage in the process
      */
     public ChickenSickle() {
-        super(2, 1.6, 4, 1f);
+        super(2, 1.6, 4, 2f);
     }
 
     @Override
@@ -107,6 +107,6 @@ public class ChickenSickle extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1;
+        return 0.9f;
     }
 }

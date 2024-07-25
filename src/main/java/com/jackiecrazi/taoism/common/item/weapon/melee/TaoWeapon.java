@@ -95,7 +95,7 @@ public abstract class TaoWeapon extends Item implements IAmModular, IElemental, 
     private final double speed;
     private final int damageType;
     private final double dmg;
-    private final float itemPostureMultiplier;
+    protected final float itemPostureMultiplier;
     protected float qiRate = 0.25f;
 
     public TaoWeapon(int damageType, double swingSpeed, double damage, float attackPostureMultiplier) {
@@ -612,7 +612,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
             //Well, ya got me. By all accounts, it doesn't make sense.
             TaoCasterData.getTaoCap(elb).setOffhandAttack(hand == EnumHand.OFF_HAND);
             //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
-            aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
+            //aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
             gettagfast(stack).setBoolean("connect", false);
         }
 //        if(!elb.onGround &&(!(elb instanceof EntityPlayer) | Taoism.proxy.isBreakingBlock((EntityPlayer) elb))&&elb.motionY<0&&TaoCasterData.getTaoCap(elb).consumeQi(0.05f, 3)) {
@@ -758,7 +758,7 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * AoE
      */
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
 
     }
 
@@ -988,11 +988,13 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
 
     @Override
     public float postureDealtBase(@Nullable EntityLivingBase attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount) {
-        return itemPostureMultiplier * (getDamDist(item)) * (float) dmg;
+        return itemPostureMultiplier;
     }
 
     @Override
-    public abstract float postureMultiplierDefend(@Nullable Entity attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount);
+    public float postureMultiplierDefend(@Nullable Entity attacker, @Nullable EntityLivingBase defender, ItemStack item, float amount){
+        return 1;
+    }
 
     @Override
     public void onSwitchIn(ItemStack stack, EntityLivingBase elb) {

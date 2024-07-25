@@ -38,7 +38,7 @@ public class Staff extends TaoWeapon {
      */
 
     public Staff() {
-        super(0, 1.4f, 6f, 0.8f);
+        super(0, 1.4f, 6f, 3f);
         setUnlocalizedName("taostaff");
     }
 
@@ -59,7 +59,7 @@ public class Staff extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 0.8f;
+        return 0.7f;
     }
 
     @Override

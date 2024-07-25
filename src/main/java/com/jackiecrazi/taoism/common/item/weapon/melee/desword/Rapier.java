@@ -35,7 +35,7 @@ public class Rapier extends TaoWeapon {
      * an attack will now pierce their heart and end the state (with cap)
      */
     public Rapier() {
-        super(2, 1.6, 5, 0.5f);
+        super(2, 1.6, 5, 2.2f);
     }
 
     @Override
@@ -123,6 +123,6 @@ public class Rapier extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1.1f;
+        return 0.85f;
     }
 }

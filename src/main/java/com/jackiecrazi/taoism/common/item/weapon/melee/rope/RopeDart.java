@@ -63,7 +63,7 @@ public class RopeDart extends TaoWeapon {
      * Hitting a block will cause you to lose all charge, so react fast!
      */
     public RopeDart() {
-        super(2, 2, 5, 0);
+        super(2, 2, 5, 1.3f);
         this.addPropertyOverride(new ResourceLocation("thrown"), (stack, w, elb) -> isThrown(stack) && (w == null || w.getEntityByID(getDartID(stack)) != null) ? 1 : 0);
     }
 
@@ -171,7 +171,7 @@ public class RopeDart extends TaoWeapon {
     }
 
     @Override
-    protected void aoe(ItemStack is, EntityLivingBase elb, int chi) {
+    public void aoe(ItemStack is, EntityLivingBase elb, int chi) {
         if (getHand(is) == EnumHand.MAIN_HAND || TaoCasterData.getTaoCap(elb).consumePosture(1, false) == 0)
             splash(elb, elb, is, 360, elb.world.getEntitiesWithinAABB(EntityRopeDart.class, elb.getEntityBoundingBox().grow(2)));
         if (!elb.world.isRemote) {
@@ -202,11 +202,11 @@ public class RopeDart extends TaoWeapon {
     @Override
     public float postureDealtBase(EntityLivingBase attacker, EntityLivingBase defender, ItemStack item, float amount) {
         if (isDartAttack(item)) {
-            return 0;
+            return itemPostureMultiplier;
         } else if (TaoCasterData.getTaoCap(attacker).consumePosture(1, false) == 0) {
             return 4;
         }
-        return 0;
+        return itemPostureMultiplier;
     }
 
     @Override

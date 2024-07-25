@@ -5,7 +5,6 @@ import com.jackiecrazi.taoism.api.NeedyLittleThings;
 import com.jackiecrazi.taoism.api.PartDefinition;
 import com.jackiecrazi.taoism.api.StaticRefs;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
-import com.jackiecrazi.taoism.common.entity.TaoEntities;
 import com.jackiecrazi.taoism.common.entity.projectile.weapons.EntityMeidoZangetsuha;
 import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
@@ -49,7 +48,7 @@ public class GuanDao extends TaoWeapon {
      * the number of beams increase with moonlight, your moonlight is reset.
      */
     public GuanDao() {
-        super(1, 1.3, 5d, 1f);
+        super(1, 1.3, 5d, 4f);
         //this.addPropertyOverride(new ResourceLocation("long"), (stack, world, ent) -> isLong(stack) ? 1 : 0);
     }
 
@@ -61,7 +60,7 @@ public class GuanDao extends TaoWeapon {
 
     @Override
     public float postureMultiplierDefend(Entity attacker, EntityLivingBase defender, ItemStack item, float amount) {
-        return 1f;
+        return 0.7f;
     }
 
     @Override
@@ -100,7 +99,7 @@ public class GuanDao extends TaoWeapon {
         return isCharged(p, is) ? 8 : 4;
     }
 
-    protected void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
+    public void aoe(ItemStack stack, EntityLivingBase attacker, int chi) {
         if (attacker.world.isRemote) return;
         if (!isCharged(attacker, stack) || TaoCasterData.getTaoCap(attacker).consumeQi(0.5f, 5)) {
             if (!attacker.onGround && (attacker.isSneaking() || !TaoCasterData.getTaoCap(attacker).isInCombatMode())) {
