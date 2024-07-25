@@ -144,10 +144,10 @@ maul.nail=right click to hammer the entity one block into the ground, rooting it
 maul.hardness=blocks under the entity must have a harvest level less than (chi/2)
 
 item.taostaff.name=Quarterstaff
-staff.flick=alt attacking a grounded target will flick them up, giving you a brief jump boost and resetting your jump
-staff.smash=alt attacking an airborne target will pummel them down, dealing extra fall damage scaling with chi
-staff.doink=attacking a grounded target will boost you up, distance increased by chi
-staff.throw=attacking an airborne target boosts them up, distance increased by chi
+staff.flick=normal attacking a target will flick them up, giving you a brief jump boost and resetting your jump
+staff.smash=sneak attacking a target will pummel them down, dealing extra fall damage scaling with chi
+staff.doink=alt attacking a target will boost you up, distance increased by chi
+staff.throw=sneak alt attacking a target boosts them up, distance increased by chi
 staff.oscillate=the two attacks have separate cooldowns; normal attack can be chained twice
 
 item.guandao.name=Guan Dao
