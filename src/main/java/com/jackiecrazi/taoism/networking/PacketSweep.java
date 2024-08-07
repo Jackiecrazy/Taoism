@@ -64,7 +64,11 @@ public class PacketSweep implements IMessage {
                 //attacker.getServerWorld().addScheduledTask(() -> {
                 Entity theEntity = attacker.world
                         .getEntityByID(message.entityId);
-                ItemStack heldItem = attacker.getHeldItem(message.main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+                if(!message.main)
+                    TaoCombatUtils.swapHeldItems(attacker);
+                ItemStack heldItem = attacker.getHeldItem(EnumHand.MAIN_HAND);
+                if (theEntity != null)
+                    TaoCombatUtils.attackAtStrength(attacker, theEntity, EnumHand.MAIN_HAND, TaoCasterData.getTaoCap(attacker).getSwing(), TaoCombatUtils.causeLivingDamage(attacker));
                 if (heldItem != null && heldItem.getItem() instanceof TaoWeapon) {
                     TaoWeapon tw = (TaoWeapon) heldItem.getItem();
                     tw.aoe(heldItem, attacker, TaoCasterData.getTaoCap(attacker).getQiFloored());
@@ -80,12 +84,20 @@ public class PacketSweep implements IMessage {
                         //!NeedyLittleThings.isFacingEntity(attacker,target)||
                         if (horDeg < 360 && !NeedyLittleThings.isFacingEntity(attacker, target, horDeg, vertDeg) || NeedyLittleThings.getDistSqCompensated(target, attacker) > reach * reach || target == theEntity)
                             continue;
-                        TaoCombatUtils.attackAtStrength(attacker, target, message.main ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, TaoCasterData.getTaoCap(attacker).getSwing(), TaoCombatUtils.causeLivingDamage(attacker));
+                        TaoCombatUtils.attackAtStrength(attacker, target, EnumHand.MAIN_HAND, TaoCasterData.getTaoCap(attacker).getSwing(), TaoCombatUtils.causeLivingDamage(attacker));
                         sweep = true;
                     }
                     if (sweep) {
                         attacker.spawnSweepParticles();
                     }
+                }
+                TaoCombatUtils.rechargeHand(attacker, EnumHand.MAIN_HAND, 0, true);
+                if(!message.main) {
+                    TaoCombatUtils.swapHeldItems(attacker);
+                    int atk=Taoism.getAtk(attacker);
+                    attacker.swingArm(EnumHand.OFF_HAND);
+                    Taoism.setAtk(attacker, atk);
+                    TaoCasterData.syncAttackTimer(attacker);
                 }
             });
             return null;

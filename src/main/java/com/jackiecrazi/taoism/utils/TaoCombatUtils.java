@@ -17,6 +17,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.IQiPostureManipulable;
 import com.jackiecrazi.taoism.api.alltheinterfaces.ITwoHanded;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.config.CombatConfig;
 import ibxm.Player;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -172,30 +173,30 @@ public class TaoCombatUtils {
             if (ep.getCooldownTracker().hasCooldown(off.getItem())) off = ItemStack.EMPTY;
         }
         boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120) && (elb instanceof EntityPlayer || Taoism.unirand.nextFloat() < CombatConfig.mobParryChance);
-        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        boolean mainRec = true, offRec = true;
         //System.out.println("main is " + mainRec + ", off is " + offRec);
         //System.out.println("main is " + getCooledAttackStrength(elb, 0.5f) + ", off is " + getCooledAttackStrengthOff(elb, 0.5f));
         float defMult = 42;//meaning of life, the universe and everything
         ItemStack ret = ItemStack.EMPTY;
         //shields
         boolean halt = false;
-        if (isShield(main) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (mainRec && facing && defMult > postureDef(elb, attacker, main, amount)))) {
+        if (isShield(main) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || facing && defMult > postureDef(elb, attacker, main, amount))) {
             ret = main;
             defMult = postureDef(elb, attacker, ret, amount);
             halt = true;
         }
-        if (isShield(off) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || (offRec && facing && defMult > postureDef(elb, attacker, off, amount)))) {
+        if (isShield(off) && (TaoCasterData.getTaoCap(elb).getParryCounter() < CombatConfig.shieldThreshold || facing && defMult > postureDef(elb, attacker, off, amount))) {
             ret = off;
             defMult = postureDef(elb, attacker, ret, amount);
             halt = true;
         }
         if (halt) return ret;
         //parries
-        if (isValidCombatItem(main) && mainRec && facing && defMult > postureDef(elb, attacker, main, amount)) {
+        if (isValidCombatItem(main) && facing && defMult > postureDef(elb, attacker, main, amount)) {
             ret = main;
             defMult = postureDef(elb, attacker, ret, amount);
         }
-        if (isValidCombatItem(off) && offRec && facing && defMult > postureDef(elb, attacker, off, amount)) {
+        if (isValidCombatItem(off) && facing && defMult > postureDef(elb, attacker, off, amount)) {
             ret = off;
             defMult = postureDef(elb, attacker, ret, amount);
         }
@@ -215,14 +216,14 @@ public class TaoCombatUtils {
 
     public static ItemStack getShield(Entity attacker, EntityLivingBase elb, float amount) {
         ItemStack main = elb.getHeldItemMainhand(), off = elb.getHeldItemOffhand();
-        boolean mainRec = getCooledAttackStrength(elb, 0.5f) > 0.8f, offRec = getCooledAttackStrengthOff(elb, 0.5f) > 0.8f;
+        boolean mainRec = true, offRec = true;
         boolean facing = NeedyLittleThings.isFacingEntity(elb, attacker, 120);
         ItemStack ret = ItemStack.EMPTY;
         //shields
-        if (isShield(off) && offRec && facing) {
+        if (isShield(off) && facing) {
             return off;
         }
-        if (isShield(main) && mainRec && facing) {
+        if (isShield(main) && facing) {
             return main;
         }
         return ret;
@@ -256,6 +257,7 @@ public class TaoCombatUtils {
 
     public static boolean isWeapon(ItemStack i) {
         if (i.getItem().getRegistryName() == null) return false;
+        if (i.getItem() instanceof TaoWeapon) return true;
         return !combatList.getOrDefault(i.getItem(), DEFAULT).isShield;
     }
 
@@ -308,6 +310,7 @@ public class TaoCombatUtils {
         if (attack.isEmpty()) {//bare hand 1.5x
             ret *= CombatConfig.defaultPostureKenshiro;
         }
+        if(attacker.world.isRemote)return ret;
         if (!(attacker instanceof EntityPlayer)) ret *= CombatConfig.basePostureMob;
         else ret *= TaoCasterData.getTaoCap(attacker).getSwing() * TaoCasterData.getTaoCap(attacker).getSwing();
         return ret;
@@ -334,6 +337,15 @@ public class TaoCombatUtils {
                     TaoCasterData.syncAttackTimer(elb);
                 break;
         }
+    }
+
+    public static void replaceItem(EntityLivingBase e, ItemStack replace){
+        ItemStack main=e.getHeldItemMainhand();
+        suppress = true;
+        e.setHeldItem(EnumHand.MAIN_HAND, replace);
+        suppress = false;
+        e.getAttributeMap().removeAttributeModifiers(main.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
+        e.getAttributeMap().applyAttributeModifiers(replace.getAttributeModifiers(EntityEquipmentSlot.MAINHAND));
     }
 
     public static void swapHeldItems(EntityLivingBase e) {
@@ -506,6 +518,7 @@ public class TaoCombatUtils {
      */
     public static void taoWeaponAttack(Entity targetEntity, EntityPlayer player, ItemStack stack, boolean main, boolean updateOff, DamageSource ds) {
         if (targetEntity == null) return;
+        //mixin targets: attacking stack, damage source
         if (updateOff) {
             TaoCasterData.getTaoCap(player).setOffhandAttack(!main);
         }

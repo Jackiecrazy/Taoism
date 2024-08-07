@@ -6,6 +6,7 @@ import com.jackiecrazi.taoism.api.alltheinterfaces.IChargeableWeapon;
 import com.jackiecrazi.taoism.api.alltheinterfaces.IRange;
 import com.jackiecrazi.taoism.capability.ITaoStatCapability;
 import com.jackiecrazi.taoism.capability.TaoCasterData;
+import com.jackiecrazi.taoism.common.item.weapon.melee.TaoWeapon;
 import com.jackiecrazi.taoism.networking.*;
 import com.jackiecrazi.taoism.utils.TaoCombatUtils;
 import net.minecraft.client.Minecraft;
@@ -32,6 +33,8 @@ import net.minecraftforge.fml.relauncher.Side;
 public class InputEvents {
     private static final int ALLOWANCE = 7;
     private static final int CHARGE = 50;
+    static int leftClickAt = 0;
+    static int rightClickAt = 0;
     /**
      * left, back, right
      */
@@ -39,11 +42,13 @@ public class InputEvents {
     private static boolean[] tapped = {false, false, false, false};
     private static boolean jump = false;
     private static boolean sneak = false;
-    static int leftClickAt = 0;
-    static int rightClickAt = 0;
     private static Entity lastTickLookAt;
     private static boolean rightClick = false;
-    private static int lastAttackTick = 0, lastSweepTick = 0;
+    private static int lastOffTick = 0, lastMainTick = 0;
+
+    private static boolean canWeaponAttack(EntityPlayer player, EnumHand hand, ItemStack stack) {
+        return hand == EnumHand.OFF_HAND && stack != null && (stack.getItem() instanceof TaoWeapon || (TaoCasterData.getTaoCap(player).isInCombatMode() && (TaoCombatUtils.isWeapon(stack) || stack.isEmpty() || TaoCombatUtils.isShield(stack))));
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void doju(InputUpdateEvent e) {
@@ -140,14 +145,14 @@ public class InputEvents {
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.MAIN_HAND));
                 }
             }
-            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
+            if (mc.gameSettings.keyBindUseItem.isKeyDown() && mc.player.getActiveHand() != EnumHand.MAIN_HAND && mc.player.getHeldItemOffhand().getItem() instanceof IChargeableWeapon) {
                 rightClickAt++;
                 if (rightClickAt == CHARGE) {
                     mc.player.sendStatusMessage(new TextComponentTranslation("weapon.spoiler"), true);
                     Taoism.net.sendToServer(new PacketChargeWeapon(EnumHand.OFF_HAND));
                 }
             }// else rightClickAt = 0;
-        }
+        } else rightClick = false;
     }
 
     @SubscribeEvent
@@ -172,6 +177,23 @@ public class InputEvents {
 //        }
     }
 
+    //attacks when out of range, charges for l'execution
+//    @SubscribeEvent
+//    public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
+//        //System.out.println("hi");
+//        EntityPlayer p = e.getEntityPlayer();
+//        ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
+//        if (i.getItem() instanceof IRange) {
+//            //System.out.println("range!");
+//            IRange icr = (IRange) i.getItem();
+//            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
+//            if (elb != null) {
+//                //System.out.println("sending packet!");
+//                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
+//            }
+//        }
+//    }
+
     @SubscribeEvent
     public static void noHitMouse(InputEvent.MouseInputEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -195,104 +217,68 @@ public class InputEvents {
 //        }
     }
 
-    //attacks when out of range, charges for l'execution
-//    @SubscribeEvent
-//    public static void pleasekillme(PlayerInteractEvent.LeftClickEmpty e) {
-//        //System.out.println("hi");
-//        EntityPlayer p = e.getEntityPlayer();
-//        ItemStack i = p.getHeldItem(EnumHand.MAIN_HAND);
-//        if (i.getItem() instanceof IRange) {
-//            //System.out.println("range!");
-//            IRange icr = (IRange) i.getItem();
-//            Entity elb = NeedyLittleThings.raytraceEntity(p.world, p, icr.getReach(p, i));
-//            if (elb != null) {
-//                //System.out.println("sending packet!");
-//                Taoism.net.sendToServer(new PacketExtendThyReach(elb.getEntityId(), true));
-//            }
-//        }
-//    }
-
+    @SubscribeEvent
+    public static void punchy(PlayerInteractEvent.EntityInteract e) {
+        if (TaoCombatUtils.isTwoHanded(e.getEntityPlayer().getHeldItemMainhand()) && e.getHand() == EnumHand.OFF_HAND)
+            return;
+        if (!rightClick && e.getHand() == EnumHand.OFF_HAND && canWeaponAttack(e.getEntityPlayer(), e.getHand(), e.getItemStack())) {
+            rightClick = true;
+            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityLiving(), EnumHand.OFF_HAND));
+            if (n == null && TaoCombatUtils.isShield(e.getItemStack())) return;
+            if (e.getEntityPlayer().ticksExisted >= lastOffTick +2) {
+                Taoism.net.sendToServer(new PacketSweep(false, n));
+                lastOffTick = e.getEntityPlayer().ticksExisted;
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void sweepSwing(PlayerInteractEvent.LeftClickEmpty e) {
-        Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityPlayer(), EnumHand.MAIN_HAND));
-        if (e.getEntity().ticksExisted != lastAttackTick) {
+        Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityPlayer(), EnumHand.MAIN_HAND));
+        if (e.getEntity().ticksExisted >= lastMainTick +2) {
             Taoism.net.sendToServer(new PacketSweep(true, n));
-            lastAttackTick = e.getEntity().ticksExisted;
+            lastMainTick = e.getEntity().ticksExisted;
         }
-//        if (lastSweepTick != e.getEntity().ticksExisted)
-//            Taoism.net.sendToServer(new RequestSweepPacket(true, n));
-        lastSweepTick = e.getEntity().ticksExisted;
+    }
+
+    @SubscribeEvent
+    public static void sweepSwingBlock(PlayerInteractEvent.LeftClickBlock e) {
+        // if (Minecraft.getMinecraft()()) return;
+        //float temp = CombatUtils.getCooledAttackStrength(e.getEntity(), EnumHand.MAIN_HAND, 0.5f);
+        Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityLiving(), EnumHand.MAIN_HAND));
+        if (e.getEntity().ticksExisted >= lastMainTick +2) {
+            Taoism.net.sendToServer(new PacketSweep(true, n));
+            lastMainTick = e.getEntity().ticksExisted;
+        }
     }
 
     @SubscribeEvent
     public static void sweepSwingOff(PlayerInteractEvent.RightClickEmpty e) {
         if (TaoCombatUtils.isTwoHanded(e.getEntityPlayer().getHeldItemMainhand()) && e.getHand() == EnumHand.OFF_HAND)
             return;
-        if (!rightClick && e.getHand() == EnumHand.OFF_HAND&& TaoCasterData.getTaoCap(e.getEntityPlayer()).isInCombatMode() && (TaoCombatUtils.isWeapon(e.getItemStack()) || e.getItemStack().isEmpty() || TaoCombatUtils.isShield(e.getItemStack()))) {
+        if (!rightClick && canWeaponAttack(e.getEntityPlayer(), e.getHand(), e.getItemStack())) {
             rightClick = true;
-            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityLiving(), EnumHand.OFF_HAND));
+            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityLiving(), EnumHand.OFF_HAND));
             if (n == null && TaoCombatUtils.isShield(e.getItemStack())) return;
-            e.getEntityPlayer().swingArm(EnumHand.OFF_HAND);
-            if (e.getEntity().ticksExisted != lastAttackTick) {
+            if (e.getEntityPlayer().ticksExisted >= lastOffTick +2) {
                 Taoism.net.sendToServer(new PacketSweep(false, n));
-                lastAttackTick = e.getEntity().ticksExisted;
+                lastOffTick = e.getEntityPlayer().ticksExisted;
             }
-//            if (lastSweepTick != e.getEntity().ticksExisted)
-//                Taoism.net.sendToServer(new RequestSweepPacket(false, n));
-            lastSweepTick = e.getEntity().ticksExisted;
         }
-    }
-
-    @SubscribeEvent
-    public static void sweepSwingBlock(PlayerInteractEvent.LeftClickBlock e) {
-       // if (Minecraft.getMinecraft()()) return;
-        //float temp = CombatUtils.getCooledAttackStrength(e.getEntity(), EnumHand.MAIN_HAND, 0.5f);
-        Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityLiving(), EnumHand.MAIN_HAND));
-        if (e.getEntity().ticksExisted != lastAttackTick) {
-            Taoism.net.sendToServer(new PacketSweep(true, n));
-            lastAttackTick = e.getEntity().ticksExisted;
-        }
-//        if (lastSweepTick != e.getEntity().ticksExisted)
-//            Taoism.net.sendToServer(new RequestSweepPacket(true, n));
-        lastSweepTick = e.getEntity().ticksExisted;
     }
 
     @SubscribeEvent
     public static void sweepSwingOffItem(PlayerInteractEvent.RightClickItem e) {
         if (TaoCombatUtils.isTwoHanded(e.getEntityPlayer().getHeldItemMainhand()) && e.getHand() == EnumHand.OFF_HAND)
             return;
-        if (!rightClick && e.getHand() == EnumHand.OFF_HAND && TaoCasterData.getTaoCap(e.getEntityLiving()).isInCombatMode() && (TaoCombatUtils.isWeapon(e.getItemStack()) || e.getItemStack().isEmpty() || TaoCombatUtils.isShield( e.getItemStack()))) {
+        if (!rightClick && canWeaponAttack(e.getEntityPlayer(), e.getHand(), e.getItemStack())) {
             rightClick = true;
-            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityLiving(), EnumHand.OFF_HAND));
+            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityLiving(), EnumHand.OFF_HAND));
             if (n == null && TaoCombatUtils.isShield(e.getItemStack())) return;
-            e.getEntityPlayer().swingArm(EnumHand.OFF_HAND);
-            if (e.getEntity().ticksExisted != lastAttackTick) {
+            if (e.getEntityPlayer().ticksExisted >= lastOffTick +2) {
                 Taoism.net.sendToServer(new PacketSweep(false, n));
-                lastAttackTick = e.getEntity().ticksExisted;
+                lastOffTick = e.getEntityPlayer().ticksExisted;
             }
-//            if (lastSweepTick != e.getEntity().ticksExisted)
-//                Taoism.net.sendToServer(new RequestSweepPacket(false, n));
-            lastSweepTick = e.getEntity().ticksExisted;
-        }
-    }
-
-    @SubscribeEvent
-    public static void punchy(PlayerInteractEvent.EntityInteract e) {
-        if (TaoCombatUtils.isTwoHanded(e.getEntityPlayer().getHeldItemMainhand()) && e.getHand() == EnumHand.OFF_HAND)
-            return;
-        if (!rightClick && e.getHand() == EnumHand.OFF_HAND && TaoCasterData.getTaoCap(e.getEntityLiving()).isInCombatMode() && (TaoCombatUtils.isWeapon(e.getItemStack()) || e.getItemStack().isEmpty() || TaoCombatUtils.isShield(e.getItemStack()))) {
-            rightClick = true;
-            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityLiving(), EnumHand.OFF_HAND));
-            e.getEntityPlayer().swingArm(EnumHand.OFF_HAND);
-            if (n == null && TaoCombatUtils.isShield(e.getItemStack())) return;
-            if (e.getEntity().ticksExisted != lastAttackTick) {
-                Taoism.net.sendToServer(new PacketSweep(false, n));
-                lastAttackTick = e.getEntity().ticksExisted;
-            }
-//            if (lastSweepTick != e.getEntity().ticksExisted)
-//                Taoism.net.sendToServer(new RequestSweepPacket(false, n));
-            lastSweepTick = e.getEntity().ticksExisted;
         }
     }
 
@@ -300,18 +286,14 @@ public class InputEvents {
     public static void sweepSwingOffItemBlock(PlayerInteractEvent.RightClickBlock e) {
         if (TaoCombatUtils.isTwoHanded(e.getEntityPlayer().getHeldItemMainhand()) && e.getHand() == EnumHand.OFF_HAND)
             return;
-        if (!rightClick && e.getHand() == EnumHand.OFF_HAND && TaoCasterData.getTaoCap(e.getEntityLiving()).isInCombatMode() && (TaoCombatUtils.isWeapon(e.getItemStack()) || e.getItemStack().isEmpty() || TaoCombatUtils.isShield(e.getItemStack()))) {
+        if (!rightClick && canWeaponAttack(e.getEntityPlayer(), e.getHand(), e.getItemStack())) {
             rightClick = true;
-            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE,e.getEntityLiving(), EnumHand.OFF_HAND) - (e.getItemStack().isEmpty() ? 1 : 0));
-            e.getEntityPlayer().swingArm(EnumHand.OFF_HAND);
+            Entity n = ClientEvents.getEntityLookedAt(e.getEntity(), NeedyLittleThings.getAttributeModifierHandSensitive(EntityPlayer.REACH_DISTANCE, e.getEntityLiving(), EnumHand.OFF_HAND) - (e.getItemStack().isEmpty() ? 1 : 0));
             if (n == null && TaoCombatUtils.isShield(e.getItemStack())) return;
-            if (e.getEntity().ticksExisted != lastAttackTick) {
+            if (e.getEntityPlayer().ticksExisted >= lastOffTick +2) {
                 Taoism.net.sendToServer(new PacketSweep(false, n));
-                lastAttackTick = e.getEntity().ticksExisted;
+                lastOffTick = e.getEntityPlayer().ticksExisted;
             }
-//            if (lastSweepTick != e.getEntity().ticksExisted)
-//                Taoism.net.sendToServer(new RequestSweepPacket(false, n));
-            lastSweepTick = e.getEntity().ticksExisted;
         }
     }
 }

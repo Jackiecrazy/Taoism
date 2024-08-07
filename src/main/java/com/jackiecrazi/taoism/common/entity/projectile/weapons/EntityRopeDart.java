@@ -63,7 +63,7 @@ public class EntityRopeDart extends EntityThrownWeapon {
                 if (hitStatus > 0) {
                     List<Entity> ent = world.getEntitiesWithinAABB(EntityMob.class, getThrower().getEntityBoundingBox().grow(8));
                     if (!ent.isEmpty()) {
-                        shoot(ent.get(0).getPositionEyes(1).subtract(getPositionVector()), MathHelper.sqrt(NeedyLittleThings.getSpeedSq(this)), 0);
+                        shoot(ent.get(0).getPositionVector().subtract(getPositionVector()).addVector(0,ent.get(0).height/2,0), MathHelper.sqrt(NeedyLittleThings.getSpeedSq(this)), 0);
                         updateHitStatus(-2);
                         markVelocityChanged();
                         onRecallTriggered = false;

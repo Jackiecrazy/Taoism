@@ -46,18 +46,18 @@ public class TaoCombatHandler {
 
     //offhand handler for puny mod weapons that don't have it already
     //"puny" here defined as weapons that can't attack from offhand
-    @SubscribeEvent
-    public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
-        if (e.getEntityPlayer().world.isRemote) return;
-        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidCombatItem(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
-            if (lastRightClickTime.getOrDefault(e.getEntityPlayer().getEntityId(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
-                if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
-                    TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
-                    TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
-                }
-            lastRightClickTime.put(e.getEntityPlayer().getEntityId(), e.getEntityPlayer().world.getTotalWorldTime());
-        }
-    }
+//    @SubscribeEvent
+//    public static void pleaseKillMeOff(PlayerInteractEvent.EntityInteract e) {
+//        if (e.getEntityPlayer().world.isRemote) return;
+//        if (e.getHand() == EnumHand.OFF_HAND && TaoCombatUtils.isValidCombatItem(e.getItemStack()) && !TaoCombatUtils.isShield(e.getItemStack()) && !(e.getItemStack().getItem() instanceof TaoWeapon)) {
+//            if (lastRightClickTime.getOrDefault(e.getEntityPlayer().getEntityId(), 0L) + 4 < e.getEntityPlayer().world.getTotalWorldTime())
+//                if (TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND) > 0.9) {
+//                    TaoCasterData.getTaoCap(e.getEntityPlayer()).setSwing(TaoCombatUtils.getHandCoolDown(e.getEntityPlayer(), EnumHand.OFF_HAND));
+//                    TaoCombatUtils.taoWeaponAttack(e.getTarget(), e.getEntityPlayer(), e.getItemStack(), false, true);
+//                }
+//            lastRightClickTime.put(e.getEntityPlayer().getEntityId(), e.getEntityPlayer().world.getTotalWorldTime());
+//        }
+//    }
 
 
     //cancels attack if too far, done here instead of AttackEntityEvent because I need to check whether the damage source is melee.

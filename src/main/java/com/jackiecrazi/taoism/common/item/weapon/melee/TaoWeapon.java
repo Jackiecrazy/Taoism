@@ -243,37 +243,37 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
     /**
      * Called when the equipped item is right clicked.
      */
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
-        if (handIn == EnumHand.OFF_HAND) {
-            ItemStack offhand = p.getHeldItemOffhand();
-            if (!offhand.isEmpty() && TaoCombatHandler.lastRightClickTime.getOrDefault(p.getEntityId(), 0L) + 5 < worldIn.getTotalWorldTime()) {
-                if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
-                    p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
-                }
-                if (isTwoHanded(offhand) && !isDummy(offhand)) {
-                    return new ActionResult<>(EnumActionResult.FAIL, offhand);//no swinging 2-handed weapons on the offhand!
-                }
-                //setAttackFlag(p, offhand, true);
-                //p.setActiveHand(EnumHand.OFF_HAND);
-                Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
-                if (e != null) {
-                    TaoCombatUtils.taoWeaponAttack(e, p, offhand, false, true);
-                }
-                float temp = p.getCooledAttackStrength(0.5f);
-                //p.randomUnused1 = temp;
-                p.swingArm(handIn);
-                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp, true);
-                TaoCasterData.getTaoCap(p).setOffhandCool(0);
-                if (!worldIn.isRemote)
-                    TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
-                return new ActionResult<>(EnumActionResult.SUCCESS, offhand);
-            }
-            if (!worldIn.isRemote) {
-                TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
-            }
-        }
-        return super.onItemRightClick(worldIn, p, handIn);
-    }
+//    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer p, EnumHand handIn) {
+//        if (handIn == EnumHand.OFF_HAND) {
+//            ItemStack offhand = p.getHeldItemOffhand();
+//            if (!offhand.isEmpty() && TaoCombatHandler.lastRightClickTime.getOrDefault(p.getEntityId(), 0L) + 5 < worldIn.getTotalWorldTime()) {
+//                if (isDummy(offhand) && p.getHeldItemMainhand().getItem() != offhand.getItem()) {
+//                    p.setHeldItem(EnumHand.OFF_HAND, unwrapDummy(offhand));
+//                }
+//                if (isTwoHanded(offhand) && !isDummy(offhand)) {
+//                    return new ActionResult<>(EnumActionResult.FAIL, offhand);//no swinging 2-handed weapons on the offhand!
+//                }
+//                //setAttackFlag(p, offhand, true);
+//                //p.setActiveHand(EnumHand.OFF_HAND);
+//                Entity e = NeedyLittleThings.raytraceEntity(p.world, p, getReach(p, offhand));
+//                if (e != null) {
+//                    TaoCombatUtils.taoWeaponAttack(e, p, offhand, false, true);
+//                }
+//                float temp = p.getCooledAttackStrength(0.5f);
+//                //p.randomUnused1 = temp;
+//                p.swingArm(handIn);
+//                TaoCombatUtils.rechargeHand(p, EnumHand.MAIN_HAND, temp, true);
+//                TaoCasterData.getTaoCap(p).setOffhandCool(0);
+//                if (!worldIn.isRemote)
+//                    TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
+//                return new ActionResult<>(EnumActionResult.SUCCESS, offhand);
+//            }
+//            if (!worldIn.isRemote) {
+//                TaoCombatHandler.lastRightClickTime.put(p.getEntityId(), worldIn.getTotalWorldTime());
+//            }
+//        }
+//        return super.onItemRightClick(worldIn, p, handIn);
+//    }
 
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
         //updateWielderDataStart(stack, attacker, target);
@@ -549,77 +549,77 @@ I should optimize sidesteps and perhaps vary the combos with movement keys, now 
         return super.onEntityItemUpdate(entityItem);
     }
 
-    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
-        if (!(elb instanceof EntityPlayer)) {
-            boolean onMainHand = elb.getHeldItemMainhand() == stack, onOffhand = elb.getHeldItemOffhand() == stack;
-            ItemStack offhand = elb.getHeldItemOffhand(), mainhand = elb.getHeldItemMainhand();
-            NBTTagCompound tag = gettagfast(stack);
-            if (onMainHand) {
-                setHandState(stack, EnumHand.MAIN_HAND);
-                boolean single = offhand.isEmpty() || (isDummy(offhand) && offhand.getItem() == mainhand.getItem());
-                tag.setBoolean("dual", single);
-            } else if (onOffhand) {
-                setHandState(stack, EnumHand.OFF_HAND);
-                tag.removeTag("dual");
-            } else {
-                setHandState(stack, null);
-                tag.removeTag("dual");
-            }
-            //discharge weapon
-            if (onMainHand || onOffhand) {
-                if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage() - chargePerTick(stack));
-            } else {
-                stack.setItemDamage(0);
-                tag.removeTag("lastMove");
-            }
-            //two handed shenanigans
-            if (isTwoHanded(stack)) {
-                //main hand, update offhand dummy
-                if (onMainHand && !onOffhand) {
-                    if (!isDummy(offhand) || offhand.getItem() != mainhand.getItem()) {
-                        elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(mainhand, offhand));
-                    }
-                    offhand.setItemDamage(stack.getItemDamage());
-                    if (!dummyMatchMain(offhand, stack)) {
-                        NBTTagCompound cop = gettagfast(mainhand).copy();
-                        cop.setBoolean("taodummy", gettagfast(offhand).getBoolean("taodummy"));
-                        cop.setTag("sub", gettagfast(offhand).getCompoundTag("sub"));
-                        offhand.setTagCompound(cop);
-                    }
-                }
-            }
-            if (isDummy(stack)) {
-                boolean diffItem = mainhand.getItem() != stack.getItem();
-                boolean stillTwoHanded = isTwoHanded(mainhand);
-                if (diffItem || !onOffhand || !stillTwoHanded) {
-                    //check where to unwrap the stack to
-                    ItemStack unwrap = unwrapDummy(stack);
-                    if (onOffhand) {
-                        elb.setHeldItem(EnumHand.OFF_HAND, unwrap);
-                    }
-                }
-            }
-        } else {
-            elb.getAttributeMap().onAttributeModified(elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE));
-        }
-        EnumHand hand = getHand(stack);
-        if (hand == null) {
-            hand = elb.swingingHand;
-        }
-        float range = getReach(elb, stack);
-        Entity rte = NeedyLittleThings.raytraceEntity(elb.world, elb, range);
-        if (hand != null && (TaoCombatUtils.getHandCoolDown(elb, hand) > 0.9f || rte != null)) {
-            //Well, ya got me. By all accounts, it doesn't make sense.
-            TaoCasterData.getTaoCap(elb).setOffhandAttack(hand == EnumHand.OFF_HAND);
-            //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
-            //aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
-            gettagfast(stack).setBoolean("connect", false);
-        }
-//        if(!elb.onGround &&(!(elb instanceof EntityPlayer) | Taoism.proxy.isBreakingBlock((EntityPlayer) elb))&&elb.motionY<0&&TaoCasterData.getTaoCap(elb).consumeQi(0.05f, 3)) {
-//            TaoMovementUtils.attemptJump(elb);
+//    public boolean onEntitySwing(EntityLivingBase elb, ItemStack stack) {
+//        if (!(elb instanceof EntityPlayer)) {
+//            boolean onMainHand = elb.getHeldItemMainhand() == stack, onOffhand = elb.getHeldItemOffhand() == stack;
+//            ItemStack offhand = elb.getHeldItemOffhand(), mainhand = elb.getHeldItemMainhand();
+//            NBTTagCompound tag = gettagfast(stack);
+//            if (onMainHand) {
+//                setHandState(stack, EnumHand.MAIN_HAND);
+//                boolean single = offhand.isEmpty() || (isDummy(offhand) && offhand.getItem() == mainhand.getItem());
+//                tag.setBoolean("dual", single);
+//            } else if (onOffhand) {
+//                setHandState(stack, EnumHand.OFF_HAND);
+//                tag.removeTag("dual");
+//            } else {
+//                setHandState(stack, null);
+//                tag.removeTag("dual");
+//            }
+//            //discharge weapon
+//            if (onMainHand || onOffhand) {
+//                if (stack.isItemDamaged()) stack.setItemDamage(stack.getItemDamage() - chargePerTick(stack));
+//            } else {
+//                stack.setItemDamage(0);
+//                tag.removeTag("lastMove");
+//            }
+//            //two handed shenanigans
+//            if (isTwoHanded(stack)) {
+//                //main hand, update offhand dummy
+//                if (onMainHand && !onOffhand) {
+//                    if (!isDummy(offhand) || offhand.getItem() != mainhand.getItem()) {
+//                        elb.setHeldItem(EnumHand.OFF_HAND, makeDummy(mainhand, offhand));
+//                    }
+//                    offhand.setItemDamage(stack.getItemDamage());
+//                    if (!dummyMatchMain(offhand, stack)) {
+//                        NBTTagCompound cop = gettagfast(mainhand).copy();
+//                        cop.setBoolean("taodummy", gettagfast(offhand).getBoolean("taodummy"));
+//                        cop.setTag("sub", gettagfast(offhand).getCompoundTag("sub"));
+//                        offhand.setTagCompound(cop);
+//                    }
+//                }
+//            }
+//            if (isDummy(stack)) {
+//                boolean diffItem = mainhand.getItem() != stack.getItem();
+//                boolean stillTwoHanded = isTwoHanded(mainhand);
+//                if (diffItem || !onOffhand || !stillTwoHanded) {
+//                    //check where to unwrap the stack to
+//                    ItemStack unwrap = unwrapDummy(stack);
+//                    if (onOffhand) {
+//                        elb.setHeldItem(EnumHand.OFF_HAND, unwrap);
+//                    }
+//                }
+//            }
+//        } else {
+//            elb.getAttributeMap().onAttributeModified(elb.getEntityAttribute(EntityPlayer.REACH_DISTANCE));
 //        }
-        return super.onEntitySwing(elb, stack);
-    }
+//        EnumHand hand = getHand(stack);
+//        if (hand == null) {
+//            hand = elb.swingingHand;
+//        }
+//        float range = getReach(elb, stack);
+//        Entity rte = NeedyLittleThings.raytraceEntity(elb.world, elb, range);
+//        if (hand != null && (TaoCombatUtils.getHandCoolDown(elb, hand) > 0.9f || rte != null)) {
+//            //Well, ya got me. By all accounts, it doesn't make sense.
+//            TaoCasterData.getTaoCap(elb).setOffhandAttack(hand == EnumHand.OFF_HAND);
+//            //TaoCasterData.getTaoCap(entityLiving).setSwing(TaoCombatUtils.getHandCoolDown(entityLiving, hand));//commented out because this causes swing to reset before damage dealt
+//            //aoe(stack, elb, TaoCasterData.getTaoCap(elb).getQiFloored());
+//            gettagfast(stack).setBoolean("connect", false);
+//        }
+////        if(!elb.onGround &&(!(elb instanceof EntityPlayer) | Taoism.proxy.isBreakingBlock((EntityPlayer) elb))&&elb.motionY<0&&TaoCasterData.getTaoCap(elb).consumeQi(0.05f, 3)) {
+////            TaoMovementUtils.attemptJump(elb);
+////        }
+//        return super.onEntitySwing(elb, stack);
+//    }
 
     @Override
     public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {

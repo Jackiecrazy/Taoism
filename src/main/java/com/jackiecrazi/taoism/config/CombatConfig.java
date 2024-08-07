@@ -16,15 +16,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Config.LangKey("taoism.config.combat.title")
 public class CombatConfig {
     @Config.Comment("Posture consumed per projectile parried.")
-    public static float posturePerProjectile = 0.5f;
+    public static float posturePerProjectile = 1f;
     @Config.Comment("Posture multiplier when not defined in combatItems.")
-    public static float defaultMultiplierPostureDefend = 1.4f;
+    public static float defaultMultiplierPostureDefend = 1f;
     @Config.Comment("Posture multiplier when not defined in combatItems. This is multiplied by the weapon's attack damage.")
-    public static float defaultMultiplierPostureAttack = 0.15f;
+    public static float defaultMultiplierPostureAttack = 0.5f;
     @Config.Comment("Posture damage multiplier for empty hands. Notice many mobs are technically empty-handed!")
     public static float defaultPostureKenshiro = 1.3f;
-    @Config.Comment("Posture multiplier for mobs and NPCs, as they don't deal much per hit.")
-    public static float basePostureMob = 2f;
+    @Config.Comment("Posture multiplier for mobs and NPCs.")
+    public static float basePostureMob = 1f;
     @Config.Comment("Cooldown after using spirit power before it starts recharging, currently unused.")
     public static int lingCD = 20;
     @Config.Comment("Cooldown after using posture before it starts recharging.")
@@ -64,7 +64,7 @@ public class CombatConfig {
     @Config.Comment("Whether mobs can use any weapon from any mod with all its added effects. Disabled by default because some mods expect the hitter to be a player.")
     public static boolean weaponHitEntity = false;
     @Config.Comment("Toggling this option will print the list of axes, swords, and shields. It's a little expensive, so remember to turn it off again!")
-    public static boolean printParryList = true;
+    public static boolean printParryList = false;
     @Config.Comment("Whether mobs lose their attack target and planned path when blinded")
     public static boolean blindMobs = true;
     @Config.Comment("Whether mobs that kill you don't despawn so you can come back and exact some vengeance later")

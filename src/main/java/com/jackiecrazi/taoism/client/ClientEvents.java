@@ -98,7 +98,7 @@ public class ClientEvents {
                     tooltip.add(TextFormatting.GREEN + I18n.format("weapon.shield"));
 
             } else {
-                tooltip.add(I18n.format(TextFormatting.ITALIC + "weapon.shift"+TextFormatting.RESET));
+                tooltip.add(TextFormatting.ITALIC + I18n.format("weapon.shift")+TextFormatting.RESET);
             }
         }
     }
